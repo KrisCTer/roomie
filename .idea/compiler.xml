@@ -6,31 +6,41 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="maintenance-service" />
         <module name="review-service" />
+        <module name="contract-service" />
         <module name="chat-service" />
         <module name="profile-service" />
         <module name="file-service" />
         <module name="notification-service" />
+        <module name="billing-service" />
         <module name="auth-service" />
         <module name="payment-service" />
         <module name="property-service" />
         <module name="search-service" />
         <module name="booking-service" />
         <module name="api-gateway" />
-        <module name="identity-service" />
+        <module name="analytics-service" />
         <module name="admin-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="identity-service" target="25" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="admin-service" options="-parameters" />
+      <module name="analytics-service" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
       <module name="auth-service" options="-parameters" />
+      <module name="billing-service" options="-parameters" />
       <module name="booking-service" options="-parameters" />
       <module name="chat-service" options="-parameters" />
+      <module name="contract-service" options="-parameters" />
       <module name="file-service" options="-parameters" />
       <module name="identity-service" options="-parameters" />
+      <module name="maintenance-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="payment-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />

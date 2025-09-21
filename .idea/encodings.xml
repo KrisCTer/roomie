@@ -2,12 +2,16 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/services/admin-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/analytics-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/api-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/auth-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/billing-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/booking-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/chat-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/contract-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/file-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/identity-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/maintenance-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/notification-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/payment-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/profile-service/src/main/java" charset="UTF-8" />
