@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: roomie-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - roomie-network
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: roomie-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=roomie123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - roomie-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: roomie-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # HTTP collector
+      - "6831:6831/udp"  # Agent compact thrift
+      - "6832:6832/udp"  # Agent binary thrift
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - JAEGER_DISABLED=false
+    networks:
+      - roomie-network
+
+  zipkin:
+    image: openzipkin/zipkin:2.24
+    container_name: roomie-zipkin
+    restart: unless-stopped
+    ports:
+      - "9411:9411"
+    environment:
+      - STORAGE_TYPE=mem
+    networks:
+      - roomie-network
+
+  elasticsearch-monitoring:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: roomie-elasticsearch-monitoring
+    restart: unless-stopped
+    ports:
+      - "9201:9200"
+    environment:
+      - node.name=elasticsearch-monitoring
+      - cluster.name=roomie-monitoring
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - elasticsearch_monitoring_data:/usr/share/elasticsearch/data
+    networks:
+      - roomie-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: roomie-kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch-monitoring:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+    depends_on:
+      - elasticsearch-monitoring
+    networks:
+      - roomie-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: roomie-logstash
+    restart: unless-stopped
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      - "LS_JAVA_OPTS=-Xmx512m -Xms512m"
+    volumes:
+      - ./config/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./config/logstash/config:/usr/share/logstash/config:ro
+    depends_on:
+      - elasticsearch-monitoring
+    networks:
+      - roomie-network
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.11.0
+    container_name: roomie-nginx-exporter
+    restart: unless-stopped
+    ports:
+      - "9113:9113"
+    command:
+      - -nginx.scrape-uri
+      - http://nginx:8080/nginx_status
+    depends_on:
+      - nginx-lb
+    networks:
+      - roomie-network
+
+  nginx-lb:
+    image: nginx:1.25-alpine
+    container_name: roomie-nginx-lb
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"  # Status endpoint
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - roomie-network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  elasticsearch_monitoring_data:
+
+networks:
+  roomie-network:
+    external: true

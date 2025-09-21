@@ -1,0 +1,56 @@
+# docker-compose.maintenance-service.yml
+version: '3.8'
+
+services:
+  maintenance-service:
+    build:
+      context: ./maintenance-service
+      dockerfile: Dockerfile
+    container_name: roomie-maintenance-service
+    restart: unless-stopped
+    ports:
+      - "8092:8092"
+    environment:
+      - SERVER_PORT=8092
+      - SPRING_APPLICATION_NAME=maintenance-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # MySQL Configuration
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_maintenance
+      - SPRING_DATASOURCE_USERNAME=roomie
+      - SPRING_DATASOURCE_PASSWORD=roomie123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=maintenance-service
+      # Maintenance Configuration
+      - MAX_REQUEST_IMAGES=10
+      - EMERGENCY_RESPONSE_TIME_HOURS=2
+      - REGULAR_RESPONSE_TIME_HOURS=24
+      - AUTO_ASSIGN_CONTRACTORS=true
+      - MAINTENANCE_RATING_ENABLED=true
+      # External Service URLs
+      - PROPERTY_SERVICE_URL=http://property-service:8083
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8082
+      - FILE_SERVICE_URL=http://file-service:8084
+      - CONTRACT_SERVICE_URL=http://contract-service:8091
+    depends_on:
+      - mysql
+      - redis
+      - kafka
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  roomie-network:
+    external: true

@@ -1,0 +1,59 @@
+# docker-compose.contract-service.yml
+version: '3.8'
+
+services:
+  contract-service:
+    build:
+      context: ./contract-service
+      dockerfile: Dockerfile
+    container_name: roomie-contract-service
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    environment:
+      - SERVER_PORT=8091
+      - SPRING_APPLICATION_NAME=contract-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # MySQL Configuration
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_contract
+      - SPRING_DATASOURCE_USERNAME=roomie
+      - SPRING_DATASOURCE_PASSWORD=roomie123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # MongoDB Configuration (for contract documents)
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_contract?authSource=admin
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=contract-service
+      # Contract Configuration
+      - DIGITAL_SIGNATURE_SECRET=roomie-signature-secret-key-must-be-secure
+      - CONTRACT_TEMPLATE_PATH=/app/templates
+      - PDF_GENERATION_TIMEOUT_SECONDS=30
+      - CONTRACT_VALIDITY_DAYS=365
+      - AUTO_RENEWAL_ENABLED=true
+      # External Service URLs
+      - FILE_SERVICE_URL=http://file-service:8084
+      - BOOKING_SERVICE_URL=http://booking-service:8086
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8082
+      - PAYMENT_SERVICE_URL=http://payment-service:8087
+    depends_on:
+      - mysql
+      - mongodb
+      - redis
+      - kafka
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  roomie-network:
+    external: true
