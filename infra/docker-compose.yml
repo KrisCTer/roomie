@@ -1,5 +1,5 @@
 # docker-compose.yml - Main infrastructure services
-version: '3.8'
+#version: '3.8'
 
 services:
   # Database Services
@@ -143,7 +143,7 @@ services:
       - roomie-network
 
   eureka-server:
-    image: springcloud/eureka
+    image: steeltoeoss/eureka-server:latest
     container_name: roomie-eureka-server
     restart: unless-stopped
     ports:
@@ -154,6 +154,7 @@ services:
       EUREKA_CLIENT_FETCH_REGISTRY: false
     networks:
       - roomie-network
+
 
 volumes:
   mongodb_data:
