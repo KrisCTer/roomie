@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/services/auth-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/admin-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/file-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/property-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/review-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/services/notification-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/booking-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/chat-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/identity-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/payment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/profile-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/search-service/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_25" default="true" project-jdk-name="openjdk-25" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

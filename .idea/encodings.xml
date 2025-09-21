@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/services/admin-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/api-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/auth-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/booking-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/chat-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/file-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/identity-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/notification-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/payment-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/profile-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/property-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/review-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/search-service/src/main/java" charset="UTF-8" />
+  </component>
+</project>
