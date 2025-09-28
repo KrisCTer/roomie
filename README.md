@@ -51,7 +51,7 @@ Roomie là một hệ thống quản lý và cho thuê phòng trọ hiện đạ
 ### Khởi chạy nhanh
 ```bash
 # Clone repository
-git clone https://github.com/your-org/roomie-backend.git
+git clone https://github.com/KrisCTer/roomie.git
 cd roomie-backend
 
 # Copy environment variables
