@@ -1,4 +1,4 @@
-package com.roomie.services.auth_service.configuration;
+package com.roomie.services.auth_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomie.services.auth_service.dto.request.ApiResponse;

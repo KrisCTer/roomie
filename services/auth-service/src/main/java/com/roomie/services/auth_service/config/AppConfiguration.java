@@ -1,8 +1,8 @@
-package com.roomie.services.auth_service.configuration;
+package com.roomie.services.auth_service.config;
 
 import com.roomie.services.auth_service.entity.Role;
 import com.roomie.services.auth_service.entity.User;
-import com.roomie.services.auth_service.enums.RoleEnum;
+import com.roomie.services.auth_service.enums.UserRole;
 import com.roomie.services.auth_service.repository.RoleRepository;
 import com.roomie.services.auth_service.repository.UserRepository;
 
@@ -38,17 +38,17 @@ public class AppConfiguration {
         return args -> {
             if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
                 Role tenantRole = roleRepository.save(Role.builder()
-                        .name(RoleEnum.TENANT.name())
+                        .name(UserRole.TENANT.name())
                         .description("Tenant role")
                         .build());
 
                 Role landlordRole = roleRepository.save(Role.builder()
-                        .name(RoleEnum.LANDLORD.name())
+                        .name(UserRole.LANDLORD.name())
                         .description("Landlord role")
                         .build());
 
                 Role adminRole = roleRepository.save(Role.builder()
-                        .name(RoleEnum.ADMIN.name())
+                        .name(UserRole.ADMIN.name())
                         .description("Admin role")
                         .build());
 
