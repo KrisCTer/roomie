@@ -1,6 +1,6 @@
 package com.roomie.services.auth_service.enums;
 
-public enum RoleEnum {
+public enum UserRole {
     TENANT,
     LANDLORD,
     ADMIN;
