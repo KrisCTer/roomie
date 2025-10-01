@@ -1,20 +1,22 @@
-package com.roomie.services.auth_service.dto.request;
+package com.roomie.services.auth_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserUpdateRequest {
-    String password;
+public class UserProfileResponse {
+    String id;
+    String userId;
+    String username;
+    String email;
     String firstName;
     String lastName;
     LocalDate dob;
-    List<String> roles;
+    String city;
 }
