@@ -1,4 +1,4 @@
-package com.roomie.services.auth_service.configuration;
+package com.roomie.services.auth_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/users/registration", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh"
+            "/auth/register",
+            "/auth/login",
+            "/auth/refresh",
+            "/auth/verify-email",
+            "/auth/resend-otp",
+            "/auth/forgot-password",
+            "/auth/reset-password",
+            "/auth/oauth2/**",
+            "/actuator/**",
+            "/error"
     };
 
     private final CustomJwtDecoder customJwtDecoder;

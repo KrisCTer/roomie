@@ -28,6 +28,9 @@ public class User {
     @Column(name = "email_verified", nullable = false, columnDefinition = "boolean default false")
     boolean emailVerified;
 
+    @Column(name = "phone_number", unique = true, columnDefinition = "VARCHAR(15) COLLATE utf8mb4_unicode_ci")
+    private String phoneNumber;
+
     @Column(nullable = false)
     private Boolean isActive = true;
 

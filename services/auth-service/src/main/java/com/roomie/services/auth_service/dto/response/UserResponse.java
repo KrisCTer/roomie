@@ -14,6 +14,7 @@ public class UserResponse {
     String id;
     String username;
     String email;
+    String phoneNumber;
     boolean emailVerified;
     Set<RoleResponse> roles;
 }

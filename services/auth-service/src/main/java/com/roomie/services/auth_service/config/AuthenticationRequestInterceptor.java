@@ -1,4 +1,4 @@
-package com.roomie.services.auth_service.configuration;
+package com.roomie.services.auth_service.config;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
