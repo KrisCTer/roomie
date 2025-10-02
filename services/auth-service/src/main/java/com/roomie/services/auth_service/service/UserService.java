@@ -1,6 +1,5 @@
 package com.roomie.services.auth_service.service;
 
-import com.roomie.services.auth_service.constant.PredefinedRole;
 import com.roomie.services.auth_service.dto.event.NotificationEvent;
 import com.roomie.services.auth_service.dto.request.UserCreationRequest;
 import com.roomie.services.auth_service.dto.request.UserUpdateRequest;
@@ -47,7 +46,7 @@ public class UserService {
         HashSet<Role> roles = new HashSet<>();
 
         request.getRoles().forEach(roleName -> {
-            roleRepository.findById(roleName)
+            roleRepository.findById(String.valueOf(roleName))
                     .ifPresentOrElse(roles::add,
                             () -> { throw new AppException(ErrorCode.ROLE_NOT_FOUND); });
         });

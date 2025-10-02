@@ -1,5 +1,6 @@
 package com.roomie.services.auth_service.dto.request;
 
+import com.roomie.services.auth_service.entity.Role;
 import com.roomie.services.auth_service.enums.UserRole;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -22,5 +23,5 @@ public class UserCreationRequest {
     String phoneNumber;
     LocalDate dob;
     String city;
-    Set<String> roles;
+    Set<UserRole> roles;
 }
