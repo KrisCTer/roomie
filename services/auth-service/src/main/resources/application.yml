@@ -1,12 +1,14 @@
 server:
   port: 8080
+  servlet:
+    context-path: /auth
 
 spring:
   application:
     name: auth-service
-  
+
   datasource:
-    url: jdbc:mysql://localhost:3306/roomie_auth?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: roomie
     password: roomie123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -72,8 +74,9 @@ spring:
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:cm9vbWllLWF1dGgtand0LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1mb3Itc2VjdXJpdHk=}
-  expiration: 86400000  # 24 hours in milliseconds
-  refresh-expiration: 604800000  # 7 days in milliseconds
+  signerKey: ${JWT_SIGNER_KEY:cm9vbWllLWF1dGgtand0LXNpZ25lci1rZXktYmFzZTY0}
+  valid-duration: 86400000  # 24 hours in milliseconds
+  refreshable-duration: 604800000  # 7 days in milliseconds
 
 # OTP Configuration
 otp:
@@ -111,3 +114,7 @@ logging:
   level:
     com.roomie.services.auth_service: DEBUG
     org.springframework.security: DEBUG
+
+app:
+  services:
+    profile: http://localhost:8080/profile
