@@ -1,0 +1,46 @@
+# docker-compose.api-gateway.yml
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: roomie-api-gateway
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      - SERVER_PORT=8888
+      - SPRING_APPLICATION_NAME=api-gateway
+      - SPRING_PROFILES_ACTIVE=docker
+      - APP_API_PREFIX=/api/v1
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY=DEBUG
+      # Service URLs for gateway routing
+      - AUTH_SERVICE_URL=http://auth-service:8080
+      - PROFILE_SERVICE_URL=http://profile-service:8081
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8082
+      - PROPERTY_SERVICE_URL=http://property-service:8083
+      - FILE_SERVICE_URL=http://file-service:8084
+      - CHAT_SERVICE_URL=http://chat-service:8085
+    depends_on:
+      - redis
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  roomie-network:
+    external: true
