@@ -1,0 +1,120 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /identity
+
+spring:
+  application:
+    name: identity-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: roomie
+    password: roomie123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+  redis:
+    host: localhost
+    port: 6379
+    password: roomie123
+    timeout: 60000
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:noreply@roomie.com}
+    password: ${MAIL_PASSWORD:your-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+            scope:
+              - email
+              - profile
+          facebook:
+            client-id: ${FACEBOOK_CLIENT_ID:your-facebook-client-id}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:your-facebook-client-secret}
+            scope:
+              - email
+              - public_profile
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: auth-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:cm9vbWllLWF1dGgtand0LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1mb3Itc2VjdXJpdHk=}
+  signerKey: ${JWT_SIGNER_KEY:cm9vbWllLWF1dGgtand0LXNpZ25lci1rZXktYmFzZTY0}
+  valid-duration: 86400000  # 24 hours in milliseconds
+  refreshable-duration: 604800000  # 7 days in milliseconds
+
+# OTP Configuration
+otp:
+  expiration: 300000  # 5 minutes in milliseconds
+  length: 6
+
+# Rate Limiting
+rate-limit:
+  login:
+    max-attempts: 5
+    duration: 900000  # 15 minutes
+  register:
+    max-attempts: 3
+    duration: 3600000  # 1 hour
+  otp:
+    max-attempts: 3
+    duration: 3600000  # 1 hour
+
+# Kafka Topics
+kafka:
+  topics:
+    user-events: user-events
+    auth-events: auth-events
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.roomie.services.identity_service: DEBUG
+    org.springframework.security: DEBUG
+
+app:
+  services:
+    profile: http://localhost:8080/profile
