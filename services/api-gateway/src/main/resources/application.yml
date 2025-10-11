@@ -14,7 +14,6 @@ spring:
     host: ${SPRING_REDIS_HOST:redis}
     port: ${SPRING_REDIS_PORT:6379}
     password: ${SPRING_REDIS_PASSWORD:roomie123}
-    timeout: 2000ms
     lettuce:
       pool:
         max-active: 8
@@ -27,16 +26,16 @@ spring:
     gateway:
       routes:
         # Auth Service Routes
-        - id: auth-service
-          uri: ${AUTH_SERVICE_URL:http://auth-service:8080}
+        - id: identity-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/auth/**
+            - Path=${APP_API_PREFIX:/api/v1}/identity/**
           filters:
             - StripPrefix=2
 
         # Profile Service Routes
         - id: profile-service
-          uri: ${PROFILE_SERVICE_URL:http://profile-service:8081}
+          uri: ${PROFILE_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=${APP_API_PREFIX:/api/v1}/profiles/**
           filters:
@@ -44,7 +43,7 @@ spring:
 
         # Notification Service Routes
         - id: notification-service
-          uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8082}
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=${APP_API_PREFIX:/api/v1}/notifications/**
           filters:
@@ -52,7 +51,7 @@ spring:
 
         # Property Service Routes
         - id: property-service
-          uri: ${PROPERTY_SERVICE_URL:http://property-service:8083}
+          uri: ${PROPERTY_SERVICE_URL:http://localhost:8083}
           predicates:
             - Path=${APP_API_PREFIX:/api/v1}/properties/**
           filters:
@@ -60,7 +59,7 @@ spring:
 
         # File Service Routes
         - id: file-service
-          uri: ${FILE_SERVICE_URL:http://file-service:8084}
+          uri: ${FILE_SERVICE_URL:http://localhost:8084}
           predicates:
             - Path=${APP_API_PREFIX:/api/v1}/files/**
           filters:
@@ -68,7 +67,7 @@ spring:
 
         # Chat Service Routes
         - id: chat-service
-          uri: ${CHAT_SERVICE_URL:http://chat-service:8085}
+          uri: ${CHAT_SERVICE_URL:http://localhost:8085}
           predicates:
             - Path=${APP_API_PREFIX:/api/v1}/chats/**
           filters:
@@ -93,6 +92,9 @@ spring:
       # Default Filters
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+  data:
+    redis:
+      timeout: 2000ms
 
 # Eureka Client Configuration
 eureka:
@@ -137,5 +139,4 @@ logging:
 
 # Application Configuration
 app:
-  api:
-    prefix: ${APP_API_PREFIX:/api/v1}
+  api-prefix: ${APP_API_PREFIX:/api/v1}
