@@ -31,7 +31,7 @@ public class User {
     @Column(name = "phone_number", unique = true, columnDefinition = "VARCHAR(15) COLLATE utf8mb4_unicode_ci")
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(name = "is_active",nullable = false)
     private Boolean isActive = true;
 
     @ManyToMany
