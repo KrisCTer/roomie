@@ -22,10 +22,11 @@ import java.util.List;
 public class UserController {
     UserService userService;
 
-    @PostMapping("/registration")
+    @PostMapping("/register")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
+                .message("Đăng ký tài khoản thành công!")
                 .build();
     }
 

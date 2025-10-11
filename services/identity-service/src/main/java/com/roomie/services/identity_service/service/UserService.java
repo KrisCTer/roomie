@@ -53,6 +53,7 @@ public class UserService {
 
         user.setRoles(roles);
         user.setEmailVerified(false);
+        user.setIsActive(true);
 
         try {
             user = userRepository.save(user);
