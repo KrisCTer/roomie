@@ -1,0 +1,56 @@
+
+version: '3.8'
+
+services:
+  profile-service:
+    build:
+      context: ./profile-service
+      dockerfile: Dockerfile
+    container_name: roomie-profile-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_APPLICATION_NAME=profile-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # MySQL Configuration
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_profile
+      - SPRING_DATASOURCE_USERNAME=roomie
+      - SPRING_DATASOURCE_PASSWORD=roomie123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # MongoDB Configuration (for additional profile data)
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_profile?authSource=admin
+      # Neo4j Configuration
+      - SPRING_DATA_NEO4J_URI=bolt://neo4j:7687
+      - SPRING_DATA_NEO4J_AUTHENTICATION_USERNAME=neo4j
+      - SPRING_DATA_NEO4J_AUTHENTICATION_PASSWORD=roomie123
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      # File Service Configuration
+      - FILE_SERVICE_URL=http://file-service:8084
+      - MAX_PROFILE_IMAGE_SIZE=5MB
+      - MAX_BIO_LENGTH=500
+    depends_on:
+      - mysql
+      - mongodb
+      - neo4j
+      - redis
+      - kafka
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  roomie-network:
+    external: true
