@@ -1,197 +1,56 @@
-server:
-  port: 8081
-  servlet:
-    context-path: /profile
 
-spring:
-  application:
-    name: profile-service
+version: '3.8'
 
-  # MySQL Configuration - Primary Database
-  datasource:
-    url: jdbc:mysql://localhost:3306/roomie_profile?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: roomie
-    password: roomie123
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
+services:
+  profile-service:
+    build:
+      context: ./profile-service
+      dockerfile: Dockerfile
+    container_name: roomie-profile-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_APPLICATION_NAME=profile-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # MySQL Configuration
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_profile
+      - SPRING_DATASOURCE_USERNAME=roomie
+      - SPRING_DATASOURCE_PASSWORD=roomie123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # MongoDB Configuration (for additional profile data)
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_profile?authSource=admin
+      # Neo4j Configuration
+      - SPRING_DATA_NEO4J_URI=bolt://neo4j:7687
+      - SPRING_DATA_NEO4J_AUTHENTICATION_USERNAME=neo4j
+      - SPRING_DATA_NEO4J_AUTHENTICATION_PASSWORD=roomie123
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      # File Service Configuration
+      - FILE_SERVICE_URL=http://file-service:8084
+      - MAX_PROFILE_IMAGE_SIZE=5MB
+      - MAX_BIO_LENGTH=500
+    depends_on:
+      - mysql
+      - mongodb
+      - neo4j
+      - redis
+      - kafka
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: true
-
-  # MongoDB Configuration - Additional Profile Data
-  data:
-    mongodb:
-      uri: mongodb://admin:roomie123@localhost:27017/roomie_profile?authSource=admin
-      database: roomie_profile
-
-    # Neo4j Configuration - Relationship Graph
-    neo4j:
-      uri: bolt://localhost:7687
-      authentication:
-        username: neo4j
-        password: roomie123
-
-  # Redis Configuration - Caching
-  redis:
-    host: localhost
-    port: 6379
-    password: roomie123
-    timeout: 60000
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-
-  # Kafka Configuration
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.add.type.headers: false
-    consumer:
-      group-id: profile-service-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-      auto-offset-reset: earliest
-
-  # Servlet Configuration for File Upload
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 5MB
-      max-request-size: 10MB
-
-# Eureka Client Configuration
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.value}
-
-# Profile Service Configuration
-profile:
-  image:
-    max-size: 5MB
-    allowed-types: jpg,jpeg,png,gif
-    storage-path: /uploads/profiles
-  bio:
-    max-length: 500
-  preferences:
-    cache-ttl: 3600 # 1 hour in seconds
-
-# File Service Configuration
-file-service:
-  url: http://localhost:8084
-  connection-timeout: 5000
-  read-timeout: 10000
-
-# Kafka Topics
-kafka:
-  topics:
-    profile-events: profile-events
-    profile-created: profile-created
-    profile-updated: profile-updated
-    profile-deleted: profile-deleted
-    user-events: user-events
-
-# Cache Configuration
-cache:
-  profile:
-    ttl: 3600 # 1 hour
-  preferences:
-    ttl: 7200 # 2 hours
-  search:
-    ttl: 1800 # 30 minutes
-
-# Management & Monitoring
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-
-# Logging Configuration
-logging:
-  level:
-    com.roomie.services.profile_service: DEBUG
-    org.springframework.data.mongodb: DEBUG
-    org.springframework.data.neo4j: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.cache: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# Service Integration URLs
-app:
-  services:
-    identity: http://localhost:8080/identity
-    matching: http://localhost:8082/matching
-    notification: http://localhost:8083/notification
-    file: http://localhost:8084/file
-
----
-# Docker Profile Configuration
-spring:
-  config:
-    activate:
-      on-profile: docker
-
-  datasource:
-    url: jdbc:mysql://mysql:3306/roomie_profile?createDatabaseIfNotExist=true
-
-  data:
-    mongodb:
-      uri: mongodb://admin:roomie123@mongodb:27017/roomie_profile?authSource=admin
-    neo4j:
-      uri: bolt://neo4j:7687
-
-  redis:
-    host: redis
-
-  kafka:
-    bootstrap-servers: kafka:9092
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-
-file-service:
-  url: http://file-service:8084
-
-app:
-  services:
-    identity: http://identity-service:8080/identity
-    matching: http://matching-service:8082/matching
-    notification: http://notification-service:8083/notification
-    file: http://file-service:8084/file
-
-logging:
-  level:
-    com.roomie.services.profile_service: INFO
+networks:
+  roomie-network:
+    external: true
