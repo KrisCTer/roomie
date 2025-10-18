@@ -1,25 +1,22 @@
-package com.roomie.services.identity_service.dto.request;
+package com.roomie.services.profile_service.dto.request;
 
-import com.roomie.services.identity_service.enums.UserRole;
+import com.roomie.services.profile_service.enums.AccountStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserCreationRequest {
-    String username;
+public class UpdateProfileRequest {
     String email;
-    String password;
     String firstName;
     String lastName;
     String phoneNumber;
     LocalDate dob;
     String location;
-    Set<UserRole> roles;
+    AccountStatus status;
 }
