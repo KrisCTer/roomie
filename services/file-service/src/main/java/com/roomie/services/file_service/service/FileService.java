@@ -86,6 +86,7 @@ public class FileService {
                 .orElseThrow(() -> new RuntimeException("File not found"));
 
         file.setDeleted(true);
+        file.setDeletedAt(LocalDateTime.now());
         fileMgmtRepository.save(file);
     }
 }
