@@ -1,6 +1,7 @@
 package com.roomie.services.property_service.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.roomie.services.property_service.enums.PropertyStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -44,12 +45,13 @@ public class Property {
     Integer yearBuilt;
 
     Amenities amenities;
-//    @JsonProperty("mediaList")
     List<Media> mediaList;    // Ảnh / video
     VirtualTour virtualTour;
     List<Floor> floors;
 
     Owner owner;               // Thông tin chủ sở hữu hoặc người đăng
+
+    PropertyStatus status;
 
     Instant createdAt;
     Instant updatedAt;

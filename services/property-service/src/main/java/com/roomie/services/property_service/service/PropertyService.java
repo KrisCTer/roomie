@@ -6,9 +6,14 @@ import com.roomie.services.property_service.dto.response.PropertyResponse;
 import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
+import com.roomie.services.property_service.enums.PropertyStatus;
 import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
+import com.roomie.services.property_service.repository.httpclient.AdminClient;
+import com.roomie.services.property_service.repository.httpclient.AnalyticsClient;
+import com.roomie.services.property_service.repository.httpclient.FileClient;
+import com.roomie.services.property_service.repository.httpclient.NotificationClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -38,15 +43,16 @@ public class PropertyService {
     PropertySearchRepository searchRepository;
     PropertyMapper mapper;
 
-    // Cache name "property"
+    FileClient fileClient;
+    AdminClient adminClient;
+    NotificationClient notificationClient;
+    private final AnalyticsClient analyticsClient;
+
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
         Property entity = mapper.toEntity(request);
-
-        // Gán Owner tự động từ người đang đăng nhập
-        Owner currentOwner = AuthUtil.getCurrentOwner();
-        entity.setOwner(currentOwner);
-
+        entity.setOwner(AuthUtil.getCurrentOwner());
+        entity.setStatus(PropertyStatus.DRAFT);
         Instant now = Instant.now();
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
@@ -61,6 +67,7 @@ public class PropertyService {
 
         return mapper.toResponse(saved);
     }
+
     @CacheEvict(value = "properties", key = "#id")
     public PropertyResponse update(String id, PropertyRequest request) {
         Property existing = propertyRepository.findById(id)
@@ -132,5 +139,52 @@ public class PropertyService {
             doc.setUpdatedAt(p.getUpdatedAt());
             searchRepository.save(doc);
         });
+    }
+    //Gửi đến admin duyệt
+    public PropertyResponse publish(String id) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        property.setStatus(PropertyStatus.PENDING);
+        property.setUpdatedAt(Instant.now());
+        propertyRepository.save(property);
+
+//        adminClient.addToReviewQueue(
+//                new PropertyReviewRequest(property.getPropertyId(), property.getTitle()));
+//
+//        notificationClient.send(
+//                new NotificationRequest("Admin", "New property awaiting review", property.getTitle()));
+
+        return mapper.toResponse(property);
+    }
+
+    public PropertyResponse approve(String id) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        property.setStatus(PropertyStatus.ACTIVE);
+        property.setUpdatedAt(Instant.now());
+        propertyRepository.save(property);
+
+        // Index lại ES
+        PropertyDocument doc = mapper.toDocument(property);
+        doc.setId(property.getPropertyId());
+        searchRepository.save(doc);
+
+        // Notify landlord
+//        notificationClient.send(new NotificationRequest(
+//                property.getOwner().getEmail(),
+//                "Your property has been approved!",
+//                property.getTitle()
+//        ));
+//
+//        // Track analytics
+//        analyticsClient.track(new AnalyticsEventRequest(
+//                "PROPERTY_APPROVED",
+//                property.getPropertyId(),
+//                property.getOwner().getOwnerId()
+//        ));
+
+        return mapper.toResponse(property);
     }
 }
