@@ -42,3 +42,10 @@ property:
   max-images: 20
   image-max-size: 10MB
   google-maps-api-key: your-google-maps-api-key
+
+app:
+  services:
+    files: http://localhost:8084/file
+    notification: http://localhost:8085/notifications
+    admin: http://localhost:8086/admin
+    analytics: http://localhost:8087/admin
