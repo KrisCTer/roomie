@@ -16,7 +16,6 @@
         <module name="analytics-service" />
         <module name="chat-service" />
         <module name="notification-service" />
-        <module name="admin-service" />
         <module name="billing-service" />
       </profile>
       <profile name="Annotation profile for file-service" enabled="true">
@@ -33,7 +32,7 @@
         </processorPath>
         <module name="file-service" />
       </profile>
-      <profile name="Annotation profile for property-service" enabled="true">
+      <profile name="Annotation profile for admin-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -46,6 +45,7 @@
         <module name="profile-service" />
         <module name="property-service" />
         <module name="identity-service" />
+        <module name="admin-service" />
       </profile>
     </annotationProcessing>
   </component>
