@@ -7,8 +7,9 @@ spring:
   application:
     name: admin-service
 
+  # MySQL
   datasource:
-    url: jdbc:mysql://localhost:3306/roomie_admin?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/roomie_admin?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
     username: roomie
     password: roomie123
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,37 +22,63 @@ spring:
       hibernate:
         format_sql: true
 
+  # MongoDB
   data:
     mongodb:
       uri: mongodb://admin:roomie123@localhost:27017/roomie_admin?authSource=admin
 
-    redis:
-      host: localhost
-      port: 6379
+  # Redis - chạy local
+  redis:
+    host: localhost
+    port: 6379
+    # password: roomie123   # bỏ comment nếu bạn bật password trong redis
 
+  # Elasticsearch
+  elasticsearch:
+      uris: http://localhost:9200
+
+  # Kafka
   kafka:
     bootstrap-servers: localhost:9092
+    consumer:
+      group-id: log-consumers
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
 
-    elasticsearch:
-      uris: http://elasticsearch:9200
-
+# Eureka Client
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
 
+# Custom config
 admin:
   super-admin-email: admin@roomie.com
-  admin-jwt-secret: roomie-admin-jwt-secret-key-must-be-at-least-256-bits
+  admin-jwt-secret: roomie-admin-jwt-secret-key-must-be-at-least-256-bits-long-very-important
   session-timeout-hours: 8
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: prometheus,health,metrics
 
 app:
   services:
     identity: http://localhost:8080/identity
     properties: http://localhost:8083/properties
+
+# Logging (tùy chọn thêm để debug dễ hơn)
+logging:
+  level:
+    root: INFO
+    com.roomie.services.admin_service: DEBUG
+    org.springframework.data.elasticsearch: DEBUG   # nếu muốn xem log ES
+    org.apache.kafka: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
