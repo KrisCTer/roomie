@@ -120,4 +120,17 @@ public class UserService {
         return userMapper.toUserResponse(
                 userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    public void suspendUser(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setIsActive(false);
+        userRepository.save(user);
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    public void banUser(String userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setIsBanned(true);
+        user.setIsActive(false);
+        userRepository.save(user);
+    }
 }

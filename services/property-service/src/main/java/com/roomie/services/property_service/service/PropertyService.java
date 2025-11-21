@@ -2,6 +2,7 @@ package com.roomie.services.property_service.service;
 
 import com.roomie.services.property_service.configuration.AuthUtil;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
+import com.roomie.services.property_service.dto.request.PropertyReviewRequest;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
 import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
@@ -42,11 +43,11 @@ public class PropertyService {
     PropertyRepository propertyRepository;
     PropertySearchRepository searchRepository;
     PropertyMapper mapper;
-
-    FileClient fileClient;
     AdminClient adminClient;
     NotificationClient notificationClient;
-    private final AnalyticsClient analyticsClient;
+
+    //    FileClient fileClient;
+//    AnalyticsClient analyticsClient;
 
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
@@ -88,6 +89,7 @@ public class PropertyService {
 
         return mapper.toResponse(saved);
     }
+
     @CacheEvict(value = "properties", key = "#id")
     public void delete(String id) {
         propertyRepository.deleteById(id);
@@ -105,7 +107,11 @@ public class PropertyService {
         return propertyRepository.findAll(PageRequest.of(page, size)).stream()
                 .map(mapper::toResponse).collect(Collectors.toList());
     }
-
+    public List<PropertyResponse> findByStatus(PropertyStatus status) {
+        return propertyRepository.findByStatus(status)
+                .stream().map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
     public List<PropertyResponse> findByPriceRange(BigDecimal min, BigDecimal max) {
         return propertyRepository.findByPriceBetween(min, max).stream().map(mapper::toResponse).collect(Collectors.toList());
     }
@@ -140,6 +146,7 @@ public class PropertyService {
             searchRepository.save(doc);
         });
     }
+
     //Gửi đến admin duyệt
     public PropertyResponse publish(String id) {
         Property property = propertyRepository.findById(id)
@@ -149,9 +156,7 @@ public class PropertyService {
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-//        adminClient.addToReviewQueue(
-//                new PropertyReviewRequest(property.getPropertyId(), property.getTitle()));
-//
+        // Thông báo admin
 //        notificationClient.send(
 //                new NotificationRequest("Admin", "New property awaiting review", property.getTitle()));
 
@@ -163,6 +168,36 @@ public class PropertyService {
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
 
         property.setStatus(PropertyStatus.ACTIVE);
+        property.setUpdatedAt(Instant.now());
+        propertyRepository.save(property);
+
+        // Index lại ES
+        PropertyDocument doc = mapper.toDocument(property);
+        doc.setId(property.getPropertyId());
+        searchRepository.save(doc);
+
+        // Notify landlord
+//        notificationClient.send(new NotificationRequest(
+//                property.getOwner().getEmail(),
+//                "Your property has been approved!",
+//                property.getTitle()
+//        ));
+//
+//        // Track analytics
+//        analyticsClient.track(new AnalyticsEventRequest(
+//                "PROPERTY_APPROVED",
+//                property.getPropertyId(),
+//                property.getOwner().getOwnerId()
+//        ));
+
+        return mapper.toResponse(property);
+    }
+
+    public PropertyResponse reject(String id) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        property.setStatus(PropertyStatus.REJECTED);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
