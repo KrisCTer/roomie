@@ -1,4 +1,4 @@
-package com.roomie.services.identity_service.dto.response;
+package com.roomie.services.chat_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

@@ -1,14 +1,13 @@
-package com.roomie.services.identity_service.dto.response;
+package com.roomie.services.chat_service.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectResponse {
-    boolean valid;
-    String userId;
+public class IntrospectRequest {
+    String token;
 }
