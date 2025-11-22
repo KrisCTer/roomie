@@ -1,10 +1,10 @@
-package com.roomie.services.property_service.configuration;
+package com.roomie.services.chat_service.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.roomie.services.property_service.dto.response.ApiResponse;
-import com.roomie.services.property_service.exception.ErrorCode;
+import com.roomie.services.chat_service.dto.response.ApiResponse;
+import com.roomie.services.chat_service.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

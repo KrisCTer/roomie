@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -59,16 +60,19 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
-    public IntrospectResponse introspect(IntrospectRequest introspectRequest) {
+    public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws ParseException {
         var token = introspectRequest.getToken();
         boolean isValid = true;
-
+        SignedJWT jwt = null;
         try {
-            verifyToken(token, false);
+            jwt = verifyToken(token, false);
         } catch (AppException | JOSEException | ParseException e) {
             isValid = false;
         }
-        return IntrospectResponse.builder().valid(isValid).build();
+        return IntrospectResponse.builder()
+                .userId(Objects.nonNull(jwt) ? jwt.getJWTClaimsSet().getSubject() : null)
+                .valid(isValid)
+                .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
