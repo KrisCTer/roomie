@@ -1,7 +1,7 @@
 package com.roomie.services.property_service.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.roomie.services.property_service.enums.PropertyStatus;
+import com.roomie.services.property_service.enums.RentalType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -52,6 +52,8 @@ public class Property {
     Owner owner;               // Thông tin chủ sở hữu hoặc người đăng
 
     PropertyStatus status;
+
+    RentalType rentalType;
 
     Instant createdAt;
     Instant updatedAt;

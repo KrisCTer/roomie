@@ -11,6 +11,4 @@ import lombok.experimental.FieldDefaults;
 public class Media {
     String url;
     String type;   // "image" hoặc "video"
-    Boolean primary;
-    String caption;
 }
