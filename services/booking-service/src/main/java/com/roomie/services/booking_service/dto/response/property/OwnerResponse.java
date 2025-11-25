@@ -1,4 +1,4 @@
-package com.roomie.services.property_service.dto.request;
+package com.roomie.services.booking_service.dto.response.property;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OwnerRequest {
+public class OwnerResponse {
     String ownerId;
     String name;
     String phone;

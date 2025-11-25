@@ -2,9 +2,7 @@ package com.roomie.services.property_service.service;
 
 import com.roomie.services.property_service.configuration.AuthUtil;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
-import com.roomie.services.property_service.dto.request.PropertyReviewRequest;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
-import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
 import com.roomie.services.property_service.enums.PropertyStatus;
@@ -12,27 +10,19 @@ import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
 import com.roomie.services.property_service.repository.httpclient.AdminClient;
-import com.roomie.services.property_service.repository.httpclient.AnalyticsClient;
-import com.roomie.services.property_service.repository.httpclient.FileClient;
 import com.roomie.services.property_service.repository.httpclient.NotificationClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +51,7 @@ public class PropertyService {
 
         // Index ES
         PropertyDocument doc = mapper.toDocument(saved);
-        doc.setId(saved.getPropertyId());
+        doc.setPropertyId(saved.getPropertyId());
         doc.setCreatedAt(saved.getCreatedAt());
         doc.setUpdatedAt(saved.getUpdatedAt());
         searchRepository.save(doc);
@@ -82,7 +72,7 @@ public class PropertyService {
 
         // update ES
         PropertyDocument doc = mapper.toDocument(saved);
-        doc.setId(saved.getPropertyId());
+        doc.setPropertyId(saved.getPropertyId());
         doc.setCreatedAt(saved.getCreatedAt());
         doc.setUpdatedAt(saved.getUpdatedAt());
         searchRepository.save(doc);
@@ -126,7 +116,7 @@ public class PropertyService {
                 .map(d -> {
                     // convert ES doc -> minimal response
                     PropertyResponse resp = PropertyResponse.builder()
-                            .id(d.getId())
+                            .propertyId(d.getPropertyId())
                             .title(d.getTitle())
                             .description(d.getDescription())
                             .createdAt(d.getCreatedAt())
@@ -140,7 +130,7 @@ public class PropertyService {
         searchRepository.deleteAll();
         propertyRepository.findAll().forEach(p -> {
             PropertyDocument doc = mapper.toDocument(p);
-            doc.setId(p.getPropertyId());
+            doc.setPropertyId(p.getPropertyId());
             doc.setCreatedAt(p.getCreatedAt());
             doc.setUpdatedAt(p.getUpdatedAt());
             searchRepository.save(doc);
@@ -173,7 +163,7 @@ public class PropertyService {
 
         // Index lại ES
         PropertyDocument doc = mapper.toDocument(property);
-        doc.setId(property.getPropertyId());
+        doc.setPropertyId(property.getPropertyId());
         searchRepository.save(doc);
 
         // Notify landlord
@@ -203,7 +193,7 @@ public class PropertyService {
 
         // Index lại ES
         PropertyDocument doc = mapper.toDocument(property);
-        doc.setId(property.getPropertyId());
+        doc.setPropertyId(property.getPropertyId());
         searchRepository.save(doc);
 
         // Notify landlord
