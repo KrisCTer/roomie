@@ -29,13 +29,13 @@ public class User {
     boolean emailVerified;
 
     @Column(name = "phone_number", unique = true, columnDefinition = "VARCHAR(15) COLLATE utf8mb4_unicode_ci")
-    private String phoneNumber;
+    String phoneNumber;
 
     @Column(name = "is_active",nullable = false)
-    private Boolean isActive = true;
+    Boolean isActive = true;
 
     @Column(name = "is_banned",nullable = false)
-    private Boolean isBanned;
+    Boolean isBanned = false;
     @ManyToMany
     Set<Role> roles;
 }

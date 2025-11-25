@@ -1,8 +1,8 @@
 package com.roomie.services.identity_service.config;
 
+import com.roomie.services.identity_service.constant.PredefinedRole;
 import com.roomie.services.identity_service.entity.Role;
 import com.roomie.services.identity_service.entity.User;
-import com.roomie.services.identity_service.enums.UserRole;
 import com.roomie.services.identity_service.repository.RoleRepository;
 import com.roomie.services.identity_service.repository.UserRepository;
 
@@ -38,17 +38,12 @@ public class AppConfiguration {
         return args -> {
             if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
                 Role tenantRole = roleRepository.save(Role.builder()
-                        .name(UserRole.TENANT.name())
-                        .description("Tenant role")
-                        .build());
-
-                Role landlordRole = roleRepository.save(Role.builder()
-                        .name(UserRole.LANDLORD.name())
-                        .description("Landlord role")
+                        .name(PredefinedRole.USER_ROLE)
+                        .description("User role")
                         .build());
 
                 Role adminRole = roleRepository.save(Role.builder()
-                        .name(UserRole.ADMIN.name())
+                        .name(PredefinedRole.ADMIN_ROLE)
                         .description("Admin role")
                         .build());
 
@@ -61,6 +56,7 @@ public class AppConfiguration {
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
                         .roles(roles)
                         .isActive(true)
+                        .isBanned(false)
                         .build();
 
                 userRepository.save(user);
