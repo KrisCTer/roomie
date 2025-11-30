@@ -1,5 +1,8 @@
 package com.roomie.services.property_service.dto.request;
 
+import com.roomie.services.property_service.enums.PropertyLabel;
+import com.roomie.services.property_service.enums.PropertyStatus;
+import com.roomie.services.property_service.enums.PropertyType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -23,9 +26,9 @@ public class PropertyRequest {
     String priceLabel;
     BigDecimal rentalDeposit;
 
-    String propertyType;
-    String propertyStatus;
-    String propertyLabel;
+    PropertyType propertyType;
+    PropertyStatus propertyStatus;
+    PropertyLabel propertyLabel;
 
     Double size;
     Double landArea;

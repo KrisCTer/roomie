@@ -1,7 +1,9 @@
 package com.roomie.services.property_service.entity;
 
+import com.roomie.services.property_service.enums.ApprovalStatus;
+import com.roomie.services.property_service.enums.PropertyLabel;
 import com.roomie.services.property_service.enums.PropertyStatus;
-import com.roomie.services.property_service.enums.RentalType;
+import com.roomie.services.property_service.enums.PropertyType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -30,9 +32,9 @@ public class Property {
     String priceLabel;
     BigDecimal rentalDeposit;
 
-    String propertyType;       // e.g. "Phòng trọ", "Căn hộ"
-    String propertyStatus;     // e.g. "Đang cho thuê", "Đã thuê"
-    String propertyLabel;      // e.g. "Hot", "Mới đăng"
+    PropertyType propertyType;       // e.g. "Phòng trọ", "Căn hộ"
+    PropertyStatus propertyStatus;     // e.g. "Đang cho thuê", "Đã thuê"
+    PropertyLabel propertyLabel;      // e.g. "Hot", "Mới đăng"
 
     Double size;               // Diện tích sử dụng
     Double landArea;           // Diện tích đất (optional)
@@ -51,9 +53,7 @@ public class Property {
 
     Owner owner;               // Thông tin chủ sở hữu hoặc người đăng
 
-    PropertyStatus status;
-
-    RentalType rentalType;
+    ApprovalStatus status;
 
     Instant createdAt;
     Instant updatedAt;

@@ -3,7 +3,7 @@ package com.roomie.services.property_service.controller;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.ApiResponse;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
-import com.roomie.services.property_service.enums.PropertyStatus;
+import com.roomie.services.property_service.enums.ApprovalStatus;
 import com.roomie.services.property_service.service.PropertyService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class InternalPropertyController {
 
     @GetMapping("/pending")
     public ApiResponse<List<PropertyResponse>> getPendingProperties() {
-        List<PropertyResponse> list = propertyService.findByStatus(PropertyStatus.PENDING);
+        List<PropertyResponse> list = propertyService.findByStatus(ApprovalStatus.PENDING);
         return ApiResponse.success(list, "Pending properties retrieved");
     }
 
