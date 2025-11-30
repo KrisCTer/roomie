@@ -1,53 +1,49 @@
-# docker-compose.booking-service.yml
-version: '3.8'
+server:
+  port: 8084
+  servlet:
+    context-path: /bookings
 
-services:
-  booking-service:
-    build:
-      context: ./booking-service
-      dockerfile: Dockerfile
-    container_name: roomie-booking-service
-    restart: unless-stopped
-    ports:
-      - "8086:8086"
-    environment:
-      - SERVER_PORT=8086
-      - SPRING_APPLICATION_NAME=booking-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      # MySQL Configuration
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_booking
-      - SPRING_DATASOURCE_USERNAME=roomie
-      - SPRING_DATASOURCE_PASSWORD=roomie123
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      # Redis Configuration
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - SPRING_REDIS_PASSWORD=roomie123
-      # Kafka Configuration
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_KAFKA_CONSUMER_GROUP_ID=booking-service
-      # Business Logic Configuration
-      - BOOKING_TIMEOUT_MINUTES=30
-      - AUTO_CANCEL_HOURS=24
-      - BOOKING_CONFIRMATION_EXPIRY_HOURS=2
-      # External Service URLs
-      - PROPERTY_SERVICE_URL=http://property-service:8083
-      - PAYMENT_SERVICE_URL=http://payment-service:8087
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8082
-    depends_on:
-      - mysql
-      - redis
-      - kafka
-      - eureka-server
-    networks:
-      - roomie-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+spring:
+  application:
+    name: booking-service
 
-networks:
-  roomie-network:
-    external: true
+  data:
+    mongodb:
+      uri: mongodb://admin:roomie123@localhost:27017/roomie_booking?authSource=admin
+    redis:
+      host: redis
+      port: 6379
+      password: #roomie123
+      timeout: 5000ms
+
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://eureka-server:8761/eureka
+      register-with-eureka: true
+      fetch-registry: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: booking-service
+      properties:
+        spring.json.trusted.packages: "*"
+
+  booking:
+    redis:
+      lock-ttl: 900000 # 15 minutes
+      pending-ttl: 900000
+
+  cache:
+    type: redis
+
+app:
+  services:
+    properties: http://localhost:8083/properties
+

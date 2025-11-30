@@ -50,7 +50,7 @@ Error Response:
   "password": "SecurePass123!",
   "fullName": "Nguyen Van A",
   "phoneNumber": "+84901234567",
-  "role": "TENANT" // TENANT, LANDLORD
+  "role": "USER"
 }
 ```
 
@@ -63,7 +63,7 @@ Error Response:
       "id": "123",
       "email": "user@example.com",
       "fullName": "Nguyen Van A",
-      "role": "TENANT",
+      "role": "USER",
       "emailVerified": false
     },
     "tokens": {
@@ -361,7 +361,7 @@ Hủy booking
 ```json
 {
   "reason": "Thay đổi lịch trình",
-  "cancelledBy": "TENANT" // TENANT, LANDLORD, SYSTEM
+  "cancelledBy": "USER" // USER, SYSTEM
 }
 ```
 

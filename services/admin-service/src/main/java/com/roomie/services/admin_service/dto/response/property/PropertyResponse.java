@@ -1,9 +1,11 @@
 package com.roomie.services.admin_service.dto.response.property;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.roomie.services.admin_service.enums.ApprovalStatus;
+import com.roomie.services.admin_service.enums.PropertyLabel;
+import com.roomie.services.admin_service.enums.PropertyStatus;
+import com.roomie.services.admin_service.enums.PropertyType;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -13,24 +15,38 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PropertyResponse {
-    String id;
+    String propertyId;
     String title;
     String description;
     BigDecimal price;
     String priceLabel;
-    String propertyType;
-    String propertyStatus;
+    BigDecimal rentalDeposit;
+
+    PropertyType propertyType;
+    PropertyStatus propertyStatus;
+    PropertyLabel propertyLabel;
+
     Double size;
+    Double landArea;
+
     Integer rooms;
     Integer bedrooms;
     Integer bathrooms;
-    AddressResponse address;
-    AmenitiesResponse amenities;
+    Integer garages;
+
+    Integer yearBuilt;
+
+    AddressResponse address;  // Cần có đầy đủ: fullAddress, zipCode, country, neighborhood, province, location
+    AmenitiesResponse amenities;  // Cần có đầy đủ: homeSafety, bedroom, kitchen
     List<MediaResponse> mediaList;
     VirtualTourResponse virtualTour;
     List<FloorResponse> floors;
+
     OwnerResponse owner;
+    ApprovalStatus status;
+
     Instant createdAt;
     Instant updatedAt;
 }

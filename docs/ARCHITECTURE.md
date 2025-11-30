@@ -377,8 +377,7 @@ Protected Resource ← Token Validation ← JWT Token
 Role        | Property | Booking | Payment | Admin
 ------------|----------|---------|---------|-------
 GUEST       | Read     | Create  | Own     | None
-TENANT      | Read     | CRUD    | Own     | None  
-LANDLORD    | CRUD     | Read    | Own     | None
+USER        | CRUD     | CRUD    | Own     | None  
 ADMIN       | CRUD     | CRUD    | CRUD    | CRUD
 ```
 

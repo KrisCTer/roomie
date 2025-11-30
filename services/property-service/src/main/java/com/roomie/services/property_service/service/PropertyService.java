@@ -5,7 +5,7 @@ import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
-import com.roomie.services.property_service.enums.PropertyStatus;
+import com.roomie.services.property_service.enums.ApprovalStatus;
 import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
@@ -43,7 +43,7 @@ public class PropertyService {
     public PropertyResponse create(PropertyRequest request) {
         Property entity = mapper.toEntity(request);
         entity.setOwner(AuthUtil.getCurrentOwner());
-        entity.setStatus(PropertyStatus.DRAFT);
+        entity.setStatus(ApprovalStatus.DRAFT);
         Instant now = Instant.now();
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
@@ -97,7 +97,7 @@ public class PropertyService {
         return propertyRepository.findAll(PageRequest.of(page, size)).stream()
                 .map(mapper::toResponse).collect(Collectors.toList());
     }
-    public List<PropertyResponse> findByStatus(PropertyStatus status) {
+    public List<PropertyResponse> findByStatus(ApprovalStatus status) {
         return propertyRepository.findByStatus(status)
                 .stream().map(mapper::toResponse)
                 .collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class PropertyService {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
 
-        property.setStatus(PropertyStatus.PENDING);
+        property.setStatus(ApprovalStatus.PENDING);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
@@ -157,7 +157,7 @@ public class PropertyService {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
 
-        property.setStatus(PropertyStatus.ACTIVE);
+        property.setStatus(ApprovalStatus.ACTIVE);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
@@ -187,7 +187,7 @@ public class PropertyService {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
 
-        property.setStatus(PropertyStatus.REJECTED);
+        property.setStatus(ApprovalStatus.REJECTED);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 

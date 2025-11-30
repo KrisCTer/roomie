@@ -1,4 +1,4 @@
-package com.roomie.services.property_service.enums;
+package com.roomie.services.booking_service.enums;
 
 public enum PropertyStatus {
     AVAILABLE,      // Đang có sẵn cho thuê
