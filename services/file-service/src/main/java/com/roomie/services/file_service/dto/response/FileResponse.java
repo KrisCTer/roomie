@@ -14,5 +14,5 @@ public class FileResponse {
     String fileType;
     String publicUrl;
     String entityType;
-    Long entityId;
+    String entityId;
 }

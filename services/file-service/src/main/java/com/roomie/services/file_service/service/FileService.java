@@ -29,7 +29,7 @@ public class FileService {
     FileMgmtRepository fileMgmtRepository;
     FileMgmtMapper fileMgmtMapper;
 
-    public FileResponse uploadFile(MultipartFile file, String entityType, Long entityId) throws Exception {
+    public FileResponse uploadFile(MultipartFile file, String entityType, String entityId) throws Exception {
         var fileInfo = fileRepository.store(file);
 
         var fileMgmt = fileMgmtMapper.toFileMgmt(fileInfo);

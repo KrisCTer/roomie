@@ -20,7 +20,7 @@ public class PropertyResponse {
     String propertyId;
     String title;
     String description;
-    BigDecimal price;
+    BigDecimal monthlyRent;
     String priceLabel;
     BigDecimal rentalDeposit;
 

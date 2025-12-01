@@ -30,19 +30,19 @@ public class UserAdminService {
         return res.getResult();
     }
 
-//    public void updateUser(String id, UserUpdateRequest request) {
-//        log.info("Admin updating user id={}", id);
+//    public void updateUser(String contractId, UserUpdateRequest request) {
+//        log.info("Admin updating user contractId={}", contractId);
 //
 //        // Rebuild DTO to identity format
 //        UserResponse dto = UserResponse.builder()
-//                .id(id)
+//                .contractId(contractId)
 //                .username()
 //                .lastName(request.getLastName())
 //                .email(request.getEmail())
 //                .dob(request.getDob())
 //                .build();
 //
-//        userClient.updateUser(id, dto);
+//        userClient.updateUser(contractId, dto);
 //    }
 
     public void deleteUser(String id) {

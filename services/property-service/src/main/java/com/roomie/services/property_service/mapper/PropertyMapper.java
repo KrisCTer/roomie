@@ -13,7 +13,7 @@ public interface PropertyMapper {
     PropertyResponse toResponse(Property entity);
 
     // ES document mapping (basic)
-    @Mapping(target = "price", expression = "java(entity.getPrice() != null ? entity.getPrice().doubleValue() : null)")
+    @Mapping(target = "monthlyRent", expression = "java(entity.getMonthlyRent() != null ? entity.getMonthlyRent().doubleValue() : null)")
     @Mapping(target = "province", source = "address.province")
     @Mapping(target = "location", source = "address.location")
     PropertyDocument toDocument(Property entity);

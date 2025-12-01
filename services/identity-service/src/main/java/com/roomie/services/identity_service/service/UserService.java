@@ -54,6 +54,7 @@ public class UserService {
         user.setRoles(roles);
         user.setEmailVerified(false);
         user.setIsActive(true);
+        user.setIsBanned(false);
 
         try {
             user = userRepository.save(user);

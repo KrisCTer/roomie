@@ -21,7 +21,7 @@ public class FileMgmt {
     String fileName;
     FileType fileType;
     String entityType;
-    Long entityId;
+    String entityId;
     String contentType;
     long size;
     String md5Checksum;

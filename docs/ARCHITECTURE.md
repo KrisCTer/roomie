@@ -646,7 +646,7 @@ CREATE TABLE analytics_events (
 @Service
 public class PropertyService {
     
-    @Cacheable(value = "properties", key = "#id")
+    @Cacheable(value = "properties", key = "#contractId")
     public Property findById(Long id) {
         return propertyRepository.findById(id);
     }

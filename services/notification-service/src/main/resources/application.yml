@@ -25,7 +25,7 @@ services:
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_KAFKA_CONSUMER_GROUP_ID=notification-service
       # Firebase Configuration
-      - FIREBASE_PROJECT_ID=roomie-project-id
+      - FIREBASE_PROJECT_ID=roomie-project-contractId
       - FIREBASE_PRIVATE_KEY=your-firebase-private-key
       - FIREBASE_CLIENT_EMAIL=firebase-adminsdk@roomie-project.iam.gserviceaccount.com
       # Email Configuration

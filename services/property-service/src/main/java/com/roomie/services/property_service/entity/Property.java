@@ -28,7 +28,7 @@ public class Property {
 
     Address address;
 
-    BigDecimal price;
+    BigDecimal monthlyRent;
     String priceLabel;
     BigDecimal rentalDeposit;
 

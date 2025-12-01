@@ -22,7 +22,7 @@ public class PropertyRequest {
     String description;
 
     @NotNull
-    BigDecimal price;
+    BigDecimal monthlyRent;
     String priceLabel;
     BigDecimal rentalDeposit;
 

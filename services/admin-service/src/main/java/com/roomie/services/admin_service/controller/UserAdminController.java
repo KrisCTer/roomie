@@ -30,11 +30,11 @@ public class UserAdminController {
         return ResponseEntity.ok(ApiResponse.success(userService.getUserById(id),"Get user detail successfully"));
     }
 
-//    @PutMapping("/{id}")
+//    @PutMapping("/{contractId}")
 //    public void updateUser(
-//            @PathVariable("id") String id,
+//            @PathVariable("contractId") String contractId,
 //            @RequestBody UserUpdateRequest request) {
-//        userService.updateUser(id, request);
+//        userService.updateUser(contractId, request);
 //    }
 
     @DeleteMapping("/{id}")

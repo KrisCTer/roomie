@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface PropertyRepository extends MongoRepository<Property, String> {
-    List<Property> findByPriceBetween(BigDecimal min, BigDecimal max);
+    List<Property> findByMonthlyRentBetween(BigDecimal min, BigDecimal max);
 
     List<Property> findByAddress_ProvinceIgnoreCase(String province);
 

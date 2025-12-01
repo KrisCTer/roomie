@@ -25,7 +25,7 @@ public class PropertyDocument {
     String description;
 
     @Field(type = FieldType.Double)
-    Double price;
+    Double monthlyRent;
     @Field(type = FieldType.Keyword)
     String priceLabel;
     @Field(type = FieldType.Double)

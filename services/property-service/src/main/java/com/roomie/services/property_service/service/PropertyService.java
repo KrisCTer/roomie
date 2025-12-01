@@ -103,7 +103,7 @@ public class PropertyService {
                 .collect(Collectors.toList());
     }
     public List<PropertyResponse> findByPriceRange(BigDecimal min, BigDecimal max) {
-        return propertyRepository.findByPriceBetween(min, max).stream().map(mapper::toResponse).collect(Collectors.toList());
+        return propertyRepository.findByMonthlyRentBetween(min, max).stream().map(mapper::toResponse).collect(Collectors.toList());
     }
 
     public List<PropertyResponse> findByProvince(String province) {
