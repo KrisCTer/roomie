@@ -39,7 +39,7 @@ public class SocketHandler {
                      .createdAt(Instant.now())
                      .build();
              webSocketSessionService.create(session);
-             log.info("WebSocketSession created with id: {}", session.getId());
+             log.info("WebSocketSession created with contractId: {}", session.getId());
          } else {
              log.info("Authentication fail: {}", client.getSessionId());
              client.disconnect();

@@ -41,16 +41,16 @@ spring:
         password: roomie123
 
   # Redis Configuration - Caching
-  redis:
-    host: localhost
-    port: 6379
-    password: roomie123
-    timeout: 60000
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
+    redis:
+      host: localhost
+      port: 6379
+      password: roomie123
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
 
   # Kafka Configuration
   kafka:
@@ -72,7 +72,7 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 5MB
+      max-file-size: 10MB
       max-request-size: 10MB
 
 # Eureka Client Configuration
@@ -135,24 +135,10 @@ management:
       prometheus:
         enabled: true
 
-# Logging Configuration
-logging:
-  level:
-    com.roomie.services.profile_service: DEBUG
-    org.springframework.data.mongodb: DEBUG
-    org.springframework.data.neo4j: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.cache: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
 # Service Integration URLs
 app:
   services:
     identity: http://localhost:8080/identity
-    matching: http://localhost:8082/matching
-    notification: http://localhost:8083/notification
     file: http://localhost:8084/file
 
 ---
@@ -191,7 +177,3 @@ app:
     matching: http://matching-service:8082/matching
     notification: http://notification-service:8083/notification
     file: http://file-service:8084/file
-
-logging:
-  level:
-    com.roomie.services.profile_service: INFO

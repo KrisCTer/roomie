@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Owner {
-    String ownerId;           // id user đăng bài
+    String ownerId;           // contractId user đăng bài
     String name;
     String phone;
     String email;
