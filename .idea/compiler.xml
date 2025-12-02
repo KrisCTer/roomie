@@ -7,12 +7,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="analytics-service" />
         <module name="payment-service" />
         <module name="review-service" />
         <module name="search-service" />
-        <module name="analytics-service" />
         <module name="notification-service" />
-        <module name="billing-service" />
       </profile>
       <profile name="Annotation profile for file-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -29,7 +28,7 @@
         <module name="file-service" />
         <module name="chat-service" />
       </profile>
-      <profile name="Annotation profile for contract-service" enabled="true">
+      <profile name="Annotation profile for billing-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -45,6 +44,7 @@
         <module name="profile-service" />
         <module name="identity-service" />
         <module name="admin-service" />
+        <module name="billing-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
