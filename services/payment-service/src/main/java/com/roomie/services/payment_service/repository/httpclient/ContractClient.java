@@ -1,0 +1,14 @@
+package com.roomie.services.payment_service.repository.httpclient;
+
+import com.roomie.services.payment_service.dto.response.ContractResponse;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@FeignClient(name = "contract-service", url = "${app.services.contract}")
+public interface ContractClient {
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<ContractResponse> get(@PathVariable String id);
+}
