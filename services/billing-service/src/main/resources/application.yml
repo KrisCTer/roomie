@@ -1,59 +1,39 @@
-# docker-compose.billing-service.yml
-version: '3.8'
+server:
+  port: 8094
+  servlet:
+    context-path: /bills
 
-services:
-  billing-service:
-    build:
-      context: ./billing-service
-      dockerfile: Dockerfile
-    container_name: roomie-billing-service
-    restart: unless-stopped
-    ports:
-      - "8094:8094"
-    environment:
-      - SERVER_PORT=8094
-      - SPRING_APPLICATION_NAME=billing-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      # MySQL Configuration
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_billing
-      - SPRING_DATASOURCE_USERNAME=roomie
-      - SPRING_DATASOURCE_PASSWORD=roomie123
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      # Redis Configuration
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - SPRING_REDIS_PASSWORD=roomie123
-      # Kafka Configuration
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SPRING_KAFKA_CONSUMER_GROUP_ID=billing-service
-      # Billing Configuration
-      - BILLING_CYCLE_DAY=1
-      - LATE_FEE_PERCENTAGE=5.0
-      - GRACE_PERIOD_DAYS=3
-      - AUTO_BILLING_ENABLED=true
-      - INVOICE_DUE_DAYS=30
-      - TAX_RATE=10.0
-      - CURRENCY=VND
-      # External Service URLs
-      - PAYMENT_SERVICE_URL=http://payment-service:8087
-      - PROPERTY_SERVICE_URL=http://property-service:8083
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8082
-      - CONTRACT_SERVICE_URL=http://contract-service:8091
-      - BOOKING_SERVICE_URL=http://booking-service:8086
-    depends_on:
-      - mysql
-      - redis
-      - kafka
-      - eureka-server
-    networks:
-      - roomie-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8094/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+spring:
+  application:
+    name: billing-service
 
-networks:
-  roomie-network:
-    external: true
+  data:
+    mongodb:
+      uri: mongodb://admin:roomie123@localhost:27017/roomie_billing?authSource=admin
+
+    redis:
+      host: localhost
+      port: 6379
+      password: roomie123
+
+  cache:
+    type: redis
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: billing-service
+
+billing:
+  cycle-day: 1
+  due-days: 30
+  late-fee-percentage: 5
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+app:
+  services:
+    contract: http://localhost:8091/contracts
