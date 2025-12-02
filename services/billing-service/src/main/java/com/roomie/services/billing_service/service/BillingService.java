@@ -2,14 +2,18 @@ package com.roomie.services.billing_service.service;
 
 import com.roomie.services.billing_service.dto.request.BillRequest;
 import com.roomie.services.billing_service.dto.response.BillResponse;
+import com.roomie.services.billing_service.dto.response.ContractResponse;
 import com.roomie.services.billing_service.entity.Bill;
 import com.roomie.services.billing_service.enums.BillStatus;
 import com.roomie.services.billing_service.mapper.BillMapper;
 import com.roomie.services.billing_service.repository.BillRepository;
+import com.roomie.services.billing_service.repository.httpclient.ContractClient;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -24,12 +28,26 @@ import java.util.Optional;
 public class BillingService {
     BillRepository billRepository;
     BillMapper billMapper;
+    ContractClient contractClient;
 
     public BillResponse createBill(BillRequest req) {
 
         // ============================
         // 0. Parse billingMonth
         // ============================
+        ResponseEntity<ContractResponse> contractResp;
+        try {
+            contractResp = contractClient.get(req.getContractId());
+        } catch (FeignException.NotFound ex) {
+            throw new RuntimeException("ContractId không tồn tại");
+        } catch (FeignException ex) {
+            throw new RuntimeException("Lỗi khi kiểm tra contract: " + ex.getMessage());
+        }
+
+        if (contractResp == null || contractResp.getBody() == null) {
+            throw new RuntimeException("ContractId không tồn tại");
+        }
+
         if (req.getBillingMonth() == null) {
             throw new RuntimeException("billingMonth is required (format YYYY-MM)");
         }
