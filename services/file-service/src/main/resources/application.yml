@@ -1,56 +1,32 @@
-# docker-compose.file-service.yml
-version: '3.8'
+server:
+  port: 8084
+  servlet:
+    context-path: /file
 
-services:
-  file-service:
-    build:
-      context: ./file-service
-      dockerfile: Dockerfile
-    container_name: roomie-file-service
-    restart: unless-stopped
-    ports:
-      - "8084:8084"
-    environment:
-      - SERVER_PORT=8084
-      - SPRING_APPLICATION_NAME=file-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      # MySQL Configuration (for file metadata)
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_file
-      - SPRING_DATASOURCE_USERNAME=roomie
-      - SPRING_DATASOURCE_PASSWORD=roomie123
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      # MinIO Configuration
-      - MINIO_ENDPOINT=http://minio:9000
-      - MINIO_ACCESS_KEY=roomie
-      - MINIO_SECRET_KEY=roomie123
-      - MINIO_BUCKET_NAME=roomie-files
-      - MINIO_REGION=us-east-1
-      # Redis Configuration
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - SPRING_REDIS_PASSWORD=roomie123
-      # File Upload Configuration
-      - SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=50MB
-      - SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=100MB
-      - ALLOWED_IMAGE_TYPES=jpg,jpeg,png,gif,webp
-      - ALLOWED_DOCUMENT_TYPES=pdf,doc,docx,txt
-      - ALLOWED_VIDEO_TYPES=mp4,avi,mov
-      - IMAGE_COMPRESSION_QUALITY=80
-      - THUMBNAIL_SIZE=300
-    depends_on:
-      - mysql
-      - minio
-      - redis
-      - eureka-server
-    networks:
-      - roomie-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+spring:
+  application:
+    name: file-service
+  data:
+    mongodb:
+      uri: mongodb://admin:roomie123@localhost:27017/roomie_profile?authSource=admin
+      database: roomie_profile
+    redis:
+      host: localhost
+      port: 6379
+      password: roomie123
+      timeout: 5000ms
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-networks:
-  roomie-network:
-    external: true
+app:
+  file:
+    storage-dir: C:/upload
+    download-prefix: http://localhost:8888/api/v1/file/media/download/
+
+  minio:
+    endpoint: http://localhost:9000
+    bucket: roomie-files
+    access-key: roomie
+    secret-key: roomie123

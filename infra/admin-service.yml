@@ -1,0 +1,58 @@
+# docker-compose.admin-service.yml
+version: '3.8'
+
+services:
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    container_name: roomie-admin-service
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    environment:
+      - SERVER_PORT=8089
+      - SPRING_APPLICATION_NAME=admin-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # MySQL Configuration
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_admin
+      - SPRING_DATASOURCE_USERNAME=roomie
+      - SPRING_DATASOURCE_PASSWORD=roomie123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # MongoDB Configuration (for logs and analytics)
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_admin?authSource=admin
+      # Elasticsearch Configuration
+      - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=admin-service
+      # Admin Configuration
+      - SUPER_ADMIN_EMAIL=admin@roomie.com
+      - ADMIN_JWT_SECRET=roomie-admin-jwt-secret-key-must-be-at-least-256-bits
+      - ADMIN_SESSION_TIMEOUT_HOURS=8
+      # Monitoring URLs
+      - PROMETHEUS_URL=http://prometheus:9090
+      - GRAFANA_URL=http://grafana:3000
+    depends_on:
+      - mysql
+      - mongodb
+      - elasticsearch
+      - redis
+      - kafka
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  roomie-network:
+    external: true

@@ -1,7 +1,5 @@
 package com.roomie.services.profile_service.controller;
 
-import com.roomie.services.profile_service.dto.request.ProfileCreationRequest;
-import com.roomie.services.profile_service.dto.request.SearchUserRequest;
 import com.roomie.services.profile_service.dto.request.UpdateProfileRequest;
 import com.roomie.services.profile_service.dto.response.ApiResponse;
 import com.roomie.services.profile_service.dto.response.UserProfileResponse;
@@ -26,11 +24,25 @@ public class UserProfileController {
 //                .result(userProfileService.createProfile(request))
 //                .build();
 //    }
+    @PostMapping( "/me/idcard")
+    public ApiResponse<UserProfileResponse> createProfileFromIDCard(
+            @RequestParam("file") MultipartFile file) {
 
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.error(400, "Vui lòng upload ảnh CCCD/CMND");
+        }
+
+        if (!file.getContentType().startsWith("image/")) {
+            return ApiResponse.error(400, "File phải là định dạng ảnh");
+        }
+
+        UserProfileResponse result = userProfileService.createProfileFromIDCard(file);
+        return ApiResponse.success(result, "Tạo hồ sơ thành công từ CCCD!");
+    }
     @GetMapping("/users/{profileId}")
     ApiResponse<UserProfileResponse> getProfile(@PathVariable String profileId) {
         return ApiResponse.<UserProfileResponse>builder()
-                .result(userProfileService.getProfile(profileId))
+                .result(userProfileService.getByUserId(profileId))
                 .build();
     }
 
@@ -63,7 +75,7 @@ public class UserProfileController {
     }
 
     @PostMapping("/users/search")
-    ApiResponse<List<UserProfileResponse>> search(@RequestBody SearchUserRequest request) {
+    ApiResponse<List<UserProfileResponse>> search(@RequestBody String request) {
         return ApiResponse.<List<UserProfileResponse>>builder()
                 .result(userProfileService.search(request))
                 .build();
