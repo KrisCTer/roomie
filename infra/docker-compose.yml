@@ -14,7 +14,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: roomie123
       MONGO_INITDB_DATABASE: roomie
     volumes:
-      - mongodb_data:/data/db bmnvjgk'
+      - mongodb_data:/data/db
       - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     networks:
       - roomie-network

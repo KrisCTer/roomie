@@ -5,12 +5,12 @@ import Home from "../pages/Home";
 import Profile from "../pages/Profile";
 import Chat from "../pages/Chat";
 import Admin from "../pages/Admin";
+import DashboardLandlord from "../pages/DashboardLandlord";
 
 const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        {" "}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -18,6 +18,7 @@ const AppRoutes = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/dashboard-landlord" element={<DashboardLandlord />} />
       </Routes>
     </Router>
   );

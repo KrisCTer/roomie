@@ -1,481 +1,391 @@
+import React, { useState } from 'react';
+import {Eye, EyeOff, Camera } from 'lucide-react';
+import Sidebar from '../components/layout/Sidebar.jsx';
+import Header from '../components/layout/Header.jsx';
 
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Card,
-  CircularProgress,
-  Typography,
-  Avatar,
-  Divider,
-  TextField,
-  Button,
-  Snackbar,
-  Alert,
-  Tooltip,
-} from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import dayjs from "dayjs";
-import {
-  getMyInfo,
-  updateProfile,
-  uploadAvatar,
-} from "../services/userService";
-import { isAuthenticated, logOut } from "../services/authenticationService";
-import Scene from "./Scene";
+// ========== MAIN PROFILE SETTINGS COMPONENT ==========
+const Profile = () => {
+  const [activeMenu, setActiveMenu] = useState('Profile');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-export default function Profile() {
-  const navigate = useNavigate();
-  const [userDetails, setUserDetails] = useState({});
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
-  const [dob, setDob] = useState(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
+  // Form state
+  const [formData, setFormData] = useState({
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+    username: 'demo_agent',
+    email: 'themesflat@gmail.com',
+    phoneNumber: '1332565894',
+    firstName: 'Demo',
+    lastName: 'Agent',
+    gender: 'Male',
+    dob: '1990-01-15',
+    idCardNumber: '123456789012',
+    permanentAddress: '634 E 216th St, Bronx, NY 10466',
+    currentAddress: '10 Bringhurst St, Houston, TX',
+    status: 'Active',
+    facebook: '',
+    twitter: '',
+    linkedin: ''
+  });
 
-  const getUserDetails = async () => {
-    try {
-      const response = await getMyInfo();
-      const data = response.data;
+  const [passwords, setPasswords] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
-      setUserDetails(data.result);
-      // Initialize form fields with current values
-      setFirstName(data.result.firstName || "");
-      setLastName(data.result.lastName || "");
-      setEmail(data.result.email || "");
-      setCity(data.result.city || "");
-      setDob(data.result.dob ? dayjs(data.result.dob) : null);
-    } catch (error) {
-      if (error.response?.status === 401) {
-        logOut();
-        navigate("/login");
-      }
-    }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdate = async () => {
-    try {
-      // Prepare the data for update
-      const profileData = {
-        firstName,
-        lastName,
-        email,
-        city,
-        dob: dob ? dob.format("YYYY-MM-DD") : null,
-      };
-
-      await updateProfile(profileData);
-
-      const updatedDetails = {
-        ...userDetails,
-        ...profileData,
-      };
-
-      setUserDetails(updatedDetails);
-
-      // Show success message
-      setSnackbarMessage("Profile updated successfully!");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-
-      // Show error message
-      setSnackbarMessage("Failed to update profile. Please try again.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current.click();
+  const handleSubmit = () => {
+    console.log('Profile updated:', formData);
+    alert('Profile updated successfully!');
   };
 
-  const handleFileSelect = async (event) => {
-    const file = event.target.files[0];
-
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.match("image.*")) {
-      setSnackbarMessage("Please select an image file");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+  const handlePasswordUpdate = () => {
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      alert('New password and confirm password do not match!');
       return;
     }
-
-    try {
-      setUploading(true);
-
-      // Create FormData object
-      const formData = new FormData();
-      formData.append("file", file);
-
-      // Upload the image
-      const response = await uploadAvatar(formData);
-
-      // For demo purposes, create a local URL for the image
-      const imageUrl = response.data.result.avatar;
-
-      // Update user details with the new avatar URL
-      setUserDetails({
-        ...userDetails,
-        avatar: imageUrl,
-      });
-
-      // Success message
-      setSnackbarMessage("Avatar updated successfully!");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
-      setSnackbarMessage("Failed to upload avatar. Please try again.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    } finally {
-      setUploading(false);
-    }
+    console.log('Password updated');
+    alert('Password updated successfully!');
+    setPasswords({ oldPassword: '', newPassword: '', confirmPassword: '' });
   };
-
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate("/login");
-    } else {
-      getUserDetails();
-    }
-  }, [navigate]);
 
   return (
-    <Scene>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar activeMenu={activeMenu} setActiveMenu={setActiveMenu} sidebarOpen={sidebarOpen} />
 
-      {userDetails ? (
-        <Card
-          sx={{
-            minWidth: 350,
-            maxWidth: 500,
-            boxShadow: 3,
-            borderRadius: 2,
-            padding: 4,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              width: "100%",
-              gap: "10px",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "100%",
-                gap: "20px",
-                mb: "30px",
-              }}
-            >
-              <Tooltip title="Click to upload a profile picture">
-                <Box sx={{ position: "relative" }}>
-                  <Avatar
-                    src={userDetails.avatar}
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      fontSize: 48,
-                      bgcolor: "#1976d2",
-                      cursor: "pointer",
-                      transition: "opacity 0.3s",
-                      "&:hover": {
-                        opacity: 0.8,
-                      },
-                    }}
-                    onClick={handleAvatarClick}
-                  >
-                    {userDetails.firstName?.[0]}
-                    {userDetails.lastName?.[0]}
-                  </Avatar>
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      opacity: 0,
-                      transition: "opacity 0.3s",
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(0, 0, 0, 0.4)",
-                      "&:hover": {
-                        opacity: 1,
-                      },
-                      cursor: "pointer",
-                    }}
-                    onClick={handleAvatarClick}
-                  >
-                    <PhotoCameraIcon sx={{ color: "white", fontSize: 36 }} />
-                  </Box>
-                  {uploading && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(0, 0, 0, 0.4)",
-                      }}
-                    >
-                      <CircularProgress size={36} sx={{ color: "white" }} />
-                    </Box>
-                  )}
-                </Box>
-              </Tooltip>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileSelect}
-              />
-              <Typography
-                sx={{
-                  fontSize: 22,
-                  fontWeight: 600,
-                }}
-              >
-                {userDetails.username}
-              </Typography>
-              <Divider sx={{ width: "100%", mb: "10px" }} />
-            </Box>
-            <Typography
-              sx={{
-                fontSize: 18,
-                mb: "20px",
-              }}
-            >
-              Welcome back to Devteria, {userDetails.username} !
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                User Id
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 14,
-                }}
-              >
-                {userDetails.id}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                First Name
-              </Typography>
-              <TextField
-                size="small"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                sx={{ width: "60%" }}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                Last Name
-              </Typography>
-              <TextField
-                size="small"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                sx={{ width: "60%" }}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                Email
-              </Typography>
-              <TextField
-                size="small"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                sx={{ width: "60%" }}
-                type="email"
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                City
-              </Typography>
-              <TextField
-                size="small"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                sx={{ width: "60%" }}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                }}
-              >
-                Date of birth
-              </Typography>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={dob}
-                  onChange={(newValue) => setDob(newValue)}
-                  slotProps={{ textField: { size: "small" } }}
-                  sx={{ width: "60%" }}
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+        {/* Profile Content */}
+        <div className="p-6 max-w-5xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+
+          {/* Avatar Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Avatar</h2>
+            <div className="flex items-start gap-6">
+              <div className="relative">
+                <img 
+                  src={formData.avatar} 
+                  alt="Avatar" 
+                  className="w-32 h-32 rounded-full object-cover"
                 />
-              </LocalizationProvider>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                mt: 3,
-              }}
+                <button className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                  <Camera className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Upload a new avatar</label>
+                <input 
+                  type="file" 
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  accept="image/*"
+                />
+                <p className="text-xs text-gray-500 mt-2">JPEG 100x100</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Information Form */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-bold mb-6">Information</h2>
+            
+            <div className="space-y-6">
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Username *</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* First Name & Last Name */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">First Name *</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Last Name *</label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Email & Phone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email Address *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Phone Number *</label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Gender & Date of Birth */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Gender *</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date of Birth *</label>
+                  <input
+                    type="date"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* ID Card Number */}
+              <div>
+                <label className="block text-sm font-medium mb-2">ID Card Number *</label>
+                <input
+                  type="text"
+                  name="idCardNumber"
+                  value={formData.idCardNumber}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Permanent Address */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Permanent Address *</label>
+                <input
+                  type="text"
+                  name="permanentAddress"
+                  value={formData.permanentAddress}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Current Address */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Current Address *</label>
+                <input
+                  type="text"
+                  name="currentAddress"
+                  value={formData.currentAddress}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Account Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </div>
+
+              {/* Social Media */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Facebook</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
+                    <input
+                      type="text"
+                      name="facebook"
+                      value={formData.facebook}
+                      onChange={handleInputChange}
+                      placeholder="Facebook profile URL"
+                      className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Twitter</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
+                    <input
+                      type="text"
+                      name="twitter"
+                      value={formData.twitter}
+                      onChange={handleInputChange}
+                      placeholder="Twitter profile URL"
+                      className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">LinkedIn</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
+                    <input
+                      type="text"
+                      name="linkedin"
+                      value={formData.linkedin}
+                      onChange={handleInputChange}
+                      placeholder="LinkedIn profile URL"
+                      className="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={handleSubmit}
+              className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleUpdate}
-                sx={{ px: 4 }}
-              >
-                Update Profile
-              </Button>
-            </Box>
-          </Box>
-        </Card>
-      ) : (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "30px",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <CircularProgress></CircularProgress>
-          <Typography>Loading ...</Typography>
-        </Box>
-      )}
-    </Scene>
+              Save & Update
+            </button>
+          </div>
+
+          {/* Change Password Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-bold mb-6">Change Password</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Old Password *</label>
+                <div className="relative">
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    name="oldPassword"
+                    value={passwords.oldPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Password"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showOldPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">New Password *</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    value={passwords.newPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Password"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Confirm Password *</label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwords.confirmPassword}
+                    onChange={handlePasswordChange}
+                    placeholder="Password"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={handlePasswordUpdate}
+              className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Update Password
+            </button>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="text-center py-6 text-sm text-gray-500 border-t border-gray-200 mt-8">
+          Copyright © 2025 Roomie. All rights reserved.
+        </footer>
+      </div>
+    </div>
   );
-}
+};
+
+export default Profile;
