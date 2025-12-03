@@ -6,6 +6,8 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
+import com.roomie.services.contract_service.exception.AppException;
+import com.roomie.services.contract_service.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,7 +39,7 @@ public class ContractPdfGenerator {
             return baos.toByteArray();
         } catch (Exception e) {
             log.error("Error generating PDF from HTML", e);
-            throw new RuntimeException("Failed to generate PDF: " + e.getMessage(), e);
+            throw new AppException(ErrorCode.FAILED_TO_GEN_PDF,e.getMessage());
         }
     }
 

@@ -1,5 +1,5 @@
 server:
-  port: 8086
+  port: 8084
   servlet:
     context-path: /bookings
 
@@ -11,9 +11,9 @@ spring:
     mongodb:
       uri: mongodb://admin:roomie123@localhost:27017/roomie_booking?authSource=admin
     redis:
-      host: redis
+      host: localhost
       port: 6379
-      password: #roomie123
+      password: roomie123
       timeout: 5000ms
 
   eureka:

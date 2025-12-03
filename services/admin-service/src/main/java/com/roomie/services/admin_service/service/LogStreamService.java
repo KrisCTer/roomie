@@ -2,13 +2,13 @@ package com.roomie.services.admin_service.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.roomie.services.admin_service.dto.response.LogsResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.socket.TextMessage;
@@ -26,11 +26,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class LogStreamService {
+    public static final String CHANNEL = "admin-logs-stream";
+
     Set<SseEmitter> sseEmitters = ConcurrentHashMap.newKeySet();
     Set<WebSocketSession> wsSessions = new CopyOnWriteArraySet<>();
+
     ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    StringRedisTemplate redisTemplate;
 
 
     public SseEmitter registerSse() {
@@ -54,6 +58,15 @@ public class LogStreamService {
     }
 
     public void publish(LogsResponse log) {
+        try {
+            String payload = objectMapper.writeValueAsString(log);
+            redisTemplate.convertAndSend(CHANNEL, payload);
+        } catch (Exception e) {
+//            log.error("Failed to publish log to Redis", e);
+        }
+    }
+
+    public void forwardToClients(LogsResponse log) {
         String payload;
 
         try {

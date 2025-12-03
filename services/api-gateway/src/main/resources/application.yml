@@ -1,142 +1,92 @@
-# application.yml cho API Gateway
-
 server:
-  port: ${SERVER_PORT:8888}
+  port: 8888
+
+app:
+  api-prefix: /api/v1
 
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:api-gateway}
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:docker}
-
-  # Redis Configuration
-  redis:
-    host: ${SPRING_REDIS_HOST:redis}
-    port: ${SPRING_REDIS_PORT:6379}
-    password: ${SPRING_REDIS_PASSWORD:roomie123}
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1ms
-
-  # Cloud Gateway Configuration
+    name: api-gateway
   cloud:
     gateway:
       routes:
-        # Auth Service Routes
-        - id: identity-service
-          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
+
+        # Identity Service
+        - id: identity_service
+          uri: http://localhost:8080
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/identity/**
+            - Path=${app.api-prefix}/identity/**
           filters:
             - StripPrefix=2
 
-        # Profile Service Routes
-        - id: profile-service
-          uri: ${PROFILE_SERVICE_URL:http://localhost:8081}
+        # Admin Service
+        - id: admin_service
+          uri: http://localhost:8081
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/profiles/**
+            - Path=${app.api-prefix}/admin/**
           filters:
             - StripPrefix=2
 
-        # Notification Service Routes
-        - id: notification-service
-          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8082}
+        # Profile Service
+        - id: profile_service
+          uri: http://localhost:8082
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/notifications/**
+            - Path=${app.api-prefix}/profile/**
           filters:
             - StripPrefix=2
 
-        # Property Service Routes
-        - id: property-service
-          uri: ${PROPERTY_SERVICE_URL:http://localhost:8083}
+        # Property Service
+        - id: property_service
+          uri: http://localhost:8083
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/properties/**
+            - Path=${app.api-prefix}/property/**
           filters:
             - StripPrefix=2
 
-        # File Service Routes
-        - id: file-service
-          uri: ${FILE_SERVICE_URL:http://localhost:8084}
+        # Booking Service
+        - id: booking_service
+          uri: http://localhost:8084
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/files/**
+            - Path=${app.api-prefix}/booking/**
           filters:
             - StripPrefix=2
 
-        # Chat Service Routes
-        - id: chat-service
-          uri: ${CHAT_SERVICE_URL:http://localhost:8085}
+        # Contract Service
+        - id: contract_service
+          uri: http://localhost:8085
           predicates:
-            - Path=${APP_API_PREFIX:/api/v1}/chats/**
+            - Path=${app.api-prefix}/contract/**
           filters:
             - StripPrefix=2
 
-      # Global CORS Configuration
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origins: "*"
-            allowed-methods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowed-headers: "*"
-            allow-credentials: false
-            max-age: 3600
+        # Billing Service
+        - id: billing_service
+          uri: http://localhost:8086
+          predicates:
+            - Path=${app.api-prefix}/billing/**
+          filters:
+            - StripPrefix=2
 
-      # Default Filters
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-  data:
-    redis:
-      timeout: 2000ms
+        # Payment Service
+        - id: payment_service
+          uri: http://localhost:8087
+          predicates:
+            - Path=${app.api-prefix}/payment/**
+          filters:
+            - StripPrefix=2
 
-# Eureka Client Configuration
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://eureka-server:8761/eureka/}
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    hostname: ${HOSTNAME:api-gateway}
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+        # File Service
+        - id: file_service
+          uri: http://localhost:8088
+          predicates:
+            - Path=${app.api-prefix}/file/**
+          filters:
+            - StripPrefix=2
 
-# Management & Actuator Configuration
-management:
-  endpoints:
-    web:
-      exposure:
-        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:health,info,metrics,prometheus}
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: ${MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED:true}
-  health:
-    redis:
-      enabled: true
-
-# Logging Configuration
-logging:
-  level:
-    root: ${LOGGING_LEVEL_ROOT:INFO}
-    org.springframework.cloud.gateway: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY:DEBUG}
-    org.springframework.web: INFO
-    com.roomie.gateway: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# Application Configuration
-app:
-  api-prefix: ${APP_API_PREFIX:/api/v1}
+        # Chat Service
+        - id: chat_service
+          uri: http://localhost:8089
+          predicates:
+            - Path=${app.api-prefix}/chat/**
+          filters:
+            - StripPrefix=2

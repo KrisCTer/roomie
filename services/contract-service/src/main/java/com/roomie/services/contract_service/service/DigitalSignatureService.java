@@ -17,7 +17,7 @@ import java.util.Base64;
 @Slf4j
 public class DigitalSignatureService {
     @Value("${digital.signature.secret}")
-    String secret = "roomie-signature-secret-key";
+    String secret;
 
     public String sign(String payload) {
         try {

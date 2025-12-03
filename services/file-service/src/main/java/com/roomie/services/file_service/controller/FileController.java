@@ -21,22 +21,26 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileController {
-    FileService fileService;
+
+    private final FileService fileService;
 
     // Upload file
     @PostMapping("/upload")
-    ApiResponse<FileResponse> uploadFile(
+    public ResponseEntity<ApiResponse<FileResponse>> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("entityType") String entityType,
             @RequestParam("entityId") String entityId
     ) throws Exception {
+
         FileResponse result = fileService.uploadFile(file, entityType, entityId);
-        return ApiResponse.<FileResponse>builder().result(result).build();
+        return ResponseEntity.ok(
+                ApiResponse.success(result, "Uploaded successfully")
+        );
     }
 
-    // Download file
+    // Download file (GIỮ NGUYÊN, KHÔNG BỌC ApiResponse)
     @GetMapping("/download/{fileId}")
-    ResponseEntity<InputStreamResource> downloadFile(@PathVariable String fileId) throws Exception {
+    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String fileId) throws Exception {
         FileData fileData = fileService.download(fileId);
 
         return ResponseEntity.ok()
@@ -47,25 +51,31 @@ public class FileController {
 
     // List files by entity
     @GetMapping("/entity/{entityType}/{entityId}")
-    ApiResponse<List<FileResponse>> listFilesByEntity(
+    public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByEntity(
             @PathVariable String entityType,
             @PathVariable Long entityId
     ) {
         List<FileResponse> result = fileService.listFilesByEntity(entityType, entityId);
-        return ApiResponse.<List<FileResponse>>builder().result(result).build();
+        return ResponseEntity.ok(
+                ApiResponse.success(result, "Fetched files by entity successfully")
+        );
     }
 
     // List files by owner
     @GetMapping("/owner/{ownerId}")
-    ApiResponse<List<FileResponse>> listFilesByOwner(@PathVariable String ownerId) {
+    public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByOwner(@PathVariable String ownerId) {
         List<FileResponse> result = fileService.listFilesByOwner(ownerId);
-        return ApiResponse.<List<FileResponse>>builder().result(result).build();
+        return ResponseEntity.ok(
+                ApiResponse.success(result, "Fetched files by owner successfully")
+        );
     }
 
     // Soft delete file
     @DeleteMapping("/{fileId}")
-    ApiResponse<Void> deleteFile(@PathVariable String fileId) throws Exception {
+    public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable String fileId) throws Exception {
         fileService.deleteFile(fileId);
-        return ApiResponse.<Void>builder().result(null).build();
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Deleted file successfully")
+        );
     }
 }

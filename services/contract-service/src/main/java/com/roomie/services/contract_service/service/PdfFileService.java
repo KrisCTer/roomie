@@ -3,6 +3,8 @@ package com.roomie.services.contract_service.service;
 import com.roomie.services.contract_service.configuration.InMemoryMultipartFile;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.file.FileResponse;
+import com.roomie.services.contract_service.exception.AppException;
+import com.roomie.services.contract_service.exception.ErrorCode;
 import com.roomie.services.contract_service.repository.httpclient.FileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +45,8 @@ public class PdfFileService {
             // 4️⃣ Xử lý lỗi
             if (response == null || response.getResult() == null) {
                 log.error("Contract PDF upload failed for contractId: {}", contractId);
-                throw new RuntimeException("Contract PDF upload failed for contractId: " + contractId);
+                throw new AppException(ErrorCode.CONTRACT_UPLOAD_FAILED, contractId);
             }
-
             // 5️⃣ Trả về URL public
             String url = response.getResult().getUrl();
             log.info("Successfully uploaded contract PDF: {} -> {}", contractId, url);
@@ -53,7 +54,7 @@ public class PdfFileService {
 
         } catch (Exception e) {
             log.error("Error in generateUploadAndSignUrl for contract {}", contractId, e);
-            throw new RuntimeException("Failed to generate and upload PDF for contract: " + contractId, e);
+            throw new AppException(ErrorCode.CONTRACT_GENERATE_FAILED,contractId, e);
         }
     }
 }

@@ -25,7 +25,10 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/services/analytics-service/pom.xml" />
         <option value="$PROJECT_DIR$/services/maintenance-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/review-service/pom.xml" />
+        <option value="$PROJECT_DIR$/services/search-service/pom.xml" />
       </set>
     </option>
   </component>

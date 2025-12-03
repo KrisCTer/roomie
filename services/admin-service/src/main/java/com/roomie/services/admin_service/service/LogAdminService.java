@@ -16,10 +16,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,9 +32,14 @@ public class LogAdminService {
     ElasticsearchClient elasticsearchClient;
     UserActivityLogRepository userActivityLogRepository;
     MeterRegistry meterRegistry;
+    RedisTemplate<String, Object> redisTemplate;
 
     public LogsPageResponse getAllLogs(int page, int size, Instant from, Instant to, String type, String userId) {
-
+        String key = buildCacheKey(page, size, from, to, type, userId);
+        LogsPageResponse cached = (LogsPageResponse) redisTemplate.opsForValue().get(key);
+        if (cached != null) {
+            return cached;
+        }
         List<LogsResponse> mergedLogs = new ArrayList<>();
 
         /*
@@ -148,12 +155,15 @@ public class LogAdminService {
                         ? Collections.emptyList()
                         : mergedLogs.subList(fromIndex, toIndex);
 
-        return LogsPageResponse.builder()
+        LogsPageResponse response = LogsPageResponse.builder()
                 .total(mergedLogs.size())
                 .page(page)
                 .size(size)
                 .logs(pageLogs)
                 .build();
+
+        redisTemplate.opsForValue().set(key, response, 10, TimeUnit.SECONDS);
+        return response;
     }
 
     /*
@@ -174,4 +184,11 @@ public class LogAdminService {
             return Instant.EPOCH;
         }
     }
+
+    private String buildCacheKey(int page, int size, Instant from, Instant to, String type, String userId) {
+        return "logs:" + page + ":" + size + ":" + from.toEpochMilli()
+                + ":" + to.toEpochMilli() + ":" + (type == null ? "ALL" : type)
+                + ":" + (userId == null ? "ALL" : userId);
+    }
+
 }

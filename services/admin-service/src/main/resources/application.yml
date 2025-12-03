@@ -1,5 +1,5 @@
 server:
-  port: 8089
+  port: 8081
   servlet:
     context-path: /admin
 
@@ -7,31 +7,15 @@ spring:
   application:
     name: admin-service
 
-  # MySQL
-  datasource:
-    url: jdbc:mysql://localhost:3306/roomie_admin?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
-    username: roomie
-    password: roomie123
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
   # MongoDB
   data:
     mongodb:
       uri: mongodb://admin:roomie123@localhost:27017/roomie_admin?authSource=admin
-
-  # Redis - chạy local
-  redis:
-    host: localhost
-    port: 6379
-    # password: roomie123   # bỏ comment nếu bạn bật password trong redis
+    redis:
+      host: localhost
+      port: 6379
+      password: roomie123
+      timeout: 60000
 
   # Elasticsearch
   elasticsearch:
@@ -68,17 +52,3 @@ app:
   services:
     identity: http://localhost:8080/identity
     properties: http://localhost:8083/properties
-
-# Logging (tùy chọn thêm để debug dễ hơn)
-logging:
-  level:
-    root: INFO
-    com.roomie.services.admin_service: DEBUG
-    org.springframework.data.elasticsearch: DEBUG   # nếu muốn xem log ES
-    org.apache.kafka: WARN
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,env

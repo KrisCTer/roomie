@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,18 +21,24 @@ public class ChatMessageController {
     ChatMessageService chatMessageService;
 
     @PostMapping("/create")
-    ApiResponse<ChatMessageResponse> create(
+    public ResponseEntity<ApiResponse<ChatMessageResponse>> create(
             @RequestBody @Valid ChatMessageRequest request) {
-        return ApiResponse.<ChatMessageResponse>builder()
-                .result(chatMessageService.create(request))
-                .build();
+
+        ChatMessageResponse data = chatMessageService.create(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(data, "Created message successfully")
+        );
     }
 
     @GetMapping
-    ApiResponse<List<ChatMessageResponse>> getMessages(
+    public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessages(
             @RequestParam("conversationId") String conversationId) {
-        return ApiResponse.<List<ChatMessageResponse>>builder()
-                .result(chatMessageService.getMessages(conversationId))
-                .build();
+
+        List<ChatMessageResponse> data = chatMessageService.getMessages(conversationId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(data, "Fetched chat messages successfully")
+        );
     }
 }
