@@ -41,6 +41,7 @@
         <module name="contract-service" />
         <module name="booking-service" />
         <module name="api-gateway" />
+        <module name="identity-service" />
         <module name="profile-service" />
         <module name="identity-service" />
         <module name="admin-service" />
