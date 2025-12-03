@@ -1,4 +1,3 @@
-
 import { CssBaseline } from "@mui/material";
 import AppRoutes from "./routes/AppRoutes";
 

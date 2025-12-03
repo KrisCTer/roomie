@@ -1,169 +1,188 @@
-
 import {
   Box,
   Button,
   Card,
   CardContent,
-  Divider,
   TextField,
   Typography,
-  Snackbar,
-  Alert,
+  Link,
+  IconButton,
+  InputAdornment
 } from "@mui/material";
-
-import GoogleIcon from "@mui/icons-material/Google";
-import { useEffect, useState } from "react";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logIn, isAuthenticated } from "../services/authenticationService";
+import { logIn } from "../services/authenticationService"; // nếu bạn dùng API
+// Nếu chưa có logIn, bạn cứ để trống hoặc comment dòng này.
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const handleCloseSnackBar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    username: "",
+    password: ""
+  });
 
-    setSnackBarOpen(false);
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleClick = () => {
-    alert(
-      "Please refer to Oauth2 series for this implemetation guidelines. https://www.youtube.com/playlist?list=PL2xsxmVse9IbweCh6QKqZhousfEWabSeq"
-    );
-  };
-
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [snackBarOpen, setSnackBarOpen] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState("");
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     try {
-      const response = await logIn(username, password);
-      console.log("Response body:", response.data);
-      navigate("/");
-    } catch (error) {
-      const errorResponse = error.response.data;
-      setSnackBarMessage(errorResponse.message);
-      setSnackBarOpen(true);
+      // Nếu chưa tích hợp API backend thì comment lại và navigate thẳng
+      // await logIn(form.username, form.password);
+
+      navigate("/home"); // login thành công → chuyển vào home
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Sai tài khoản hoặc mật khẩu");
     }
   };
 
   return (
-    <>
-      <Snackbar
-        open={snackBarOpen}
-        onClose={handleCloseSnackBar}
-        autoHideDuration={6000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#0b1b2a",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        p: 2
+      }}
+    >
+      <Card
+        sx={{
+          display: "flex",
+          width: "900px",
+          borderRadius: "16px",
+          overflow: "hidden",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.45)"
+        }}
       >
-        <Alert
-          onClose={handleCloseSnackBar}
-          severity="error"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackBarMessage}
-        </Alert>
-      </Snackbar>
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
-        bgcolor={"#f0f2f5"}
-      >
-        <Card
+        {/* LEFT IMAGE */}
+        <Box
           sx={{
-            minWidth: 300,
-            maxWidth: 400,
-            boxShadow: 3,
-            borderRadius: 3,
-            padding: 4,
+            width: "50%",
+            backgroundImage:
+              "url('https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center"
+          }}
+        ></Box>
+
+        {/* RIGHT FORM */}
+        <CardContent
+          sx={{
+            width: "50%",
+            p: 5,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center"
           }}
         >
-          <CardContent>
-            <Typography variant="h5" component="h1" gutterBottom>
-              Welcome to Devtetia
+          <Typography variant="h4" fontWeight={700} mb={1}>
+            Login
+          </Typography>
+
+          <Typography color="text.secondary" fontSize={14} mb={4}>
+            Welcome back! Please enter your account to continue.
+          </Typography>
+
+          <Box component="form" onSubmit={handleSubmit}>
+            {/* EMAIL */}
+            <Typography fontWeight={600} fontSize={14} mb={0.5}>
+              Account
             </Typography>
-            <Box
-              component="form"
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              width="100%"
-              onSubmit={handleSubmit}
-            >
-              <TextField
-                label="Username"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <TextField
-                label="Password"
-                type="password"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Button
-                type="submit"
-                variant="contained"
+            <TextField
+              fullWidth
+              placeholder="admin@gmail.com"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            />
+
+            {/* PASSWORD */}
+            <Typography fontWeight={600} fontSize={14} mb={0.5}>
+              Password
+            </Typography>
+            <TextField
+              fullWidth
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              sx={{ mb: 1 }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+
+            {/* FORGOT PASSWORD */}
+            <Box textAlign="right" mb={3}>
+              <Link
+                underline="hover"
                 color="primary"
-                size="large"
-                onClick={handleSubmit}
-                fullWidth
-                sx={{
-                  mt: "15px",
-                  mb: "25px",
-                }}
+                sx={{ cursor: "pointer", fontSize: 14 }}
               >
-                Login
-              </Button>
-              <Divider></Divider>
+                Forgot password
+              </Link>
             </Box>
 
-            <Box display="flex" flexDirection="column" width="100%" gap="25px">
-              <Button
-                type="button"
-                variant="contained"
-                color="secondary"
-                size="large"
-                onClick={handleClick}
-                fullWidth
-                sx={{ gap: "10px" }}
+            {/* LOGIN BUTTON */}
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              sx={{
+                background: "#2563eb",
+                height: 48,
+                borderRadius: "12px",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: 16,
+                mb: 2
+              }}
+            >
+              Login
+            </Button>
+
+            {/* REGISTER LINK */}
+            <Typography textAlign="center" fontSize={14} mb={1}>
+              Don’t you have an account?{" "}
+              <Link
+                underline="hover"
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate("/register")}
               >
-                <GoogleIcon />
-                Continue with Google
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                color="success"
-                size="large"
+                Register
+              </Link>
+            </Typography>
+
+            {/* "XEM MÀ KHÔNG CẦN ĐĂNG NHẬP" */}
+            <Typography textAlign="center" fontSize={14} mt={2}>
+              <Link
+                underline="hover"
+                sx={{ cursor: "pointer", fontWeight: 600 }}
+                onClick={() => navigate("/home")}
               >
-                Create an account
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-    </>
+                Xem mà không cần đăng nhập
+              </Link>
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
