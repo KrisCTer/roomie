@@ -4,6 +4,8 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.roomie.services.profile_service.dto.response.IDCardInfo;
+import com.roomie.services.profile_service.exception.AppException;
+import com.roomie.services.profile_service.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,9 +36,9 @@ public class IDCardQRService {
             return parseVietnameseIDCardQR(qrText);
 
         } catch (NotFoundException e) {
-            throw new RuntimeException("QR code not found in image");
+            throw new AppException(ErrorCode.QR_NOT_FOUND_IN_IMAGE);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to extract QR code info: " + e.getMessage(), e);
+            throw new AppException(ErrorCode.QR_EXTRACTION_FAILED,e.getMessage());
         }
     }
 
@@ -44,7 +46,7 @@ public class IDCardQRService {
 
         String[] parts = qrText.split("\\|");
         if (parts.length < 7) {
-            throw new RuntimeException("Invalid Vietnam IDCard QR format");
+            throw new AppException(ErrorCode.INVALID_IDCARD);
         }
 
         IDCardInfo info = new IDCardInfo();

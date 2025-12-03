@@ -5,6 +5,8 @@ import com.roomie.services.billing_service.dto.response.BillResponse;
 import com.roomie.services.billing_service.dto.response.ContractResponse;
 import com.roomie.services.billing_service.entity.Bill;
 import com.roomie.services.billing_service.enums.BillStatus;
+import com.roomie.services.billing_service.exception.AppException;
+import com.roomie.services.billing_service.exception.ErrorCode;
 import com.roomie.services.billing_service.mapper.BillMapper;
 import com.roomie.services.billing_service.repository.BillRepository;
 import com.roomie.services.billing_service.repository.httpclient.ContractClient;
@@ -13,8 +15,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -22,14 +29,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Service
 public class BillingService {
     BillRepository billRepository;
     BillMapper billMapper;
     ContractClient contractClient;
 
+    @Transactional
+    @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
     public BillResponse createBill(BillRequest req) {
 
         // ============================
@@ -39,24 +48,24 @@ public class BillingService {
         try {
             contractResp = contractClient.get(req.getContractId());
         } catch (FeignException.NotFound ex) {
-            throw new RuntimeException("ContractId không tồn tại");
+            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
         } catch (FeignException ex) {
-            throw new RuntimeException("Lỗi khi kiểm tra contract: " + ex.getMessage());
+            throw new AppException(ErrorCode.CONTRACT_SERVICE_ERROR);
         }
 
         if (contractResp == null || contractResp.getBody() == null) {
-            throw new RuntimeException("ContractId không tồn tại");
+            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
         }
 
         if (req.getBillingMonth() == null) {
-            throw new RuntimeException("billingMonth is required (format YYYY-MM)");
+            throw new AppException(ErrorCode.BILLING_MONTH_REQUIRED);
         }
 
         LocalDate billMonth;
         try {
             billMonth = LocalDate.parse(req.getBillingMonth() + "-01");
         } catch (Exception e) {
-            throw new RuntimeException("Invalid billingMonth format. Expected YYYY-MM");
+            throw new AppException(ErrorCode.BILLING_MONTH_INVALID);
         }
 
         // ============================
@@ -66,7 +75,7 @@ public class BillingService {
                 .findByContractIdAndBillingMonth(req.getContractId(), billMonth);
 
         if (existing.isPresent()) {
-            throw new RuntimeException("Bill for this month already exists");
+            throw new AppException(ErrorCode.BILL_ALREADY_EXISTS);
         }
 
         // ============================
@@ -83,7 +92,7 @@ public class BillingService {
             waterOld = prevBill.get().getWaterNew();
         } else {
             if (req.getElectricityOld() == null || req.getWaterOld() == null) {
-                throw new RuntimeException("Không có bill tháng trước. Bạn phải nhập electricityOld và waterOld.");
+                throw new AppException(ErrorCode.FIRST_BILL_MISSING_OLD_VALUES);
             }
             electricityOld = req.getElectricityOld();
             waterOld = req.getWaterOld();
@@ -148,11 +157,11 @@ public class BillingService {
         return billMapper.toResponse(billRepository.save(bill));
     }
 
-
+    @Cacheable(value = "bill", key = "#id")
     public BillResponse getBill(String id) {
         return billMapper.toResponse(
                 billRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Bill not found"))
+                        .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND))
         );
     }
 
@@ -162,15 +171,18 @@ public class BillingService {
                 .toList();
     }
 
+    @Cacheable(value = "bill_by_contract", key = "#contractId")
     public List<BillResponse> getByContract(String contractId) {
         return billRepository.findByContractId(contractId).stream()
                 .map(billMapper::toResponse)
                 .toList();
     }
+
+    @CachePut(value = "bill", key = "#id")
     public BillResponse updateBill(String id, BillRequest req) {
 
         Bill bill = billRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bill not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND));
 
         // BILL THÁNG TRƯỚC LUÔN LÀ bill hiện tại → old không đổi
         Double electricityOld = bill.getElectricityOld();
@@ -214,6 +226,7 @@ public class BillingService {
         return billMapper.toResponse(billRepository.save(bill));
     }
 
+    @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
     public void deleteBill(String id) {
         billRepository.deleteById(id);
     }

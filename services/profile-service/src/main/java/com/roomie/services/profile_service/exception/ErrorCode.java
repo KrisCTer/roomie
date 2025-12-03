@@ -16,7 +16,10 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     PROFILE_ALREADY_EXISTS(1009, "Profile already exists", HttpStatus.CONFLICT),
-    PROFILE_NOT_FOUND(10010, "Profile not found", HttpStatus.NOT_FOUND),
+    PROFILE_NOT_FOUND(1010, "Profile not found", HttpStatus.NOT_FOUND),
+    QR_NOT_FOUND_IN_IMAGE(1011,"QR code not found in image", HttpStatus.NOT_FOUND),
+    INVALID_IDCARD(1012,"Invalid Vietnam IDCard QR format", HttpStatus.BAD_REQUEST),
+    QR_EXTRACTION_FAILED(1013,"Failed to extract QR code info: ", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

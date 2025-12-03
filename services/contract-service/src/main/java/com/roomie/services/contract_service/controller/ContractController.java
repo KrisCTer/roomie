@@ -1,6 +1,7 @@
 package com.roomie.services.contract_service.controller;
 
 import com.roomie.services.contract_service.dto.request.ContractRequest;
+import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
 import com.roomie.services.contract_service.repository.httpclient.FileClient;
 import com.roomie.services.contract_service.service.ContractService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,20 +25,27 @@ public class ContractController {
      * Tạo contract mới (sẽ tạo bản PREVIEW)
      */
     @PostMapping
-    public ResponseEntity<ContractResponse> create(@RequestBody ContractRequest req) {
+    public ResponseEntity<ApiResponse<ContractResponse>> create(@RequestBody ContractRequest req) {
         log.info("Creating new contract for bookingId={}", req.getBookingId());
-        return ResponseEntity.ok(service.create(req));
+        ContractResponse data = service.create(req);
+        return ResponseEntity.ok(
+                ApiResponse.success(data, "Created contract successfully")
+        );
     }
 
     /**
      * Lấy thông tin contract
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ContractResponse> get(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<ContractResponse>> get(@PathVariable String id) {
         return service.getById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(contract -> ResponseEntity.ok(
+                        ApiResponse.success(contract, "Fetched contract successfully")
+                ))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("Contract not found", 404)));
     }
+
 
     /**
      * Tenant ký hợp đồng
@@ -44,11 +53,16 @@ public class ContractController {
      * - Nếu chưa -> status = PENDING_SIGNATURE
      */
     @PostMapping("/{id}/sign/tenant")
-    public ResponseEntity<ContractResponse> tenantSign(
+    public ResponseEntity<ApiResponse<ContractResponse>> tenantSign(
             @PathVariable String id,
             @RequestBody(required = false) String payload) {
+
         log.info("Tenant signing contract contractId={}", id);
-        return ResponseEntity.ok(service.tenantSign(id, payload));
+        ContractResponse data = service.tenantSign(id, payload);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(data, "Tenant signed contract successfully")
+        );
     }
 
     /**
@@ -57,11 +71,16 @@ public class ContractController {
      * - Nếu chưa -> status = PENDING_SIGNATURE
      */
     @PostMapping("/{id}/sign/landlord")
-    public ResponseEntity<ContractResponse> landlordSign(
+    public ResponseEntity<ApiResponse<ContractResponse>> landlordSign(
             @PathVariable String id,
             @RequestBody(required = false) String payload) {
+
         log.info("Landlord signing contract contractId={}", id);
-        return ResponseEntity.ok(service.landlordSign(id, payload));
+        ContractResponse data = service.landlordSign(id, payload);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(data, "Landlord signed contract successfully")
+        );
     }
 
     /**
@@ -69,28 +88,38 @@ public class ContractController {
      * URL sẽ tự động trỏ đến bản PREVIEW hoặc FINAL tùy trạng thái
      */
     @GetMapping("/{id}/pdf")
-    public ResponseEntity<?> downloadPdf(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<PdfInfo>> downloadPdf(@PathVariable String id) {
         return service.getById(id)
-                .map(contract -> ResponseEntity.status(302)
-                        .header(HttpHeaders.LOCATION, contract.getPdfUrl())
-                        .build())
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(contract -> {
+                    PdfInfo body = new PdfInfo(contract.getPdfUrl());
+                    return ResponseEntity.ok(
+                            ApiResponse.success(body, "Fetched contract PDF url successfully")
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("Contract not found", 404)));
     }
 
     /**
      * Kiểm tra trạng thái ký
      */
     @GetMapping("/{id}/signature-status")
-    public ResponseEntity<?> getSignatureStatus(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<SignatureStatus>> getSignatureStatus(@PathVariable String id) {
         return service.getById(id)
-                .map(contract -> ResponseEntity.ok(new SignatureStatus(
-                        contract.isTenantSigned(),
-                        contract.isLandlordSigned(),
-                        contract.isTenantSigned() && contract.isLandlordSigned(),
-                        contract.getStatus().toString(),
-                        contract.getPdfUrl()
-                )))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(contract -> {
+                    SignatureStatus status = new SignatureStatus(
+                            contract.isTenantSigned(),
+                            contract.isLandlordSigned(),
+                            contract.isTenantSigned() && contract.isLandlordSigned(),
+                            contract.getStatus().toString(),
+                            contract.getPdfUrl()
+                    );
+                    return ResponseEntity.ok(
+                            ApiResponse.success(status, "Fetched signature status successfully")
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("Contract not found", 404)));
     }
 
     // Inner DTO for signature status
@@ -101,4 +130,6 @@ public class ContractController {
             String contractStatus,
             String pdfUrl
     ) {}
+
+    private record PdfInfo(String pdfUrl) {}
 }

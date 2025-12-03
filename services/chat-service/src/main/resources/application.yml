@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8089
   servlet:
     context-path: /chat
 
@@ -11,6 +11,10 @@ spring:
     mongodb:
       uri: mongodb://admin:roomie123@localhost:27017/roomie_chat?authSource=admin
       auto-index-creation: true
+    redis:
+      host: localhost
+      port: 6379
+      password: roomie123
 
 app:
   services:

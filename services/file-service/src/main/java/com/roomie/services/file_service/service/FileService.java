@@ -83,7 +83,7 @@ public class FileService {
 
     public void deleteFile(String fileId) {
         var file = fileMgmtRepository.findByFileId(fileId)
-                .orElseThrow(() -> new RuntimeException("File not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
 
         file.setDeleted(true);
         file.setDeletedAt(LocalDateTime.now());

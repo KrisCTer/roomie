@@ -16,9 +16,12 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     CONTRACT_NOT_FOUND(1009, "Contract not found", HttpStatus.NOT_FOUND),
-    CONTRACT_EXISTS(10010, "Contract exists", HttpStatus.CONFLICT),
-    RESOURCE_LOCKED(10011, "Resource locked", HttpStatus.SERVICE_UNAVAILABLE),
-    ALREADY_SIGNED(10012, "Already Signed", HttpStatus.CONFLICT),
+    CONTRACT_EXISTS(1010, "Contract exists", HttpStatus.CONFLICT),
+    RESOURCE_LOCKED(1011, "Resource locked", HttpStatus.SERVICE_UNAVAILABLE),
+    ALREADY_SIGNED(1012, "Already Signed", HttpStatus.CONFLICT),
+    FAILED_TO_GEN_PDF(1013,"Failed to generate PDF: ",HttpStatus.CONFLICT),
+    CONTRACT_UPLOAD_FAILED(1014,"Contract PDF upload failed",HttpStatus.CONFLICT),
+    CONTRACT_GENERATE_FAILED(1015,"Failed to generate and upload PDF",HttpStatus.CONFLICT),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -16,7 +16,15 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     PROFILE_ALREADY_EXISTS(1009, "Profile already exists", HttpStatus.CONFLICT),
-    PROFILE_NOT_FOUND(10010, "Profile not found", HttpStatus.NOT_FOUND),
+    PROFILE_NOT_FOUND(1010, "Profile not found", HttpStatus.NOT_FOUND),
+    CONTRACT_NOT_FOUND(1011,"ContractId không tồn tại",HttpStatus.NOT_FOUND),
+    CONTRACT_SERVICE_ERROR(1012,"Lỗi khi kiểm tra contract", HttpStatus.INTERNAL_SERVER_ERROR),
+    BILLING_MONTH_REQUIRED(1013,"billingMonth is required (format YYYY-MM)", HttpStatus.BAD_REQUEST),
+    BILLING_MONTH_INVALID(1014,"Invalid billingMonth format. Expected YYYY-MM", HttpStatus.BAD_REQUEST),
+    BILL_ALREADY_EXISTS(1015,"Bill for this month already exists", HttpStatus.CONFLICT),
+    FIRST_BILL_MISSING_OLD_VALUES(1016,"Không có bill tháng trước. Bạn phải nhập electricityOld và waterOld.", HttpStatus.BAD_REQUEST),
+    BILL_NOT_FOUND(1017,"Bill not found", HttpStatus.NOT_FOUND),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
