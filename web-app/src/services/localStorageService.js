@@ -1,14 +1,14 @@
-
-export const KEY_TOKEN = "accessToken";
+// src/services/localStorageService.js
+const ACCESS_TOKEN_KEY = "access_token";
 
 export const setToken = (token) => {
-  localStorage.setItem(KEY_TOKEN, token);
+  if (!token) return;
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
 };
 
-export const getToken = () => {
-  return localStorage.getItem(KEY_TOKEN);
-};
+export const getToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
-export const removeToken = () => {
-  return localStorage.removeItem(KEY_TOKEN);
-};
+export const removeToken = () => localStorage.removeItem(ACCESS_TOKEN_KEY);
+
+// tiện dùng trong UI
+export const isAuthenticated = () => Boolean(getToken());

@@ -1,264 +1,261 @@
-
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+// src/pages/Home.jsx
 import {
   Box,
-  Card,
-  CircularProgress,
+  Container,
   Typography,
-  Fab,
-  Popover,
-  TextField,
-  Button,
-  Snackbar,
-  Alert,
+  Card,
+  CardMedia,
+  CardContent,
+  Chip,
+  IconButton,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import { isAuthenticated, logOut } from "../services/authenticationService";
-import Scene from "./Scene";
-import Post from "../components/Post";
-import { getMyPosts, createPost } from "../services/postService";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
-export default function Home() {
-  const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(false);
-  const observer = useRef();
-  const lastPostElementRef = useRef();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [newPostContent, setNewPostContent] = useState("");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+import Header from "../components/Header";
+import SearchBar from "../components/SearchBar";
+import Footer from "../components/Footer"; // nếu bạn đã tạo Footer như trước
+import FloatingSearchButton from "../components/FloatingSearchButton";
 
-  const navigate = useNavigate();
 
-  // Handle opening the popover
-  const handleCreatePostClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+// ─── Demo data ──────────────────────────────────────────────
+const hcmListings = [
+  {
+    id: 1,
+    title: "Căn hộ tại Thành phố Hồ Chí Minh",
+    city: "Thành phố Hồ Chí Minh",
+    price: "760.000",
+    nights: 2,
+    rating: 5.0,
+    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+    badge: "Được khách yêu thích",
+  },
+  {
+    id: 2,
+    title: "Căn hộ studio hiện đại",
+    city: "Quận 1",
+    price: "1.437.000",
+    nights: 2,
+    rating: 4.87,
+    image: "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg",
+    badge: "Được khách yêu thích",
+  },
+  {
+    id: 3,
+    title: "Căn hộ cao cấp Thủ Đức",
+    city: "Thủ Đức",
+    price: "922.000",
+    nights: 2,
+    rating: 4.91,
+    image: "https://images.pexels.com/photos/1571461/pexels-photo-1571461.jpeg",
+    badge: "Được khách yêu thích",
+  },
+  {
+    id: 4,
+    title: "Nhà nguyên căn 3 phòng ngủ",
+    city: "Gò Vấp",
+    price: "1.584.000",
+    nights: 2,
+    rating: 4.86,
+    image: "https://images.pexels.com/photos/259580/pexels-photo-259580.jpeg",
+    badge: "Được khách yêu thích",
+  },
+];
 
-  // Handle closing the popover
-  const handleClosePopover = () => {
-    setAnchorEl(null);
-    setNewPostContent("");
-  };
+const hnListings = [
+  {
+    id: 5,
+    title: "Căn hộ tại Quận Tây Hồ",
+    city: "Hà Nội",
+    price: "899.000",
+    nights: 2,
+    rating: 4.95,
+    image: "https://images.pexels.com/photos/3754591/pexels-photo-3754591.jpeg",
+    badge: "Được khách yêu thích",
+  },
+  {
+    id: 6,
+    title: "Nơi ở tại Quận Đống Đa",
+    city: "Hà Nội",
+    price: "743.000",
+    nights: 2,
+    rating: 4.88,
+    image: "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg",
+    badge: "Được khách yêu thích",
+  },
+  {
+    id: 7,
+    title: "Căn hộ tại Hoàn Kiếm",
+    city: "Hà Nội",
+    price: "1.120.000",
+    nights: 2,
+    rating: 4.97,
+    image: "https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg",
+    badge: "Được khách yêu thích",
+  },
+  {
+    id: 8,
+    title: "Nhà cổ phố cổ",
+    city: "Hà Nội",
+    price: "1.320.000",
+    nights: 2,
+    rating: 4.9,
+    image: "https://images.pexels.com/photos/4392270/pexels-photo-4392270.jpeg",
+    badge: "Được khách yêu thích",
+  },
+];
 
-  // Handle Snackbar close
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
-
-  // Handle posting new content
-  const handlePostContent = () => {
-    console.log("New post content:", newPostContent);
-    handleClosePopover();
-
-    createPost(newPostContent)
-      .then((response) => {
-        console.log("Post created successfully:", response.data);
-        setPosts((prevPosts) => [response.data.result, ...prevPosts]);
-        setNewPostContent("");
-        setSnackbarMessage("Post created successfully!");
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
-      })
-      .catch((error) => {
-        console.error("Error creating post:", error);
-        setSnackbarMessage("Failed to create post. Please try again.");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-      });
-  };
-
-  const open = Boolean(anchorEl);
-  const popoverId = open ? "post-popover" : undefined;
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate("/login");
-    } else {
-      loadPosts(page);
-    }
-  }, [navigate, page]);
-
-  const loadPosts = (page) => {
-    console.log(`loading posts for page ${page}`);
-    setLoading(true);
-    getMyPosts(page)
-      .then((response) => {
-        setTotalPages(response.data.result.totalPages);
-        setPosts((prevPosts) => [...prevPosts, ...response.data.result.data]);
-        setHasMore(response.data.result.data.length > 0);
-        console.log("loaded posts:", response.data.result);
-      })
-      .catch((error) => {
-        if (error.response.status === 401) {
-          logOut();
-          navigate("/login");
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    if (!hasMore) return;
-
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        if (page < totalPages) {
-          setPage((prevPage) => prevPage + 1);
-        }
-      }
-    });
-    if (lastPostElementRef.current) {
-      observer.current.observe(lastPostElementRef.current);
-    }
-
-    setHasMore(false);
-  }, [hasMore]);
+// ─── ListingRow ─────────────────────────────────────────────
+function ListingRow({ title, subtitle, listings = [] }) {
+  const safeListings = Array.isArray(listings) ? listings : [];
 
   return (
-    <Scene>
-      {" "}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{ marginTop: "64px" }} // Position below the header
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-      <Card
-        sx={{
-          minWidth: 500,
-          maxWidth: 600,
-          boxShadow: 3,
-          borderRadius: 2,
-          mt: "20px",
-          padding: "20px",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            width: "100%",
-            gap: "10px",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: 18,
-              mb: "10px",
-            }}
-          >
-            Your posts,
+    <Box sx={{ mt: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h6" fontWeight={600}>
+          {title}
+        </Typography>
+        {subtitle && (
+          <Typography variant="body2" color="text.secondary">
+            {subtitle}
           </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              width: "100%", // Ensure content takes full width
-            }}
-          ></Box>
-          {posts.map((post, index) => {
-            if (posts.length === index + 1) {
-              return (
-                <Post ref={lastPostElementRef} key={post.id} post={post} />
-              );
-            } else {
-              return <Post key={post.id} post={post} />;
-            }
-          })}
-          {loading && (
-            <Box
-              sx={{ display: "flex", justifyContent: "center", width: "100%" }}
-            >
-              <CircularProgress size="24px" />
-            </Box>
-          )}
-        </Box>
-      </Card>
-      {/* Floating Action Button for creating new posts */}
-      <Fab
-        color="primary"
-        aria-label="add"
-        onClick={handleCreatePostClick}
+        )}
+      </Box>
+
+      <Box
         sx={{
-          position: "fixed",
-          bottom: 30,
-          right: 30,
-        }}
-      >
-        <AddIcon />
-      </Fab>
-      {/* Popover for creating new post */}{" "}
-      <Popover
-        id={popoverId}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClosePopover}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 5,
-              p: 3,
-              width: 500,
-            },
+          display: "flex",
+          overflowX: "auto",
+          gap: 3,
+          pb: 1,
+          "&::-webkit-scrollbar": { height: 6 },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "rgba(148,163,184,0.9)",
+            borderRadius: 999,
           },
         }}
       >
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Create new Post
-        </Typography>
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-          placeholder="What's on your mind?"
-          value={newPostContent}
-          onChange={(e) => setNewPostContent(e.target.value)}
-          variant="outlined"
-          sx={{ mb: 2 }}
-        />
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handlePostContent}
-            disabled={!newPostContent.trim()}
+        {safeListings.map((item) => (
+          <Card
+            key={item.id}
+            sx={{
+              minWidth: 260,
+              borderRadius: 3,
+              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
+              overflow: "hidden",
+              bgcolor: "white",
+              flexShrink: 0,
+            }}
           >
-            Post
-          </Button>
-        </Box>
-      </Popover>
-    </Scene>
+            <Box sx={{ position: "relative" }}>
+              <CardMedia
+                component="img"
+                height="180"
+                image={item.image}
+                sx={{ objectFit: "cover" }}
+              />
+              <Chip
+                label={item.badge}
+                size="small"
+                sx={{
+                  position: "absolute",
+                  top: 10,
+                  left: 10,
+                  bgcolor: "rgba(255,255,255,0.9)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
+              />
+              <IconButton
+                size="small"
+                sx={{
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                  bgcolor: "rgba(255,255,255,0.9)",
+                }}
+              >
+                <FavoriteBorderIcon fontSize="small" />
+              </IconButton>
+            </Box>
+
+            <CardContent sx={{ p: 2 }}>
+              <Typography noWrap variant="subtitle2" fontWeight={600}>
+                {item.title}
+              </Typography>
+              <Typography noWrap variant="body2" color="text.secondary">
+                {item.city}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {item.price} đ / {item.nights} đêm ·{" "}
+                <Typography component="span" variant="body2" sx={{ fontWeight: 600 }}>
+                  ★ {item.rating}
+                </Typography>
+              </Typography>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+// ─── Home page ──────────────────────────────────────────────
+export default function Home() {
+  return (
+    <Box sx={{ minHeight: "100vh", bgcolor: "#0b1b2a" }}>
+      {/* Header dùng chung */}
+      <Header />
+
+      {/* HERO + SEARCH BAR */}
+      <Box
+        sx={{
+          pt: 6,
+          pb: 10,
+          background:
+            "radial-gradient(circle at top, #1d4ed8 0, #0b1b2a 45%, #020617 100%)",
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Title + subtitle */}
+          <Box sx={{ textAlign: "center", color: "white", mb: 4 }}>
+            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
+              Tìm nơi ở phù hợp cho chuyến đi của bạn
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ maxWidth: 540, mx: "auto", color: "rgba(241,245,249,0.85)" }}
+            >
+              Khám phá hàng ngàn căn hộ, nhà ở, homestay với giá minh bạch
+              và đặt phòng nhanh chóng, an toàn.
+            </Typography>
+          </Box>
+
+          {/* Thanh search sticky + zoom */}
+          <SearchBar />
+        </Container>
+      </Box>
+
+      {/* DANH SÁCH GỢI Ý */}
+      <Box sx={{ bgcolor: "#f9fafb", pb: 8 }}>
+        <Container maxWidth="lg" sx={{ pt: 4 }}>
+          <ListingRow
+            title="Nơi lưu trú được ưa chuộng tại Hồ Chí Minh"
+            subtitle="Những lựa chọn phổ biến nhất"
+            listings={hcmListings}
+          />
+          <ListingRow
+            title="Căn phòng tại Hà Nội vào tháng tới"
+            subtitle="Gợi ý cho chuyến đi tiếp theo"
+            listings={hnListings}
+          />
+        </Container>
+      </Box>
+
+      {/* Nút search tròn nổi góc phải */}
+      <FloatingSearchButton />
+
+      {/* Footer cuối trang */}
+      <Footer />
+    </Box>
   );
 }
