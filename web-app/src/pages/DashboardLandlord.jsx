@@ -8,7 +8,7 @@ import MessageItem from '../components/layout/MessageItem.jsx';
 import ReviewItem from '../components/layout/ReviewItem.jsx';
 
 // ========== MAIN DASHBOARD COMPONENT ==========
-const Admin = () => {
+const DashboardLandlord = () => {
   const [activeMenu, setActiveMenu] = useState('Dashboards');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -187,11 +187,11 @@ const Admin = () => {
 
         {/* Footer */}
         <footer className="text-center py-6 text-sm text-gray-500 border-t border-gray-200 mt-8">
-          Copyright © 2025 Roomie
+          Copyright © 2025 Roomie. All rights reserved.
         </footer>
       </div>
     </div>
   );
 };
 
-export default Admin;
+export default DashboardLandlord;
