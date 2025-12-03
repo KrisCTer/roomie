@@ -1,0 +1,51 @@
+# docker-compose.chat-service.yml
+version: '3.8'
+
+services:
+  chat-service:
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    container_name: roomie-chat-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - SERVER_PORT=8085
+      - SPRING_APPLICATION_NAME=chat-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      # MongoDB Configuration
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_chat?authSource=admin
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=roomie123
+      # Kafka Configuration
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=chat-service
+      # WebSocket Configuration
+      - SPRING_WEBSOCKET_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8888
+      # File Service Configuration
+      - FILE_SERVICE_URL=http://file-service:8084
+      - MAX_MESSAGE_LENGTH=2000
+      - MAX_ATTACHMENT_SIZE=25MB
+      - ALLOWED_ATTACHMENT_TYPES=jpg,jpeg,png,gif,pdf,doc,docx,txt
+      # JWT Configuration
+      - JWT_SECRET=roomie-auth-jwt-secret-key-must-be-at-least-256-bits
+    depends_on:
+      - mongodb
+      - redis
+      - kafka
+      - eureka-server
+    networks:
+      - roomie-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  roomie-network:
+    external: true

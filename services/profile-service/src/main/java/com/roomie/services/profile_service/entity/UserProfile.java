@@ -25,32 +25,30 @@ public class UserProfile {
     @Id
     @GeneratedValue(generatorClass = UUIDStringGenerator.class)
     String id;
-
     @Property("userId")
     String userId;
 
     String avatar;
-
     String username;
-
     @Property("email")
     String email;
-
     @Property("phoneNumber")
     String phoneNumber;
 
     @Property("firstName")
     String firstName;
-
     @Property("lastName")
     String lastName;
-
     Gender gender;
-
     LocalDate dob;
-    String location;
+
+    String idCardNumber;
+    String permanentAddress;
+
+    String currentAddress;
 
     AccountStatus status;
 
+    LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }
