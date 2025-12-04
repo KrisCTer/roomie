@@ -1,6 +1,7 @@
 package com.roomie.services.property_service.configuration;
 
 import com.nimbusds.jwt.SignedJWT;
+import lombok.AllArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 
 @Component
+@AllArgsConstructor
 public class CustomJwtDecoder implements JwtDecoder {
     @Override
     public Jwt decode(String token) throws JwtException {
@@ -22,7 +24,7 @@ public class CustomJwtDecoder implements JwtDecoder {
                     signedJWT.getJWTClaimsSet().getClaims()
             );
 
-        } catch (ParseException e) {
+        } catch (Exception e) {
             throw new JwtException("Invalid token");
         }
     }
