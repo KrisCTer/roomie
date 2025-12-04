@@ -46,7 +46,7 @@ public class PropertyController {
         return ResponseEntity.ok(ApiResponse.success(null, "Property deleted successfully"));
     }
 
-    @GetMapping
+    @GetMapping("/properties")
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> list(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

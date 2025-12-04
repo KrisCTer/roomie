@@ -41,7 +41,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/auth/.*",
             "/identity/users/register",
             "/notification/email/send",
-            "/file/media/download/.*"
+            "/file/media/download/.*",
+            "/property/properties",           // GET list properties
+            "/property/properties/[^/]+",     // GET /properties/{id}
+            "/property/properties/search.*",  // GET /properties/search?q=...
+            "/property/properties/by-price.*", // GET /properties/by-price?min=...&max=...
+            "/property/properties/by-province.*" // GET /properties/by-province?province=...
     };
 
     @Value("${app.api-prefix}")

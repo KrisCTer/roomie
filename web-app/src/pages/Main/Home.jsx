@@ -14,94 +14,12 @@ import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
 import Footer from "../../components/layout/layoutHome/Footer";
 
-// ─── Demo data ──────────────────────────────────────────────
-const hcmListings = [
-  {
-    id: 1,
-    title: "Căn hộ tại Thành phố Hồ Chí Minh",
-    city: "Thành phố Hồ Chí Minh",
-    price: "760.000",
-    nights: 2,
-    rating: 5.0,
-    image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-    badge: "Được khách yêu thích",
-  },
-  {
-    id: 2,
-    title: "Căn hộ studio hiện đại",
-    city: "Quận 1",
-    price: "1.437.000",
-    nights: 2,
-    rating: 4.87,
-    image: "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg",
-    badge: "Được khách yêu thích",
-  },
-  {
-    id: 3,
-    title: "Căn hộ cao cấp Thủ Đức",
-    city: "Thủ Đức",
-    price: "922.000",
-    nights: 2,
-    rating: 4.91,
-    image: "https://images.pexels.com/photos/1571461/pexels-photo-1571461.jpeg",
-    badge: "Được khách yêu thích",
-  },
-  {
-    id: 4,
-    title: "Nhà nguyên căn 3 phòng ngủ",
-    city: "Gò Vấp",
-    price: "1.584.000",
-    nights: 2,
-    rating: 4.86,
-    image: "https://images.pexels.com/photos/259580/pexels-photo-259580.jpeg",
-    badge: "Được khách yêu thích",
-  },
-];
+import { useEffect, useState } from "react";
+import { getAllProperties } from "../../services/property.service";
 
-const hnListings = [
-  {
-    id: 5,
-    title: "Căn hộ tại Quận Tây Hồ",
-    city: "Hà Nội",
-    price: "899.000",
-    nights: 2,
-    rating: 4.95,
-    image: "https://images.pexels.com/photos/3754591/pexels-photo-3754591.jpeg",
-    badge: "Được khách yêu thích",
-  },
-  {
-    id: 6,
-    title: "Nơi ở tại Quận Đống Đa",
-    city: "Hà Nội",
-    price: "743.000",
-    nights: 2,
-    rating: 4.88,
-    image: "https://images.pexels.com/photos/271639/pexels-photo-271639.jpeg",
-    badge: "Được khách yêu thích",
-  },
-  {
-    id: 7,
-    title: "Căn hộ tại Hoàn Kiếm",
-    city: "Hà Nội",
-    price: "1.120.000",
-    nights: 2,
-    rating: 4.97,
-    image: "https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg",
-    badge: "Được khách yêu thích",
-  },
-  {
-    id: 8,
-    title: "Nhà cổ phố cổ",
-    city: "Hà Nội",
-    price: "1.320.000",
-    nights: 2,
-    rating: 4.9,
-    image: "https://images.pexels.com/photos/4392270/pexels-photo-4392270.jpeg",
-    badge: "Được khách yêu thích",
-  },
-];
-
-// ─── ListingRow ─────────────────────────────────────────────
+//
+// COMPONENT: ListingRow
+//
 function ListingRow({ title, subtitle, listings = [] }) {
   const safeListings = Array.isArray(listings) ? listings : [];
 
@@ -147,21 +65,25 @@ function ListingRow({ title, subtitle, listings = [] }) {
               <CardMedia
                 component="img"
                 height="180"
-                image={item.image}
+                image={item.thumbnail || item.imageUrl || item.images?.[0]}
                 sx={{ objectFit: "cover" }}
               />
-              <Chip
-                label={item.badge}
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 10,
-                  left: 10,
-                  bgcolor: "rgba(255,255,255,0.9)",
-                  fontSize: 11,
-                  fontWeight: 600,
-                }}
-              />
+
+              {item.badge && (
+                <Chip
+                  label={item.badge}
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: 10,
+                    left: 10,
+                    bgcolor: "rgba(255,255,255,0.9)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+
               <IconButton
                 size="small"
                 sx={{
@@ -179,17 +101,19 @@ function ListingRow({ title, subtitle, listings = [] }) {
               <Typography noWrap variant="subtitle2" fontWeight={600}>
                 {item.title}
               </Typography>
+
               <Typography noWrap variant="body2" color="text.secondary">
-                {item.city}
+                {item.address?.district || item.city || "Không rõ khu vực"}
               </Typography>
+
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {item.price} đ / {item.nights} đêm ·{" "}
+                {item.price?.toLocaleString()} đ / đêm ·{" "}
                 <Typography
                   component="span"
                   variant="body2"
                   sx={{ fontWeight: 600 }}
                 >
-                  ★ {item.rating}
+                  ★ {item.rating || 4.8}
                 </Typography>
               </Typography>
             </CardContent>
@@ -200,14 +124,58 @@ function ListingRow({ title, subtitle, listings = [] }) {
   );
 }
 
-// ─── Home page ──────────────────────────────────────────────
+//
+// HOME PAGE
+//
 export default function Home() {
+  const [hcmListings, setHcmListings] = useState([]);
+  const [hnListings, setHnListings] = useState([]);
+
+  useEffect(() => {
+    loadListings();
+  }, []);
+
+  const loadListings = async () => {
+    try {
+      const res = await getAllProperties();
+
+      // ⭐ MAP DATA từ API → format UI cần
+      const formatted = res.map((p) => ({
+        id: p._id,
+        title: p.title,
+        price: Number(p.monthlyRent).toLocaleString(),
+        city: p.address?.district || p.address?.province || "Không rõ",
+        rating: 4.9, // backend chưa có thì cho mặc định
+        badge: p.propertyLabel === "HOT" ? "Được khách yêu thích" : "",
+        image:
+          p.mediaList?.[0]?.url ||
+          "https://via.placeholder.com/400x300?text=No+Image",
+        nights: 1, // tạm vì UI đang dùng
+      }));
+
+      // Tách theo khu vực như bạn đang làm
+      const hcm = formatted.filter(
+        (p) =>
+          p.city.toLowerCase().includes("hồ chí minh") ||
+          p.city.toLowerCase().includes("quận")
+      );
+
+      const hanoi = formatted.filter((p) =>
+        p.city.toLowerCase().includes("hà nội")
+      );
+
+      setHcmListings(hcm);
+      setHnListings(hanoi);
+    } catch (err) {
+      console.error("LOAD PROPERTY ERROR", err);
+    }
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#0b1b2a" }}>
-      {/* Header dùng chung */}
       <Header />
 
-      {/* HERO + SEARCH BAR */}
+      {/* HERO */}
       <Box
         sx={{
           pt: 6,
@@ -217,7 +185,6 @@ export default function Home() {
         }}
       >
         <Container maxWidth="lg">
-          {/* Title + subtitle */}
           <Box sx={{ textAlign: "center", color: "white", mb: 4 }}>
             <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
               Tìm nơi ở phù hợp cho chuyến đi của bạn
@@ -235,28 +202,27 @@ export default function Home() {
             </Typography>
           </Box>
 
-          {/* Thanh search sticky + zoom */}
           <SearchBar />
         </Container>
       </Box>
 
-      {/* DANH SÁCH GỢI Ý */}
+      {/* LISTINGS */}
       <Box sx={{ bgcolor: "#f9fafb", pb: 8 }}>
         <Container maxWidth="lg" sx={{ pt: 4 }}>
           <ListingRow
             title="Nơi lưu trú được ưa chuộng tại Hồ Chí Minh"
-            subtitle="Những lựa chọn phổ biến nhất"
+            subtitle="Dữ liệu từ hệ thống"
             listings={hcmListings}
           />
+
           <ListingRow
-            title="Căn phòng tại Hà Nội vào tháng tới"
-            subtitle="Gợi ý cho chuyến đi tiếp theo"
+            title="Căn phòng tại Hà Nội"
+            subtitle="Dữ liệu từ hệ thống"
             listings={hnListings}
           />
         </Container>
       </Box>
 
-      {/* Footer cuối trang */}
       <Footer />
     </Box>
   );

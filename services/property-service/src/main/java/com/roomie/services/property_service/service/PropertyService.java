@@ -3,6 +3,7 @@ package com.roomie.services.property_service.service;
 import com.roomie.services.property_service.configuration.AuthUtil;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
+import com.roomie.services.property_service.entity.Address;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
 import com.roomie.services.property_service.enums.ApprovalStatus;
