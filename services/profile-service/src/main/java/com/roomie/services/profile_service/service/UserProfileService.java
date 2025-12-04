@@ -2,10 +2,7 @@ package com.roomie.services.profile_service.service;
 
 import com.roomie.services.profile_service.dto.request.ProfileCreationRequest;
 import com.roomie.services.profile_service.dto.request.UpdateProfileRequest;
-import com.roomie.services.profile_service.dto.response.FileResponse;
-import com.roomie.services.profile_service.dto.response.IDCardInfo;
-import com.roomie.services.profile_service.dto.response.UserProfileResponse;
-import com.roomie.services.profile_service.dto.response.UserResponse;
+import com.roomie.services.profile_service.dto.response.*;
 import com.roomie.services.profile_service.entity.UserProfile;
 import com.roomie.services.profile_service.enums.AccountStatus;
 import com.roomie.services.profile_service.enums.Gender;
@@ -19,6 +16,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +35,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserProfileService {
-
     UserProfileRepository userProfileRepository;
     UserProfileMapper userProfileMapper;
     FileClient fileClient;
@@ -94,23 +94,35 @@ public class UserProfileService {
 
     // 2. TẠO PROFILE THỦ CÔNG (dành cho admin hoặc fallback)
     public UserProfileResponse createProfile(ProfileCreationRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String userId = auth.getName();
 
-        if (userProfileRepository.findByUserId(userId).isPresent()) {
-            throw new AppException(ErrorCode.PROFILE_ALREADY_EXISTS);
+        // 🔥 1. Không sử dụng SecurityContext trong trường hợp đăng ký
+        if (request.getUserId() == null) {
+            throw new AppException(ErrorCode.USER_ID_REQUIRED);
         }
 
+        // 🔥 2. Không cho tạo trùng profile
+        userProfileRepository.findByUserId(request.getUserId())
+                .ifPresent(p -> {
+                    throw new AppException(ErrorCode.PROFILE_ALREADY_EXISTS);
+                });
+
+        // 🔥 3. Mapping dữ liệu
         UserProfile profile = userProfileMapper.toUserProfile(request);
-        profile.setUserId(userId);
+
+        profile.setUserId(request.getUserId());
         profile.setStatus(AccountStatus.ACTIVE);
         profile.setCreatedAt(LocalDateTime.now());
         profile.setUpdatedAt(LocalDateTime.now());
 
-        return userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        // 🔥 4. Lưu profile
+        profile = userProfileRepository.save(profile);
+
+        // 🔥 5. Trả về DTO
+        return userProfileMapper.toUserProfileResponse(profile);
     }
 
     // 3. CẬP NHẬT PROFILE
+    @CachePut(value = "profile", key = "#userId")
     public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -128,27 +140,41 @@ public class UserProfileService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         return getByUserId(userId);
     }
-
+    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getByUserId(String userId) {
-        UserProfile profile = userProfileRepository.findByUserId(userId)
+        System.out.println("Load DB because cache miss");
+        return userProfileRepository.findByUserId(userId)
+                .map(userProfileMapper::toUserProfileResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-        return userProfileMapper.toUserProfileResponse(profile);
     }
 
     // 5. UPLOAD AVATAR
+//    @CachePut(value = "profile", key = "#userId")
     public UserProfileResponse updateAvatar(MultipartFile file) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
 
-        FileResponse response = fileClient.uploadMedia(file).getResult();
-        profile.setAvatar(response.getUrl());
-        profile.setUpdatedAt(LocalDateTime.now());
+        // 1. Upload file lên file-service
+        ApiResponse<FileResponse> response = fileClient.uploadFile(file, "avatar", profile.getId());
 
-        return userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        FileResponse uploaded = response.getResult();
+        if (uploaded == null) {
+            throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+        }
+
+        profile.setAvatar(uploaded.getPublicUrl());
+        profile.setUpdatedAt(LocalDateTime.now());
+        userProfileRepository.save(profile);
+
+        return userProfileMapper.toUserProfileResponse(profile);
+
     }
 
+
     // 6. TÌM KIẾM USER (dành cho chat, đặt phòng...)
+    @Cacheable(value = "userSearch", key = "#query", cacheManager = "cacheManager")
     public List<UserProfileResponse> search(String keyword) {
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -166,6 +192,11 @@ public class UserProfileService {
         var profiles = userProfileRepository.findAll();
 
         return profiles.stream().map(userProfileMapper::toUserProfileResponse).toList();
+    }
+
+    @CacheEvict(value = "profile", key = "#userId")
+    public void deleteProfile(String userId) {
+        userProfileRepository.deleteByUserId(userId);
     }
 
     // HELPER: Tách họ tên tiếng Việt chuẩn

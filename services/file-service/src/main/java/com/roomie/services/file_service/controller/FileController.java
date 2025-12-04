@@ -24,7 +24,6 @@ public class FileController {
 
     private final FileService fileService;
 
-    // Upload file
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<FileResponse>> uploadFile(
             @RequestParam("file") MultipartFile file,
@@ -38,7 +37,6 @@ public class FileController {
         );
     }
 
-    // Download file (GIỮ NGUYÊN, KHÔNG BỌC ApiResponse)
     @GetMapping("/download/{fileId}")
     public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String fileId) throws Exception {
         FileData fileData = fileService.download(fileId);
@@ -49,7 +47,6 @@ public class FileController {
                 .body(new InputStreamResource(fileData.getResource()));
     }
 
-    // List files by entity
     @GetMapping("/entity/{entityType}/{entityId}")
     public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByEntity(
             @PathVariable String entityType,
@@ -61,7 +58,6 @@ public class FileController {
         );
     }
 
-    // List files by owner
     @GetMapping("/owner/{ownerId}")
     public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByOwner(@PathVariable String ownerId) {
         List<FileResponse> result = fileService.listFilesByOwner(ownerId);
@@ -70,7 +66,6 @@ public class FileController {
         );
     }
 
-    // Soft delete file
     @DeleteMapping("/{fileId}")
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable String fileId) throws Exception {
         fileService.deleteFile(fileId);
