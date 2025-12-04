@@ -3,15 +3,12 @@ package com.roomie.services.property_service.service;
 import com.roomie.services.property_service.configuration.AuthUtil;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
-import com.roomie.services.property_service.entity.Address;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
 import com.roomie.services.property_service.enums.ApprovalStatus;
 import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
-import com.roomie.services.property_service.repository.httpclient.AdminClient;
-import com.roomie.services.property_service.repository.httpclient.NotificationClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,11 +31,6 @@ public class PropertyService {
     PropertyRepository propertyRepository;
     PropertySearchRepository searchRepository;
     PropertyMapper mapper;
-    AdminClient adminClient;
-    NotificationClient notificationClient;
-
-    //    FileClient fileClient;
-//    AnalyticsClient analyticsClient;
 
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {

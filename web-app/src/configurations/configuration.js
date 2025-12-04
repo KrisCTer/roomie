@@ -1,6 +1,7 @@
 // src/configurations/configuration.js
 export const CONFIG = {
   API_GATEWAY: "http://localhost:8888/api/v1",
+  SOCKET_URL: "http://localhost:8099", // WebSocket server
 };
 
 export const API = {
@@ -20,8 +21,8 @@ export const API = {
   MY_PROFILE: "/profile/users/my-profile",
   UPDATE_PROFILE: "/profile/users/my-profile",
   UPDATE_AVATAR: "/profile/users/avatar",
-  UPDATE_ID_CARD: "/profile/users/id-card",
-  GET_USER: (id) => `/profile/users/${id}`,
+  UPDATE_ID_CARD: "/profile/me/id-card",
+  GET_USER_PROFILE: (id) => `/profile/users/${id}`,
   SEARCH_USER: "/profile/users/search",
 
   // INTERNAL USER
@@ -37,9 +38,11 @@ export const API = {
   IDCARD_GET: (id) => `/profile/id-cards/${id}`,
 
   // ========= FILE SERVICE =========
-  FILE_UPLOAD: "/file/files/upload",
-  FILE_GET: (id) => `/file/files/${id}`,
-  FILE_DELETE: (id) => `/file/files/${id}`,
+  FILE_UPLOAD: "/file/upload",
+  FILE_DOWNLOAD: (fileId) => `/file/download/${fileId}`,
+  FILE_DELETE: (fileId) => `/file/${fileId}`,
+  FILE_GET_BY_ENTITY: (entityType, entityId) => `/file/entity/${entityType}/${entityId}`,
+  FILE_GET_BY_OWNER: (ownerId) => `/file/owner/${ownerId}`,
 
   // ========= ROLE / PERMISSION =========
   ROLE_CREATE: "/identity/roles",
@@ -59,13 +62,21 @@ export const API = {
   PAYMENT_MOMO_WEBHOOK: "/payment/webhook/momo",
 
   // ========= PROPERTY =========
-  PROPERTY_GET_ALL: "/property/properties",
-  PROPERTY_GET: (id) => `/property/${id}`,
-  PROPERTY_CREATE: "/property/properties",
+  PROPERTY_CREATE: "/property/",
   PROPERTY_UPDATE: (id) => `/property/${id}`,
+  PROPERTY_GET: (id) => `/property/${id}`,
   PROPERTY_DELETE: (id) => `/property/${id}`,
-  PROPERTY_GET_BY_OWNER: (ownerId) =>
-    `/property/properties/owner/${ownerId}`,
+  PROPERTY_GET_ALL: "/property/properties",
+  PROPERTY_SEARCH: "/property/search",
+  PROPERTY_BY_PRICE: "/property/by-price",
+  PROPERTY_BY_PROVINCE: "/property/by-province",
+  
+  // Internal Property endpoints
+  PROPERTY_INTERNAL_PENDING: "/property/internal/pending",
+  PROPERTY_INTERNAL_APPROVE: (id) => `/property/internal/${id}/approve`,
+  PROPERTY_INTERNAL_REJECT: (id) => `/property/internal/${id}/reject`,
+  PROPERTY_INTERNAL_GET: (id) => `/property/internal/${id}`,
+  PROPERTY_INTERNAL_UPDATE: (id) => `/property/internal/${id}`,
 
   // ========= BOOKING =========
   BOOKING_CREATE: "/booking",
@@ -90,10 +101,15 @@ export const API = {
   CONTRACT_SIGNATURE_STATUS: (id) => `/contract/${id}/signature-status`,
 
   // ========= CHAT =========
-  CREATE_CONVERSATION: "/conversations/create",
-  MY_CONVERSATIONS: "/conversations/my-conversations",
-  CREATE_MESSAGE: "/messages/create",
-  GET_MESSAGES: "/messages",
+  // Conversations
+  CONVERSATION_BASE: "/chat/conversations",
+  CREATE_CONVERSATION: "/chat/conversations/create",
+  MY_CONVERSATIONS: "/chat/conversations/my-conversations",
+  
+  // Messages
+  MESSAGE_BASE: "/chat/messages",
+  CREATE_MESSAGE: "/chat/messages/create",
+  GET_MESSAGES: "/chat/messages",
 
   // ========= POST =========
   MY_POST: "/social/posts/my-posts",

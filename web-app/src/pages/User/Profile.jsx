@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Eye, EyeOff, Camera } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Eye, EyeOff, Camera, Upload, X } from "lucide-react";
 
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
@@ -9,20 +9,23 @@ import {
   getMyProfile,
   updateProfile,
   uploadAvatar,
+  updateIdCard,
 } from "../../services/user.service";
-
-// Nếu backend có API đổi mật khẩu → bạn đặt vào đây
-// import { changePassword } from "../../services/profile.service";
 
 const Profile = () => {
   const [activeMenu, setActiveMenu] = useState("Profile");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
   const [formData, setFormData] = useState({
     avatarUrl: "",
@@ -51,12 +54,19 @@ const Profile = () => {
     loadProfile();
   }, []);
 
+  // Cleanup camera stream khi component unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
   const loadProfile = async () => {
     try {
       const res = await getMyProfile();
       console.log("PROFILE RESPONSE =", res);
 
-      const p = res?.result; // backend của bạn chuẩn JSON API
+      const p = res?.result;
 
       if (!p) {
         console.error("Profile result is empty");
@@ -65,20 +75,15 @@ const Profile = () => {
 
       setProfile(p);
 
-      // ⭐ Fill vào form để UI hiển thị đúng
       setFormData({
         avatarUrl: p.avatar || "",
-
         username: p.username || "",
         email: p.email || "",
         phoneNumber: p.phoneNumber || "",
-
         firstName: p.firstName || "",
         lastName: p.lastName || "",
-
         gender: p.gender || "",
-        dob: p.dob ? p.dob.substring(0, 10) : "", // YYYY-MM-DD
-
+        dob: p.dob ? p.dob.substring(0, 10) : "",
         idCardNumber: p.idCardNumber || "",
         permanentAddress: p.permanentAddress || "",
         currentAddress: p.currentAddress || "",
@@ -144,7 +149,6 @@ const Profile = () => {
       console.log("UPLOAD AVATAR RESPONSE", res);
 
       const newAvatarUrl = res?.result?.avatar;
-
       const updatedUrl = `${newAvatarUrl}?v=${Date.now()}`;
 
       setFormData((prev) => ({
@@ -158,6 +162,105 @@ const Profile = () => {
     } catch (err) {
       console.error("Upload avatar failed:", err);
     }
+  };
+
+  // =============================
+  // ID CARD UPLOAD
+  // =============================
+  const handleIdCardUpload = async (file) => {
+    if (!file) return;
+
+    try {
+      const res = await updateIdCard(file);
+      console.log("ID CARD UPLOAD RESPONSE", res);
+
+      const result = res?.result;
+      if (result) {
+        // Cập nhật các field từ kết quả QR Code/OCR
+        setFormData((prev) => ({
+          ...prev,
+          username: result.username || prev.username,
+          firstName: result.firstName || prev.firstName,
+          lastName: result.lastName || prev.lastName,
+          idCardNumber: result.idCardNumber || prev.idCardNumber,
+          dob: result.dob ? result.dob.substring(0, 10) : prev.dob,
+          gender:
+            result.gender === "MALE"
+              ? "Nam"
+              : result.gender === "FEMALE"
+              ? "Nữ"
+              : prev.gender,
+          permanentAddress: result.permanentAddress || prev.permanentAddress,
+          currentAddress: result.currentAddress || prev.currentAddress,
+          email: result.email || prev.email,
+          phoneNumber: result.phoneNumber || prev.phoneNumber,
+        }));
+
+        alert(
+          "✅ Quét CCCD/CMND thành công! Thông tin đã được tự động điền. Vui lòng kiểm tra và cập nhật nếu cần."
+        );
+      }
+    } catch (err) {
+      console.error("ID Card upload failed:", err);
+      const errorMsg =
+        err?.response?.data?.message ||
+        "Không thể xử lý ảnh CCCD/CMND. Vui lòng thử lại.";
+      alert("❌ " + errorMsg);
+    }
+  };
+
+  const handleIdCardFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    await handleIdCardUpload(file);
+  };
+
+  // =============================
+  // CAMERA FUNCTIONS
+  // =============================
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+      }
+
+      setShowCamera(true);
+    } catch (err) {
+      console.error("Failed to start camera:", err);
+      alert("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
+  };
+
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const file = new File([blob], "id-card.jpg", { type: "image/jpeg" });
+        stopCamera();
+        await handleIdCardUpload(file);
+      }
+    }, "image/jpeg");
   };
 
   // =============================
@@ -213,30 +316,110 @@ const Profile = () => {
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <div className="px-10 py-8 w-full">
-          {/* Avatar */}
+          {/* Avatar & ID Card Scanner */}
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6">Avatar</h2>
+            <h2 className="text-xl font-bold mb-6">Avatar & ID Card Scanner</h2>
 
-            <div className="flex items-start gap-6">
-              <div className="relative">
-                <img
-                  src={formData.avatarUrl || "/default-avatar.png"}
-                  alt="Avatar"
-                  className="w-32 h-32 rounded-full object-cover"
-                />
-
-                <label className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 cursor-pointer">
-                  <Camera className="w-5 h-5" />
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
+            <div className="flex items-start gap-8">
+              {/* Avatar Section */}
+              <div className="flex flex-col items-center">
+                <p className="text-sm text-gray-600 mb-3">Profile Picture</p>
+                <div className="relative">
+                  <img
+                    src={formData.avatarUrl || "/default-avatar.png"}
+                    alt="Avatar"
+                    className="w-32 h-32 rounded-xl object-cover"
                   />
-                </label>
+
+                  <label className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 cursor-pointer shadow-lg">
+                    <Camera className="w-5 h-5" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* ID Card Scanner Section */}
+              <div className="flex-1">
+                <p className="text-sm text-gray-600 mb-3">
+                  Scan ID Card (CCCD/CMND) to auto-fill information
+                </p>
+                <div className="flex flex-col gap-3">
+                  {/* Upload Button */}
+                  <label className="flex items-center gap-3 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer transition shadow-md">
+                    <Upload className="w-5 h-5" />
+                    <span className="font-medium">Upload ID Card Image</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleIdCardFileSelect}
+                    />
+                  </label>
+
+                  {/* Camera Button */}
+                  <button
+                    onClick={startCamera}
+                    className="flex items-center gap-3 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition shadow-md"
+                  >
+                    <Camera className="w-5 h-5" />
+                    <span className="font-medium">Open Camera to Scan</span>
+                  </button>
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    📷 Hỗ trợ quét QR code và OCR để tự động điền thông tin từ
+                    CCCD/CMND
+                  </p>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Camera Modal */}
+          {showCamera && (
+            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold">Scan ID Card</h3>
+                  <button
+                    onClick={stopCamera}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    className="w-full rounded-lg"
+                  />
+                  <canvas ref={canvasRef} className="hidden" />
+                </div>
+
+                <div className="mt-4 flex gap-3">
+                  <button
+                    onClick={capturePhoto}
+                    className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
+                    📸 Capture & Scan
+                  </button>
+                  <button
+                    onClick={stopCamera}
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* FORM */}
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -365,10 +548,7 @@ const Profile = () => {
             </button>
           </div>
         </div>
-
-        <footer className="text-center py-6 text-sm text-gray-500 border-t border-gray-200 mt-8">
-          Copyright © 2025 Roomie. All rights reserved.
-        </footer>
+        <Footer />
       </div>
     </div>
   );
@@ -412,6 +592,5 @@ const PasswordField = ({ label, name, value, onChange, show, toggle }) => (
         {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
       </button>
     </div>
-    <Footer />
   </div>
 );
