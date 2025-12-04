@@ -23,7 +23,6 @@ public class PropertyRequest {
 
     @NotNull
     BigDecimal monthlyRent;
-    String priceLabel;
     BigDecimal rentalDeposit;
 
     PropertyType propertyType;
@@ -31,20 +30,15 @@ public class PropertyRequest {
     PropertyLabel propertyLabel;
 
     Double size;
-    Double landArea;
 
     Integer rooms;
     Integer bedrooms;
     Integer bathrooms;
     Integer garages;
 
-    Integer yearBuilt;
-
     String rentalType;
 
     AddressRequest address;
     AmenitiesRequest amenities;
     List<MediaRequest> mediaList;
-    VirtualTourRequest virtualTour;
-    List<FloorRequest> floors;
 }

@@ -6,6 +6,7 @@ import com.roomie.services.identity_service.dto.request.UserUpdateRequest;
 import com.roomie.services.identity_service.dto.response.UserResponse;
 import com.roomie.services.identity_service.entity.Role;
 import com.roomie.services.identity_service.entity.User;
+import com.roomie.services.identity_service.enums.UserRole;
 import com.roomie.services.identity_service.exception.AppException;
 import com.roomie.services.identity_service.exception.ErrorCode;
 import com.roomie.services.identity_service.mapper.ProfileMapper;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -43,14 +45,17 @@ public class UserService {
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        HashSet<Role> roles = new HashSet<>();
+        Set<UserRole> roleNames = request.getRoles();
+        if (roleNames == null || roleNames.isEmpty()) {
+            roleNames = Set.of(UserRole.USER); // default role
+        }
 
-        request.getRoles().forEach(roleName -> {
+        HashSet<Role> roles = new HashSet<>();
+        roleNames.forEach(roleName -> {
             roleRepository.findById(String.valueOf(roleName))
                     .ifPresentOrElse(roles::add,
                             () -> { throw new AppException(ErrorCode.ROLE_NOT_FOUND); });
         });
-
         user.setRoles(roles);
         user.setEmailVerified(false);
         user.setIsActive(true);

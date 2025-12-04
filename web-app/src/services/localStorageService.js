@@ -10,5 +10,4 @@ export const getToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
 export const removeToken = () => localStorage.removeItem(ACCESS_TOKEN_KEY);
 
-// tiện dùng trong UI
 export const isAuthenticated = () => Boolean(getToken());
