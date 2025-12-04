@@ -13,7 +13,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
 import Footer from "../../components/layout/layoutHome/Footer";
-
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAllProperties } from "../../services/property.service";
 
@@ -22,6 +22,7 @@ import { getAllProperties } from "../../services/property.service";
 //
 function ListingRow({ title, subtitle, listings = [] }) {
   const safeListings = Array.isArray(listings) ? listings : [];
+  const navigate = useNavigate();
 
   return (
     <Box sx={{ mt: 5 }}>
@@ -52,13 +53,16 @@ function ListingRow({ title, subtitle, listings = [] }) {
         {safeListings.map((item) => (
           <Card
             key={item.id}
+            onClick={() => navigate(`/property/${item.id}`)}
             sx={{
               width: 260,
               borderRadius: 3,
               overflow: "hidden",
               bgcolor: "white",
               flexShrink: 0,
+              cursor: "pointer",
               boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+              "&:hover": { transform: "scale(1.02)", transition: "0.2s" },
             }}
           >
             <Box sx={{ position: "relative" }}>
@@ -105,17 +109,6 @@ function ListingRow({ title, subtitle, listings = [] }) {
               <Typography noWrap variant="body2" color="text.secondary">
                 {item.address?.district || item.city || "Không rõ khu vực"}
               </Typography>
-
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {item.price?.toLocaleString()} đ / đêm ·{" "}
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{ fontWeight: 600 }}
-                >
-                  ★ {item.rating || 4.8}
-                </Typography>
-              </Typography>
             </CardContent>
           </Card>
         ))}
@@ -138,22 +131,31 @@ export default function Home() {
   const loadListings = async () => {
     try {
       const res = await getAllProperties();
+      console.log("PROPERTY RESPONSE =", res);
 
-      // ⭐ MAP DATA từ API → format UI cần
-      const formatted = res.map((p) => ({
-        id: p._id,
+      const list = Array.isArray(res)
+        ? res
+        : Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.result)
+        ? res.result
+        : Array.isArray(res?.content)
+        ? res.content
+        : [];
+
+      console.log("LIST PARSED =", list);
+
+      const formatted = list.map((p) => ({
+        id: p.propertyId || p._id,
         title: p.title,
         price: Number(p.monthlyRent).toLocaleString(),
-        city: p.address?.district || p.address?.province || "Không rõ",
-        rating: 4.9, // backend chưa có thì cho mặc định
+        city: p.address?.district || p.address?.province || "",
+        rating: 4.9,
         badge: p.propertyLabel === "HOT" ? "Được khách yêu thích" : "",
-        image:
-          p.mediaList?.[0]?.url ||
-          "https://via.placeholder.com/400x300?text=No+Image",
-        nights: 1, // tạm vì UI đang dùng
+        image: p.mediaList?.[0]?.url || "https://via.placeholder.com/400x300",
+        nights: 1,
       }));
 
-      // Tách theo khu vực như bạn đang làm
       const hcm = formatted.filter(
         (p) =>
           p.city.toLowerCase().includes("hồ chí minh") ||

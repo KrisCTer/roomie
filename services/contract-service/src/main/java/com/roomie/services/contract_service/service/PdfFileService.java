@@ -48,7 +48,7 @@ public class PdfFileService {
                 throw new AppException(ErrorCode.CONTRACT_UPLOAD_FAILED, contractId);
             }
             // 5️⃣ Trả về URL public
-            String url = response.getResult().getUrl();
+            String url = response.getResult().getPublicUrl();
             log.info("Successfully uploaded contract PDF: {} -> {}", contractId, url);
             return url;
 

@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface UserProfileRepository extends Neo4jRepository<UserProfile, String> {
     Optional<UserProfile> findByUserId(String userId);
     List<UserProfile> findAllByUsernameLike(String username);
+    void deleteByUserId(String userId);
 }

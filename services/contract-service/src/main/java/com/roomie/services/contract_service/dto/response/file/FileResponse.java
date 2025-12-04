@@ -9,6 +9,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileResponse {
-    String originalFileName;
-    String url;
+    String fileId;
+    String fileName;
+    String fileType;
+    String publicUrl;
+    String entityType;
+    String entityId;
 }

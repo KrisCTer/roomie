@@ -20,6 +20,8 @@ public enum ErrorCode {
     QR_NOT_FOUND_IN_IMAGE(1011,"QR code not found in image", HttpStatus.NOT_FOUND),
     INVALID_IDCARD(1012,"Invalid Vietnam IDCard QR format", HttpStatus.BAD_REQUEST),
     QR_EXTRACTION_FAILED(1013,"Failed to extract QR code info: ", HttpStatus.BAD_REQUEST),
+    USER_ID_REQUIRED(1014,"User id required", HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED(1015,"File upload failed", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

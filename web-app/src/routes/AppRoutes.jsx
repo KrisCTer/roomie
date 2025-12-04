@@ -26,8 +26,7 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/add-property" element={<AddProperty />} />
         <Route path="/my-properties" element={<MyProperties />} />
-        <Route path="/property/:propertyId" element={<PropertyDetail />} />
-        <Route path="/property-detail" element={<PropertyDetail />} />
+        <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property-search" element={<PropertySearch />} />
         <Route path="/contract-signing" element={<ContractSigning />} />
       </Routes>

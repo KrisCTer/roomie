@@ -103,7 +103,5 @@ cache:
 
 app:
   services:
-    identity: http://identity-service:8080/identity
-    matching: http://matching-service:8082/matching
-    notification: http://notification-service:8083/notification
-    file: http://file-service:8084/file
+    identity: http://localhost:8080/identity
+    files: http://localhost:8088/file

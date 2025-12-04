@@ -17,8 +17,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/properties",           // GET /properties (list)
-            "/properties/*/",        // GET /properties/{id}
-            "/properties/**"          // All sub-paths like /properties/search, /properties/by-price, etc.
+            "/*/",        // GET /properties/{id}
+            "/**"          // All sub-paths like /properties/search, /properties/by-price, etc.
     };
 
     private final CustomJwtDecoder customJwtDecoder;

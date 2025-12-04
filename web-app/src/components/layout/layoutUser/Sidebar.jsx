@@ -8,22 +8,36 @@ import {
   LogOut,
   Contact,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
+
   const menuItems = [
     { icon: BarChart3, label: t("Dashboards"), path: "/dashboard" },
     { icon: User, label: t("Profile"), path: "/profile" },
-    // { icon: Star, label: t("Reviews"), path: "/reviews" },
     { icon: Building, label: t("My Properties"), path: "/my-properties" },
     { icon: Contact, label: t("Contracts"), path: "/contract-signing" },
     { icon: MessageSquare, label: t("Message"), path: "/Message" },
     { icon: Plus, label: t("Add Property"), path: "/add-property" },
     { icon: LogOut, label: t("Logout"), path: "/logout" },
   ];
+
+  const handleNavigation = (item) => {
+    // Cập nhật activeMenu
+    setActiveMenu(item.label);
+
+    // Navigate không reload trang
+    navigate(item.path);
+  };
+
+  // Tự động set activeMenu dựa trên URL hiện tại
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
   return (
     <div
@@ -62,12 +76,9 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
           {menuItems.map((item) => (
             <button
               key={item.label}
-              onClick={() => {
-                setActiveMenu(item.label);
-                navigate(item.path);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
-                activeMenu === item.label ? "bg-blue-600" : "hover:bg-gray-800"
+              onClick={() => handleNavigation(item)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                isActive(item.path) ? "bg-blue-600" : "hover:bg-gray-800"
               }`}
             >
               <item.icon className="w-5 h-5" />

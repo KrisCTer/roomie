@@ -21,6 +21,8 @@ export const API = {
   UPDATE_PROFILE: "/profile/users/my-profile",
   UPDATE_AVATAR: "/profile/users/avatar",
   UPDATE_ID_CARD: "/profile/users/id-card",
+  GET_USER: (id) => `/profile/users/${id}`,
+  SEARCH_USER: "/profile/users/search",
 
   // INTERNAL USER
   INTERNAL_USER: (id) => `/identity/internal/users/${id}`,
@@ -58,10 +60,10 @@ export const API = {
 
   // ========= PROPERTY =========
   PROPERTY_GET_ALL: "/property/properties",
-  PROPERTY_GET: (id) => `/property/properties/${id}`,
+  PROPERTY_GET: (id) => `/property/${id}`,
   PROPERTY_CREATE: "/property/properties",
-  PROPERTY_UPDATE: (id) => `/property/properties/${id}`,
-  PROPERTY_DELETE: (id) => `/property/properties/${id}`,
+  PROPERTY_UPDATE: (id) => `/property/${id}`,
+  PROPERTY_DELETE: (id) => `/property/${id}`,
   PROPERTY_GET_BY_OWNER: (ownerId) =>
     `/property/properties/owner/${ownerId}`,
 

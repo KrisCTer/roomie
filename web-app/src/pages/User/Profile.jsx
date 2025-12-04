@@ -1,30 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Camera } from "lucide-react";
+
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
+import Footer from "../../components/layout/layoutUser/Footer.jsx";
 
-// ========== MAIN PROFILE SETTINGS COMPONENT ==========
+import {
+  getMyProfile,
+  updateProfile,
+  uploadAvatar,
+} from "../../services/user.service";
+
+// Nếu backend có API đổi mật khẩu → bạn đặt vào đây
+// import { changePassword } from "../../services/profile.service";
+
 const Profile = () => {
   const [activeMenu, setActiveMenu] = useState("Profile");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
-    username: "demo_agent",
-    email: "themesflat@gmail.com",
-    phoneNumber: "1332565894",
-    firstName: "Demo",
-    lastName: "Agent",
-    gender: "Male",
-    dob: "1990-01-15",
-    idCardNumber: "123456789012",
-    permanentAddress: "634 E 216th St, Bronx, NY 10466",
-    currentAddress: "10 Bringhurst St, Houston, TX",
+    avatarUrl: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+    firstName: "",
+    lastName: "",
+    gender: "",
+    dob: "",
+    idCardNumber: "",
+    permanentAddress: "",
+    currentAddress: "",
   });
 
   const [passwords, setPasswords] = useState({
@@ -33,6 +44,56 @@ const Profile = () => {
     confirmPassword: "",
   });
 
+  // =============================
+  // LOAD PROFILE
+  // =============================
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const res = await getMyProfile();
+      console.log("PROFILE RESPONSE =", res);
+
+      const p = res?.result; // backend của bạn chuẩn JSON API
+
+      if (!p) {
+        console.error("Profile result is empty");
+        return;
+      }
+
+      setProfile(p);
+
+      // ⭐ Fill vào form để UI hiển thị đúng
+      setFormData({
+        avatarUrl: p.avatar || "",
+
+        username: p.username || "",
+        email: p.email || "",
+        phoneNumber: p.phoneNumber || "",
+
+        firstName: p.firstName || "",
+        lastName: p.lastName || "",
+
+        gender: p.gender || "",
+        dob: p.dob ? p.dob.substring(0, 10) : "", // YYYY-MM-DD
+
+        idCardNumber: p.idCardNumber || "",
+        permanentAddress: p.permanentAddress || "",
+        currentAddress: p.currentAddress || "",
+      });
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+      setLoading(false);
+    }
+  };
+
+  // =============================
+  // HANDLERS
+  // =============================
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -43,31 +104,107 @@ const Profile = () => {
     setPasswords((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    console.log("Profile updated:", formData);
-    alert("Profile updated successfully!");
+  // =============================
+  // UPDATE PROFILE
+  // =============================
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        username: formData.username,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        gender: formData.gender,
+        dob: formData.dob,
+        idCardNumber: formData.idCardNumber,
+        permanentAddress: formData.permanentAddress,
+        currentAddress: formData.currentAddress,
+      };
+
+      await updateProfile(payload);
+
+      alert("Cập nhật thông tin thành công!");
+      loadProfile();
+    } catch (e) {
+      console.error(e);
+      alert("Không thể cập nhật thông tin.");
+    }
   };
 
-  const handlePasswordUpdate = () => {
+  // =============================
+  // UPDATE AVATAR
+  // =============================
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const res = await uploadAvatar(file);
+      console.log("UPLOAD AVATAR RESPONSE", res);
+
+      const newAvatarUrl = res?.result?.avatar;
+
+      const updatedUrl = `${newAvatarUrl}?v=${Date.now()}`;
+
+      setFormData((prev) => ({
+        ...prev,
+        avatarUrl: updatedUrl,
+      }));
+
+      setProfile((prev) => ({ ...prev, avatar: updatedUrl }));
+
+      await loadProfile();
+    } catch (err) {
+      console.error("Upload avatar failed:", err);
+    }
+  };
+
+  // =============================
+  // CHANGE PASSWORD
+  // =============================
+  const handlePasswordUpdate = async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
-      alert("New password and confirm password do not match!");
+      alert("Mật khẩu mới không trùng khớp!");
       return;
     }
-    console.log("Password updated");
-    alert("Password updated successfully!");
-    setPasswords({ oldPassword: "", newPassword: "", confirmPassword: "" });
+
+    try {
+      // await changePassword({
+      //   oldPassword: passwords.oldPassword,
+      //   newPassword: passwords.newPassword,
+      // });
+
+      alert("Password updated successfully!");
+      setPasswords({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Không thể đổi mật khẩu.");
+    }
   };
 
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center mt-20 text-xl">
+        Loading profile...
+      </div>
+    );
+
+  // =============================
+  // UI
+  // =============================
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
         sidebarOpen={sidebarOpen}
       />
 
-      {/* Main Content */}
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
@@ -75,291 +212,160 @@ const Profile = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        {/* Profile Content */}
         <div className="px-10 py-8 w-full">
-          {/* Avatar Section */}
+          {/* Avatar */}
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Avatar</h2>
+
             <div className="flex items-start gap-6">
               <div className="relative">
                 <img
-                  src={formData.avatar}
+                  src={formData.avatarUrl || "/default-avatar.png"}
                   alt="Avatar"
                   className="w-32 h-32 rounded-full object-cover"
                 />
-                <button className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+
+                <label className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 cursor-pointer">
                   <Camera className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">
-                  Upload a new avatar
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                  />
                 </label>
-                <input
-                  type="file"
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  accept="image/*"
-                />
-                <p className="text-xs text-gray-500 mt-2">JPEG 100x100</p>
               </div>
             </div>
           </div>
 
-          {/* Information Form */}
+          {/* FORM */}
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 className="text-xl font-bold mb-6">Information</h2>
 
             <div className="space-y-6">
-              {/* Username */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Username *
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <Field
+                label="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+              />
 
-              {/* First Name & Last Name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    First Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Last Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                <Field
+                  label="First Name"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                />
+                <Field
+                  label="Last Name"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                />
               </div>
 
-              {/* Email & Phone */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    value={formData.phoneNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                <Field
+                  label="Email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+                <Field
+                  label="Phone Number"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                />
               </div>
 
-              {/* Gender & Date of Birth */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Gender *
-                  </label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Date of Birth *
-                  </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    value={formData.dob}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* ID Card Number */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  ID Card Number *
-                </label>
-                <input
-                  type="text"
-                  name="idCardNumber"
-                  value={formData.idCardNumber}
+                <Field
+                  label="Gender"
+                  name="gender"
+                  value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Field
+                  label="Date of Birth"
+                  type="date"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={handleInputChange}
                 />
               </div>
 
-              {/* Permanent Address */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Permanent Address *
-                </label>
-                <input
-                  type="text"
-                  name="permanentAddress"
-                  value={formData.permanentAddress}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Current Address */}
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Current Address *
-                </label>
-                <input
-                  type="text"
-                  name="currentAddress"
-                  value={formData.currentAddress}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <Field
+                label="ID Card Number"
+                name="idCardNumber"
+                value={formData.idCardNumber}
+                onChange={handleInputChange}
+              />
+              <Field
+                label="Permanent Address"
+                name="permanentAddress"
+                value={formData.permanentAddress}
+                onChange={handleInputChange}
+              />
+              <Field
+                label="Current Address"
+                name="currentAddress"
+                value={formData.currentAddress}
+                onChange={handleInputChange}
+              />
             </div>
 
             <button
               onClick={handleSubmit}
-              className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
             >
               Save & Update
             </button>
           </div>
 
-          {/* Change Password Section */}
+          {/* PASSWORD */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-xl font-bold mb-6">Change Password</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Old Password *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showOldPassword ? "text" : "password"}
-                    name="oldPassword"
-                    value={passwords.oldPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Password"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowOldPassword(!showOldPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showOldPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+              <PasswordField
+                label="Old Password"
+                name="oldPassword"
+                value={passwords.oldPassword}
+                onChange={handlePasswordChange}
+                show={showOldPassword}
+                toggle={() => setShowOldPassword(!showOldPassword)}
+              />
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  New Password *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showNewPassword ? "text" : "password"}
-                    name="newPassword"
-                    value={passwords.newPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Password"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showNewPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+              <PasswordField
+                label="New Password"
+                name="newPassword"
+                value={passwords.newPassword}
+                onChange={handlePasswordChange}
+                show={showNewPassword}
+                toggle={() => setShowNewPassword(!showNewPassword)}
+              />
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Confirm Password *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    value={passwords.confirmPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Password"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+              <PasswordField
+                label="Confirm Password"
+                name="confirmPassword"
+                value={passwords.confirmPassword}
+                onChange={handlePasswordChange}
+                show={showConfirmPassword}
+                toggle={() => setShowConfirmPassword(!showConfirmPassword)}
+              />
             </div>
 
             <button
               onClick={handlePasswordUpdate}
-              className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
             >
               Update Password
             </button>
           </div>
         </div>
 
-        {/* Footer */}
         <footer className="text-center py-6 text-sm text-gray-500 border-t border-gray-200 mt-8">
           Copyright © 2025 Roomie. All rights reserved.
         </footer>
@@ -369,3 +375,43 @@ const Profile = () => {
 };
 
 export default Profile;
+
+// ============================
+// REUSABLE COMPONENTS
+// ============================
+const Field = ({ label, name, type = "text", value, onChange }) => (
+  <div>
+    <label className="block text-sm font-medium mb-2">{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value || ""}
+      onChange={onChange}
+      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+);
+
+const PasswordField = ({ label, name, value, onChange, show, toggle }) => (
+  <div>
+    <label className="block text-sm font-medium mb-2">{label}</label>
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg pr-12 focus:ring-2 focus:ring-blue-500"
+      />
+
+      <button
+        type="button"
+        onClick={toggle}
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      >
+        {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+      </button>
+    </div>
+    <Footer />
+  </div>
+);
