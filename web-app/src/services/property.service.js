@@ -1,4 +1,4 @@
-// src/services/property.service.js
+// web-app/src/services/property.service.js
 import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
@@ -19,3 +19,4 @@ export const deleteProperty = (id) =>
 
 export const getPropertiesByOwner = (ownerId) =>
   BaseService.get(API.PROPERTY_GET_BY_OWNER(ownerId));
+

@@ -18,14 +18,14 @@ import java.util.List;
 public class UserProfileController {
     UserProfileService userProfileService;
 
-//    @PostMapping("/users")
+    //    @PostMapping("/users")
 //    ApiResponse<UserProfileResponse> createProfile(@RequestBody ProfileCreationRequest request) {
 //        return ApiResponse.<UserProfileResponse>builder()
 //                .result(userProfileService.createProfile(request))
 //                .build();
 //    }
-    @PostMapping( "/me/idcard")
-    public ApiResponse<UserProfileResponse> createProfileFromIDCard(
+    @PutMapping("/me/id-card")
+    public ApiResponse<UserProfileResponse> updateProfileFromIDCard(
             @RequestParam("file") MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
@@ -36,9 +36,10 @@ public class UserProfileController {
             return ApiResponse.error(400, "File phải là định dạng ảnh");
         }
 
-        UserProfileResponse result = userProfileService.createProfileFromIDCard(file);
-        return ApiResponse.success(result, "Tạo hồ sơ thành công từ CCCD!");
+        UserProfileResponse result = userProfileService.updateProfileFromIDCard(file);
+        return ApiResponse.success(result, "Cập nhật hồ sơ thành công từ CCCD!");
     }
+
     @GetMapping("/users/{profileId}")
     ApiResponse<UserProfileResponse> getProfile(@PathVariable String profileId) {
         return ApiResponse.<UserProfileResponse>builder()

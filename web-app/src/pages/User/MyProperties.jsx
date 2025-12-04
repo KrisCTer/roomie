@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx";
-import { Edit, Trash2, DollarSign, X } from "lucide-react";
+import { X } from "lucide-react";
+import {
+  getAllProperties,
+  deleteProperty,
+  updateProperty,
+} from "../../services/property.service";
 
 const MyProperties = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -11,194 +16,151 @@ const MyProperties = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("MyPropertys");
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Sample data based on PropertyResponse
-  const properties = [
-    {
-      propertyId: "1",
-      title: "Casa Lomas de Machali Machas",
-      description:
-        "Beautiful modern apartment with stunning city views. Fully furnished with high-end appliances and amenities.",
-      monthlyRent: 4498,
-      postingDate: "March 22, 2024",
-      propertyStatus: "PENDING",
-      mediaList: [
-        {
-          url: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400",
-          type: "IMAGE",
-        },
-        {
-          url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-          type: "IMAGE",
-        },
-      ],
-      address: {
-        fullAddress: "123 Nguyen Hue Street, District 1, Ho Chi Minh City",
-        province: "Ho Chi Minh City",
-        district: "District 1",
-        ward: "Ben Nghe Ward",
-      },
-      size: 85.5,
-      bedrooms: 2,
-      bathrooms: 2,
-      yearBuilt: 2020,
-      amenities: {
-        homeSafety: ["Smoke Detector", "Fire Extinguisher", "Security Camera"],
-        bedroom: ["King Bed", "Wardrobe", "Air Conditioning"],
-        kitchen: ["Refrigerator", "Microwave", "Gas Stove"],
-        others: ["WiFi", "Swimming Pool", "Gym"],
-      },
-      owner: {
-        name: "John Doe",
-        phone: "+84 123 456 789",
-        email: "john.doe@example.com",
-      },
-    },
-    {
-      propertyId: "2",
-      title: "Casa Lomas de Machali Machas",
-      description: "Spacious villa with private garden and pool.",
-      monthlyRent: 5007,
-      postingDate: "March 22, 2024",
-      propertyStatus: "APPROVED",
-      mediaList: [
-        {
-          url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400",
-          type: "IMAGE",
-        },
-      ],
-      address: {
-        fullAddress: "45 Tran Hung Dao Street, District 2, Ho Chi Minh City",
-        province: "Ho Chi Minh City",
-        district: "District 2",
-      },
-      size: 250,
-      bedrooms: 4,
-      bathrooms: 3,
-      yearBuilt: 2019,
-      amenities: {
-        homeSafety: ["Security System", "CCTV"],
-        bedroom: ["King Bed", "Wardrobe"],
-        kitchen: ["Refrigerator", "Oven"],
-        others: ["WiFi", "Private Pool"],
-      },
-      owner: {
-        name: "Jane Smith",
-        phone: "+84 987 654 321",
-        email: "jane.smith@example.com",
-      },
-    },
-    {
-      propertyId: "3",
-      title: "Casa Lomas de Machali Machas",
-      description: "Modern house with pool and beautiful interior design.",
-      monthlyRent: 5329,
-      postingDate: "March 22, 2024",
-      propertyStatus: "SOLD",
-      mediaList: [
-        {
-          url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400",
-          type: "IMAGE",
-        },
-      ],
-      address: {
-        fullAddress: "789 Le Loi Boulevard, District 3, Ho Chi Minh City",
-        province: "Ho Chi Minh City",
-        district: "District 3",
-      },
-      size: 180,
-      bedrooms: 3,
-      bathrooms: 3,
-      yearBuilt: 2023,
-      amenities: {
-        homeSafety: ["Smart Lock", "Fire System"],
-        bedroom: ["King Beds", "Walk-in Closet"],
-        kitchen: ["Smart Fridge", "Wine Cooler"],
-        others: ["WiFi", "Rooftop Pool"],
-      },
-      owner: {
-        name: "Mike Johnson",
-        phone: "+84 912 345 678",
-        email: "mike@example.com",
-      },
-    },
-    {
-      propertyId: "4",
-      title: "Casa Lomas de Machali Machas",
-      description: "Cozy evening house with warm lighting.",
-      monthlyRent: 3882,
-      postingDate: "March 22, 2024",
-      propertyStatus: "PENDING",
-      mediaList: [
-        {
-          url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400",
-          type: "IMAGE",
-        },
-      ],
-      address: {
-        fullAddress: "321 Vo Van Tan Street, District 5, Ho Chi Minh City",
-        province: "Ho Chi Minh City",
-        district: "District 5",
-      },
-      size: 120,
-      bedrooms: 3,
-      bathrooms: 2,
-      yearBuilt: 2021,
-      amenities: {
-        homeSafety: ["Security Camera"],
-        bedroom: ["Queen Bed", "AC"],
-        kitchen: ["Basic Appliances"],
-        others: ["WiFi", "Garden"],
-      },
-      owner: {
-        name: "Sarah Lee",
-        phone: "+84 901 234 567",
-        email: "sarah@example.com",
-      },
-    },
-    {
-      propertyId: "5",
-      title: "Casa Lomas de Machali Machas",
-      description: "Luxury bedroom with modern design.",
-      monthlyRent: 2895,
-      postingDate: "March 22, 2024",
-      propertyStatus: "SOLD",
-      mediaList: [
-        {
-          url: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=400",
-          type: "IMAGE",
-        },
-      ],
-      address: {
-        fullAddress: "555 Hai Ba Trung Street, District 7, Ho Chi Minh City",
-        province: "Ho Chi Minh City",
-        district: "District 7",
-      },
-      size: 95,
-      bedrooms: 2,
-      bathrooms: 2,
-      yearBuilt: 2022,
-      amenities: {
-        homeSafety: ["Smoke Detector"],
-        bedroom: ["King Bed", "Smart TV"],
-        kitchen: ["Full Kitchen"],
-        others: ["WiFi", "Gym Access"],
-      },
-      owner: {
-        name: "Tom Wilson",
-        phone: "+84 908 765 432",
-        email: "tom@example.com",
-      },
-    },
-  ];
+  // Fetch properties from API
+  useEffect(() => {
+    fetchProperties();
+  }, [postStatus, searchTerm, currentPage]);
+
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const params = {
+        page: currentPage - 1,
+        size: 10,
+      };
+
+      if (postStatus) {
+        params.status = postStatus;
+      }
+
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      const response = await getAllProperties(params);
+      console.log("API Response:", response);
+
+      // Xử lý response - API trả về trực tiếp {code, success, message, result}
+      if (response && response.success && response.result) {
+        setProperties(response.result);
+        setTotalPages(Math.ceil(response.result.length / 10) || 1);
+      }
+      // Fallback: nếu có response.data
+      else if (response && response.data) {
+        const data = response.data;
+        if (data.result) {
+          setProperties(data.result);
+          setTotalPages(Math.ceil(data.result.length / 10) || 1);
+        } else if (data.content) {
+          setProperties(data.content);
+          setTotalPages(data.totalPages || 1);
+        } else if (Array.isArray(data)) {
+          setProperties(data);
+          setTotalPages(1);
+        }
+      }
+      // Fallback: nếu response trực tiếp là array
+      else if (Array.isArray(response)) {
+        setProperties(response);
+        setTotalPages(1);
+      }
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      alert("Failed to fetch properties. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (propertyId) => {
+    if (window.confirm("Are you sure you want to delete this property?")) {
+      try {
+        await deleteProperty(propertyId);
+        fetchProperties(); // Refresh list
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        alert("Failed to delete property");
+      }
+    }
+  };
+
+  const handleSold = async (propertyId) => {
+    if (window.confirm("Mark this property as sold?")) {
+      try {
+        await updateProperty(propertyId, { status: "SOLD" });
+        fetchProperties(); // Refresh list
+        alert("Property marked as sold successfully!");
+      } catch (error) {
+        console.error("Error updating property:", error);
+        alert("Failed to update property status");
+      }
+    }
+  };
+
+  const handleEdit = (propertyId) => {
+    // Navigate to edit page or open edit modal
+    console.log("Edit property:", propertyId);
+    // TODO: Implement edit functionality
+    window.location.href = `/add-property?edit=${propertyId}`;
+  };
 
   const getStatusConfig = (status) => {
     const configs = {
+      DRAFT: { bg: "bg-orange-500", text: "Pending" },
       PENDING: { bg: "bg-orange-500", text: "Pending" },
       APPROVED: { bg: "bg-green-500", text: "Approved" },
+      AVAILABLE: { bg: "bg-green-500", text: "Approved" },
       SOLD: { bg: "bg-purple-500", text: "Sold" },
+      RENTED: { bg: "bg-purple-500", text: "Sold" },
     };
     return configs[status] || configs.PENDING;
+  };
+
+  // Transform property data to match ListingCard props
+  const transformPropertyToListing = (property) => {
+    // Format date
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    // Get status text
+    const getStatusText = (status) => {
+      const statusMap = {
+        DRAFT: "Pending",
+        PENDING: "Pending",
+        APPROVED: "Approved",
+        AVAILABLE: "Approved",
+        SOLD: "Sold",
+        RENTED: "Sold",
+      };
+      return statusMap[status] || "Pending";
+    };
+
+    return {
+      id: property.propertyId,
+      image:
+        property.mediaList?.[0]?.url ||
+        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
+      title: property.title,
+      date: formatDate(property.createdAt),
+      price: `${property.monthlyRent?.toLocaleString()} VND`,
+      status: getStatusText(property.status || property.propertyStatus),
+      onEdit: () => handleEdit(property.propertyId),
+      onSold: () => handleSold(property.propertyId),
+      onDelete: () => handleDelete(property.propertyId),
+      onClick: () => setSelectedProperty(property),
+    };
   };
 
   const PropertyDetailModal = ({ property, onClose }) => {
@@ -221,30 +183,39 @@ const MyProperties = () => {
 
           <div className="p-6">
             {/* Images Gallery */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {property.mediaList.map((media, index) => (
-                <img
-                  key={index}
-                  src={media.url}
-                  alt={`Property ${index + 1}`}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              ))}
-            </div>
+            {property.mediaList && property.mediaList.length > 0 && (
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {property.mediaList.map((media, index) => (
+                  <img
+                    key={index}
+                    src={media.url}
+                    alt={`Property ${index + 1}`}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Price and Status */}
             <div className="flex items-center justify-between mb-6 pb-6 border-b">
               <div>
                 <div className="text-3xl font-bold text-blue-600 mb-1">
-                  ${property.monthlyRent.toLocaleString()}
+                  {property.monthlyRent?.toLocaleString()} VND
                 </div>
                 <div className="text-gray-600 text-sm">
-                  Posted: {property.postingDate}
+                  Posted:{" "}
+                  {new Date(property.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </div>
               </div>
               <div>
                 {(() => {
-                  const statusConfig = getStatusConfig(property.propertyStatus);
+                  const statusConfig = getStatusConfig(
+                    property.status || property.propertyStatus
+                  );
                   return (
                     <span
                       className={`px-4 py-2 rounded-full text-white text-sm font-medium ${statusConfig.bg}`}
@@ -269,7 +240,9 @@ const MyProperties = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Bedrooms:</span>
-                    <span className="font-medium">{property.bedrooms}</span>
+                    <span className="font-medium">
+                      {property.bedrooms || property.rooms || "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Bathrooms:</span>
@@ -277,7 +250,9 @@ const MyProperties = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Year Built:</span>
-                    <span className="font-medium">{property.yearBuilt}</span>
+                    <span className="font-medium">
+                      {property.yearBuilt || "N/A"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -288,19 +263,19 @@ const MyProperties = () => {
                   <div>
                     <span className="text-gray-600">Address:</span>
                     <p className="font-medium mt-1">
-                      {property.address.fullAddress}
+                      {property.address?.fullAddress}
                     </p>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Province:</span>
                     <span className="font-medium">
-                      {property.address.province}
+                      {property.address?.province}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">District:</span>
                     <span className="font-medium">
-                      {property.address.district}
+                      {property.address?.district}
                     </span>
                   </div>
                 </div>
@@ -316,106 +291,110 @@ const MyProperties = () => {
             </div>
 
             {/* Amenities */}
-            <div className="mb-6 pb-6 border-b">
-              <h3 className="font-semibold text-gray-900 mb-3">Amenities</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {property.amenities.homeSafety.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Home Safety
-                    </h4>
-                    <ul className="space-y-1">
-                      {property.amenities.homeSafety.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm text-gray-600 flex items-center"
-                        >
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {property.amenities.bedroom.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Bedroom
-                    </h4>
-                    <ul className="space-y-1">
-                      {property.amenities.bedroom.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm text-gray-600 flex items-center"
-                        >
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {property.amenities.kitchen.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Kitchen
-                    </h4>
-                    <ul className="space-y-1">
-                      {property.amenities.kitchen.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm text-gray-600 flex items-center"
-                        >
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {property.amenities.others.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Others
-                    </h4>
-                    <ul className="space-y-1">
-                      {property.amenities.others.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="text-sm text-gray-600 flex items-center"
-                        >
-                          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+            {property.amenities && (
+              <div className="mb-6 pb-6 border-b">
+                <h3 className="font-semibold text-gray-900 mb-3">Amenities</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {property.amenities.homeSafety?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Home Safety
+                      </h4>
+                      <ul className="space-y-1">
+                        {property.amenities.homeSafety.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm text-gray-600 flex items-center"
+                          >
+                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {property.amenities.bedroom?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Bedroom
+                      </h4>
+                      <ul className="space-y-1">
+                        {property.amenities.bedroom.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm text-gray-600 flex items-center"
+                          >
+                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {property.amenities.kitchen?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Kitchen
+                      </h4>
+                      <ul className="space-y-1">
+                        {property.amenities.kitchen.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm text-gray-600 flex items-center"
+                          >
+                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {property.amenities.others?.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        Others
+                      </h4>
+                      <ul className="space-y-1">
+                        {property.amenities.others.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="text-sm text-gray-600 flex items-center"
+                          >
+                            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-2"></span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Owner Information */}
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-3">
-                Owner Information
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Name:</span>
-                    <p className="font-medium mt-1">{property.owner.name}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Phone:</span>
-                    <p className="font-medium mt-1">{property.owner.phone}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Email:</span>
-                    <p className="font-medium mt-1">{property.owner.email}</p>
+            {property.owner && (
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Owner Information
+                </h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Name:</span>
+                      <p className="font-medium mt-1">{property.owner.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Phone:</span>
+                      <p className="font-medium mt-1">{property.owner.phone}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Email:</span>
+                      <p className="font-medium mt-1">{property.owner.email}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -453,9 +432,11 @@ const MyProperties = () => {
                   onChange={(e) => setPostStatus(e.target.value)}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select</option>
+                  <option value="">All Status</option>
+                  <option value="DRAFT">Draft</option>
                   <option value="PENDING">Pending</option>
                   <option value="APPROVED">Approved</option>
+                  <option value="AVAILABLE">Available</option>
                   <option value="SOLD">Sold</option>
                 </select>
               </div>
@@ -473,103 +454,73 @@ const MyProperties = () => {
               </div>
             </div>
 
-            {/* Properties Table */}
+            {/* Properties List */}
             <div className="bg-white rounded-lg shadow-sm">
               <h2 className="text-2xl font-semibold text-gray-900 p-6 border-b">
                 My Properties
               </h2>
 
-              {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-800 text-white font-medium text-sm">
-                <div className="col-span-6">Listing</div>
-                <div className="col-span-3 text-center">Status</div>
-                <div className="col-span-3 text-center">Action</div>
-              </div>
-
-              {/* Table Body */}
-              <div className="divide-y">
-                {properties.map((property) => {
-                  const statusConfig = getStatusConfig(property.propertyStatus);
-                  return (
-                    <div
+              {loading ? (
+                <div className="p-8 text-center text-gray-500">
+                  Loading properties...
+                </div>
+              ) : properties.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  No properties found
+                </div>
+              ) : (
+                <div className="p-6 space-y-4">
+                  {properties.map((property) => (
+                    <ListingCard
                       key={property.propertyId}
-                      className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors items-center"
-                    >
-                      {/* Listing Column */}
-                      <div className="col-span-6 flex items-center gap-4">
-                        <img
-                          src={property.mediaList[0]?.url}
-                          alt={property.title}
-                          className="w-28 h-20 object-cover rounded-lg flex-shrink-0 cursor-pointer"
-                          onClick={() => setSelectedProperty(property)}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3
-                            className="font-medium text-gray-900 mb-1 cursor-pointer hover:text-blue-600"
-                            onClick={() => setSelectedProperty(property)}
-                          >
-                            {property.title}
-                          </h3>
-                          <p className="text-sm text-gray-500 mb-2">
-                            Posting date: {property.postingDate}
-                          </p>
-                          <p className="text-lg font-semibold text-blue-600">
-                            ${property.monthlyRent.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Status Column */}
-                      <div className="col-span-3 flex justify-center">
-                        <span
-                          className={`px-6 py-1.5 rounded-full text-white text-sm font-medium ${statusConfig.bg}`}
-                        >
-                          {statusConfig.text}
-                        </span>
-                      </div>
-
-                      {/* Action Column */}
-                      <div className="col-span-3 flex flex-col items-center gap-1 text-sm">
-                        <button className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
-                          <Edit className="w-4 h-4" />
-                          Edit
-                        </button>
-                        <button className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-                          <DollarSign className="w-4 h-4" />
-                          Sold
-                        </button>
-                        <button className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      listing={transformPropertyToListing(property)}
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Pagination */}
-              <div className="flex items-center justify-center gap-2 px-6 py-6 border-t">
-                <button className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                  ‹
-                </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                  1
-                </button>
-                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                  2
-                </button>
-                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                  3
-                </button>
-                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                  4
-                </button>
-                <span className="px-3 py-2 text-gray-600">...</span>
-                <button className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                  ›
-                </button>
-              </div>
+              {!loading && properties.length > 0 && (
+                <div className="flex items-center justify-center gap-2 px-6 py-6 border-t">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ‹
+                  </button>
+                  {[...Array(Math.min(totalPages, 5))].map((_, index) => {
+                    const pageNum = index + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          currentPage === pageNum
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  {totalPages > 5 && (
+                    <span className="px-3 py-2 text-gray-600">...</span>
+                  )}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </main>

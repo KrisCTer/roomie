@@ -16,14 +16,14 @@ export const login = async (username, password) => {
 
   // User info (nếu backend trả về)
   const user = res?.result?.user ?? res?.user;
-  if (user) localStorage.setItem("user", JSON.stringify(user)); // ⭐ LƯU USER
+  if (user) localStorage.setItem("user", JSON.stringify(user));
 
   return res;
 };
 
 export const logout = () => {
   removeToken();
-  localStorage.removeItem("user"); // ⭐ XÓA USER KHI ĐĂNG XUẤT
+  localStorage.removeItem("user");
 };
 
 export const register = (payload) => BaseService.post(API.REGISTER, payload);

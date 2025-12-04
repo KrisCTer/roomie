@@ -42,15 +42,22 @@ public class UserProfileService {
     IDCardQRService idCardQRService;
 
     // 1. TẠO PROFILE TỪ CCCD (QR CODE) – TỰ ĐỘNG ĐIỀN THÔNG TIN
-    public UserProfileResponse createProfileFromIDCard(MultipartFile idCardImage) {
+    public UserProfileResponse updateProfileFromIDCard(MultipartFile idCardImage) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userId = auth.getName();
 
-        // Kiểm tra đã có profile chưa
-        if (userProfileRepository.findByUserId(userId).isPresent()) {
-            throw new AppException(ErrorCode.PROFILE_ALREADY_EXISTS);
-        }
+        // Lấy profile hiện tại (tạo mới nếu chưa có)
+        UserProfile profile = userProfileRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    log.info("Profile not found for userId: {}. Creating new profile.", userId);
+                    return UserProfile.builder()
+                            .userId(userId)
+                            .status(AccountStatus.ACTIVE)
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                });
 
+        // Trích xuất thông tin từ CCCD
         IDCardInfo idCardInfo = idCardQRService.extractFromFile(idCardImage);
 
         String fullName = idCardInfo.getFullName().trim();
@@ -62,32 +69,52 @@ public class UserProfileService {
                 : "Nữ".equalsIgnoreCase(idCardInfo.getGender()) ? Gender.FEMALE
                 : null;
 
-        UserResponse userFromIdentity = identityClient.getUser(userId).getResult();
-        String email = userFromIdentity != null ? userFromIdentity.getEmail() : null;
-        String phoneNumber = userFromIdentity != null ? userFromIdentity.getPhoneNumber() : null;
-        String username = userFromIdentity != null && userFromIdentity.getUsername() != null
-                ? userFromIdentity.getUsername()
-                : fullName; // fallback to fullName
-        // B4: Tạo profile
-        UserProfile profile = UserProfile.builder()
-                .userId(userId)
-                .username(username) // tạm dùng tên thật làm username hiển thị
-                .email(email)
-                .phoneNumber(phoneNumber)
-                .firstName(firstName)
-                .lastName(lastName)
-                .gender(gender)
-                .dob(LocalDate.parse(idCardInfo.getDob())) // yyyy-MM-dd
-                .idCardNumber(idCardInfo.getIdNumber())
-                .permanentAddress(idCardInfo.getAddress())
-                .currentAddress(idCardInfo.getAddress())
-                .status(AccountStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        // Lấy thông tin từ Identity Service (nếu chưa có trong profile)
+        if (profile.getEmail() == null || profile.getPhoneNumber() == null) {
+            try {
+                UserResponse userFromIdentity = identityClient.getUser(userId).getResult();
+                if (userFromIdentity != null) {
+                    if (profile.getEmail() == null) {
+                        profile.setEmail(userFromIdentity.getEmail());
+                    }
+                    if (profile.getPhoneNumber() == null) {
+                        profile.setPhoneNumber(userFromIdentity.getPhoneNumber());
+                    }
+                    if (profile.getUsername() == null) {
+                        profile.setUsername(userFromIdentity.getUsername() != null
+                                ? userFromIdentity.getUsername()
+                                : fullName);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to fetch user from identity service: {}", e.getMessage());
+            }
+        }
+
+        // Cập nhật thông tin từ CCCD
+        profile.setFirstName(firstName);
+        profile.setLastName(lastName);
+        profile.setGender(gender);
+        profile.setDob(LocalDate.parse(idCardInfo.getDob())); // yyyy-MM-dd
+        profile.setIdCardNumber(idCardInfo.getIdNumber());
+
+        // Chỉ cập nhật địa chỉ nếu chưa có
+        if (profile.getPermanentAddress() == null || profile.getPermanentAddress().isEmpty()) {
+            profile.setPermanentAddress(idCardInfo.getAddress());
+        }
+        if (profile.getCurrentAddress() == null || profile.getCurrentAddress().isEmpty()) {
+            profile.setCurrentAddress(idCardInfo.getAddress());
+        }
+
+        // Fallback username nếu chưa có
+        if (profile.getUsername() == null || profile.getUsername().isEmpty()) {
+            profile.setUsername(fullName);
+        }
+
+        profile.setUpdatedAt(LocalDateTime.now());
 
         UserProfile saved = userProfileRepository.save(profile);
-        log.info("Created profile from IDCard for userId: {} - {}", userId, fullName);
+        log.info("Updated profile from IDCard for userId: {} - {}", userId, fullName);
 
         return userProfileMapper.toUserProfileResponse(saved);
     }

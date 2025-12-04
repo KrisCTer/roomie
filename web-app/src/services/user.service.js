@@ -23,11 +23,13 @@ export const updateIdCard = (file) => {
   formData.append("file", file);
 
   return httpClient.put(API.UPDATE_ID_CARD, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { 
+      "Content-Type": "multipart/form-data" 
+    },
   });
 };
 
 export const getUserById = (userId) => BaseService.get(API.GET_USER(userId));
 
 export const searchUsers = (data) =>
-  BaseService.post(API.SEARCH_USER, data);
+  BaseService.put(API.SEARCH_USER, data);
