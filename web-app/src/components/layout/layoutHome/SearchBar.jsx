@@ -2,15 +2,21 @@
 import { Box, Button, Divider, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchBar() {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", h);
     return () => window.removeEventListener("scroll", h);
   }, []);
+
+  const handleSearch = () => {
+    navigate("/property-search");
+  };
 
   return (
     <Box
@@ -50,7 +56,11 @@ export default function SearchBar() {
         >
           <Typography
             variant="caption"
-            sx={{ fontWeight: 700, color: "#0f172a", textTransform: "uppercase" }}
+            sx={{
+              fontWeight: 700,
+              color: "#0f172a",
+              textTransform: "uppercase",
+            }}
           >
             Địa điểm
           </Typography>
@@ -77,7 +87,11 @@ export default function SearchBar() {
         >
           <Typography
             variant="caption"
-            sx={{ fontWeight: 700, color: "#0f172a", textTransform: "uppercase" }}
+            sx={{
+              fontWeight: 700,
+              color: "#0f172a",
+              textTransform: "uppercase",
+            }}
           >
             Thời gian
           </Typography>
@@ -104,7 +118,11 @@ export default function SearchBar() {
         >
           <Typography
             variant="caption"
-            sx={{ fontWeight: 700, color: "#0f172a", textTransform: "uppercase" }}
+            sx={{
+              fontWeight: 700,
+              color: "#0f172a",
+              textTransform: "uppercase",
+            }}
           >
             Khách
           </Typography>
@@ -114,9 +132,12 @@ export default function SearchBar() {
         </Box>
 
         {/* Nút search */}
-        <Box sx={{ display: "flex", alignItems: "center", pr: { xs: 0, md: 1 } }}>
+        <Box
+          sx={{ display: "flex", alignItems: "center", pr: { xs: 0, md: 1 } }}
+        >
           <Button
             variant="contained"
+            onClick={handleSearch}
             sx={{
               minWidth: 48,
               height: 48,

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { register as registerApi } from "../services/authenticationService";
+import { register as registerApi } from "../services/auth.service";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await registerApi(username, email, password);
+      await registerApi({ username, email, password });
       setSnackType("success");
       setSnackMsg("Register successfully. Please login.");
       setShowSnack(true);

@@ -26,8 +26,6 @@ public class PropertyDocument {
 
     @Field(type = FieldType.Double)
     Double monthlyRent;
-    @Field(type = FieldType.Keyword)
-    String priceLabel;
     @Field(type = FieldType.Double)
     Double rentalDeposit;
 
@@ -40,8 +38,6 @@ public class PropertyDocument {
 
     @Field(type = FieldType.Double)
     Double size;
-    @Field(type = FieldType.Double)
-    Double landArea;
 
     @Field(type = FieldType.Integer)
     Integer rooms;
@@ -51,9 +47,6 @@ public class PropertyDocument {
     Integer bathrooms;
     @Field(type = FieldType.Integer)
     Integer garages;
-
-    @Field(type = FieldType.Integer)
-    Integer yearBuilt;
 
     @Field(type = FieldType.Keyword)
     String fullAddress;
@@ -81,8 +74,6 @@ public class PropertyDocument {
 
     @Field(type = FieldType.Nested)
     List<Media> mediaList;
-    @Field(type = FieldType.Object)
-    VirtualTour virtualTour;
 
     @Field(type = FieldType.Object)
     Owner owner;

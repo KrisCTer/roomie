@@ -20,7 +20,8 @@ export default function Footer() {
               Roomie
             </Typography>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)" }}>
-              Nền tảng tìm kiếm và đặt nơi lưu trú nhanh chóng, an toàn và tiện lợi trên toàn Việt Nam.
+              Nền tảng tìm kiếm và đặt nơi lưu trú nhanh chóng, an toàn và tiện
+              lợi trên toàn Việt Nam.
             </Typography>
           </Grid>
 
@@ -30,16 +31,32 @@ export default function Footer() {
               Về chúng tôi
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Giới thiệu
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Tin tức
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Blog
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Tuyển dụng
               </Link>
             </Box>
@@ -51,13 +68,25 @@ export default function Footer() {
               Hỗ trợ
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Trung tâm trợ giúp
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Câu hỏi thường gặp
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Chính sách hoàn tiền
               </Link>
             </Box>
@@ -70,13 +99,25 @@ export default function Footer() {
             </Typography>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Facebook
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Instagram
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Twitter
               </Link>
             </Box>
@@ -106,13 +147,25 @@ export default function Footer() {
               mt: { xs: 2, sm: 0 },
             }}
           >
-            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <Link
+              href="#"
+              underline="hover"
+              sx={{ color: "rgba(255,255,255,0.7)" }}
+            >
               Điều khoản dịch vụ
             </Link>
-            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <Link
+              href="#"
+              underline="hover"
+              sx={{ color: "rgba(255,255,255,0.7)" }}
+            >
               Chính sách bảo mật
             </Link>
-            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <Link
+              href="#"
+              underline="hover"
+              sx={{ color: "rgba(255,255,255,0.7)" }}
+            >
               Cookies
             </Link>
           </Box>

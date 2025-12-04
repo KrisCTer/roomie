@@ -29,7 +29,6 @@ public class Property {
     Address address;
 
     BigDecimal monthlyRent;
-    String priceLabel;
     BigDecimal rentalDeposit;
 
     PropertyType propertyType;       // e.g. "Phòng trọ", "Căn hộ"
@@ -37,19 +36,14 @@ public class Property {
     PropertyLabel propertyLabel;      // e.g. "Hot", "Mới đăng"
 
     Double size;               // Diện tích sử dụng
-    Double landArea;           // Diện tích đất (optional)
 
     Integer rooms;
     Integer bedrooms;
     Integer bathrooms;
     Integer garages;
 
-    Integer yearBuilt;
-
     Amenities amenities;
     List<Media> mediaList;    // Ảnh / video
-    VirtualTour virtualTour;
-    List<Floor> floors;
 
     Owner owner;               // Thông tin chủ sở hữu hoặc người đăng
 

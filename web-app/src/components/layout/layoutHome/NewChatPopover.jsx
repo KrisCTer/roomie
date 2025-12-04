@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import {
@@ -18,7 +17,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { search as searchUsers } from "../services/userService";
+import { search as searchUsers } from "../../services/userService";
 
 const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,0 +1,180 @@
+// src/components/Header.jsx
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Stack,
+  Box,
+  Avatar,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import LanguageIcon from "@mui/icons-material/Language";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  isAuthenticated,
+  removeToken,
+} from "../../../services/localStorageService";
+
+export default function Header() {
+  const navigate = useNavigate();
+  const loggedIn = isAuthenticated();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => setAnchorEl(null);
+
+  const handleLogout = () => {
+    removeToken();
+    handleCloseMenu();
+    navigate("/login");
+  };
+
+  return (
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        bgcolor: "rgba(11,27,42,0.9)",
+        backdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(148,163,184,0.2)",
+      }}
+    >
+      <Toolbar sx={{ maxWidth: 1200, mx: "auto", width: "100%" }}>
+        {/* Logo */}
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 700, mr: 4, cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        >
+          Roomie
+        </Typography>
+
+        {/* Tabs */}
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3, mr: "auto" }}>
+          <Button
+            color="inherit"
+            sx={{
+              fontWeight: 600,
+              textTransform: "none",
+              borderBottom: "2px solid white",
+              borderRadius: 0,
+              px: 0,
+            }}
+          >
+            Nơi lưu trú
+          </Button>
+        </Box>
+
+        {/* Right side */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          <IconButton color="inherit">
+            <LanguageIcon />
+          </IconButton>
+
+          {!loggedIn ? (
+            <>
+              {/* Khi CHƯA đăng nhập */}
+              <Button
+                color="inherit"
+                sx={{ textTransform: "none" }}
+                onClick={() => navigate("/dashboard")}
+              >
+                Trở thành chủ nhà
+              </Button>
+
+              <Button
+                color="inherit"
+                sx={{ textTransform: "none" }}
+                onClick={() => navigate("/login")}
+              >
+                Đăng nhập
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={() => navigate("/register")}
+                sx={{
+                  borderRadius: 999,
+                  px: 2.5,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  bgcolor: "#2563eb",
+                }}
+              >
+                Đăng ký
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* Khi ĐÃ đăng nhập */}
+              <IconButton onClick={handleOpenMenu}>
+                <Avatar sx={{ bgcolor: "#2563eb" }}>
+                  {/* Nếu có tên user thì lấy chữ cái đầu */}
+                  {(localStorage.getItem("user") &&
+                    JSON.parse(
+                      localStorage.getItem("user")
+                    ).username[0].toUpperCase()) ||
+                    "U"}
+                </Avatar>
+              </IconButton>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleCloseMenu}
+                PaperProps={{
+                  elevation: 3,
+                  sx: {
+                    mt: 1.2,
+                    borderRadius: 2,
+                    minWidth: 180,
+                  },
+                }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    handleCloseMenu();
+                    navigate("/profile");
+                  }}
+                >
+                  Hồ sơ của tôi
+                </MenuItem>
+
+                <MenuItem
+                  onClick={() => {
+                    handleCloseMenu();
+                    navigate("/dashboard");
+                  }}
+                >
+                  Dashboard chủ nhà
+                </MenuItem>
+
+                <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+                  Đăng xuất
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+
+          {/* Mobile menu icon */}
+          <IconButton
+            sx={{ display: { xs: "inline-flex", md: "none" }, ml: 1 }}
+            color="inherit"
+          >
+            <MenuIcon />
+          </IconButton>
+        </Stack>
+      </Toolbar>
+    </AppBar>
+  );
+}

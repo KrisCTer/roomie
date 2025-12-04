@@ -7,7 +7,9 @@ const MessageItem = ({ message }) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
           <h3 className="font-semibold text-sm">{message.name}</h3>
-          <span className="text-xs text-gray-500 flex-shrink-0">{message.time}</span>
+          <span className="text-xs text-gray-500 flex-shrink-0">
+            {message.time}
+          </span>
         </div>
         <p className="text-sm text-gray-600 line-clamp-2">{message.message}</p>
       </div>

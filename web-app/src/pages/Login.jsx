@@ -7,14 +7,13 @@ import {
   Typography,
   Link,
   IconButton,
-  InputAdornment
+  InputAdornment,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logIn } from "../services/authenticationService"; // nếu bạn dùng API
-// Nếu chưa có logIn, bạn cứ để trống hoặc comment dòng này.
+import { login as loginApi } from "../services/auth.service"; // ⭐ THÊM
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     username: "",
-    password: ""
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -33,13 +32,11 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      // Nếu chưa tích hợp API backend thì comment lại và navigate thẳng
-      // await logIn(form.username, form.password);
-
-      navigate("/home"); // login thành công → chuyển vào home
+      await loginApi(form.username, form.password); // ⭐ GỌI API LOGIN
+      navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
-      alert("Sai tài khoản hoặc mật khẩu");
+      alert(err?.response?.data?.message || "Sai tài khoản hoặc mật khẩu");
     }
   };
 
@@ -51,7 +48,7 @@ export default function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        p: 2
+        p: 2,
       }}
     >
       <Card
@@ -60,7 +57,7 @@ export default function Login() {
           width: "900px",
           borderRadius: "16px",
           overflow: "hidden",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.45)"
+          boxShadow: "0 8px 40px rgba(0,0,0,0.45)",
         }}
       >
         {/* LEFT IMAGE */}
@@ -70,7 +67,7 @@ export default function Login() {
             backgroundImage:
               "url('https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg')",
             backgroundSize: "cover",
-            backgroundPosition: "center"
+            backgroundPosition: "center",
           }}
         ></Box>
 
@@ -81,7 +78,7 @@ export default function Login() {
             p: 5,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center"
+            justifyContent: "center",
           }}
         >
           <Typography variant="h4" fontWeight={700} mb={1}>
@@ -125,7 +122,7 @@ export default function Login() {
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                )
+                ),
               }}
             />
 
@@ -152,7 +149,7 @@ export default function Login() {
                 textTransform: "none",
                 fontWeight: 600,
                 fontSize: 16,
-                mb: 2
+                mb: 2,
               }}
             >
               Login
@@ -170,7 +167,7 @@ export default function Login() {
               </Link>
             </Typography>
 
-            {/* "XEM MÀ KHÔNG CẦN ĐĂNG NHẬP" */}
+            {/* GUEST VIEW */}
             <Typography textAlign="center" fontSize={14} mt={2}>
               <Link
                 underline="hover"

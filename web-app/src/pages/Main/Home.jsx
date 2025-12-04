@@ -10,12 +10,9 @@ import {
   IconButton,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-
-import Header from "../components/Header";
-import SearchBar from "../components/SearchBar";
-import Footer from "../components/Footer"; // nếu bạn đã tạo Footer như trước
-import FloatingSearchButton from "../components/FloatingSearchButton";
-
+import Header from "../../components/layout/layoutHome/Header";
+import SearchBar from "../../components/layout/layoutHome/SearchBar";
+import Footer from "../../components/layout/layoutHome/Footer";
 
 // ─── Demo data ──────────────────────────────────────────────
 const hcmListings = [
@@ -138,12 +135,12 @@ function ListingRow({ title, subtitle, listings = [] }) {
           <Card
             key={item.id}
             sx={{
-              minWidth: 260,
+              width: 260,
               borderRadius: 3,
-              boxShadow: "0 10px 30px rgba(15,23,42,0.35)",
               overflow: "hidden",
               bgcolor: "white",
               flexShrink: 0,
+              boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
             }}
           >
             <Box sx={{ position: "relative" }}>
@@ -187,7 +184,11 @@ function ListingRow({ title, subtitle, listings = [] }) {
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
                 {item.price} đ / {item.nights} đêm ·{" "}
-                <Typography component="span" variant="body2" sx={{ fontWeight: 600 }}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{ fontWeight: 600 }}
+                >
                   ★ {item.rating}
                 </Typography>
               </Typography>
@@ -223,10 +224,14 @@ export default function Home() {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ maxWidth: 540, mx: "auto", color: "rgba(241,245,249,0.85)" }}
+              sx={{
+                maxWidth: 540,
+                mx: "auto",
+                color: "rgba(241,245,249,0.85)",
+              }}
             >
-              Khám phá hàng ngàn căn hộ, nhà ở, homestay với giá minh bạch
-              và đặt phòng nhanh chóng, an toàn.
+              Khám phá hàng ngàn căn hộ, nhà ở, homestay với giá minh bạch và
+              đặt phòng nhanh chóng, an toàn.
             </Typography>
           </Box>
 
@@ -250,9 +255,6 @@ export default function Home() {
           />
         </Container>
       </Box>
-
-      {/* Nút search tròn nổi góc phải */}
-      <FloatingSearchButton />
 
       {/* Footer cuối trang */}
       <Footer />
