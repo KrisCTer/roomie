@@ -53,11 +53,24 @@ public class PropertyController {
         List<PropertyResponse> list = propertyService.findAll(page, size);
         return ResponseEntity.ok(ApiResponse.success(list, "Property list fetched successfully"));
     }
+    @GetMapping("/owner/me")
+    public ApiResponse<List<PropertyResponse>> getMyProperties() {
+        return ApiResponse.success(propertyService.getMyProperties(),"Get my property successfully");
+    }
+
+    @GetMapping("/public")
+    public ApiResponse<List<PropertyResponse>> getPublicProperties() {
+        return ApiResponse.success(propertyService.getAllPublicProperties(),"");
+    }
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> search(@RequestParam String q) {
         List<PropertyResponse> list = propertyService.searchFullText(q);
         return ResponseEntity.ok(ApiResponse.success(list, "Search results fetched successfully"));
+    }
+    @PostMapping("/{id}/publish")
+    public ApiResponse<PropertyResponse> publishProperty(@PathVariable String id) {
+        return ApiResponse.success(propertyService.publish(id),"Property published successfully");
     }
 
     @GetMapping("/by-price")
