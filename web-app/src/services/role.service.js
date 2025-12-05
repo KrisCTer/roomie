@@ -3,14 +3,10 @@ import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
 export const createRole = (payload) =>
-  BaseService.post(API.ROLE_CREATE, payload);
+  BaseService.post(API.CREATE_ROLE, payload);
 
-export const getRoles = () => BaseService.get(API.ROLE_GET_ALL);
+export const getAllRoles = () => 
+  BaseService.get(API.GET_ALL_ROLES);
 
-export const getRole = (id) => BaseService.get(API.ROLE_GET(id));
-
-export const updateRole = (id, payload) =>
-  BaseService.put(API.ROLE_UPDATE(id), payload);
-
-export const deleteRole = (id) =>
-  BaseService.delete(API.ROLE_DELETE(id));
+export const deleteRole = (role) =>
+  BaseService.delete(API.DELETE_ROLE(role));

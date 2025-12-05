@@ -970,18 +970,6 @@ const AddProperty = () => {
             </div>
           )}
 
-          {/* Page Title */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">
-              {isEditMode ? "Edit Property" : "Add New Property"}
-            </h1>
-            <p className="text-gray-600 mt-2">
-              {isEditMode
-                ? "Update your property information below"
-                : "Fill in the details to list your property"}
-            </p>
-          </div>
-
           {/* Progress Indicator */}
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <div className="relative mb-4">

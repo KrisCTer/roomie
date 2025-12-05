@@ -45,17 +45,22 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+            client-id: your-google-client-id
+            client-secret: your-google-client-secret
             scope:
               - email
               - profile
           facebook:
-            client-id: ${FACEBOOK_CLIENT_ID:your-facebook-client-id}
-            client-secret: ${FACEBOOK_CLIENT_SECRET:your-facebook-client-secret}
+            client-id: your-facebook-client-id}
+            client-secret: your-facebook-client-secret
             scope:
               - email
               - public_profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
 
   kafka:
     bootstrap-servers: localhost:9092
@@ -118,3 +123,5 @@ logging:
 app:
   services:
     profile: http://localhost:8082/profile
+  oauth2:
+    redirectUri: http://localhost:3000/oauth2/callback/google

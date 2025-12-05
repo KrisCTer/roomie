@@ -11,6 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class OwnerResponse {
     String ownerId;
     String name;
-    String phone;
+    String phoneNumber;
     String email;
 }

@@ -11,6 +11,7 @@ import MyProperties from "../pages/User/MyProperties";
 import PropertyDetail from "../pages/Main/PropertyDetail";
 import PropertySearch from "../pages/Main/PropertySearch";
 import ContractSigning from "../pages/User/ContractSigning";
+import MyContracts from "../pages/User/MyContracts";
 
 const AppRoutes = () => {
   return (
@@ -29,6 +30,7 @@ const AppRoutes = () => {
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property-search" element={<PropertySearch />} />
         <Route path="/contract-signing" element={<ContractSigning />} />
+        <Route path="/my-contracts" element={<MyContracts />} />
       </Routes>
     </Router>
   );

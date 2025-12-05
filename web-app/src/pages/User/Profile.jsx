@@ -7,7 +7,7 @@ import Footer from "../../components/layout/layoutUser/Footer.jsx";
 
 import {
   getMyProfile,
-  updateProfile,
+  updateMyProfile,
   uploadAvatar,
   updateIdCard,
 } from "../../services/user.service";
@@ -127,7 +127,7 @@ const Profile = () => {
         currentAddress: formData.currentAddress,
       };
 
-      await updateProfile(payload);
+      await updateMyProfile(payload);
 
       alert("Cập nhật thông tin thành công!");
       loadProfile();

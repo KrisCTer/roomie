@@ -1,14 +1,15 @@
 package com.roomie.services.property_service.service;
 
-import com.roomie.services.property_service.configuration.AuthUtil;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
-import com.roomie.services.property_service.dto.response.PropertyResponse;
+import com.roomie.services.property_service.dto.response.*;
+import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
 import com.roomie.services.property_service.enums.ApprovalStatus;
 import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
+import com.roomie.services.property_service.repository.httpclient.ProfileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -31,11 +33,20 @@ public class PropertyService {
     PropertyRepository propertyRepository;
     PropertySearchRepository searchRepository;
     PropertyMapper mapper;
+    ProfileClient propertyClient;
 
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
         Property entity = mapper.toEntity(request);
-        entity.setOwner(AuthUtil.getCurrentOwner());
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserProfileResponse userResponse = propertyClient.getProfile(userId).getResult();
+        Owner owner = Owner.builder()
+                .ownerId(userId)
+                .name(userResponse.getLastName()+" "+userResponse.getFirstName())
+                .email(userResponse.getEmail())
+                .phoneNumber(userResponse.getPhoneNumber())
+                .build();
+        entity.setOwner(owner);
         entity.setStatus(ApprovalStatus.DRAFT);
         Instant now = Instant.now();
         entity.setCreatedAt(now);

@@ -3,13 +3,13 @@ import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
 export const createBooking = (payload) =>
-  BaseService.post(API.BOOKING_CREATE, payload);
+  BaseService.post(API.CREATE_BOOKING, payload);
 
 export const getBooking = (id) =>
-  BaseService.get(API.BOOKING_GET(id));
+  BaseService.get(API.GET_BOOKING(id));
 
 export const confirmBooking = (id) =>
-  BaseService.post(API.BOOKING_CONFIRM(id));
+  BaseService.post(API.CONFIRM_BOOKING(id));
 
 export const cancelBooking = (id) =>
-  BaseService.post(API.BOOKING_CANCEL(id));
+  BaseService.post(API.CANCEL_BOOKING(id));

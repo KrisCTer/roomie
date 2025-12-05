@@ -36,3 +36,7 @@ property:
   max-images: 20
   image-max-size: 10MB
   google-maps-api-key: your-google-maps-api-key
+
+app:
+  services:
+    profile: http://localhost:8082/profile

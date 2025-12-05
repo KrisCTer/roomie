@@ -21,13 +21,28 @@ export const login = async (username, password) => {
   return res;
 };
 
-export const logout = () => {
-  removeToken();
-  localStorage.removeItem("user");
+export const logout = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      await BaseService.post(API.LOGOUT, { token });
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+  } finally {
+    removeToken();
+    localStorage.removeItem("user");
+  }
 };
 
 export const register = (payload) => BaseService.post(API.REGISTER, payload);
 
-export const me = () => BaseService.get(API.MY_PROFILE);
+export const introspect = (token) => 
+  BaseService.post(API.INTROSPECT, { token });
+
+export const refreshToken = (refreshToken) =>
+  BaseService.post(API.REFRESH_TOKEN, { token: refreshToken });
+
+export const getMyInfo = () => BaseService.get(API.GET_MY_INFO);
 
 export const isAuthenticated = () => isAuthenticatedLS();
