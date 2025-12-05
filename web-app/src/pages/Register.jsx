@@ -19,10 +19,11 @@ import { useTranslation } from "react-i18next";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // FORM STATES
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -47,7 +48,6 @@ export default function Register() {
     setShowSnack(false);
   };
 
-  // SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -61,23 +61,16 @@ export default function Register() {
       phoneNumber,
     } = form;
 
-    if (
-      !username ||
-      !email ||
-      !password ||
-      !firstName ||
-      !lastName ||
-      !phoneNumber
-    ) {
+    if (!username || !email || !password || !firstName || !lastName || !phoneNumber) {
       setSnackType("error");
-      setSnackMsg("Please fill all required fields!");
+      setSnackMsg(t("auth.fillAll"));
       setShowSnack(true);
       return;
     }
 
     if (password !== confirm) {
       setSnackType("error");
-      setSnackMsg("Passwords do not match");
+      setSnackMsg(t("auth.passwordNotMatch"));
       setShowSnack(true);
       return;
     }
@@ -94,7 +87,7 @@ export default function Register() {
       });
 
       setSnackType("success");
-      setSnackMsg("Register successfully. Please login.");
+      setSnackMsg(t("auth.registerSuccess"));
       setShowSnack(true);
 
       setTimeout(() => navigate("/login"), 800);
@@ -102,8 +95,7 @@ export default function Register() {
       console.error(err);
       setSnackType("error");
       setSnackMsg(
-        err?.response?.data?.message ||
-          "Register failed. Please check your information."
+        err?.response?.data?.message || t("auth.registerFailed")
       );
       setShowSnack(true);
     } finally {
@@ -137,7 +129,7 @@ export default function Register() {
         <CardMedia
           component="img"
           image="/images/login-livingroom.jpg"
-          alt="Register"
+          alt={t("auth.register")}
           sx={{
             width: { xs: "100%", md: "50%" },
             height: { xs: 240, md: "auto" },
@@ -156,17 +148,18 @@ export default function Register() {
           }}
         >
           <Typography variant="h4" fontWeight={600} mb={1}>
-            Register
+            {t("auth.register")}
           </Typography>
+
           <Typography variant="body2" color="text.secondary" mb={3}>
-            Create an account to start exploring properties.
+            {t("auth.registerSubtitle")}
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={2.2}>
               {/* Username */}
               <TextField
-                label="Username"
+                label={t("auth.username")}
                 value={form.username}
                 onChange={(e) => handleChange("username", e.target.value)}
                 fullWidth
@@ -175,22 +168,22 @@ export default function Register() {
               {/* First + Last Name */}
               <Stack direction="row" spacing={2}>
                 <TextField
-                  label="First Name"
+                  label={t("auth.firstName")}
                   value={form.firstName}
                   onChange={(e) => handleChange("firstName", e.target.value)}
                   fullWidth
                 />
                 <TextField
-                  label="Last Name"
+                  label={t("auth.lastName")}
                   value={form.lastName}
                   onChange={(e) => handleChange("lastName", e.target.value)}
-                  fullWidth
+                  fullFull
                 />
               </Stack>
 
               {/* Phone Number */}
               <TextField
-                label="Phone Number"
+                label={t("auth.phoneNumber")}
                 value={form.phoneNumber}
                 onChange={(e) => handleChange("phoneNumber", e.target.value)}
                 fullWidth
@@ -198,7 +191,7 @@ export default function Register() {
 
               {/* Email */}
               <TextField
-                label="Email"
+                label={t("auth.email")}
                 type="email"
                 value={form.email}
                 onChange={(e) => handleChange("email", e.target.value)}
@@ -208,25 +201,23 @@ export default function Register() {
               {/* Password */}
               <TextField
                 type={showPassword ? "text" : "password"}
-                label="Password"
+                label={t("auth.password")}
                 value={form.password}
                 onChange={(e) => handleChange("password", e.target.value)}
                 fullWidth
                 InputProps={{
                   endAdornment: (
-                    <Button
-                      onClick={() => setShowPassword(!showPassword)}
-                      sx={{ minWidth: "40px" }}
-                    >
+                    <Button onClick={() => setShowPassword(!showPassword)} sx={{ minWidth: "40px" }}>
                       {showPassword ? <EyeOff /> : <Eye />}
                     </Button>
                   ),
                 }}
               />
+
               {/* Confirm Password */}
               <TextField
                 type={showConfirmPassword ? "text" : "password"}
-                label="Confirm Password"
+                label={t("auth.confirmPassword")}
                 value={form.confirm}
                 onChange={(e) => handleChange("confirm", e.target.value)}
                 fullWidth
@@ -244,6 +235,7 @@ export default function Register() {
                 }}
               />
 
+              {/* Submit Button */}
               <Button
                 type="submit"
                 variant="contained"
@@ -256,23 +248,25 @@ export default function Register() {
                   fontWeight: 600,
                 }}
               >
-                {loading ? "Signing up..." : "Sign Up"}
+                {loading ? t("auth.processing") : t("auth.register")}
               </Button>
 
+              {/* Login Link */}
               <Typography variant="body2" textAlign="center">
-                Already have an account?{" "}
+                {t("auth.hasAccount")}{" "}
                 <Typography
                   component={RouterLink}
                   to="/login"
                   color="primary"
                   sx={{ textDecoration: "none", fontWeight: 500 }}
                 >
-                  Login
+                  {t("auth.login")}
                 </Typography>
               </Typography>
 
-              <Divider>or sign up with</Divider>
+              <Divider>{t("auth.orSignupWith")}</Divider>
 
+              {/* Social Buttons */}
               <Stack direction="row" spacing={2} justifyContent="center">
                 <Button variant="outlined" sx={{ borderRadius: 999, px: 3 }}>
                   Google

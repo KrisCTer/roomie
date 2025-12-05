@@ -57,17 +57,28 @@
     "bookNow": "Book Now"
   },
   "auth": {
-    "username": "Username",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "forgotPassword": "Forgot Password?",
-    "noAccount": "Don't have an account?",
-    "hasAccount": "Already have an account?",
-    "loginSuccess": "Login successful",
-    "registerSuccess": "Registration successful",
-    "loginError": "Login failed",
-    "registerError": "Registration failed"
+  "login": "Login",
+  "register": "Register",
+  "loginSubtitle": "Welcome back! Please enter your account.",
+  "registerSubtitle": "Create an account to start exploring properties.",
+  "username": "Username",
+  "usernamePlaceholder": "Enter username",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "email": "Email",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "phoneNumber": "Phone Number",
+  "forgotPassword": "Forgot password?",
+  "noAccount": "Don’t have an account?",
+  "hasAccount": "Already have an account?",
+  "registerSuccess": "Register successfully. Please login.",
+  "registerFailed": "Registration failed. Please check your information.",
+  "loginError": "Incorrect username or password.",
+  "fillAll": "Please fill all required fields!",
+  "passwordNotMatch": "Passwords do not match!",
+  "processing": "Processing...",
+  "orSignupWith": "or sign up with"
   },
   "dashboard": {
     "welcome": "Welcome back",
@@ -132,5 +143,13 @@
     "friends": "Friends",
     "groups": "Groups",
     "chat": "Chat"
-  }
+  },
+  "home": {
+  "findPerfectPlace": "Find the perfect place for your stay",
+  "exploreThousands": "Explore thousands of apartments, houses and homestays worldwide.",
+  "roomsIn": "Rooms & Stays in",
+  "fromSystemData": "From system data",
+  "unknownAddress": "Unknown address",
+  "other": "Other"
+}
 }
