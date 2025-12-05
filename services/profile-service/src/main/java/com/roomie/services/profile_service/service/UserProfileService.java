@@ -1,6 +1,7 @@
 package com.roomie.services.profile_service.service;
 
 import com.roomie.services.profile_service.dto.request.ProfileCreationRequest;
+import com.roomie.services.profile_service.dto.request.SearchUserRequest;
 import com.roomie.services.profile_service.dto.request.UpdateProfileRequest;
 import com.roomie.services.profile_service.dto.response.*;
 import com.roomie.services.profile_service.entity.UserProfile;
@@ -29,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -202,19 +204,17 @@ public class UserProfileService {
 
 
     // 6. TÌM KIẾM USER (dành cho chat, đặt phòng...)
-    @Cacheable(value = "userSearch", key = "#query", cacheManager = "cacheManager")
-    public List<UserProfileResponse> search(String keyword) {
-        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+//    @Cacheable(value = "userSearch", key = "#query", cacheManager = "cacheManager")
+    public List<UserProfileResponse> search(SearchUserRequest request) {
+        String keyword = Optional.ofNullable(request.getKeyword()).orElse("").trim();
 
-        List<UserProfile> results = (keyword == null || keyword.isBlank())
-                ? userProfileRepository.findAll()
-                : userProfileRepository.findAllByUsernameLike(keyword);
+        List<UserProfile> list = userProfileRepository.searchUsers(keyword);
 
-        return results.stream()
-                .filter(p -> !p.getUserId().equals(currentUserId))
+        return list.stream()
                 .map(userProfileMapper::toUserProfileResponse)
                 .toList();
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserProfileResponse> getAllProfiles() {
         var profiles = userProfileRepository.findAll();

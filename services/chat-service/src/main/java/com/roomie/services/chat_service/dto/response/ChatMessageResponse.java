@@ -2,6 +2,7 @@ package com.roomie.services.chat_service.dto.response;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.roomie.services.chat_service.entity.ParticipantInfo;
 
 import lombok.*;
@@ -18,5 +19,6 @@ public class ChatMessageResponse {
     boolean me;
     String message;
     ParticipantInfo sender;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     Instant createdDate;
 }

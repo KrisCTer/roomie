@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Send,
   Search,
@@ -13,11 +13,11 @@ import {
   ArrowLeft,
   Home as HomeIcon,
 } from "lucide-react";
-import { io } from "socket.io-client";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
+import { useCall } from "../../contexts/Callcontext";
 import {
   getMyConversations,
   createConversation,
@@ -26,9 +26,8 @@ import {
 } from "../../services/chat.service";
 import { searchUsers } from "../../services/user.service";
 import { getToken, getUserInfo } from "../../services/localStorageService";
-
-// ========== WEBSOCKET CONFIG ==========
-const SOCKET_URL = "http://localhost:8099";
+import { useSocket } from "../../contexts/SocketContext";
+import CallModal from "../../components/layout/layoutUser/CallModal";
 
 const Message = () => {
   const location = useLocation();
@@ -50,16 +49,27 @@ const Message = () => {
   const [searching, setSearching] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
 
-  // WebSocket
-  const [socket, setSocket] = useState(null);
-  const [connected, setConnected] = useState(false);
-
   // Property context (from navigation)
   const [propertyContext, setPropertyContext] = useState(null);
 
   // Refs
   const messagesEndRef = useRef(null);
   const messageInputRef = useRef(null);
+  const currentConversationRef = useRef(null);
+  const { startCall, callState } = useCall();
+  // ⭐ USE SOCKET CONTEXT
+  // const { isConnected, registerMessageCallbacks } = useSocket();
+  const { isConnected, registerMessageCallbacks, sendMessage } = useSocket();
+  // ========== UPDATE CURRENT CONVERSATION REF ==========
+  useEffect(() => {
+    const convId =
+      selectedConversation?.conversationId || selectedConversation?.id;
+    currentConversationRef.current = convId;
+    console.log("📌 Current conversation ref updated:", convId);
+  }, [selectedConversation]);
+
+  // Get current user
+  const currentUser = getUserInfo();
 
   // ========== HANDLE NAVIGATION FROM PROPERTY DETAIL ==========
   useEffect(() => {
@@ -67,7 +77,6 @@ const Message = () => {
       const { conversationId, propertyId, propertyTitle, ownerId, ownerName } =
         location.state;
 
-      // Save property context
       if (propertyId) {
         setPropertyContext({
           propertyId,
@@ -77,53 +86,11 @@ const Message = () => {
         });
       }
 
-      // If conversationId is provided, select it after loading conversations
       if (conversationId) {
-        // We'll handle this after conversations are loaded
         sessionStorage.setItem("pendingConversationId", conversationId);
       }
     }
   }, [location.state]);
-
-  // ========== WEBSOCKET CONNECTION ==========
-  useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-
-    const socketInstance = io(SOCKET_URL, {
-      query: { token },
-      transports: ["websocket"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    socketInstance.on("connect", () => {
-      console.log("✅ WebSocket connected");
-      setConnected(true);
-    });
-
-    socketInstance.on("disconnect", () => {
-      console.log("❌ WebSocket disconnected");
-      setConnected(false);
-    });
-
-    socketInstance.on("message", (data) => {
-      console.log("📩 Received message:", data);
-      handleReceiveMessage(data);
-    });
-
-    socketInstance.on("connect_error", (error) => {
-      console.error("WebSocket connection error:", error);
-      setConnected(false);
-    });
-
-    setSocket(socketInstance);
-
-    return () => {
-      socketInstance.disconnect();
-    };
-  }, []);
 
   // ========== LOAD CONVERSATIONS ==========
   useEffect(() => {
@@ -136,9 +103,11 @@ const Message = () => {
       const response = await getMyConversations();
       const convList =
         response?.result || response?.data?.result || response?.data || [];
+
+      console.log("✅ Loaded conversations:", convList);
       setConversations(convList);
 
-      // Check if there's a pending conversation to select
+      // Auto-select pending conversation
       const pendingId = sessionStorage.getItem("pendingConversationId");
       if (pendingId) {
         const targetConv = convList.find(
@@ -150,7 +119,7 @@ const Message = () => {
         sessionStorage.removeItem("pendingConversationId");
       }
     } catch (error) {
-      console.error("Error loading conversations:", error);
+      console.error("❌ Error loading conversations:", error);
     } finally {
       setLoading(false);
     }
@@ -163,41 +132,124 @@ const Message = () => {
       const response = await getMessages(conversationId);
       const msgList =
         response?.result || response?.data?.result || response?.data || [];
+
+      console.log("📨 Loaded messages:", msgList.length);
       setMessages(msgList);
       scrollToBottom();
     } catch (error) {
-      console.error("Error loading messages:", error);
+      console.error("❌ Error loading messages:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ========== SELECT CONVERSATION ==========
-  const handleSelectConversation = (conversation) => {
-    setSelectedConversation(conversation);
-    const convId = conversation.conversationId || conversation.id;
-    loadMessages(convId);
+  const handleVoiceCall = () => {
+    if (!selectedConversation) {
+      alert("Please select a conversation first");
+      return;
+    }
+
+    const remotePeer = selectedConversation.participants?.find(
+      (p) => p.userId !== currentUser?.userId
+    );
+
+    if (!remotePeer) {
+      alert("Cannot find recipient");
+      return;
+    }
+
+    console.log("📞 Starting voice call with:", remotePeer);
+    startCall(
+      selectedConversation.id || selectedConversation.conversationId,
+      remotePeer,
+      "voice"
+    );
   };
+  const handleVideoCall = () => {
+    if (!selectedConversation) {
+      alert("Please select a conversation first");
+      return;
+    }
+
+    const remotePeer = selectedConversation.participants?.find(
+      (p) => p.userId !== currentUser?.userId
+    );
+
+    if (!remotePeer) {
+      alert("Cannot find recipient");
+      return;
+    }
+
+    console.log("📹 Starting video call with:", remotePeer);
+    startCall(
+      selectedConversation.id || selectedConversation.conversationId,
+      remotePeer,
+      "video"
+    );
+  };
+  // ========== SELECT CONVERSATION ==========
+  // const handleSelectConversation = useCallback((conversation) => {
+  //   const convId = conversation.conversationId || conversation.id;
+  //   console.log("📂 Selecting conversation:", convId);
+
+  //   setSelectedConversation(conversation);
+  //   currentConversationRef.current = convId;
+  //   loadMessages(convId);
+  // }, []);
+  const handleSelectConversation = useCallback((conversation) => {
+    const convId = conversation.conversationId || conversation.id;
+
+    setSelectedConversation(conversation);
+    currentConversationRef.current = convId;
+    loadMessages(convId);
+
+    // ⭐ Join socket room
+    if (sendMessage) {
+      sendMessage("join_conversation", convId);
+    }
+  }, []);
 
   // ========== SEND MESSAGE ==========
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedConversation) return;
 
-    const currentUser = getUserInfo();
     if (!currentUser) {
       alert("Vui lòng đăng nhập để gửi tin nhắn");
       return;
     }
 
+    const convId =
+      selectedConversation.conversationId || selectedConversation.id;
+
+    // Create optimistic message
+    const tempMessage = {
+      id: `temp-${Date.now()}`,
+      conversationId: convId,
+      message: newMessage.trim(),
+      me: true,
+      sender: {
+        userId: currentUser.userId,
+        username: currentUser.username,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        avatar: currentUser.avatar,
+      },
+      createdDate: new Date().toISOString(),
+      isPending: true,
+    };
+
+    // Add optimistic message immediately
+    setMessages((prev) => [...prev, tempMessage]);
+    setNewMessage("");
+    scrollToBottom();
+
     try {
       setSending(true);
-      const convId =
-        selectedConversation.conversationId || selectedConversation.id;
 
       const payload = {
         conversationId: convId,
-        message: newMessage.trim(),
+        message: tempMessage.message,
       };
 
       console.log("📤 Sending message:", payload);
@@ -208,19 +260,19 @@ const Message = () => {
         response?.data ||
         response;
 
-      console.log("✅ Message sent:", sentMessage);
+      console.log("✅ Message sent successfully:", sentMessage);
 
-      // Add message to local state
-      setMessages((prev) => [...prev, sentMessage]);
-      setNewMessage("");
-      scrollToBottom();
+      // Replace temp message with real message
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempMessage.id ? { ...sentMessage, isPending: false } : msg
+        )
+      );
 
-      // Emit via WebSocket
-      if (socket && connected) {
-        socket.emit("message", sentMessage);
-      }
+      // Refresh conversations to update last message
+      // loadConversations();
 
-      // Add property context as first message if it exists
+      // Send property context if first message
       if (
         propertyContext &&
         messages.length === 0 &&
@@ -242,51 +294,125 @@ const Message = () => {
       }
     } catch (error) {
       console.error("❌ Error sending message:", error);
+
+      // Remove optimistic message on error
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
       alert("Không thể gửi tin nhắn. Vui lòng thử lại.");
     } finally {
       setSending(false);
     }
   };
 
-  // ========== RECEIVE MESSAGE ==========
-  const handleReceiveMessage = (data) => {
-    const currentUser = getUserInfo();
-    if (!currentUser) return;
+  // ========== HANDLE MESSAGE RECEIVED (SOCKET) ==========
+  const handleMessageReceived = useCallback((data) => {
+    console.log("📩 WebSocket message received:", data);
 
-    const convId =
-      selectedConversation?.conversationId || selectedConversation?.id;
-    const msgConvId = data.conversationId || data.conversation?.conversationId;
+    const msgConvId = data.conversationId;
+    const currentConvId = currentConversationRef.current;
 
-    if (convId && msgConvId === convId) {
-      setMessages((prev) => {
-        // Avoid duplicates
-        const exists = prev.some(
-          (msg) =>
-            (msg.messageId && msg.messageId === data.messageId) ||
-            (msg.id && msg.id === data.id)
-        );
-        if (exists) return prev;
-        return [...prev, data];
-      });
-      scrollToBottom();
+    if (!currentConvId || msgConvId !== currentConvId) {
+      console.log("ℹ️ Message for different conversation");
+      return;
     }
 
-    // Update conversation list (move to top)
-    setConversations((prev) => {
-      const updated = prev.filter((c) => {
-        const cId = c.conversationId || c.id;
-        return cId !== msgConvId;
-      });
-      const targetConv = prev.find((c) => {
-        const cId = c.conversationId || c.id;
-        return cId === msgConvId;
-      });
-      if (targetConv) {
-        return [{ ...targetConv, lastMessage: data }, ...updated];
+    setMessages((prev) => {
+      const msgId = data.id || data.messageId;
+
+      // 1️⃣ Block duplicates
+      if (prev.some((msg) => msg.id === msgId)) {
+        console.log("⚠️ Duplicate message blocked");
+        return prev;
       }
-      return prev;
+
+      // 2️⃣ Replace temp message
+      const tempIndex = prev.findIndex(
+        (m) => m.isPending && m.message === data.message
+      );
+
+      if (tempIndex !== -1) {
+        const updated = [...prev];
+        updated[tempIndex] = { ...data, isPending: false };
+        return updated;
+      }
+
+      // 3️⃣ Append normally
+      return [...prev, data];
     });
-  };
+    setConversations((prev) => {
+      const convId = data.conversationId;
+      const exists = prev.some((c) => (c.conversationId || c.id) === convId);
+
+      // Nếu conversation chưa có trong list -> reload
+      if (!exists) {
+        loadConversations();
+        return prev;
+      }
+
+      // Cập nhật last message
+      return prev.map((conv) => {
+        if ((conv.conversationId || conv.id) === convId) {
+          return {
+            ...conv,
+            lastMessage: data,
+            lastMessageTime:
+              data.createdDate || data.createdAt || new Date().toISOString(),
+          };
+        }
+        return conv;
+      });
+    });
+
+    scrollToBottom();
+  }, []);
+  // ⭐ Empty deps - uses ref, not state
+
+  // ========== HANDLE MESSAGE SENT (SOCKET) ==========
+  const handleMessageSent = useCallback((data) => {
+    console.log("📤 Message sent event:", data);
+
+    // Refresh conversations
+    // loadConversations();
+
+    // Update message if in current conversation
+    const msgConvId = data.conversationId;
+    const currentConvId = currentConversationRef.current;
+
+    if (currentConvId && msgConvId === currentConvId) {
+      setMessages((prev) => {
+        // Replace temp message with real one
+        const tempIdx = prev.findIndex(
+          (m) => m.isPending && m.message === data.message
+        );
+
+        if (tempIdx === -1) {
+          return prev;
+        }
+
+        const updated = [...prev];
+        updated[tempIdx] = {
+          ...data,
+          isPending: false,
+        };
+
+        return updated;
+      });
+    }
+  }, []); // ⭐ Empty deps - uses ref
+
+  // ========== REGISTER SOCKET CALLBACKS ==========
+  useEffect(() => {
+    if (!registerMessageCallbacks) {
+      console.warn("⚠️ Socket context not available");
+      return;
+    }
+
+    console.log("🔌 Registering socket callbacks");
+
+    registerMessageCallbacks({
+      onMessageReceived: handleMessageReceived,
+      onMessageSent: handleMessageSent,
+    });
+  }, []); // ⭐ Only depend on registerMessageCallbacks, NOT on the handlers
 
   // ========== SEARCH USERS ==========
   const handleSearchUsers = async () => {
@@ -338,7 +464,7 @@ const Message = () => {
   const scrollToBottom = () => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    }, [messages]);
   };
 
   // ========== FORMAT TIME ==========
@@ -367,9 +493,6 @@ const Message = () => {
       minute: "2-digit",
     });
   };
-
-  // Get current user
-  const currentUser = getUserInfo();
 
   // ========== RENDER ==========
   return (
@@ -433,15 +556,15 @@ const Message = () => {
                 <div className="flex items-center gap-2 text-xs">
                   <Circle
                     className={`w-2 h-2 ${
-                      connected
+                      isConnected
                         ? "fill-green-500 text-green-500"
                         : "fill-gray-400 text-gray-400"
                     }`}
                   />
                   <span
-                    className={connected ? "text-green-600" : "text-gray-500"}
+                    className={isConnected ? "text-green-600" : "text-gray-500"}
                   >
-                    {connected ? "Đã kết nối" : "Đang kết nối..."}
+                    {isConnected ? "Đã kết nối" : "Đang kết nối..."}
                   </span>
                 </div>
               </div>
@@ -517,10 +640,20 @@ const Message = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button className="p-2 hover:bg-gray-100 rounded-full transition">
+                      <button
+                        onClick={handleVoiceCall}
+                        disabled={callState.isInCall || callState.isRinging}
+                        className="p-2 hover:bg-gray-100 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Voice Call"
+                      >
                         <Phone className="w-5 h-5" />
                       </button>
-                      <button className="p-2 hover:bg-gray-100 rounded-full transition">
+                      <button
+                        onClick={handleVideoCall}
+                        disabled={callState.isInCall || callState.isRinging}
+                        className="p-2 hover:bg-gray-100 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Video Call"
+                      >
                         <Video className="w-5 h-5" />
                       </button>
                       <button className="p-2 hover:bg-gray-100 rounded-full transition">
@@ -542,11 +675,12 @@ const Message = () => {
                     ) : (
                       messages.map((msg) => (
                         <MessageBubble
-                          key={msg.messageId || msg.id}
+                          key={msg.id || msg.messageId}
                           message={msg}
                           isOwn={
+                            msg.me ||
                             (msg.senderId || msg.sender?.userId) ===
-                            currentUser?.userId
+                              currentUser?.userId
                           }
                           formatTime={formatMessageTime}
                         />
@@ -616,6 +750,7 @@ const Message = () => {
                 </div>
               )}
             </div>
+            <CallModal />
           </div>
         </main>
 
@@ -656,13 +791,19 @@ const ConversationItem = ({
 
   const displayName =
     conversation.name ||
+    conversation.conversationName ||
     otherParticipant?.fullName ||
     otherParticipant?.username ||
     "Unknown User";
 
   const lastMsg = conversation.lastMessage;
   const lastMsgText = lastMsg?.message || lastMsg?.content || "No messages yet";
-  const lastMsgTime = formatTime(lastMsg?.createdAt || lastMsg?.timestamp);
+  const lastMsgTime = formatTime(
+    conversation.lastMessageTime ||
+      lastMsg?.createdDate ||
+      lastMsg?.createdAt ||
+      lastMsg?.timestamp
+  );
 
   return (
     <div
@@ -688,23 +829,35 @@ const ConversationItem = ({
 };
 
 const MessageBubble = ({ message, isOwn, formatTime }) => {
+  const isMine = message.me !== undefined ? message.me : isOwn;
+
   return (
-    <div className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[70%] ${
-          isOwn ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
-        } rounded-2xl px-4 py-2`}
+          isMine ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
+        } rounded-2xl px-4 py-2 ${message.isPending ? "opacity-50" : ""}`}
       >
+        {!isMine && message.sender && (
+          <p className="text-xs font-semibold mb-1 text-gray-600">
+            {message.sender.firstName} {message.sender.lastName}
+          </p>
+        )}
+
         <p className="text-sm break-words">
           {message.message || message.content}
         </p>
-        <p
-          className={`text-xs mt-1 ${
-            isOwn ? "text-blue-100" : "text-gray-500"
-          }`}
-        >
-          {formatTime(message.createdAt || message.timestamp)}
-        </p>
+
+        <div className="flex items-center gap-2 mt-1">
+          <p
+            className={`text-xs ${isMine ? "text-blue-100" : "text-gray-500"}`}
+          >
+            {formatTime(
+              message.createdDate || message.createdAt || message.timestamp
+            )}
+          </p>
+          {message.isPending && <Loader className="w-3 h-3 animate-spin" />}
+        </div>
       </div>
     </div>
   );
@@ -796,7 +949,9 @@ const SearchModal = ({
 
 // Helper function
 const getConversationName = (conversation, currentUserId) => {
-  if (conversation.name) return conversation.name;
+  if (conversation.name || conversation.conversationName) {
+    return conversation.name || conversation.conversationName;
+  }
 
   const otherParticipant = conversation.participants?.find(
     (p) => (p.userId || p.id) !== currentUserId

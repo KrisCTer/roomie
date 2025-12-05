@@ -24,4 +24,12 @@ public class WebSocketSessionService {
     public void deleteSession(String sessionId) {
         webSocketSessionRepository.deleteBySocketSessionId(sessionId);
     }
+
+    /**
+     * Find WebSocket session by userId
+     * Used for call signaling to find target user's socket connection
+     */
+    public WebSocketSession findByUserId(String userId) {
+        return webSocketSessionRepository.findByUserId(userId).orElse(null);
+    }
 }

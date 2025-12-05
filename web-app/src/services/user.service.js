@@ -7,11 +7,8 @@ import { API } from "../configurations/configuration";
 export const getAllUsers = () => 
   BaseService.get(API.GET_ALL_USERS);
 
-export const getUserById = (userId) => {
-  return httpClient
-    .get(API.GET_USER(userId))
-    .then((res) => res.data);
-};
+export const getUserById = (userId) => 
+  BaseService.get(API.GET_USER(userId));
 
 export const getMyInfo = () => 
   BaseService.get(API.GET_MY_INFO);
@@ -23,16 +20,9 @@ export const deleteUser = (userId) =>
   BaseService.delete(API.DELETE_USER(userId));
 
 // ========= PROFILE (Profile Service) =========
-export const getMyProfile = () => {
-  return httpClient
-    .get(API.GET_MY_PROFILE)
-    .then((res) => res.data);
-};
-export const updateProfile = (data) => {
-  return httpClient
-    .put(API.UPDATE_MY_PROFILE, data)
-    .then((res) => res.data);
-};
+export const getMyProfile = () => 
+  BaseService.get(API.GET_MY_PROFILE);
+
 export const updateMyProfile = (profileData) =>
   BaseService.put(API.UPDATE_MY_PROFILE, profileData);
 
@@ -42,13 +32,8 @@ export const getUserProfile = (profileId) =>
 export const getAllProfiles = () => 
   BaseService.get(API.GET_ALL_PROFILES);
 
-// export const searchUsers = (query) =>
-//   BaseService.post(API.SEARCH_USER, query);
-export const searchUsers = (params) => {
-  return httpClient
-    .get(API.SEARCH_USER, { params })
-    .then((res) => res.data);
-};
+export const searchUsers = (query) =>
+  BaseService.post(API.SEARCH_USER, query);
 
 // ========= FILE UPLOAD =========
 export const uploadAvatar = (file) => {
