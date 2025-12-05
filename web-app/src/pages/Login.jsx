@@ -13,11 +13,12 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login as loginApi } from "../services/auth.service"; // ⭐ THÊM
+import { login as loginApi } from "../services/auth.service";
 import { useTranslation } from "react-i18next";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
@@ -33,11 +34,10 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      await loginApi(form.username, form.password); // ⭐ GỌI API LOGIN
+      await loginApi(form.username, form.password);
       navigate("/home");
     } catch (err) {
-      console.error("Login error:", err);
-      alert(err?.response?.data?.message || "Sai tài khoản hoặc mật khẩu");
+      alert(t("auth.loginError"));
     }
   };
 
@@ -83,21 +83,21 @@ export default function Login() {
           }}
         >
           <Typography variant="h4" fontWeight={700} mb={1}>
-            Login
+            {t("auth.login")}
           </Typography>
 
           <Typography color="text.secondary" fontSize={14} mb={4}>
-            Welcome back! Please enter your account to continue.
+            {t("auth.loginSubtitle")}
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit}>
-            {/* EMAIL */}
+            {/* USERNAME */}
             <Typography fontWeight={600} fontSize={14} mb={0.5}>
-              Account
+              {t("auth.username")}
             </Typography>
             <TextField
               fullWidth
-              placeholder="admin@gmail.com"
+              placeholder={t("auth.usernamePlaceholder")}
               name="username"
               value={form.username}
               onChange={handleChange}
@@ -106,7 +106,7 @@ export default function Login() {
 
             {/* PASSWORD */}
             <Typography fontWeight={600} fontSize={14} mb={0.5}>
-              Password
+              {t("auth.password")}
             </Typography>
             <TextField
               fullWidth
@@ -129,12 +129,8 @@ export default function Login() {
 
             {/* FORGOT PASSWORD */}
             <Box textAlign="right" mb={3}>
-              <Link
-                underline="hover"
-                color="primary"
-                sx={{ cursor: "pointer", fontSize: 14 }}
-              >
-                Forgot password
+              <Link underline="hover" color="primary" sx={{ fontSize: 14 }}>
+                {t("auth.forgotPassword")}
               </Link>
             </Box>
 
@@ -153,18 +149,18 @@ export default function Login() {
                 mb: 2,
               }}
             >
-              Login
+              {t("auth.login")}
             </Button>
 
             {/* REGISTER LINK */}
             <Typography textAlign="center" fontSize={14} mb={1}>
-              Don’t you have an account?{" "}
+              {t("auth.noAccount")}{" "}
               <Link
                 underline="hover"
                 sx={{ cursor: "pointer" }}
                 onClick={() => navigate("/register")}
               >
-                Register
+                {t("auth.register")}
               </Link>
             </Typography>
 
@@ -175,7 +171,7 @@ export default function Login() {
                 sx={{ cursor: "pointer", fontWeight: 600 }}
                 onClick={() => navigate("/home")}
               >
-                Xem mà không cần đăng nhập
+                {t("auth.viewWithoutLogin")}
               </Link>
             </Typography>
           </Box>

@@ -14,16 +14,18 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
 import Footer from "../../components/layout/layoutHome/Footer";
+import { useTranslation } from "react-i18next";
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAllProperties } from "../../services/property.service";
 
 //
-// COMPONENT: PropertyCard (giống Airbnb)
+// COMPONENT: PropertyCard 
 //
 function PropertyCard({ item }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Card
@@ -64,7 +66,7 @@ function PropertyCard({ item }) {
         {/* Badge */}
         {item.badge && (
           <Chip
-            label={item.badge}
+            label={t("propertyCard.featured")}
             size="small"
             sx={{
               position: "absolute",
@@ -103,7 +105,7 @@ function PropertyCard({ item }) {
           color="primary"
           sx={{ mt: 0.5 }}
         >
-          {item.price} VND / tháng
+          {item.price} VND / {t("property.monthlyRent")}
         </Typography>
 
         <Typography variant="body2" mt={0.5} color="text.secondary" noWrap>
@@ -118,14 +120,16 @@ function PropertyCard({ item }) {
 // COMPONENT: Section (Rooms & Stays in ...)
 //
 function Section({ province, listings = [] }) {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ mt: 6 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h6" fontWeight={700}>
-          Rooms & Stays in {province}
+          {t("home.roomsIn")} {province}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          From system data
+          {t("home.fromSystemData")}
         </Typography>
       </Box>
 
@@ -155,6 +159,7 @@ function Section({ province, listings = [] }) {
 // HOME PAGE
 //
 export default function Home() {
+  const { t } = useTranslation();
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
@@ -172,8 +177,8 @@ export default function Home() {
       image:
         p.mediaList?.[0]?.url ||
         "https://via.placeholder.com/500x350?text=No+Image",
-      address: p.address?.fullAddress || "Unknown address",
-      province: p.address?.province || "Khác",
+      address: p.address?.fullAddress || t("home.unknownAddress"),
+      province: p.address?.province || t("home.other"),
       badge: p.propertyLabel === "HOT" ? "HOT" : "",
     }));
 
@@ -183,7 +188,12 @@ export default function Home() {
       return acc;
     }, {});
 
-    setSections(Object.entries(grouped).map(([province, items]) => ({ province, items })));
+    setSections(
+      Object.entries(grouped).map(([province, items]) => ({
+        province,
+        items,
+      }))
+    );
   };
 
   return (
@@ -202,14 +212,15 @@ export default function Home() {
       >
         <Container maxWidth="lg">
           <Typography variant="h3" fontWeight={800} textAlign="center">
-            Find the perfect place for your stay
+            {t("home.findPerfectPlace")}
           </Typography>
+
           <Typography
             variant="body1"
             textAlign="center"
             sx={{ mt: 1, opacity: 0.9 }}
           >
-            Explore thousands of apartments, houses and homestays worldwide.
+            {t("home.exploreThousands")}
           </Typography>
 
           <Box sx={{ mt: 4 }}>
