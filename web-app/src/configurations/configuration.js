@@ -66,7 +66,7 @@ export const API = {
 
   // ========= PROPERTY (Property Service - Port 8083) =========
   // Public Property endpoints
-  CREATE_PROPERTY: "/property",
+  CREATE_PROPERTY: "/property/",
   UPDATE_PROPERTY: (id) => `/property/${id}`,
   GET_PROPERTY: (id) => `/property/${id}`,
   DELETE_PROPERTY: (id) => `/property/${id}`,
@@ -74,6 +74,7 @@ export const API = {
   SEARCH_PROPERTY: "/property/search",
   PROPERTY_BY_PRICE: "/property/by-price",
   PROPERTY_BY_PROVINCE: "/property/by-province",
+  PROPERTY_BY_ME: "/property/owner/me",
 
   // Internal Property endpoints
   PROPERTY_INTERNAL_PENDING: "/property/internal/pending",

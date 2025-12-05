@@ -25,3 +25,6 @@ export const getPropertiesByPrice = (min, max) =>
 
 export const getPropertiesByProvince = (province) =>
   BaseService.get(API.PROPERTY_BY_PROVINCE, { province });
+
+export const getPropertiesByOwner = (params) =>
+  BaseService.get(API.PROPERTY_BY_ME, params);

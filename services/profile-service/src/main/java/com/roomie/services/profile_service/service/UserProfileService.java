@@ -167,7 +167,8 @@ public class UserProfileService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         return getByUserId(userId);
     }
-    @Cacheable(value = "profile", key = "#userId")
+
+//    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getByUserId(String userId) {
         System.out.println("Load DB because cache miss");
         return userProfileRepository.findByUserId(userId)

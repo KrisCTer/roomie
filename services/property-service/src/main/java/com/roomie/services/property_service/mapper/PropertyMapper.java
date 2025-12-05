@@ -15,7 +15,6 @@ public interface PropertyMapper {
     // ES document mapping (basic)
     @Mapping(target = "monthlyRent", expression = "java(entity.getMonthlyRent() != null ? entity.getMonthlyRent().doubleValue() : null)")
     @Mapping(target = "province", source = "address.province")
-    @Mapping(target = "location", source = "address.location")
     PropertyDocument toDocument(Property entity);
 
     Property toEntityFromDocument(PropertyDocument doc);
