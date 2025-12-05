@@ -1,4 +1,4 @@
-package com.roomie.services.profile_service.configuration;
+package com.roomie.services.property_service.configuration;
 
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;

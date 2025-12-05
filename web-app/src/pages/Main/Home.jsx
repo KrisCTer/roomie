@@ -10,9 +10,11 @@ import {
   IconButton,
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+
 import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
 import Footer from "../../components/layout/layoutHome/Footer";
+
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAllProperties } from "../../services/property.service";
@@ -30,6 +32,7 @@ function ListingRow({ title, subtitle, listings = [] }) {
         <Typography variant="h6" fontWeight={600}>
           {title}
         </Typography>
+
         {subtitle && (
           <Typography variant="body2" color="text.secondary">
             {subtitle}
@@ -107,7 +110,7 @@ function ListingRow({ title, subtitle, listings = [] }) {
               </Typography>
 
               <Typography noWrap variant="body2" color="text.secondary">
-                {item.address?.district || item.city || "Không rõ khu vực"}
+                {item.address?.district || item.city || "Unknown area"}
               </Typography>
             </CardContent>
           </Card>
@@ -118,7 +121,7 @@ function ListingRow({ title, subtitle, listings = [] }) {
 }
 
 //
-// HOME PAGE
+// HOME PAGE (ENGLISH VERSION)
 //
 export default function Home() {
   const [hcmListings, setHcmListings] = useState([]);
@@ -131,7 +134,6 @@ export default function Home() {
   const loadListings = async () => {
     try {
       const res = await getAllProperties();
-      console.log("PROPERTY RESPONSE =", res);
 
       const list = Array.isArray(res)
         ? res
@@ -143,15 +145,13 @@ export default function Home() {
         ? res.content
         : [];
 
-      console.log("LIST PARSED =", list);
-
       const formatted = list.map((p) => ({
         id: p.propertyId || p._id,
         title: p.title,
         price: Number(p.monthlyRent).toLocaleString(),
         city: p.address?.district || p.address?.province || "",
         rating: 4.9,
-        badge: p.propertyLabel === "HOT" ? "Được khách yêu thích" : "",
+        badge: p.propertyLabel === "HOT" ? "Guest Favorite" : "",
         image: p.mediaList?.[0]?.url || "https://via.placeholder.com/400x300",
         nights: 1,
       }));
@@ -159,11 +159,14 @@ export default function Home() {
       const hcm = formatted.filter(
         (p) =>
           p.city.toLowerCase().includes("hồ chí minh") ||
-          p.city.toLowerCase().includes("quận")
+          p.city.toLowerCase().includes("ho chi minh") ||
+          p.city.toLowerCase().includes("district")
       );
 
-      const hanoi = formatted.filter((p) =>
-        p.city.toLowerCase().includes("hà nội")
+      const hanoi = formatted.filter(
+        (p) =>
+          p.city.toLowerCase().includes("hà nội") ||
+          p.city.toLowerCase().includes("ha noi")
       );
 
       setHcmListings(hcm);
@@ -177,7 +180,7 @@ export default function Home() {
     <Box sx={{ minHeight: "100vh", bgcolor: "#0b1b2a" }}>
       <Header />
 
-      {/* HERO */}
+      {/* HERO SECTION */}
       <Box
         sx={{
           pt: 6,
@@ -189,8 +192,9 @@ export default function Home() {
         <Container maxWidth="lg">
           <Box sx={{ textAlign: "center", color: "white", mb: 4 }}>
             <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
-              Tìm nơi ở phù hợp cho chuyến đi của bạn
+              Find the perfect place for your stay
             </Typography>
+
             <Typography
               variant="body1"
               sx={{
@@ -199,8 +203,8 @@ export default function Home() {
                 color: "rgba(241,245,249,0.85)",
               }}
             >
-              Khám phá hàng ngàn căn hộ, nhà ở, homestay với giá minh bạch và
-              đặt phòng nhanh chóng, an toàn.
+              Explore thousands of apartments, houses, and homestays with
+              transparent pricing and fast, secure booking.
             </Typography>
           </Box>
 
@@ -212,14 +216,14 @@ export default function Home() {
       <Box sx={{ bgcolor: "#f9fafb", pb: 8 }}>
         <Container maxWidth="lg" sx={{ pt: 4 }}>
           <ListingRow
-            title="Nơi lưu trú được ưa chuộng tại Hồ Chí Minh"
-            subtitle="Dữ liệu từ hệ thống"
+            title="Popular Stays in Ho Chi Minh City"
+            subtitle="From system data"
             listings={hcmListings}
           />
 
           <ListingRow
-            title="Căn phòng tại Hà Nội"
-            subtitle="Dữ liệu từ hệ thống"
+            title="Rooms & Stays in Hanoi"
+            subtitle="From system data"
             listings={hnListings}
           />
         </Container>

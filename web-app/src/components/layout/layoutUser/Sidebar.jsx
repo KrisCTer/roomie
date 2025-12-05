@@ -20,8 +20,8 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     { icon: BarChart3, label: t("Dashboards"), path: "/dashboard" },
     { icon: User, label: t("Profile"), path: "/profile" },
     { icon: Building, label: t("My Properties"), path: "/my-properties" },
-    { icon: Contact, label: t("Contracts"), path: "/contract-signing" },
-    { icon: MessageSquare, label: t("Message"), path: "/Message" },
+    { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
+    { icon: MessageSquare, label: t("Message"), path: "/message" },
     { icon: Plus, label: t("Add Property"), path: "/add-property" },
     { icon: LogOut, label: t("Logout"), path: "/logout" },
   ];

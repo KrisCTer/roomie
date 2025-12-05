@@ -1,4 +1,4 @@
-package com.roomie.services.identity_service.dto.response;
+package com.roomie.services.property_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +15,7 @@ public class UserProfileResponse {
     String userId;
     String username;
     String email;
+    String phoneNumber;
     String firstName;
     String lastName;
     LocalDate dob;

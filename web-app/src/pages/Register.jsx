@@ -11,17 +11,30 @@ import {
   Alert,
   Stack,
 } from "@mui/material";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { register as registerApi } from "../services/auth.service";
 
 export default function Register() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("admin@gmail.com");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  // FORM STATES
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirm: "",
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+  });
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   const [showSnack, setShowSnack] = useState(false);
   const [snackMsg, setSnackMsg] = useState("");
@@ -33,29 +46,56 @@ export default function Register() {
     setShowSnack(false);
   };
 
+  // SUBMIT HANDLER
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !email || !password) {
+    const {
+      username,
+      email,
+      password,
+      confirm,
+      firstName,
+      lastName,
+      phoneNumber,
+    } = form;
+
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !firstName ||
+      !lastName ||
+      !phoneNumber
+    ) {
       setSnackType("error");
-      setSnackMsg("Please fill all fields");
+      setSnackMsg("Please fill all required fields!");
       setShowSnack(true);
       return;
     }
 
     if (password !== confirm) {
       setSnackType("error");
-      setSnackMsg("Password and confirm password do not match");
+      setSnackMsg("Passwords do not match");
       setShowSnack(true);
       return;
     }
 
     setLoading(true);
     try {
-      await registerApi({ username, email, password });
+      await registerApi({
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        phoneNumber,
+      });
+
       setSnackType("success");
       setSnackMsg("Register successfully. Please login.");
       setShowSnack(true);
+
       setTimeout(() => navigate("/login"), 800);
     } catch (err) {
       console.error(err);
@@ -92,10 +132,10 @@ export default function Register() {
           flexDirection: { xs: "column", md: "row" },
         }}
       >
-        {/* Ảnh bên trái – dùng cùng ảnh với login hoặc 1 ảnh khác trong /public/images */}
+        {/* Left Image */}
         <CardMedia
           component="img"
-          image="/images/login-livingroom.jpg" // đổi nếu bạn muốn ảnh khác
+          image="/images/login-livingroom.jpg"
           alt="Register"
           sx={{
             width: { xs: "100%", md: "50%" },
@@ -104,7 +144,7 @@ export default function Register() {
           }}
         />
 
-        {/* Form bên phải */}
+        {/* Form Section */}
         <CardContent
           sx={{
             width: { xs: "100%", md: "50%" },
@@ -123,42 +163,89 @@ export default function Register() {
 
           <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={2.2}>
+              {/* Username */}
               <TextField
-                size="medium"
-                label="User name"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                label="Username"
+                value={form.username}
+                onChange={(e) => handleChange("username", e.target.value)}
                 fullWidth
               />
+
+              {/* First + Last Name */}
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="First Name"
+                  value={form.firstName}
+                  onChange={(e) => handleChange("firstName", e.target.value)}
+                  fullWidth
+                />
+                <TextField
+                  label="Last Name"
+                  value={form.lastName}
+                  onChange={(e) => handleChange("lastName", e.target.value)}
+                  fullWidth
+                />
+              </Stack>
+
+              {/* Phone Number */}
               <TextField
-                size="medium"
+                label="Phone Number"
+                value={form.phoneNumber}
+                onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                fullWidth
+              />
+
+              {/* Email */}
+              <TextField
+                label="Email"
                 type="email"
-                label="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={(e) => handleChange("email", e.target.value)}
                 fullWidth
               />
+
+              {/* Password */}
               <TextField
-                size="medium"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 label="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={form.password}
+                onChange={(e) => handleChange("password", e.target.value)}
                 fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <Button
+                      onClick={() => setShowPassword(!showPassword)}
+                      sx={{ minWidth: "40px" }}
+                    >
+                      {showPassword ? <EyeOff /> : <Eye />}
+                    </Button>
+                  ),
+                }}
               />
+              {/* Confirm Password */}
               <TextField
-                size="medium"
-                type="password"
-                label="Confirm password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
+                type={showConfirmPassword ? "text" : "password"}
+                label="Confirm Password"
+                value={form.confirm}
+                onChange={(e) => handleChange("confirm", e.target.value)}
                 fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <Button
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      sx={{ minWidth: "40px" }}
+                    >
+                      {showConfirmPassword ? <EyeOff /> : <Eye />}
+                    </Button>
+                  ),
+                }}
               />
 
               <Button
                 type="submit"
                 variant="contained"
-                size="large"
                 fullWidth
                 disabled={loading}
                 sx={{
@@ -186,16 +273,10 @@ export default function Register() {
               <Divider>or sign up with</Divider>
 
               <Stack direction="row" spacing={2} justifyContent="center">
-                <Button
-                  variant="outlined"
-                  sx={{ textTransform: "none", borderRadius: 999, px: 3 }}
-                >
+                <Button variant="outlined" sx={{ borderRadius: 999, px: 3 }}>
                   Google
                 </Button>
-                <Button
-                  variant="outlined"
-                  sx={{ textTransform: "none", borderRadius: 999, px: 3 }}
-                >
+                <Button variant="outlined" sx={{ borderRadius: 999, px: 3 }}>
                   Facebook
                 </Button>
               </Stack>
@@ -204,17 +285,14 @@ export default function Register() {
         </CardContent>
       </Card>
 
+      {/* Snackbar */}
       <Snackbar
         open={showSnack}
         autoHideDuration={3000}
         onClose={handleCloseSnackBar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          severity={snackType}
-          onClose={handleCloseSnackBar}
-          sx={{ width: "100%" }}
-        >
+        <Alert severity={snackType} onClose={handleCloseSnackBar}>
           {snackMsg}
         </Alert>
       </Snackbar>

@@ -62,10 +62,10 @@ export default function SearchBar() {
               textTransform: "uppercase",
             }}
           >
-            Địa điểm
+            Location
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Địa điểm bất kỳ
+            Any location
           </Typography>
         </Box>
 
@@ -93,10 +93,10 @@ export default function SearchBar() {
               textTransform: "uppercase",
             }}
           >
-            Thời gian
+            Time
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Thời gian bất kỳ
+            Any time
           </Typography>
         </Box>
 
@@ -124,10 +124,10 @@ export default function SearchBar() {
               textTransform: "uppercase",
             }}
           >
-            Khách
+            Guests
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Thêm khách
+            Add guests
           </Typography>
         </Box>
 

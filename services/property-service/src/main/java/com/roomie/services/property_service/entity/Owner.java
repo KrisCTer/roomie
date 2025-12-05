@@ -11,6 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class Owner {
     String ownerId;           // contractId user đăng bài
     String name;
-    String phone;
+    String phoneNumber;
     String email;
 }

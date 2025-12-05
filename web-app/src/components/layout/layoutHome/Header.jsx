@@ -1,4 +1,4 @@
-// src/components/Header.jsx
+// web-app/src/components/layout/layoutHome/Header.jsx
 import {
   AppBar,
   Toolbar,
@@ -11,17 +11,19 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import LanguageIcon from "@mui/icons-material/Language";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   isAuthenticated,
   removeToken,
 } from "../../../services/localStorageService";
+import SettingsMenu from "../../common/SettingsMenu";
 
 export default function Header() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const loggedIn = isAuthenticated();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -71,15 +73,14 @@ export default function Header() {
               px: 0,
             }}
           >
-            Nơi lưu trú
+            {t("common.properties")}
           </Button>
         </Box>
 
         {/* Right side */}
         <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton color="inherit">
-            <LanguageIcon />
-          </IconButton>
+          {/* Settings Menu */}
+          <SettingsMenu />
 
           {!loggedIn ? (
             <>
@@ -89,7 +90,7 @@ export default function Header() {
                 sx={{ textTransform: "none" }}
                 onClick={() => navigate("/dashboard")}
               >
-                Trở thành chủ nhà
+                {t("header.becomeHost")}
               </Button>
 
               <Button
@@ -97,7 +98,7 @@ export default function Header() {
                 sx={{ textTransform: "none" }}
                 onClick={() => navigate("/login")}
               >
-                Đăng nhập
+                {t("common.login")}
               </Button>
 
               <Button
@@ -111,7 +112,7 @@ export default function Header() {
                   bgcolor: "#2563eb",
                 }}
               >
-                Đăng ký
+                {t("common.register")}
               </Button>
             </>
           ) : (
@@ -119,7 +120,6 @@ export default function Header() {
               {/* Khi ĐÃ đăng nhập */}
               <IconButton onClick={handleOpenMenu}>
                 <Avatar sx={{ bgcolor: "#2563eb" }}>
-                  {/* Nếu có tên user thì lấy chữ cái đầu */}
                   {(localStorage.getItem("user") &&
                     JSON.parse(
                       localStorage.getItem("user")
@@ -147,7 +147,7 @@ export default function Header() {
                     navigate("/profile");
                   }}
                 >
-                  Hồ sơ của tôi
+                  {t("header.myProfile")}
                 </MenuItem>
 
                 <MenuItem
@@ -156,11 +156,11 @@ export default function Header() {
                     navigate("/dashboard");
                   }}
                 >
-                  Dashboard chủ nhà
+                  {t("header.hostDashboard")}
                 </MenuItem>
 
                 <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
-                  Đăng xuất
+                  {t("common.logout")}
                 </MenuItem>
               </Menu>
             </>

@@ -20,15 +20,15 @@ export default function Footer() {
               Roomie
             </Typography>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)" }}>
-              Nền tảng tìm kiếm và đặt nơi lưu trú nhanh chóng, an toàn và tiện
-              lợi trên toàn Việt Nam.
+              Fast, safe and convenient accommodation search and booking
+              platform across Vietnam.
             </Typography>
           </Grid>
 
           {/* Cột 2 */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Về chúng tôi
+              About Us
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Link
@@ -36,14 +36,14 @@ export default function Footer() {
                 underline="hover"
                 sx={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Giới thiệu
+                Introduce
               </Link>
               <Link
                 href="#"
                 underline="hover"
                 sx={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Tin tức
+                News
               </Link>
               <Link
                 href="#"
@@ -57,7 +57,7 @@ export default function Footer() {
                 underline="hover"
                 sx={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Tuyển dụng
+                Careers
               </Link>
             </Box>
           </Grid>
@@ -73,21 +73,21 @@ export default function Footer() {
                 underline="hover"
                 sx={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Trung tâm trợ giúp
+                Help Center
               </Link>
               <Link
                 href="#"
                 underline="hover"
                 sx={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Câu hỏi thường gặp
+                Frequently Asked Questions
               </Link>
               <Link
                 href="#"
                 underline="hover"
                 sx={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Chính sách hoàn tiền
+                Refund Policy
               </Link>
             </Box>
           </Grid>
@@ -95,7 +95,7 @@ export default function Footer() {
           {/* Cột 4 */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Kết nối với chúng tôi
+              Connect with Us
             </Typography>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
@@ -137,7 +137,7 @@ export default function Footer() {
             fontSize: 14,
           }}
         >
-          <Typography>© 2025 Roomie. Tất cả các quyền được bảo lưu.</Typography>
+          <Typography>© 2025 Roomie. All rights reserved.</Typography>
 
           <Box
             sx={{
@@ -152,14 +152,14 @@ export default function Footer() {
               underline="hover"
               sx={{ color: "rgba(255,255,255,0.7)" }}
             >
-              Điều khoản dịch vụ
+              Terms of Service
             </Link>
             <Link
               href="#"
               underline="hover"
               sx={{ color: "rgba(255,255,255,0.7)" }}
             >
-              Chính sách bảo mật
+              Privacy Policy
             </Link>
             <Link
               href="#"

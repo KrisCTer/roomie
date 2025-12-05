@@ -3,10 +3,10 @@ import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
 export const createPermission = (payload) =>
-  BaseService.post(API.PERMISSION_CREATE, payload);
+  BaseService.post(API.CREATE_PERMISSION, payload);
 
-export const getPermissions = () =>
-  BaseService.get(API.PERMISSION_GET_ALL);
+export const getAllPermissions = () =>
+  BaseService.get(API.GET_ALL_PERMISSIONS);
 
-export const getPermission = (id) =>
-  BaseService.get(API.PERMISSION_GET(id));
+export const deletePermission = (permission) =>
+  BaseService.delete(API.DELETE_PERMISSION(permission));

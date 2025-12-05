@@ -3,20 +3,25 @@ import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
 export const getAllProperties = (params) =>
-  BaseService.get(API.PROPERTY_GET_ALL, params);
+  BaseService.get(API.GET_ALL_PROPERTIES, params);
 
 export const getPropertyById = (id) =>
-  BaseService.get(API.PROPERTY_GET(id));
+  BaseService.get(API.GET_PROPERTY(id));
 
 export const createProperty = (data) =>
-  BaseService.post(API.PROPERTY_CREATE, data);
+  BaseService.post(API.CREATE_PROPERTY, data);
 
 export const updateProperty = (id, data) =>
-  BaseService.put(API.PROPERTY_UPDATE(id), data);
+  BaseService.put(API.UPDATE_PROPERTY(id), data);
 
 export const deleteProperty = (id) =>
-  BaseService.delete(API.PROPERTY_DELETE(id));
+  BaseService.delete(API.DELETE_PROPERTY(id));
 
-export const getPropertiesByOwner = (ownerId) =>
-  BaseService.get(API.PROPERTY_GET_BY_OWNER(ownerId));
+export const searchProperties = (query) =>
+  BaseService.get(API.SEARCH_PROPERTY, { q: query });
 
+export const getPropertiesByPrice = (min, max) =>
+  BaseService.get(API.PROPERTY_BY_PRICE, { min, max });
+
+export const getPropertiesByProvince = (province) =>
+  BaseService.get(API.PROPERTY_BY_PROVINCE, { province });
