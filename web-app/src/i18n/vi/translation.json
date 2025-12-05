@@ -104,5 +104,33 @@
     "online": "Đang hoạt động",
     "offline": "Ngoại tuyến",
     "typeMessage": "Nhập tin nhắn..."
+  },
+  "searchBar": {
+  "locationLabel": "Địa điểm bất kỳ",
+  "locationPlaceholder": "Địa điểm bất kỳ",
+  "priceLabel": "Giá bất kỳ",
+  "pricePlaceholder": "Giá bất kỳ",
+  "acreageLabel": "Diện tích bất kỳ",
+  "acreagePlaceholder": "Diện tích bất kỳ"
+  },
+  "chat": {
+    "title": "Bắt đầu cuộc trò chuyện mới",
+    "placeholder": "Nhập để tìm kiếm người dùng...",
+    "error": "Không thể tìm kiếm người dùng. Vui lòng thử lại.",
+    "noResult": "Không tìm thấy người dùng khớp với \"{{query}}\"",
+    "hint": "Hãy tìm một người dùng để bắt đầu trò chuyện"
+  },
+  "propertyCard": {
+    "featured": "Nổi bật",
+    "forSale": "Cho thuê",
+    "beds": "Phòng ngủ",
+    "baths": "Phòng tắm",
+    "sqft": "Diện tích"
+  },
+  "sideMenu": {
+    "home": "Trang chủ",
+    "friends": "Bạn bè",
+    "groups": "Nhóm",
+    "chat": "Trò chuyện"
   }
 }

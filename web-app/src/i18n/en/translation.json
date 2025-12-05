@@ -104,5 +104,33 @@
     "online": "Online",
     "offline": "Offline",
     "typeMessage": "Type a message..."
+  },
+  "chat": {
+    "title": "Start a new conversation",
+    "placeholder": "Start typing to search users...",
+    "error": "Failed to search users. Please try again.",
+    "noResult": "No users found matching \"{{query}}\"",
+    "hint": "Search for a user to start a conversation"
+  },
+  "searchBar": {
+    "locationLabel": "Location",
+    "locationPlaceholder": "Any location",
+    "priceLabel": "Price",
+    "pricePlaceholder": "Any price",
+    "acreageLabel": "Acreage",
+    "acreagePlaceholder": "Any acreage"
+  },
+  "propertyCard": {
+    "featured": "Featured",
+    "forSale": "For Sale",
+    "beds": "Beds",
+    "baths": "Baths",
+    "sqft": "Sqft"
+  },
+  "sideMenu": {
+    "home": "Home",
+    "friends": "Friends",
+    "groups": "Groups",
+    "chat": "Chat"
   }
 }

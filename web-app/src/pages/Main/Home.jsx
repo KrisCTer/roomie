@@ -72,7 +72,13 @@ function ListingRow({ title, subtitle, listings = [] }) {
               <CardMedia
                 component="img"
                 height="180"
-                image={item.thumbnail || item.imageUrl || item.images?.[0]}
+                image={
+                  item.image ||
+                  item.thumbnail ||
+                  item.imageUrl ||
+                  item.images?.[0] ||
+                  "https://via.placeholder.com/400x300"
+                }
                 sx={{ objectFit: "cover" }}
               />
 
@@ -110,7 +116,11 @@ function ListingRow({ title, subtitle, listings = [] }) {
               </Typography>
 
               <Typography noWrap variant="body2" color="text.secondary">
-                {item.address?.district || item.city || "Unknown area"}
+                {item.district ||
+                  item.cityLabel ||
+                  item.address?.district ||
+                  item.city ||
+                  "Unknown area"}
               </Typography>
             </CardContent>
           </Card>
@@ -124,53 +134,59 @@ function ListingRow({ title, subtitle, listings = [] }) {
 // HOME PAGE (ENGLISH VERSION)
 //
 export default function Home() {
-  const [hcmListings, setHcmListings] = useState([]);
-  const [hnListings, setHnListings] = useState([]);
+  const [sections, setSections] = useState([]);
 
   useEffect(() => {
     loadListings();
   }, []);
 
+  const extractListFromResponse = (res) => {
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.result)) return res.result;
+    if (Array.isArray(res?.content)) return res.content;
+    if (Array.isArray(res?.result?.content)) return res.result.content;
+    return [];
+  };
+
   const loadListings = async () => {
     try {
       const res = await getAllProperties();
+      const list = extractListFromResponse(res);
 
-      const list = Array.isArray(res)
-        ? res
-        : Array.isArray(res?.data)
-        ? res.data
-        : Array.isArray(res?.result)
-        ? res.result
-        : Array.isArray(res?.content)
-        ? res.content
-        : [];
+      const formatted = list.map((p) => {
+        const province = p.address?.province || "Khác";
+        const district = p.address?.district || "";
+        return {
+          id: p.propertyId || p._id,
+          title: p.title,
+          price: Number(p.monthlyRent || 0).toLocaleString(),
+          province,
+          district,
+          cityLabel: district || province,
+          rating: 4.9,
+          badge: p.propertyLabel === "HOT" ? "Guest Favorite" : "",
+          image:
+            p.mediaList?.[0]?.url || "https://via.placeholder.com/400x300",
+          nights: 1,
+        };
+      });
 
-      const formatted = list.map((p) => ({
-        id: p.propertyId || p._id,
-        title: p.title,
-        price: Number(p.monthlyRent).toLocaleString(),
-        city: p.address?.district || p.address?.province || "",
-        rating: 4.9,
-        badge: p.propertyLabel === "HOT" ? "Guest Favorite" : "",
-        image: p.mediaList?.[0]?.url || "https://via.placeholder.com/400x300",
-        nights: 1,
-      }));
+      const grouped = formatted.reduce((acc, item) => {
+        const key = item.province || "Khác";
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(item);
+        return acc;
+      }, {});
 
-      const hcm = formatted.filter(
-        (p) =>
-          p.city.toLowerCase().includes("hồ chí minh") ||
-          p.city.toLowerCase().includes("ho chi minh") ||
-          p.city.toLowerCase().includes("district")
+      const sectionsData = Object.entries(grouped).map(
+        ([provinceName, listings]) => ({
+          provinceName,
+          listings,
+        })
       );
 
-      const hanoi = formatted.filter(
-        (p) =>
-          p.city.toLowerCase().includes("hà nội") ||
-          p.city.toLowerCase().includes("ha noi")
-      );
-
-      setHcmListings(hcm);
-      setHnListings(hanoi);
+      setSections(sectionsData);
     } catch (err) {
       console.error("LOAD PROPERTY ERROR", err);
     }
@@ -215,17 +231,14 @@ export default function Home() {
       {/* LISTINGS */}
       <Box sx={{ bgcolor: "#f9fafb", pb: 8 }}>
         <Container maxWidth="lg" sx={{ pt: 4 }}>
-          <ListingRow
-            title="Popular Stays in Ho Chi Minh City"
-            subtitle="From system data"
-            listings={hcmListings}
-          />
-
-          <ListingRow
-            title="Rooms & Stays in Hanoi"
-            subtitle="From system data"
-            listings={hnListings}
-          />
+          {sections.map((section) => (
+            <ListingRow
+              key={section.provinceName}
+              title={`Rooms & Stays in ${section.provinceName}`}
+              subtitle="From system data"
+              listings={section.listings}
+            />
+          ))}
         </Container>
       </Box>
 

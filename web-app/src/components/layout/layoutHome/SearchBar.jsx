@@ -3,10 +3,12 @@ import { Box, Button, Divider, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function SearchBar() {
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 80);
@@ -22,7 +24,7 @@ export default function SearchBar() {
     <Box
       sx={{
         position: "sticky",
-        top: 80, // nằm dưới header, không đè lên
+        top: 80,
         zIndex: (theme) => theme.zIndex.appBar + 2,
         maxWidth: scrolled ? 720 : 880,
         mx: "auto",
@@ -44,7 +46,7 @@ export default function SearchBar() {
             : "0 18px 50px rgba(15,23,42,0.6)",
         }}
       >
-        {/* Địa điểm */}
+        {/* LOCATION */}
         <Box
           sx={{
             flex: 1,
@@ -62,11 +64,9 @@ export default function SearchBar() {
               textTransform: "uppercase",
             }}
           >
-            Location
+            {t("searchBar.locationLabel")}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Any location
-          </Typography>
+          
         </Box>
 
         <Divider
@@ -75,7 +75,7 @@ export default function SearchBar() {
           sx={{ display: { xs: "none", md: "block" } }}
         />
 
-        {/* Thời gian */}
+        {/* PRICE */}
         <Box
           sx={{
             flex: 1,
@@ -93,11 +93,9 @@ export default function SearchBar() {
               textTransform: "uppercase",
             }}
           >
-            Time
+            {t("searchBar.priceLabel")}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Any time
-          </Typography>
+          
         </Box>
 
         <Divider
@@ -106,7 +104,7 @@ export default function SearchBar() {
           sx={{ display: { xs: "none", md: "block" } }}
         />
 
-        {/* Khách */}
+        {/* ACREAGE */}
         <Box
           sx={{
             flex: 1,
@@ -124,14 +122,12 @@ export default function SearchBar() {
               textTransform: "uppercase",
             }}
           >
-            Guests
+            {t("searchBar.acreageLabel")}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Add guests
-          </Typography>
+          
         </Box>
 
-        {/* Nút search */}
+        {/* SEARCH BUTTON */}
         <Box
           sx={{ display: "flex", alignItems: "center", pr: { xs: 0, md: 1 } }}
         >

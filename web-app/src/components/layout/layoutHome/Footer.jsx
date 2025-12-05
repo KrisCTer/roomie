@@ -1,6 +1,9 @@
 import { Box, Container, Typography, Grid, Link, Divider } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -20,6 +23,7 @@ export default function Footer() {
               Roomie
             </Typography>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)" }}>
+              {/* Bạn có thể thêm key mới, ví dụ footer.description */}
               Fast, safe and convenient accommodation search and booking
               platform across Vietnam.
             </Typography>
@@ -28,36 +32,20 @@ export default function Footer() {
           {/* Cột 2 */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              About Us
+              {t("footer.about")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Introduce
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.introduction")}
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                News
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.news")}
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Blog
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.blog")}
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Careers
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.careers")}
               </Link>
             </Box>
           </Grid>
@@ -65,29 +53,17 @@ export default function Footer() {
           {/* Cột 3 */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Hỗ trợ
+              {t("footer.support")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Help Center
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.helpCenter")}
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Frequently Asked Questions
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.faq")}
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Refund Policy
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+                {t("footer.refundPolicy")}
               </Link>
             </Box>
           </Grid>
@@ -95,29 +71,17 @@ export default function Footer() {
           {/* Cột 4 */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Connect with Us
+              {t("footer.connect")}
             </Typography>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
                 Facebook
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
                 Instagram
               </Link>
-              <Link
-                href="#"
-                underline="hover"
-                sx={{ color: "rgba(255,255,255,0.7)" }}
-              >
+              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
                 Twitter
               </Link>
             </Box>
@@ -137,7 +101,7 @@ export default function Footer() {
             fontSize: 14,
           }}
         >
-          <Typography>© 2025 Roomie. All rights reserved.</Typography>
+          <Typography>{t("footer.copyright")}</Typography>
 
           <Box
             sx={{
@@ -147,26 +111,14 @@ export default function Footer() {
               mt: { xs: 2, sm: 0 },
             }}
           >
-            <Link
-              href="#"
-              underline="hover"
-              sx={{ color: "rgba(255,255,255,0.7)" }}
-            >
-              Terms of Service
+            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              {t("footer.terms")}
             </Link>
-            <Link
-              href="#"
-              underline="hover"
-              sx={{ color: "rgba(255,255,255,0.7)" }}
-            >
-              Privacy Policy
+            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              {t("footer.privacy")}
             </Link>
-            <Link
-              href="#"
-              underline="hover"
-              sx={{ color: "rgba(255,255,255,0.7)" }}
-            >
-              Cookies
+            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              {t("footer.cookies")}
             </Link>
           </Box>
         </Box>
