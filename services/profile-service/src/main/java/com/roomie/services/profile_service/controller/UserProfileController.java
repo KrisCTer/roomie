@@ -1,5 +1,6 @@
 package com.roomie.services.profile_service.controller;
 
+import com.roomie.services.profile_service.dto.request.SearchUserRequest;
 import com.roomie.services.profile_service.dto.request.UpdateProfileRequest;
 import com.roomie.services.profile_service.dto.response.ApiResponse;
 import com.roomie.services.profile_service.dto.response.UserProfileResponse;
@@ -75,10 +76,8 @@ public class UserProfileController {
                 .build();
     }
 
-    @PostMapping("/users/search")
-    ApiResponse<List<UserProfileResponse>> search(@RequestBody String request) {
-        return ApiResponse.<List<UserProfileResponse>>builder()
-                .result(userProfileService.search(request))
-                .build();
+    @PostMapping("/search")
+    public ApiResponse<List<UserProfileResponse>> search(@RequestBody SearchUserRequest request) {
+        return ApiResponse.success(userProfileService.search(request),"Search User successfuly");
     }
 }

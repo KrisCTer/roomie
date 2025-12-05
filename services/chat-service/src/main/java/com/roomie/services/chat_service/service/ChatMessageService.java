@@ -85,11 +85,11 @@ public class ChatMessageService {
 
         // Create chat message
         chatMessage = chatMessageRepository.save(chatMessage);
-        String message = chatMessage.getMessage();
+        ChatMessageResponse response = chatMessageMapper.toChatMessageResponse(chatMessage);
 
         // Connected server
         server.getAllClients().stream().forEach(client -> {
-            client.sendEvent("message", message);
+            client.sendEvent("message", response);
         });
 
         // convert to Response

@@ -17,18 +17,15 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { useTranslation } from "react-i18next";
 import { search as searchUsers } from "../../services/userService";
 
 const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
-  const { t } = useTranslation();
-
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(null);
-
+  // Memoized search function to avoid recreating on every render
   const handleSearch = useCallback(async (query) => {
     if (!query?.trim()) {
       setSearchResults([]);
@@ -49,14 +46,16 @@ const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
       }
     } catch (err) {
       console.error("Error searching users:", err);
-      setError(t("chat.error"));
+      setError("Failed to search users. Please try again.");
       setSearchResults([]);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
+  // Debounced search effect
   useEffect(() => {
+    // Clear previous timeout
     const timeoutId = setTimeout(() => {
       if (searchQuery) {
         handleSearch(searchQuery);
@@ -65,11 +64,12 @@ const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
         setHasSearched(false);
         setError(null);
       }
-    }, 500);
+    }, 500); // 500ms debounce time
 
+    // Cleanup function to clear timeout if component unmounts or query changes
     return () => clearTimeout(timeoutId);
   }, [searchQuery, handleSearch]);
-
+  // No need for handleKeyPress anymore as search is debounced
   const handleClearSearch = () => {
     setSearchQuery("");
     setSearchResults([]);
@@ -109,12 +109,11 @@ const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
       }}
     >
       <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: "bold" }}>
-        {t("chat.title")}
-      </Typography>
-
+        Start a new conversation
+      </Typography>{" "}
       <TextField
         fullWidth
-        placeholder={t("chat.placeholder")}
+        placeholder="Start typing to search users..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         InputProps={{
@@ -137,8 +136,7 @@ const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
         }}
         sx={{ mb: 2 }}
         autoFocus
-      />
-
+      />{" "}
       <Box sx={{ height: 300, overflow: "auto" }}>
         {loading && (
           <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
@@ -187,7 +185,7 @@ const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
         {!loading && !error && searchResults.length === 0 && hasSearched && (
           <Box sx={{ p: 2, textAlign: "center" }}>
             <Typography color="text.secondary">
-              {t("chat.noResult", { query: searchQuery })}
+              No users found matching "{searchQuery}"
             </Typography>
           </Box>
         )}
@@ -195,7 +193,7 @@ const NewChatPopover = ({ anchorEl, open, onClose, onSelectUser }) => {
         {!loading && !error && !hasSearched && (
           <Box sx={{ p: 2, textAlign: "center" }}>
             <Typography color="text.secondary">
-              {t("chat.hint")}
+              Search for a user to start a conversation
             </Typography>
           </Box>
         )}

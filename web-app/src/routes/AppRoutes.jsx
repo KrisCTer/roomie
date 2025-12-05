@@ -12,6 +12,7 @@ import PropertyDetail from "../pages/Main/PropertyDetail";
 import PropertySearch from "../pages/Main/PropertySearch";
 import ContractSigning from "../pages/User/ContractSigning";
 import MyContracts from "../pages/User/MyContracts";
+import { SocketProvider } from "../contexts/SocketContext";
 
 const AppRoutes = () => {
   return (
@@ -22,7 +23,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/message" element={<Message />} />
+        <Route path="/message" element={<Message />} />{" "}
         <Route path="/admin" element={<Admin />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/add-property" element={<AddProperty />} />

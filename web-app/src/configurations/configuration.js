@@ -47,7 +47,7 @@ export const API = {
   UPDATE_ID_CARD: "/profile/me/id-card",
   GET_USER_PROFILE: (profileId) => `/profile/users/${profileId}`,
   GET_ALL_PROFILES: "/profile/users",
-  SEARCH_USER: "/profile/users/search",
+  SEARCH_USER: "/profile/search",
 
   // Internal Profile
   INTERNAL_CREATE_PROFILE: "/profile/internal/users",
