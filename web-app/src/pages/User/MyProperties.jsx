@@ -385,7 +385,9 @@ const MyProperties = () => {
                     </div>
                     <div>
                       <span className="text-gray-600">Phone:</span>
-                      <p className="font-medium mt-1">{property.owner.phone}</p>
+                      <p className="font-medium mt-1">
+                        {property.owner.phoneNumber}
+                      </p>
                     </div>
                     <div>
                       <span className="text-gray-600">Email:</span>
