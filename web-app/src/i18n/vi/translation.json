@@ -57,17 +57,28 @@
     "bookNow": "Đặt ngay"
   },
   "auth": {
-    "username": "Tên đăng nhập",
-    "email": "Email",
-    "password": "Mật khẩu",
-    "confirmPassword": "Xác nhận mật khẩu",
-    "forgotPassword": "Quên mật khẩu?",
-    "noAccount": "Chưa có tài khoản?",
-    "hasAccount": "Đã có tài khoản?",
-    "loginSuccess": "Đăng nhập thành công",
-    "registerSuccess": "Đăng ký thành công",
-    "loginError": "Đăng nhập thất bại",
-    "registerError": "Đăng ký thất bại"
+  "login": "Đăng nhập",
+  "register": "Đăng ký",
+  "loginSubtitle": "Chào mừng trở lại! Vui lòng nhập tài khoản của bạn.",
+  "registerSubtitle": "Tạo tài khoản để bắt đầu khám phá nơi ở.",
+  "username": "Tài khoản",
+  "usernamePlaceholder": "Nhập tài khoản",
+  "password": "Mật khẩu",
+  "confirmPassword": "Xác nhận mật khẩu",
+  "email": "Email",
+  "firstName": "Tên",
+  "lastName": "Họ",
+  "phoneNumber": "Số điện thoại",
+  "forgotPassword": "Quên mật khẩu?",
+  "noAccount": "Chưa có tài khoản?",
+  "hasAccount": "Đã có tài khoản?",
+  "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
+  "registerFailed": "Đăng ký thất bại. Vui lòng kiểm tra thông tin.",
+  "loginError": "Sai tài khoản hoặc mật khẩu.",
+  "fillAll": "Vui lòng điền đầy đủ thông tin!",
+  "passwordNotMatch": "Mật khẩu không khớp!",
+  "processing": "Đang xử lý...",
+  "orSignupWith": "hoặc đăng ký bằng"
   },
   "dashboard": {
     "welcome": "Chào mừng trở lại",
@@ -104,5 +115,41 @@
     "online": "Đang hoạt động",
     "offline": "Ngoại tuyến",
     "typeMessage": "Nhập tin nhắn..."
+  },
+  "searchBar": {
+  "locationLabel": "Địa điểm bất kỳ",
+  "locationPlaceholder": "Địa điểm bất kỳ",
+  "priceLabel": "Giá bất kỳ",
+  "pricePlaceholder": "Giá bất kỳ",
+  "acreageLabel": "Diện tích bất kỳ",
+  "acreagePlaceholder": "Diện tích bất kỳ"
+  },
+  "chat": {
+    "title": "Bắt đầu cuộc trò chuyện mới",
+    "placeholder": "Nhập để tìm kiếm người dùng...",
+    "error": "Không thể tìm kiếm người dùng. Vui lòng thử lại.",
+    "noResult": "Không tìm thấy người dùng khớp với \"{{query}}\"",
+    "hint": "Hãy tìm một người dùng để bắt đầu trò chuyện"
+  },
+  "propertyCard": {
+    "featured": "Nổi bật",
+    "forSale": "Cho thuê",
+    "beds": "Phòng ngủ",
+    "baths": "Phòng tắm",
+    "sqft": "Diện tích"
+  },
+  "sideMenu": {
+    "home": "Trang chủ",
+    "friends": "Bạn bè",
+    "groups": "Nhóm",
+    "chat": "Trò chuyện"
+  },
+  "home": {
+  "findPerfectPlace": "Tìm nơi ở hoàn hảo cho bạn",
+  "exploreThousands": "Khám phá hàng ngàn căn hộ, nhà và homestay trên toàn thế giới.",
+  "roomsIn": "Phòng & Nơi lưu trú tại",
+  "fromSystemData": "Từ dữ liệu hệ thống",
+  "unknownAddress": "Địa chỉ không xác định",
+  "other": "Khác"
   }
 }

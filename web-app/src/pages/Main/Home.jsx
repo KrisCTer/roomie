@@ -14,106 +14,141 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
 import Footer from "../../components/layout/layoutHome/Footer";
+import { useTranslation } from "react-i18next";
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAllProperties } from "../../services/property.service";
 
 //
-// COMPONENT: ListingRow
+// COMPONENT: PropertyCard 
 //
-function ListingRow({ title, subtitle, listings = [] }) {
-  const safeListings = Array.isArray(listings) ? listings : [];
+function PropertyCard({ item }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
-    <Box sx={{ mt: 5 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6" fontWeight={600}>
-          {title}
-        </Typography>
+    <Card
+      onClick={() => navigate(`/property/${item.id}`)}
+      sx={{
+        width: 280,
+        borderRadius: 4,
+        bgcolor: "#fff",
+        cursor: "pointer",
+        flexShrink: 0,
+        transition: "0.25s",
+        "&:hover": { transform: "scale(1.03)" },
+        boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
+      }}
+    >
+      {/* IMAGE */}
+      <Box
+        sx={{
+          height: 220,
+          borderRadius: 4,
+          overflow: "hidden",
+          position: "relative",
+          mx: 1,
+          mt: 1,
+        }}
+      >
+        <CardMedia
+          component="img"
+          image={item.image}
+          alt={item.title}
+          sx={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
 
-        {subtitle && (
-          <Typography variant="body2" color="text.secondary">
-            {subtitle}
-          </Typography>
+        {/* Badge */}
+        {item.badge && (
+          <Chip
+            label={t("propertyCard.featured")}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              bgcolor: "#fff",
+              fontWeight: 700,
+              opacity: 0.9,
+            }}
+          />
         )}
+
+        {/* Favorite button */}
+        <IconButton
+          size="small"
+          sx={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            bgcolor: "rgba(255,255,255,0.9)",
+          }}
+        >
+          <FavoriteBorderIcon />
+        </IconButton>
       </Box>
 
+      {/* CONTENT */}
+      <CardContent sx={{ p: 2 }}>
+        <Typography variant="subtitle1" fontWeight={700} noWrap>
+          {item.title}
+        </Typography>
+
+        <Typography
+          variant="subtitle2"
+          fontWeight={700}
+          color="primary"
+          sx={{ mt: 0.5 }}
+        >
+          {item.price} VND / {t("property.monthlyRent")}
+        </Typography>
+
+        <Typography variant="body2" mt={0.5} color="text.secondary" noWrap>
+          {item.address}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+}
+
+//
+// COMPONENT: Section (Rooms & Stays in ...)
+//
+function Section({ province, listings = [] }) {
+  const { t } = useTranslation();
+
+  return (
+    <Box sx={{ mt: 6 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h6" fontWeight={700}>
+          {t("home.roomsIn")} {province}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {t("home.fromSystemData")}
+        </Typography>
+      </Box>
+
+      {/* Horizontal scroll */}
       <Box
         sx={{
           display: "flex",
-          overflowX: "auto",
           gap: 3,
+          overflowX: "auto",
           pb: 1,
           "&::-webkit-scrollbar": { height: 6 },
           "&::-webkit-scrollbar-thumb": {
-            bgcolor: "rgba(148,163,184,0.9)",
-            borderRadius: 999,
+            bgcolor: "rgba(100,100,100,0.3)",
+            borderRadius: 3,
           },
         }}
       >
-        {safeListings.map((item) => (
-          <Card
-            key={item.id}
-            onClick={() => navigate(`/property/${item.id}`)}
-            sx={{
-              width: 260,
-              borderRadius: 3,
-              overflow: "hidden",
-              bgcolor: "white",
-              flexShrink: 0,
-              cursor: "pointer",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-              "&:hover": { transform: "scale(1.02)", transition: "0.2s" },
-            }}
-          >
-            <Box sx={{ position: "relative" }}>
-              <CardMedia
-                component="img"
-                height="180"
-                image={item.thumbnail || item.imageUrl || item.images?.[0]}
-                sx={{ objectFit: "cover" }}
-              />
-
-              {item.badge && (
-                <Chip
-                  label={item.badge}
-                  size="small"
-                  sx={{
-                    position: "absolute",
-                    top: 10,
-                    left: 10,
-                    bgcolor: "rgba(255,255,255,0.9)",
-                    fontSize: 11,
-                    fontWeight: 600,
-                  }}
-                />
-              )}
-
-              <IconButton
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                  bgcolor: "rgba(255,255,255,0.9)",
-                }}
-              >
-                <FavoriteBorderIcon fontSize="small" />
-              </IconButton>
-            </Box>
-
-            <CardContent sx={{ p: 2 }}>
-              <Typography noWrap variant="subtitle2" fontWeight={600}>
-                {item.title}
-              </Typography>
-
-              <Typography noWrap variant="body2" color="text.secondary">
-                {item.address?.district || item.city || "Unknown area"}
-              </Typography>
-            </CardContent>
-          </Card>
+        {(listings || []).map((item) => (
+          <PropertyCard key={item.id} item={item} />
         ))}
       </Box>
     </Box>
@@ -121,111 +156,89 @@ function ListingRow({ title, subtitle, listings = [] }) {
 }
 
 //
-// HOME PAGE (ENGLISH VERSION)
+// HOME PAGE
 //
 export default function Home() {
-  const [hcmListings, setHcmListings] = useState([]);
-  const [hnListings, setHnListings] = useState([]);
+  const { t } = useTranslation();
+  const [sections, setSections] = useState([]);
 
   useEffect(() => {
-    loadListings();
+    loadData();
   }, []);
 
-  const loadListings = async () => {
-    try {
-      const res = await getAllProperties();
+  const loadData = async () => {
+    const res = await getAllProperties();
+    const raw = res?.result || [];
 
-      const list = Array.isArray(res)
-        ? res
-        : Array.isArray(res?.data)
-        ? res.data
-        : Array.isArray(res?.result)
-        ? res.result
-        : Array.isArray(res?.content)
-        ? res.content
-        : [];
+    const formatted = raw.map((p) => ({
+      id: p.propertyId,
+      title: p.title,
+      price: Number(p.monthlyRent).toLocaleString(),
+      image:
+        p.mediaList?.[0]?.url ||
+        "https://via.placeholder.com/500x350?text=No+Image",
+      address: p.address?.fullAddress || t("home.unknownAddress"),
+      province: p.address?.province || t("home.other"),
+      badge: p.propertyLabel === "HOT" ? "HOT" : "",
+    }));
 
-      const formatted = list.map((p) => ({
-        id: p.propertyId || p._id,
-        title: p.title,
-        price: Number(p.monthlyRent).toLocaleString(),
-        city: p.address?.district || p.address?.province || "",
-        rating: 4.9,
-        badge: p.propertyLabel === "HOT" ? "Guest Favorite" : "",
-        image: p.mediaList?.[0]?.url || "https://via.placeholder.com/400x300",
-        nights: 1,
-      }));
+    const grouped = formatted.reduce((acc, item) => {
+      if (!acc[item.province]) acc[item.province] = [];
+      acc[item.province].push(item);
+      return acc;
+    }, {});
 
-      const hcm = formatted.filter(
-        (p) =>
-          p.city.toLowerCase().includes("hồ chí minh") ||
-          p.city.toLowerCase().includes("ho chi minh") ||
-          p.city.toLowerCase().includes("district")
-      );
-
-      const hanoi = formatted.filter(
-        (p) =>
-          p.city.toLowerCase().includes("hà nội") ||
-          p.city.toLowerCase().includes("ha noi")
-      );
-
-      setHcmListings(hcm);
-      setHnListings(hanoi);
-    } catch (err) {
-      console.error("LOAD PROPERTY ERROR", err);
-    }
+    setSections(
+      Object.entries(grouped).map(([province, items]) => ({
+        province,
+        items,
+      }))
+    );
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#0b1b2a" }}>
+    <Box sx={{ bgcolor: "#0b1b2a", minHeight: "100vh" }}>
       <Header />
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <Box
         sx={{
-          pt: 6,
+          pt: 8,
           pb: 10,
           background:
-            "radial-gradient(circle at top, #1d4ed8 0, #0b1b2a 45%, #020617 100%)",
+            "radial-gradient(circle at top, #1d4ed8, #0b1b2a 50%, #020617 100%)",
+          color: "#fff",
         }}
       >
         <Container maxWidth="lg">
-          <Box sx={{ textAlign: "center", color: "white", mb: 4 }}>
-            <Typography variant="h3" fontWeight={700} sx={{ mb: 1 }}>
-              Find the perfect place for your stay
-            </Typography>
+          <Typography variant="h3" fontWeight={800} textAlign="center">
+            {t("home.findPerfectPlace")}
+          </Typography>
 
-            <Typography
-              variant="body1"
-              sx={{
-                maxWidth: 540,
-                mx: "auto",
-                color: "rgba(241,245,249,0.85)",
-              }}
-            >
-              Explore thousands of apartments, houses, and homestays with
-              transparent pricing and fast, secure booking.
-            </Typography>
+          <Typography
+            variant="body1"
+            textAlign="center"
+            sx={{ mt: 1, opacity: 0.9 }}
+          >
+            {t("home.exploreThousands")}
+          </Typography>
+
+          <Box sx={{ mt: 4 }}>
+            <SearchBar />
           </Box>
-
-          <SearchBar />
         </Container>
       </Box>
 
       {/* LISTINGS */}
-      <Box sx={{ bgcolor: "#f9fafb", pb: 8 }}>
-        <Container maxWidth="lg" sx={{ pt: 4 }}>
-          <ListingRow
-            title="Popular Stays in Ho Chi Minh City"
-            subtitle="From system data"
-            listings={hcmListings}
-          />
-
-          <ListingRow
-            title="Rooms & Stays in Hanoi"
-            subtitle="From system data"
-            listings={hnListings}
-          />
+      <Box sx={{ bgcolor: "#f5f7fa", py: 6 }}>
+        <Container maxWidth="lg">
+          {sections.map((sec) => (
+            <Section
+              key={sec.province}
+              province={sec.province}
+              listings={sec.items}
+            />
+          ))}
         </Container>
       </Box>
 
