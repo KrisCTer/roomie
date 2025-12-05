@@ -15,23 +15,28 @@ import {
   DollarSign,
   Home,
   Tag,
+  MessageCircle,
 } from "lucide-react";
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../components/layout/layoutHome/Header.jsx";
 import Footer from "../../components/layout/layoutHome/Footer.jsx";
 
 import { getPropertyById } from "../../services/property.service";
+import { createConversation } from "../../services/chat.service";
+import { getUserInfo } from "../../services/localStorageService";
 
 // ========================================================
 // MAIN COMPONENT
 // ========================================================
 const PropertyDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [contactingOwner, setContactingOwner] = useState(false);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -55,6 +60,104 @@ const PropertyDetail = () => {
     }
   };
 
+  // ==============================
+  // HANDLE CONTACT OWNER
+  // ==============================
+  const handleContactOwner = async () => {
+    try {
+      // Check if user is logged in
+      const currentUser = getUserInfo();
+      if (!currentUser) {
+        alert("Vui lòng đăng nhập để nhắn tin với chủ nhà");
+        navigate("/login");
+        return;
+      }
+
+      // Check if trying to message yourself
+      if (currentUser.userId === property.ownerId) {
+        alert("Bạn không thể nhắn tin cho chính mình");
+        return;
+      }
+
+      setContactingOwner(true);
+
+      // Create or get conversation with owner
+      const conversationData = {
+        type: "DIRECT",
+        participantIds: [property.ownerId],
+      };
+
+      console.log("Creating conversation with owner:", conversationData);
+      const response = await createConversation(conversationData);
+
+      const conversation =
+        response?.result ||
+        response?.data?.result ||
+        response?.data ||
+        response;
+
+      console.log("Conversation created/found:", conversation);
+
+      // Navigate to messages page with conversation selected
+      navigate("/messages", {
+        state: {
+          conversationId: conversation.conversationId,
+          propertyId: property.propertyId,
+          propertyTitle: property.title,
+          ownerId: property.ownerId,
+          ownerName:
+            property.owner?.fullName || property.owner?.username || "Owner",
+        },
+      });
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      alert("Không thể tạo cuộc trò chuyện. Vui lòng thử lại sau.");
+    } finally {
+      setContactingOwner(false);
+    }
+  };
+
+  // ==============================
+  // HANDLE BOOKING
+  // ==============================
+  const handleBooking = () => {
+    if (!checkIn || !checkOut) {
+      alert("Please select check-in and check-out dates");
+      return;
+    }
+
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+
+    if (checkInDate >= checkOutDate) {
+      alert("Check-out date must be after check-in date");
+      return;
+    }
+
+    // Calculate rental period
+    const days = Math.ceil(
+      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+    );
+    const totalCost = (property.monthlyRent / 30) * days;
+
+    console.log("Booking details:", {
+      propertyId: property.propertyId,
+      checkIn,
+      checkOut,
+      days,
+      totalCost: totalCost.toFixed(2),
+    });
+
+    alert(
+      `Booking request:\nProperty: ${
+        property.title
+      }\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}\nDays: ${days}\nEstimated cost: ${totalCost.toLocaleString()}đ`
+    );
+
+    // TODO: Implement actual booking logic
+    // navigate("/booking", { state: { property, checkIn, checkOut } });
+  };
+
   if (loading)
     return (
       <div className="flex min-h-screen items-center justify-center text-xl">
@@ -72,9 +175,11 @@ const PropertyDetail = () => {
   // ==============================
   // IMAGE LIST
   // ==============================
-  const images = property.mediaList?.map((i) => i.url) ?? [
-    "https://via.placeholder.com/800x600?text=No+Image",
-  ];
+  const images =
+    property.mediaList?.map((i) => i.url) ??
+    ["https://via.placeholder.com/800x600?text=No+Image"].map(
+      (url) => url + "?format=webp"
+    );
 
   const nextImage = () =>
     setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
@@ -97,251 +202,216 @@ const PropertyDetail = () => {
   };
 
   // ==============================
-  // FORMAT CURRENCY
-  // ==============================
-  const formatCurrency = (amount) => {
-    if (!amount) return "0";
-    return Number(amount).toLocaleString("vi-VN");
-  };
-
-  // ==============================
-  // BOOKING
-  // ==============================
-  const handleBooking = () => {
-    if (!checkIn || !checkOut) {
-      alert("Please choose check-in and check-out dates!");
-      return;
-    }
-
-    alert(
-      `Booking request sent!\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}`
-    );
-  };
-
-  // ==============================
-  // RENDER UI
+  // RENDER
   // ==============================
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         <Header />
 
-        <main className="flex-1 overflow-auto">
-          <div className="max-w-7xl mx-auto p-4 lg:p-8">
-            {/* =========================== */}
-            {/* TITLE + TOP SECTION */}
-            {/* =========================== */}
-            <header className="mb-6">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {property.title}
-                  </h1>
+        <main className="flex-1">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            {/* BREADCRUMB */}
+            <nav className="mb-6 text-sm text-gray-600">
+              <a href="/" className="hover:text-blue-600">
+                Home
+              </a>
+              {" > "}
+              <a href="/search" className="hover:text-blue-600">
+                Properties
+              </a>
+              {" > "}
+              <span className="text-gray-900">{property.title}</span>
+            </nav>
 
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>{property.address?.fullAddress || "N/A"}</span>
+            {/* TITLE & ACTIONS */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+              <div className="flex-1 mb-4 lg:mb-0">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {property.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-4 text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-sm">
+                      {property.address?.fullAddress ||
+                        `${property.address?.district}, ${property.address?.province}` ||
+                        "Location not specified"}
+                    </span>
                   </div>
-
-                  {/* Status Badges */}
-                  <div className="flex gap-2 mt-3">
-                    {property.propertyStatus && (
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                        {property.propertyStatus}
-                      </span>
-                    )}
-                    {property.propertyLabel && (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                  <div className="flex items-center gap-1">
+                    <Tag className="w-4 h-4" />
+                    <span className="text-sm">{property.propertyType}</span>
+                  </div>
+                  {property.propertyLabel &&
+                    property.propertyLabel !== "NONE" && (
+                      <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
                         {property.propertyLabel}
                       </span>
                     )}
-                    {property.status && (
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          property.status === "APPROVED"
-                            ? "bg-green-100 text-green-700"
-                            : property.status === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {property.status}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="text-right ml-4">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {formatCurrency(property.monthlyRent)} đ
-                  </div>
-                  <div className="text-gray-600">/month</div>
-                  {property.rentalDeposit && (
-                    <div className="text-sm text-gray-500 mt-2">
-                      Deposit: {formatCurrency(property.rentalDeposit)} đ
-                    </div>
-                  )}
                 </div>
               </div>
-            </header>
 
-            {/* =========================== */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsFavorite(!isFavorite)}
+                  className="p-3 border rounded-lg hover:bg-gray-50 transition"
+                  title="Add to favorites"
+                >
+                  <Heart
+                    className={`w-5 h-5 ${
+                      isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"
+                    }`}
+                  />
+                </button>
+                <button
+                  onClick={() => {
+                    const url = window.location.href;
+                    navigator.clipboard.writeText(url);
+                    alert("Link copied to clipboard!");
+                  }}
+                  className="p-3 border rounded-lg hover:bg-gray-50 transition"
+                  title="Share property"
+                >
+                  <Share2 className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+
             {/* IMAGE GALLERY */}
-            {/* =========================== */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-10">
-              <div className="lg:col-span-2 relative rounded-xl overflow-hidden bg-gray-200 h-96">
+            <div className="relative mb-8 bg-black rounded-xl overflow-hidden">
+              <div className="aspect-video">
                 <img
                   src={images[currentImageIndex]}
-                  alt="Main"
-                  className="w-full h-full object-cover"
+                  alt={`Property ${currentImageIndex + 1}`}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/800x600?text=Image+Not+Found";
+                  }}
                 />
-
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow hover:bg-white transition"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow hover:bg-white transition"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                  {images.map((_, idx) => (
-                    <div
-                      key={idx}
-                      className={`w-3 h-3 rounded-full cursor-pointer transition ${
-                        currentImageIndex === idx ? "bg-white" : "bg-white/50"
-                      }`}
-                      onClick={() => setCurrentImageIndex(idx)}
-                    />
-                  ))}
-                </div>
-
-                {/* Media Type Indicator */}
-                {property.mediaList?.[currentImageIndex]?.type && (
-                  <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                    {property.mediaList[currentImageIndex].type}
-                  </div>
-                )}
               </div>
 
-              <div className="hidden lg:grid grid-rows-2 gap-4">
-                {images.slice(1, 3).map((img, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl overflow-hidden bg-gray-200 cursor-pointer hover:opacity-80 transition"
-                    onClick={() => setCurrentImageIndex(i + 1)}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full transition shadow-lg"
                   >
-                    <img
-                      src={img}
-                      alt={`Thumbnail ${i + 1}`}
-                      className="w-full h-full object-cover"
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full transition shadow-lg"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+                    {currentImageIndex + 1} / {images.length}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* MAIN CONTENT */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* LEFT: PROPERTY DETAILS */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* OVERVIEW */}
+                <Section title="Property Overview">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Detail
+                      icon={<Bed className="w-5 h-5" />}
+                      label="Bedrooms"
+                      value={property.bedrooms || 0}
+                    />
+                    <Detail
+                      icon={<Bath className="w-5 h-5" />}
+                      label="Bathrooms"
+                      value={property.bathrooms || 0}
+                    />
+                    <Detail
+                      icon={<Car className="w-5 h-5" />}
+                      label="Garages"
+                      value={property.garages || 0}
+                    />
+                    <Detail
+                      icon={<Maximize className="w-5 h-5" />}
+                      label="Size"
+                      value={`${property.size || 0} m²`}
                     />
                   </div>
-                ))}
-              </div>
-            </section>
 
-            {/* =========================== */}
-            {/* MAIN CONTENT */}
-            {/* =========================== */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* LEFT CONTENT */}
-              <div className="lg:col-span-2 space-y-8">
+                  <div className="mt-6 pt-6 border-t">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          Monthly Rent
+                        </div>
+                        <div className="text-3xl font-bold text-blue-600">
+                          {property.monthlyRent?.toLocaleString()}đ
+                        </div>
+                        {property.rentalDeposit > 0 && (
+                          <div className="text-sm text-gray-600 mt-1">
+                            Deposit: {property.rentalDeposit?.toLocaleString()}đ
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">Rental Type</div>
+                        <div className="font-semibold">
+                          {property.rentalType}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
+
                 {/* DESCRIPTION */}
                 <Section title="Description">
-                  <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                    {property.description || "No description available"}
+                  <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                    {property.description || "No description available."}
                   </p>
                 </Section>
 
-                {/* PROPERTY DETAILS */}
-                <Section title="Property Details">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Detail
-                      label="Bedrooms"
-                      value={property.bedrooms || 0}
-                      icon={<Bed className="w-5 h-5" />}
-                    />
-                    <Detail
-                      label="Bathrooms"
-                      value={property.bathrooms || 0}
-                      icon={<Bath className="w-5 h-5" />}
-                    />
-                    <Detail
-                      label="Garages"
-                      value={property.garages || 0}
-                      icon={<Car className="w-5 h-5" />}
-                    />
-                    <Detail
-                      label="Size"
-                      value={property.size ? `${property.size} m²` : "N/A"}
-                      icon={<Maximize className="w-5 h-5" />}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 border-t pt-4 mt-4">
-                    <Detail
-                      label="Total Rooms"
-                      value={property.rooms || 0}
-                      icon={<Home className="w-5 h-5" />}
-                    />
-                    <Detail
-                      label="Property Type"
-                      value={property.propertyType || "N/A"}
-                      icon={<Tag className="w-5 h-5" />}
-                    />
-                  </div>
-                </Section>
-
-                {/* PRICING INFORMATION */}
-                <Section title="Pricing Information">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <DollarSign className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm text-gray-600">
-                          Monthly Rent
-                        </span>
-                      </div>
-                      <div className="text-2xl font-bold text-blue-600">
-                        {formatCurrency(property.monthlyRent)} đ
-                      </div>
-                    </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <DollarSign className="w-5 h-5 text-green-600" />
-                        <span className="text-sm text-gray-600">
-                          Rental Deposit
-                        </span>
-                      </div>
-                      <div className="text-2xl font-bold text-green-600">
-                        {formatCurrency(property.rentalDeposit)} đ
-                      </div>
-                    </div>
-                  </div>
-                </Section>
-
                 {/* AMENITIES */}
-                <Section title="Amenities & Features">
-                  {renderAmenity("Home Safety", property.amenities?.homeSafety)}
-                  {renderAmenity("Bedroom", property.amenities?.bedroom)}
-                  {renderAmenity("Kitchen", property.amenities?.kitchen)}
-                  {renderAmenity("Others", property.amenities?.others)}
-                  {!property.amenities?.homeSafety?.length &&
-                    !property.amenities?.bedroom?.length &&
-                    !property.amenities?.kitchen?.length &&
-                    !property.amenities?.others?.length && (
-                      <p className="text-gray-500">No amenities listed</p>
-                    )}
-                </Section>
+                {(property.amenities?.homeSafety?.length > 0 ||
+                  property.amenities?.bedroom?.length > 0 ||
+                  property.amenities?.kitchen?.length > 0 ||
+                  property.amenities?.others?.length > 0) && (
+                  <Section title="Amenities">
+                    <div className="space-y-4">
+                      {property.amenities?.homeSafety?.length > 0 && (
+                        <AmenityGroup
+                          title="Home Safety"
+                          items={property.amenities.homeSafety}
+                        />
+                      )}
+                      {property.amenities?.bedroom?.length > 0 && (
+                        <AmenityGroup
+                          title="Bedroom"
+                          items={property.amenities.bedroom}
+                        />
+                      )}
+                      {property.amenities?.kitchen?.length > 0 && (
+                        <AmenityGroup
+                          title="Kitchen"
+                          items={property.amenities.kitchen}
+                        />
+                      )}
+                      {property.amenities?.others?.length > 0 && (
+                        <AmenityGroup
+                          title="Others"
+                          items={property.amenities.others}
+                        />
+                      )}
+                    </div>
+                  </Section>
+                )}
 
-                {/* ADDRESS */}
-                <Section title="Address Information">
+                {/* LOCATION */}
+                <Section title="Location">
                   <div className="space-y-3">
                     <Info
                       label="Full Address"
@@ -356,45 +426,37 @@ const PropertyDetail = () => {
                       value={property.address?.houseNumber}
                     />
                   </div>
-                </Section>
 
-                {/* MAP */}
-                <Section title="Map Location">
-                  {property.address?.location ? (
-                    <div className="w-full h-64 rounded-lg overflow-hidden">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        loading="lazy"
-                        allowFullScreen
-                        referrerPolicy="no-referrer-when-downgrade"
-                        src={`https://www.google.com/maps?q=${property.address.location}&output=embed`}
-                      ></iframe>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-200 h-64 rounded-lg flex items-center justify-center text-gray-500">
-                      No Location Provided
+                  {property.address?.location && (
+                    <div className="mt-4 pt-4 border-t">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Coordinates: {property.address.location}
+                      </p>
+                      {/* TODO: Add Google Maps integration */}
+                      <div className="bg-gray-100 rounded-lg h-64 flex items-center justify-center text-gray-500">
+                        Map view coming soon
+                      </div>
                     </div>
                   )}
                 </Section>
               </div>
 
-              {/* RIGHT SIDEBAR */}
-              <div className="space-y-8">
-                {/* OWNER */}
-                <Section>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">
-                      {property.owner?.name?.charAt(0)?.toUpperCase() || "?"}
+              {/* RIGHT: SIDEBAR */}
+              <div className="space-y-6">
+                {/* OWNER INFO */}
+                <Section title="Contact Owner">
+                  {property.owner?.fullName && (
+                    <div className="mb-4 pb-4 border-b">
+                      <div className="text-lg font-semibold">
+                        {property.owner.fullName}
+                      </div>
+                      {property.owner.username && (
+                        <div className="text-sm text-gray-500">
+                          @{property.owner.username}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <h3 className="font-bold text-lg">
-                        {property.owner?.name || "Unknown Owner"}
-                      </h3>
-                      <p className="text-sm text-gray-500">Property Owner</p>
-                    </div>
-                  </div>
+                  )}
 
                   {property.owner?.phone && (
                     <Contact
@@ -409,8 +471,22 @@ const PropertyDetail = () => {
                     />
                   )}
 
-                  <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mt-5">
-                    Contact Owner
+                  <button
+                    onClick={handleContactOwner}
+                    disabled={contactingOwner}
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mt-5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {contactingOwner ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Connecting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="w-5 h-5" />
+                        <span>Contact Owner</span>
+                      </>
+                    )}
                   </button>
 
                   <div className="flex gap-2 mt-4">
@@ -455,8 +531,14 @@ const PropertyDetail = () => {
                   />
                   <Info label="Property Label" value={property.propertyLabel} />
                   <Info label="Approval Status" value={property.status} />
-                  {property.owner?.ownerId && (
-                    <Info label="Owner ID" value={property.owner.ownerId} />
+                  {property.ownerId && (
+                    <Info label="Owner ID" value={property.ownerId} />
+                  )}
+                  {property.createdDate && (
+                    <Info
+                      label="Listed on"
+                      value={formatDate(property.createdDate)}
+                    />
                   )}
                 </Section>
               </div>
@@ -499,65 +581,69 @@ const Info = ({ label, value }) => (
   </div>
 );
 
+const AmenityGroup = ({ title, items }) => (
+  <div>
+    <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
+    <div className="flex flex-wrap gap-2">
+      {items.map((item, index) => (
+        <span
+          key={index}
+          className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full"
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  </div>
+);
+
 const Contact = ({ icon, text }) => (
-  <div className="flex items-center gap-2 text-gray-600 text-sm mb-3">
-    {icon}
-    <span>{text}</span>
+  <div className="flex items-center gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
+    <div className="text-blue-600">{icon}</div>
+    <div className="text-sm font-medium">{text}</div>
+  </div>
+);
+
+const InputDate = ({ label, value, onChange }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <input
+      type="date"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
   </div>
 );
 
 const FavButton = ({ active, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-1 py-3 rounded-lg font-semibold border transition ${
-      active
-        ? "bg-red-50 border-red-300 text-red-600"
-        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-    }`}
+    className="flex-1 border border-gray-300 rounded-lg py-2 px-4 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
   >
-    <Heart className={`w-5 h-5 mx-auto ${active ? "fill-current" : ""}`} />
+    <Heart
+      className={`w-5 h-5 ${
+        active ? "fill-red-500 text-red-500" : "text-gray-600"
+      }`}
+    />
+    <span className="text-sm font-medium">{active ? "Saved" : "Save"}</span>
   </button>
 );
 
 const ShareButton = () => (
-  <button className="flex-1 py-3 rounded-lg font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-    <Share2 className="w-5 h-5 mx-auto" />
+  <button
+    onClick={() => {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url);
+      alert("Link copied to clipboard!");
+    }}
+    className="flex-1 border border-gray-300 rounded-lg py-2 px-4 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
+  >
+    <Share2 className="w-5 h-5 text-gray-600" />
+    <span className="text-sm font-medium">Share</span>
   </button>
 );
-
-const InputDate = ({ label, value, onChange }) => (
-  <div>
-    <label className="text-sm text-gray-600 mb-1 block">{label}</label>
-    <div className="flex items-center gap-2 border rounded-md px-3 py-2">
-      <Calendar className="w-4 h-4 text-gray-600" />
-      <input
-        type="date"
-        className="flex-1 outline-none"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
-  </div>
-);
-
-const renderAmenity = (title, items) => {
-  if (!items?.length) return null;
-
-  return (
-    <div className="mb-4">
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <div className="flex flex-wrap gap-2">
-        {items.map((i, idx) => (
-          <span
-            key={idx}
-            className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm"
-          >
-            {i}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 export default PropertyDetail;
