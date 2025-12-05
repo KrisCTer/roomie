@@ -19,7 +19,7 @@ public class Bill {
     @MongoId
     String id;
     String contractId;
-
+    String paymentId;
     // RENT
     Double rentPrice;
 
@@ -60,6 +60,7 @@ public class Bill {
 
     BillStatus status;
 
+    Instant paidAt;
     Instant createdAt;
     Instant updatedAt;
 }

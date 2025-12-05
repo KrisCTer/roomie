@@ -122,6 +122,30 @@ public class ContractController {
                         .body(ApiResponse.error("Contract not found", 404)));
     }
 
+    @PostMapping("/{id}/pause")
+    public ApiResponse<ContractResponse> pauseContract(
+            @PathVariable String id,
+            @RequestParam(required = false) String reason
+    ) {
+        ContractResponse response = service.pause(id, reason);
+        return ApiResponse.success(response, "Contract paused successfully");
+    }
+
+    @PostMapping("/{id}/resume")
+    public ApiResponse<ContractResponse> resumeContract(@PathVariable String id) {
+        ContractResponse response = service.resume(id);
+        return ApiResponse.success(response, "Contract resumed successfully");
+    }
+
+    @PostMapping("/{id}/terminate")
+    public ApiResponse<ContractResponse> terminateContract(
+            @PathVariable String id,
+            @RequestParam(required = false) String reason
+    ) {
+        ContractResponse response = service.terminate(id, reason);
+        return ApiResponse.success(response, "Contract terminated successfully");
+    }
+
     // Inner DTO for signature status
     private record SignatureStatus(
             boolean tenantSigned,
@@ -129,7 +153,9 @@ public class ContractController {
             boolean bothSigned,
             String contractStatus,
             String pdfUrl
-    ) {}
+    ) {
+    }
 
-    private record PdfInfo(String pdfUrl) {}
+    private record PdfInfo(String pdfUrl) {
+    }
 }

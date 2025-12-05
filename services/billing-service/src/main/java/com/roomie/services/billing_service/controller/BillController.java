@@ -55,4 +55,17 @@ public class BillController {
         service.deleteBill(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Delete billing successfully"));
     }
+    @PostMapping("/{billId}/send")
+    public ApiResponse<BillResponse> sendBill(@PathVariable String billId) {
+        BillResponse response = service.send(billId);
+        return ApiResponse.success(response, "Bill sent successfully");
+    }
+    @PostMapping("/{billId}/pay")
+    public ApiResponse<BillResponse> payBill(
+            @PathVariable String billId,
+            @RequestParam String paymentId
+    ) {
+        BillResponse response = service.pay(billId, paymentId);
+        return ApiResponse.success(response, "Bill paid successfully");
+    }
 }

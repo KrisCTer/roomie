@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,10 +41,6 @@ public class BillingService {
     @Transactional
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
     public BillResponse createBill(BillRequest req) {
-
-        // ============================
-        // 0. Parse billingMonth
-        // ============================
         ResponseEntity<ContractResponse> contractResp;
         try {
             contractResp = contractClient.get(req.getContractId());
@@ -68,9 +65,6 @@ public class BillingService {
             throw new AppException(ErrorCode.BILLING_MONTH_INVALID);
         }
 
-        // ============================
-        // 1. Check duplicate bill
-        // ============================
         Optional<Bill> existing = billRepository
                 .findByContractIdAndBillingMonth(req.getContractId(), billMonth);
 
@@ -78,9 +72,6 @@ public class BillingService {
             throw new AppException(ErrorCode.BILL_ALREADY_EXISTS);
         }
 
-        // ============================
-        // 2. Lấy bill tháng trước
-        // ============================
         Optional<Bill> prevBill = billRepository
                 .findFirstByContractIdOrderByCreatedAtDesc(req.getContractId());
 
@@ -98,18 +89,12 @@ public class BillingService {
             waterOld = req.getWaterOld();
         }
 
-        // ============================
-        // 3. Tính consumption
-        // ============================
         double electricityConsumption = req.getElectricityNew() - electricityOld;
         double electricityAmount = electricityConsumption * req.getElectricityUnitPrice();
 
         double waterConsumption = req.getWaterNew() - waterOld;
         double waterAmount = waterConsumption * req.getWaterUnitPrice();
 
-        // ============================
-        // 4. Total
-        // ============================
         double total = electricityAmount + waterAmount
                 + (req.getInternetPrice() != null ? req.getInternetPrice() : 0)
                 + (req.getParkingPrice() != null ? req.getParkingPrice() : 0)
@@ -118,9 +103,6 @@ public class BillingService {
                 + (req.getOtherPrice() != null ? req.getOtherPrice() : 0)
                 + (req.getRentPrice() != null ? req.getRentPrice() : 0);
 
-        // ============================
-        // 5. Lưu bill
-        // ============================
         Bill bill = Bill.builder()
                 .contractId(req.getContractId())
                 .billingMonth(billMonth)
@@ -148,7 +130,7 @@ public class BillingService {
 
                 .rentPrice(req.getRentPrice())
                 .totalAmount(total)
-                .status(BillStatus.PENDING)
+                .status(BillStatus.DRAFT)
 
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
@@ -156,6 +138,49 @@ public class BillingService {
 
         return billMapper.toResponse(billRepository.save(bill));
     }
+    public BillResponse send(String billId) {
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + billId));
+
+        // Validation
+        if (bill.getStatus() != BillStatus.DRAFT) {
+            throw new AppException(ErrorCode.INVALID_BILL_STATUS);
+        }
+
+        // State transition
+        bill.setStatus(BillStatus.PENDING);
+        bill.setUpdatedAt(Instant.now());
+        Bill saved = billRepository.save(bill);
+
+        // Notify tenant
+//        kafkaTemplate.send("bill.sent",
+//                new BillEvent(saved.getId(), saved.getContractId(), saved.getTotalAmount())
+//        );
+
+        return billMapper.toResponse(saved);
+    }
+
+    public BillResponse pay(String billId, String paymentId) {
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + billId));
+
+        // State transition
+        bill.setStatus(BillStatus.PAID);
+        bill.setPaymentId(paymentId);
+        bill.setPaidAt(Instant.now());
+        bill.setUpdatedAt(Instant.now());
+
+        Bill saved = billRepository.save(bill);
+
+        // Publish event
+//        kafkaTemplate.send("bill.paid",
+//                new BillPaidEvent(saved.getId(), saved.getContractId(), saved.getTotalAmount())
+//        );
+
+        return billMapper.toResponse(saved);
+    }
+
+
 
     @Cacheable(value = "bill", key = "#id")
     public BillResponse getBill(String id) {
@@ -180,7 +205,6 @@ public class BillingService {
 
     @CachePut(value = "bill", key = "#id")
     public BillResponse updateBill(String id, BillRequest req) {
-
         Bill bill = billRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND));
 
@@ -225,6 +249,31 @@ public class BillingService {
 
         return billMapper.toResponse(billRepository.save(bill));
     }
+
+    @Scheduled(cron = "0 0 3 * * *") // Daily at 3 AM
+    public void markOverdueBills() {
+        LocalDate today = LocalDate.now();
+
+        List<Bill> overdueBills = billRepository.findByStatusAndDueDateBefore(
+                BillStatus.PENDING,
+                today
+        );
+
+        for (Bill bill : overdueBills) {
+            bill.setStatus(BillStatus.OVERDUE);
+            bill.setUpdatedAt(Instant.now());
+
+            Bill saved = billRepository.save(bill);
+
+            // Notify tenant and landlord
+//            kafkaTemplate.send("bill.overdue",
+//                    new BillOverdueEvent(saved.getId(), saved.getContractId())
+//            );
+        }
+
+        log.info("Marked {} bills as OVERDUE", overdueBills.size());
+    }
+
 
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
     public void deleteBill(String id) {
