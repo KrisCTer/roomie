@@ -11,8 +11,11 @@ import PeopleIcon from "@mui/icons-material/People";
 import GroupsIcon from "@mui/icons-material/Groups";
 import ChatIcon from "@mui/icons-material/Chat";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function SideMenu() {
+  const { t } = useTranslation();
+
   return (
     <>
       <Toolbar />
@@ -23,40 +26,43 @@ function SideMenu() {
               <HomeIcon />
             </ListItemIcon>
             <ListItemText
-              primary={"Home"}
+              primary={t("sideMenu.home")}
               primaryTypographyProps={{ style: { fontWeight: "bold" } }}
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem key={"friends"} disablePadding>
           <ListItemButton>
             <ListItemIcon>
               <PeopleIcon />
             </ListItemIcon>
             <ListItemText
-              primary={"Friends"}
+              primary={t("sideMenu.friends")}
               primaryTypographyProps={{ style: { fontWeight: "bold" } }}
             />
           </ListItemButton>
-        </ListItem>{" "}
+        </ListItem>
+
         <ListItem key={"groups"} disablePadding>
           <ListItemButton>
             <ListItemIcon>
               <GroupsIcon />
             </ListItemIcon>
             <ListItemText
-              primary={"Groups"}
+              primary={t("sideMenu.groups")}
               primaryTypographyProps={{ style: { fontWeight: "bold" } }}
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem key={"chat"} disablePadding>
           <ListItemButton component={Link} to="/chat">
             <ListItemIcon>
               <ChatIcon />
             </ListItemIcon>
             <ListItemText
-              primary={"Chat"}
+              primary={t("sideMenu.chat")}
               primaryTypographyProps={{ style: { fontWeight: "bold" } }}
             />
           </ListItemButton>

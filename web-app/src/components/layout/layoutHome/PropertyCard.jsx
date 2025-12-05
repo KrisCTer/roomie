@@ -1,7 +1,10 @@
 import { MapPin, Bed, Bath, Square, Heart } from "lucide-react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const PropertyCard = ({ property }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-lg transition-all cursor-pointer">
       {/* IMAGE */}
@@ -16,11 +19,11 @@ const PropertyCard = ({ property }) => {
         <div className="absolute top-3 left-3 flex gap-2">
           {property.isFeatured && (
             <span className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full">
-              Featured
+              {t("propertyCard.featured")}
             </span>
           )}
           <span className="px-3 py-1 text-xs font-semibold text-white bg-gray-800 rounded-full">
-            For Sale
+            {t("propertyCard.forSale")}
           </span>
         </div>
 
@@ -46,41 +49,43 @@ const PropertyCard = ({ property }) => {
         {/* Specs */}
         <div className="flex justify-between text-gray-600 text-sm mb-4">
           <div className="flex items-center gap-1">
-            <Bed size={16} /> Beds:{" "}
+            <Bed size={16} /> {t("propertyCard.beds")}:{" "}
             <span className="font-semibold text-gray-900">
               {property.bedrooms}
             </span>
           </div>
 
           <div className="flex items-center gap-1">
-            <Bath size={16} /> Baths:{" "}
+            <Bath size={16} /> {t("propertyCard.baths")}:{" "}
             <span className="font-semibold text-gray-900">
               {property.bathrooms}
             </span>
           </div>
 
           <div className="flex items-center gap-1">
-            <Square size={16} /> Sqft:{" "}
-            <span className="font-semibold text-gray-900">{property.size}</span>
+            <Square size={16} /> {t("propertyCard.sqft")}:{" "}
+            <span className="font-semibold text-gray-900">
+              {property.size}
+            </span>
           </div>
         </div>
 
         {/* Divider */}
         <div className="border-t my-4"></div>
 
-        {/* Footer (agent + price) */}
+        {/* Footer (owner + price) */}
         <div className="flex items-center justify-between">
-          {/* Owner */}
           <div className="flex items-center gap-3">
             <img
               src={property.ownerAvatar}
               alt={property.owner}
               className="w-10 h-10 rounded-full object-cover"
             />
-            <span className="text-gray-900 font-medium">{property.owner}</span>
+            <span className="text-gray-900 font-medium">
+              {property.owner}
+            </span>
           </div>
 
-          {/* Price */}
           <div className="text-xl font-semibold text-gray-900">
             ${property.price.toLocaleString()}
           </div>
