@@ -16,5 +16,6 @@ public interface LeaseLongTermRepository extends MongoRepository<LeaseLongTerm, 
     @Query("{ 'propertyId': ?0, $or: [ { $and: [ { 'leaseStart': { $lte: ?2 } }, { 'leaseEnd': { $gte: ?1 } } ] } ] }")
     List<LeaseLongTerm> findOverlapping(String propertyId, Instant start, Instant end);
 
+    List<LeaseLongTerm> findByStatusAndLeaseEndBefore(LeaseStatus leaseStatus, Instant now);
 }
 

@@ -1,8 +1,9 @@
 package com.roomie.services.chat_service.configuration;
 
-import com.corundumstudio.socketio.SocketIOServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.corundumstudio.socketio.SocketIOServer;
 
 @Configuration
 public class SocketIOConfig {

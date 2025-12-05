@@ -8,8 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 public class ChatServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ChatServiceApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ChatServiceApplication.class, args);
+    }
 }

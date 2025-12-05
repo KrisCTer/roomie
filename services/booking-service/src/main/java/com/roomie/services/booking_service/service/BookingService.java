@@ -5,7 +5,9 @@ import com.roomie.services.booking_service.dto.request.BookingRequest;
 import com.roomie.services.booking_service.dto.response.BookingResponse;
 import com.roomie.services.booking_service.dto.response.property.PropertyResponse;
 import com.roomie.services.booking_service.entity.LeaseLongTerm;
+import com.roomie.services.booking_service.enums.ApprovalStatus;
 import com.roomie.services.booking_service.enums.LeaseStatus;
+import com.roomie.services.booking_service.enums.PropertyStatus;
 import com.roomie.services.booking_service.exception.AppException;
 import com.roomie.services.booking_service.exception.ErrorCode;
 import com.roomie.services.booking_service.mapper.BookingMapper;
@@ -16,10 +18,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -54,7 +58,8 @@ public class BookingService {
             LeaseLongTerm lease = bookingMapper.toLeaseEntity(req);
             lease.setTenantId(tenantId);
             lease.setStatus(LeaseStatus.PENDING_APPROVAL);
-
+            lease.setCreatedAt(Instant.now());
+            lease.setUpdatedAt(Instant.now());
             ltRepo.save(lease);
             cacheService.put(cacheKey(lease.getId()), lease, CACHE_TTL_SECONDS);
 
@@ -79,6 +84,12 @@ public class BookingService {
         LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         if (lease.getStatus() != LeaseStatus.PENDING_APPROVAL)
             throw new AppException(ErrorCode.LONG_TERM_INVALID_STATUS);
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
+        if (!property.getOwner().getOwnerId().equals(currentUserId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         lease.setStatus(LeaseStatus.ACTIVE);
         lease.setUpdatedAt(Instant.now());
         ltRepo.save(lease);
@@ -95,6 +106,91 @@ public class BookingService {
         cacheService.evict(cacheKey(id));
         kafkaTemplate.send("lease.cancelled", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent()));
         return bookingMapper.leaseToResponse(lease);
+    }
+
+    public BookingResponse pause(String id, String reason) {
+        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        lease.setStatus(LeaseStatus.PAUSED);
+        lease.setUpdatedAt(Instant.now());
+        ltRepo.save(lease);
+        return bookingMapper.leaseToResponse(ltRepo.save(lease));
+    }
+
+    public BookingResponse resume(String id) {
+        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        lease.setStatus(LeaseStatus.ACTIVE);
+        lease.setUpdatedAt(Instant.now());
+        ltRepo.save(lease);
+        return bookingMapper.leaseToResponse(ltRepo.save(lease));
+    }
+
+    public BookingResponse terminate(String id, String reason) {
+        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        lease.setStatus(LeaseStatus.TERMINATED);
+        lease.setUpdatedAt(Instant.now());
+
+        LeaseLongTerm saved = ltRepo.save(lease);
+
+        // Mark property as AVAILABLE again
+        propertyClient.markAsAvailable(lease.getPropertyId());
+
+        // Publish event
+//        kafkaTemplate.send("lease.terminated",
+//                new LeaseTerminatedEvent(saved.getId(), saved.getPropertyId())
+//        );
+
+        return bookingMapper.leaseToResponse(saved);
+    }
+
+    private void validatePropertyRentable(PropertyResponse property) {
+        if (property == null) {
+            throw new AppException(ErrorCode.PROPERTY_NOT_FOUND);
+        }
+
+        if (property.getStatus() != ApprovalStatus.ACTIVE) {
+            throw new AppException(ErrorCode.PROPERTY_NOT_APPROVED);
+        }
+
+        if (property.getPropertyStatus() != PropertyStatus.AVAILABLE) {
+            throw new AppException(ErrorCode.PROPERTY_NOT_AVAILABLE);
+        }
+    }
+
+
+    @Scheduled(cron = "0 0 1 * * *") // Daily at 1 AM
+    public void expireLeases() {
+        Instant now = Instant.now();
+
+        List<LeaseLongTerm> expiring = ltRepo.findByStatusAndLeaseEndBefore(
+                LeaseStatus.ACTIVE,
+                now
+        );
+
+        for (LeaseLongTerm lease : expiring) {
+            lease.setStatus(LeaseStatus.EXPIRED);
+            lease.setUpdatedAt(now);
+
+            LeaseLongTerm saved = ltRepo.save(lease);
+
+            // Mark property as AVAILABLE
+            propertyClient.markAsAvailable(lease.getPropertyId());
+
+            // Notify parties
+//            kafkaTemplate.send("lease.expired",
+//                    new LeaseExpiredEvent(saved.getId(), saved.getPropertyId())
+//            );
+        }
+    }
+    public BookingResponse renew(String id, BookingRequest renewalRequest) {
+        LeaseLongTerm oldLease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        // Mark old lease as RENEWED
+        oldLease.setStatus(LeaseStatus.RENEWED);
+        oldLease.setUpdatedAt(Instant.now());
+        ltRepo.save(oldLease);
+        BookingResponse newLease = create(renewalRequest);
+        ltRepo.save(oldLease);
+        return newLease;
     }
 
     private String cacheKey(String id) {

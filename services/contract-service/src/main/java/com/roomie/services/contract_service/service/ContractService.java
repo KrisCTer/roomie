@@ -16,10 +16,12 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -55,6 +57,8 @@ public class ContractService {
         }
 
         Contract c = mapper.toEntity(req);
+        c.setTenantSigned(false);
+        c.setLandlordSigned(false);
         c.setCreatedAt(Instant.now());
         c.setUpdatedAt(Instant.now());
         c.setStatus(ContractStatus.DRAFT);
@@ -190,6 +194,71 @@ public class ContractService {
             kafkaTemplate.send("contract.activated", buildEvent(c));
             log.info("Contract activated after payment for contractId={}", c.getId());
         });
+    }
+
+    public ContractResponse pause(String id, String reason) {
+        Contract contract = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        contract.setStatus(ContractStatus.PAUSED);
+        contract.setUpdatedAt(Instant.now());
+        return mapper.toResponse(repo.save(contract));
+    }
+
+    public ContractResponse resume(String id) {
+        Contract contract = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        contract.setStatus(ContractStatus.ACTIVE);
+        contract.setUpdatedAt(Instant.now());
+        return mapper.toResponse(repo.save(contract));
+    }
+
+    public ContractResponse terminate(String id, String reason) {
+        Contract contract = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        contract.setStatus(ContractStatus.TERMINATED);
+        contract.setUpdatedAt(Instant.now());
+        Contract saved = repo.save(contract);
+        kafkaTemplate.send("contract.terminated", buildEvent(saved));
+        return mapper.toResponse(saved);
+    }
+    @Scheduled(cron = "0 0 2 * * *") // Daily at 2 AM
+    public void expireContracts() {
+        Instant now = Instant.now();
+
+        List<Contract> expiring = repo.findByStatusAndEndDateBefore(
+                ContractStatus.ACTIVE,
+                now
+        );
+
+        for (Contract contract : expiring) {
+            contract.setStatus(ContractStatus.EXPIRED);
+            contract.setEndDate(now);
+            contract.setUpdatedAt(now);
+
+            Contract saved = repo.save(contract);
+
+            kafkaTemplate.send("contract.expired", buildEvent(saved));
+        }
+    }
+    public ContractResponse renew(String id, ContractRequest renewalRequest) {
+        Contract oldContract = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        if (oldContract.getStatus() != ContractStatus.EXPIRED) {
+            throw new AppException(ErrorCode.INVALID_CONTRACT_STATUS,
+                    "Only EXPIRED contracts can be renewed. Current: " + oldContract.getStatus()
+            );
+        }
+
+        // Mark old as RENEWED
+        oldContract.setStatus(ContractStatus.RENEWED);
+        oldContract.setUpdatedAt(Instant.now());
+        repo.save(oldContract);
+
+        // Create new contract
+        ContractResponse newContract = create(renewalRequest);
+
+        return newContract;
     }
 
     /**

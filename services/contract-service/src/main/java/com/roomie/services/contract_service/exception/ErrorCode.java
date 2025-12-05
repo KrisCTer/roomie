@@ -22,6 +22,7 @@ public enum ErrorCode {
     FAILED_TO_GEN_PDF(1013,"Failed to generate PDF: ",HttpStatus.CONFLICT),
     CONTRACT_UPLOAD_FAILED(1014,"Contract PDF upload failed",HttpStatus.CONFLICT),
     CONTRACT_GENERATE_FAILED(1015,"Failed to generate and upload PDF",HttpStatus.CONFLICT),
+    INVALID_CONTRACT_STATUS(1016,"Invalid contract status",HttpStatus.CONFLICT),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -1,11 +1,12 @@
 package com.roomie.services.chat_service.entity;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import java.time.Instant;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.time.Instant;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter

@@ -1,5 +1,12 @@
 package com.roomie.services.chat_service.service;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
 import com.corundumstudio.socketio.SocketIOServer;
 import com.roomie.services.chat_service.dto.request.ChatMessageRequest;
 import com.roomie.services.chat_service.dto.response.ChatMessageResponse;
@@ -11,16 +18,11 @@ import com.roomie.services.chat_service.mapper.ChatMessageMapper;
 import com.roomie.services.chat_service.repository.ChatMessageRepository;
 import com.roomie.services.chat_service.repository.ConversationRepository;
 import com.roomie.services.chat_service.repository.httpclient.ProfileClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -37,7 +39,8 @@ public class ChatMessageService {
     public List<ChatMessageResponse> getMessages(String conversationId) {
         // Validate conversationId
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        conversationRepository.findById(conversationId)
+        conversationRepository
+                .findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND))
                 .getParticipants()
                 .stream()
@@ -53,7 +56,8 @@ public class ChatMessageService {
     public ChatMessageResponse create(ChatMessageRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         // Validate conversationId
-        conversationRepository.findById(request.getConversationId())
+        conversationRepository
+                .findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND))
                 .getParticipants()
                 .stream()
@@ -83,7 +87,7 @@ public class ChatMessageService {
         chatMessage = chatMessageRepository.save(chatMessage);
         String message = chatMessage.getMessage();
 
-        //Connected server
+        // Connected server
         server.getAllClients().stream().forEach(client -> {
             client.sendEvent("message", message);
         });

@@ -1,10 +1,11 @@
 package com.roomie.services.chat_service.mapper;
 
-import com.roomie.services.chat_service.dto.response.ConversationResponse;
-import com.roomie.services.chat_service.entity.Conversation;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 
-import java.util.List;
+import com.roomie.services.chat_service.dto.response.ConversationResponse;
+import com.roomie.services.chat_service.entity.Conversation;
 
 @Mapper(componentModel = "spring")
 public interface ConversationMapper {

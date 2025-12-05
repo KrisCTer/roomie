@@ -1,17 +1,20 @@
 package com.roomie.services.chat_service.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.roomie.services.chat_service.dto.request.ChatMessageRequest;
 import com.roomie.services.chat_service.dto.response.ApiResponse;
 import com.roomie.services.chat_service.dto.response.ChatMessageResponse;
 import com.roomie.services.chat_service.service.ChatMessageService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,14 +24,11 @@ public class ChatMessageController {
     ChatMessageService chatMessageService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<ChatMessageResponse>> create(
-            @RequestBody @Valid ChatMessageRequest request) {
+    public ResponseEntity<ApiResponse<ChatMessageResponse>> create(@RequestBody @Valid ChatMessageRequest request) {
 
         ChatMessageResponse data = chatMessageService.create(request);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(data, "Created message successfully")
-        );
+        return ResponseEntity.ok(ApiResponse.success(data, "Created message successfully"));
     }
 
     @GetMapping
@@ -37,8 +37,6 @@ public class ChatMessageController {
 
         List<ChatMessageResponse> data = chatMessageService.getMessages(conversationId);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(data, "Fetched chat messages successfully")
-        );
+        return ResponseEntity.ok(ApiResponse.success(data, "Fetched chat messages successfully"));
     }
 }

@@ -53,14 +53,15 @@ public class PropertyController {
         List<PropertyResponse> list = propertyService.findAll(page, size);
         return ResponseEntity.ok(ApiResponse.success(list, "Property list fetched successfully"));
     }
+
     @GetMapping("/owner/me")
     public ApiResponse<List<PropertyResponse>> getMyProperties() {
-        return ApiResponse.success(propertyService.getMyProperties(),"Get my property successfully");
+        return ApiResponse.success(propertyService.getMyProperties(), "Get my property successfully");
     }
 
     @GetMapping("/public")
     public ApiResponse<List<PropertyResponse>> getPublicProperties() {
-        return ApiResponse.success(propertyService.getAllPublicProperties(),"");
+        return ApiResponse.success(propertyService.getAllPublicProperties(), "");
     }
 
     @GetMapping("/search")
@@ -68,9 +69,10 @@ public class PropertyController {
         List<PropertyResponse> list = propertyService.searchFullText(q);
         return ResponseEntity.ok(ApiResponse.success(list, "Search results fetched successfully"));
     }
+
     @PostMapping("/{id}/publish")
     public ApiResponse<PropertyResponse> publishProperty(@PathVariable String id) {
-        return ApiResponse.success(propertyService.publish(id),"Property published successfully");
+        return ApiResponse.success(propertyService.publish(id), "Property published successfully");
     }
 
     @GetMapping("/by-price")
@@ -85,5 +87,23 @@ public class PropertyController {
     public ResponseEntity<ApiResponse<List<PropertyResponse>>> byProvince(@RequestParam String province) {
         List<PropertyResponse> list = propertyService.findByProvince(province);
         return ResponseEntity.ok(ApiResponse.success(list, "Properties fetched by province"));
+    }
+
+    @PostMapping("/{propertyId}/rented")
+    public ApiResponse<String> markAsRented(@PathVariable String propertyId) {
+        propertyService.markAsRented(propertyId);
+        return ApiResponse.success(null, "Property marked as RENTED");
+    }
+
+    @PostMapping("/{propertyId}/available")
+    public ApiResponse<String> markAsAvailable(@PathVariable String propertyId) {
+        propertyService.markAsAvailable(propertyId);
+        return ApiResponse.success(null, "Property marked as AVAILABLE");
+    }
+
+    @PostMapping("/{propertyId}/deactivate")
+    public ApiResponse<String> deactivate(@PathVariable String propertyId) {
+        propertyService.deactivate(propertyId);
+        return ApiResponse.success(null, "Property deactivated");
     }
 }

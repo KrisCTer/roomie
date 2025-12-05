@@ -6,6 +6,7 @@ import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
 import com.roomie.services.property_service.enums.ApprovalStatus;
+import com.roomie.services.property_service.enums.PropertyStatus;
 import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
@@ -48,6 +49,7 @@ public class PropertyService {
                 .build();
         entity.setOwner(owner);
         entity.setStatus(ApprovalStatus.DRAFT);
+        entity.setPropertyStatus(PropertyStatus.INACTIVE);
         Instant now = Instant.now();
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
@@ -96,14 +98,6 @@ public class PropertyService {
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
         return mapper.toResponse(p);
     }
-    public List<PropertyResponse> getAllPublicProperties() {
-        List<Property> properties = propertyRepository.findAll();
-
-        return properties.stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
-    }
-
 
     public List<PropertyResponse> findAll(int page, int size) {
         return propertyRepository.findAll(PageRequest.of(page, size)).stream()
@@ -165,6 +159,12 @@ public class PropertyService {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
 
+        if (property.getStatus() != ApprovalStatus.DRAFT) {
+            throw new IllegalStateException(
+                    "Only DRAFT properties can be published. Current: "
+                            + property.getStatus()
+            );
+        }
         property.setStatus(ApprovalStatus.PENDING);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
@@ -181,7 +181,14 @@ public class PropertyService {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
 
+        if (property.getStatus() != ApprovalStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only PENDING properties can be approved. Current: "
+                            + property.getStatus()
+            );
+        }
         property.setStatus(ApprovalStatus.ACTIVE);
+        property.setPropertyStatus(PropertyStatus.AVAILABLE);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
@@ -210,7 +217,12 @@ public class PropertyService {
     public PropertyResponse reject(String id) {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
-
+        if (property.getStatus() != ApprovalStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only PENDING properties can be rejected. Current: "
+                            + property.getStatus()
+            );
+        }
         property.setStatus(ApprovalStatus.REJECTED);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
@@ -235,5 +247,72 @@ public class PropertyService {
 //        ));
 
         return mapper.toResponse(property);
+    }
+    public void markAsRented(String propertyId) {
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + propertyId));
+
+        // Validation
+        if (property.getStatus() != ApprovalStatus.ACTIVE) {
+            throw new IllegalStateException("Property must be ACTIVE to rent");
+        }
+
+        if (property.getPropertyStatus() != PropertyStatus.AVAILABLE) {
+            throw new IllegalStateException(
+                    "Property must be AVAILABLE to rent. Current: "
+                            + property.getPropertyStatus()
+            );
+        }
+
+        property.setPropertyStatus(PropertyStatus.RENTED);
+        property.setUpdatedAt(Instant.now());
+        propertyRepository.save(property);
+
+        // Remove from search results
+        searchRepository.deleteById(propertyId);
+    }
+
+    public void markAsAvailable(String propertyId) {
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + propertyId));
+
+        if (property.getPropertyStatus() != PropertyStatus.RENTED) {
+            throw new IllegalStateException(
+                    "Only RENTED properties can be marked as AVAILABLE. Current: "
+                            + property.getPropertyStatus()
+            );
+        }
+
+        property.setPropertyStatus(PropertyStatus.AVAILABLE);
+        property.setUpdatedAt(Instant.now());
+
+        Property saved = propertyRepository.save(property);
+
+        // Re-index to search
+        if (property.getStatus() == ApprovalStatus.ACTIVE) {
+            PropertyDocument doc = mapper.toDocument(saved);
+            searchRepository.save(doc);
+        }
+    }
+    public void deactivate(String propertyId) {
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + propertyId));
+
+        property.setPropertyStatus(PropertyStatus.INACTIVE);
+        property.setUpdatedAt(Instant.now());
+        propertyRepository.save(property);
+
+        // Remove from search
+        searchRepository.deleteById(propertyId);
+    }
+    public List<PropertyResponse> getAllPublicProperties() {
+        return propertyRepository
+                .findByApprovalStatusAndPropertyStatus(
+                        ApprovalStatus.ACTIVE,
+                        PropertyStatus.AVAILABLE
+                )
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

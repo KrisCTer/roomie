@@ -24,6 +24,7 @@ public enum ErrorCode {
     BILL_ALREADY_EXISTS(1015,"Bill for this month already exists", HttpStatus.CONFLICT),
     FIRST_BILL_MISSING_OLD_VALUES(1016,"Không có bill tháng trước. Bạn phải nhập electricityOld và waterOld.", HttpStatus.BAD_REQUEST),
     BILL_NOT_FOUND(1017,"Bill not found", HttpStatus.NOT_FOUND),
+    INVALID_BILL_STATUS(1018,"Invalid bill status", HttpStatus.BAD_REQUEST),
 
     ;
 
