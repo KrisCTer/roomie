@@ -96,6 +96,14 @@ public class PropertyService {
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
         return mapper.toResponse(p);
     }
+    public List<PropertyResponse> getAllPublicProperties() {
+        List<Property> properties = propertyRepository.findAll();
+
+        return properties.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 
     public List<PropertyResponse> findAll(int page, int size) {
         return propertyRepository.findAll(PageRequest.of(page, size)).stream()
@@ -113,6 +121,17 @@ public class PropertyService {
     public List<PropertyResponse> findByProvince(String province) {
         return propertyRepository.findByAddress_ProvinceIgnoreCase(province).stream().map(mapper::toResponse).collect(Collectors.toList());
     }
+
+    public List<PropertyResponse> getMyProperties() {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<Property> properties = propertyRepository.findAllByOwner_OwnerId(userId);
+
+        return properties.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 
     public List<PropertyResponse> searchFullText(String q) {
         List<PropertyDocument> docs = searchRepository.findByTitleContainingOrDescriptionContaining(q, q);
@@ -156,6 +175,7 @@ public class PropertyService {
 
         return mapper.toResponse(property);
     }
+
 
     public PropertyResponse approve(String id) {
         Property property = propertyRepository.findById(id)
