@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Building,
   Upload,
@@ -23,6 +23,90 @@ import {
 } from "../../services/property.service";
 import { uploadFile } from "../../services/file.service";
 
+// Vietnam provinces/cities data
+const vietnamProvinces = [
+  { code: "HN", name: "Hà Nội" },
+  { code: "HCM", name: "Hồ Chí Minh" },
+  { code: "DN", name: "Đà Nẵng" },
+  { code: "HP", name: "Hải Phòng" },
+  { code: "CT", name: "Cần Thơ" },
+  { code: "BD", name: "Bình Dương" },
+  { code: "DNA", name: "Đồng Nai" },
+  { code: "KH", name: "Khánh Hòa" },
+  { code: "LA", name: "Long An" },
+  { code: "QN", name: "Quảng Nam" },
+  { code: "QNG", name: "Quảng Ninh" },
+  { code: "VT", name: "Bà Rịa - Vũng Tàu" },
+  { code: "BTH", name: "Bình Thuận" },
+  { code: "TH", name: "Thanh Hóa" },
+  { code: "NA", name: "Nghệ An" },
+  { code: "HT", name: "Hà Tĩnh" },
+];
+
+// Sample districts for major cities (you should expand this)
+const vietnamDistricts = {
+  "Hà Nội": [
+    "Ba Đình",
+    "Hoàn Kiếm",
+    "Tây Hồ",
+    "Long Biên",
+    "Cầu Giấy",
+    "Đống Đa",
+    "Hai Bà Trưng",
+    "Hoàng Mai",
+    "Thanh Xuân",
+    "Nam Từ Liêm",
+    "Bắc Từ Liêm",
+    "Hà Đông",
+  ],
+  "Hồ Chí Minh": [
+    "Quận 1",
+    "Quận 2",
+    "Quận 3",
+    "Quận 4",
+    "Quận 5",
+    "Quận 6",
+    "Quận 7",
+    "Quận 8",
+    "Quận 9",
+    "Quận 10",
+    "Quận 11",
+    "Quận 12",
+    "Bình Thạnh",
+    "Gò Vấp",
+    "Phú Nhuận",
+    "Tân Bình",
+    "Tân Phú",
+    "Thủ Đức",
+    "Bình Tân",
+  ],
+  "Đà Nẵng": [
+    "Hải Châu",
+    "Thanh Khê",
+    "Sơn Trà",
+    "Ngũ Hành Sơn",
+    "Liên Chiểu",
+    "Cẩm Lệ",
+  ],
+  "Đồng Nai": [
+    "Biên Hòa",
+    "Long Khánh",
+    "Long Thành",
+    "Nhơn Trạch",
+    "Vĩnh Cửu",
+  ],
+  "Bình Dương": ["Thủ Dầu Một", "Dĩ An", "Thuận An", "Tân Uyên", "Bến Cát"],
+};
+
+// Sample wards (you should expand this)
+const vietnamWards = {
+  "Ba Đình": ["Phúc Xá", "Trúc Bạch", "Vĩnh Phúc", "Cống Vị", "Liễu Giai"],
+  "Quận 1": ["Tân Định", "Đa Kao", "Bến Nghé", "Bến Thành", "Nguyễn Thái Bình"],
+  "Hải Châu": ["Thạch Thang", "Hải Châu 1", "Hải Châu 2", "Phước Ninh"],
+  "Biên Hòa": ["Trảng Dài", "Tân Phong", "Tân Biên", "Hố Nai", "Tân Tiến"],
+  "Thủ Dầu Một": ["Hiệp Thành", "Phú Hòa", "Phú Lợi", "Phú Cường"],
+};
+
 const AddProperty = () => {
   const [activeMenu, setActiveMenu] = useState("Add Property");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -32,6 +116,12 @@ const AddProperty = () => {
   const [success, setSuccess] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [propertyId, setPropertyId] = useState(null);
+
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const [map, setMap] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [mapsLoaded, setMapsLoaded] = useState(false);
 
   const [propertyData, setPropertyData] = useState({
     title: "",
@@ -63,6 +153,259 @@ const AddProperty = () => {
 
   const [uploadedImages, setUploadedImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [availableDistricts, setAvailableDistricts] = useState([]);
+  const [availableWards, setAvailableWards] = useState([]);
+  const [gettingLocation, setGettingLocation] = useState(false);
+
+  // Load Google Maps Script
+  useEffect(() => {
+    const loadGoogleMaps = () => {
+      // Check if already loaded
+      if (window.google && window.google.maps) {
+        setMapsLoaded(true);
+        return;
+      }
+
+      const existingScript = document.getElementById("google-maps-script");
+      if (existingScript) {
+        existingScript.addEventListener("load", () => {
+          setMapsLoaded(true);
+        });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = "google-maps-script";
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+
+      script.addEventListener("load", () => {
+        console.log("✅ Google Maps API loaded successfully");
+        setMapsLoaded(true);
+      });
+
+      script.addEventListener("error", (e) => {
+        console.error("❌ Failed to load Google Maps API:", e);
+        setError("Failed to load Google Maps. Please check your API key.");
+      });
+
+      document.head.appendChild(script);
+    };
+
+    loadGoogleMaps();
+  }, []);
+
+  // Initialize map when everything is ready
+  useEffect(() => {
+    if (mapsLoaded && mapRef.current && currentStep === 2) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        initMap();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mapsLoaded, currentStep]);
+
+  const initMap = () => {
+    if (!mapRef.current || !window.google || !window.google.maps) {
+      console.warn("Map initialization skipped - not ready yet");
+      return;
+    }
+
+    // Avoid reinitializing if map already exists
+    if (map) {
+      console.log("Map already initialized");
+      return;
+    }
+
+    try {
+      console.log("🗺️ Initializing Google Map...");
+
+      // Default to Bien Hoa, Dong Nai
+      const defaultCenter = { lat: 10.9447, lng: 106.8392 };
+
+      const mapInstance = new window.google.maps.Map(mapRef.current, {
+        center: defaultCenter,
+        zoom: 13,
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: true,
+        zoomControl: true,
+      });
+
+      console.log("✅ Map instance created");
+      setMap(mapInstance);
+
+      // Add click listener to map
+      mapInstance.addListener("click", (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        console.log("Map clicked:", lat, lng);
+        updateMapMarker(lat, lng);
+      });
+
+      // Add marker
+      const marker = new window.google.maps.Marker({
+        map: mapInstance,
+        draggable: true,
+        position: defaultCenter,
+        title: "Drag me to select location",
+      });
+
+      console.log("✅ Marker created");
+      markerRef.current = marker;
+
+      // Add drag listener to marker
+      marker.addListener("dragend", (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        console.log("Marker dragged to:", lat, lng);
+        updateLocation(lat, lng);
+      });
+
+      // Set initial location if exists
+      if (propertyData.location) {
+        const [lat, lng] = propertyData.location
+          .split(",")
+          .map((v) => parseFloat(v.trim()));
+        if (!isNaN(lat) && !isNaN(lng)) {
+          updateMapMarker(lat, lng);
+        }
+      }
+    } catch (error) {
+      console.error("Error initializing map:", error);
+      setError("Failed to initialize map. Please refresh the page.");
+    }
+  };
+
+  const updateMapMarker = (lat, lng) => {
+    if (markerRef.current) {
+      markerRef.current.setPosition({ lat, lng });
+    }
+    if (map) {
+      map.panTo({ lat, lng });
+    }
+    updateLocation(lat, lng);
+  };
+
+  const updateLocation = (lat, lng) => {
+    const locationStr = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+    setSelectedLocation({ lat, lng });
+    setPropertyData((prev) => ({
+      ...prev,
+      location: locationStr,
+    }));
+  };
+
+  // Get user's current location
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setGettingLocation(true);
+    setError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        console.log("Current location:", lat, lng);
+
+        updateMapMarker(lat, lng);
+
+        if (map) {
+          map.setZoom(15); // Zoom in to current location
+        }
+
+        setGettingLocation(false);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        let errorMessage = "Unable to get your location. ";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += "Please allow location access in your browser.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage += "Location request timed out.";
+            break;
+          default:
+            errorMessage += "An unknown error occurred.";
+        }
+
+        setError(errorMessage);
+        setGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  // Auto-fill full address when address fields change
+  useEffect(() => {
+    const addressParts = [
+      propertyData.houseNumber,
+      propertyData.street,
+      propertyData.ward,
+      propertyData.district,
+      propertyData.province,
+    ].filter((part) => part && part.trim());
+
+    if (addressParts.length > 0) {
+      const fullAddress = addressParts.join(", ");
+      setPropertyData((prev) => ({
+        ...prev,
+        fullAddress,
+      }));
+    }
+  }, [
+    propertyData.houseNumber,
+    propertyData.street,
+    propertyData.ward,
+    propertyData.district,
+    propertyData.province,
+  ]);
+
+  // Update available districts when province changes
+  useEffect(() => {
+    if (propertyData.province) {
+      const districts = vietnamDistricts[propertyData.province] || [];
+      setAvailableDistricts(districts);
+      // Reset district and ward if province changes
+      if (!districts.includes(propertyData.district)) {
+        setPropertyData((prev) => ({
+          ...prev,
+          district: "",
+          ward: "",
+        }));
+      }
+    }
+  }, [propertyData.province]);
+
+  // Update available wards when district changes
+  useEffect(() => {
+    if (propertyData.district) {
+      const wards = vietnamWards[propertyData.district] || [];
+      setAvailableWards(wards);
+      // Reset ward if district changes
+      if (!wards.includes(propertyData.ward)) {
+        setPropertyData((prev) => ({
+          ...prev,
+          ward: "",
+        }));
+      }
+    }
+  }, [propertyData.district]);
 
   // Check if edit mode and load property data
   useEffect(() => {
@@ -81,7 +424,6 @@ const AddProperty = () => {
       setLoading(true);
       const response = await getPropertyById(id);
 
-      // Handle response structure
       const property =
         response?.result ||
         response?.data?.result ||
@@ -89,7 +431,6 @@ const AddProperty = () => {
         response;
 
       if (property) {
-        // Map property data to form state
         setPropertyData({
           title: property.title || "",
           description: property.description || "",
@@ -118,7 +459,16 @@ const AddProperty = () => {
           others: property.amenities?.others || [],
         });
 
-        // Load existing images
+        // Update map if location exists
+        if (property.address?.location) {
+          const [lat, lng] = property.address.location
+            .split(",")
+            .map((v) => parseFloat(v.trim()));
+          if (!isNaN(lat) && !isNaN(lng) && map) {
+            updateMapMarker(lat, lng);
+          }
+        }
+
         if (property.mediaList && property.mediaList.length > 0) {
           setUploadedImages(
             property.mediaList.map((media) => ({
@@ -161,11 +511,30 @@ const AddProperty = () => {
     try {
       const uploadPromises = files.map(async (file) => {
         try {
+          // Validate file type
+          if (!file.type.startsWith("image/")) {
+            console.error("Invalid file type:", file.type);
+            return null;
+          }
+
+          // Validate file size (10MB)
+          if (file.size > 10 * 1024 * 1024) {
+            console.error("File too large:", file.size);
+            return null;
+          }
+
+          console.log("Uploading file:", file.name);
           const response = await uploadFile(file);
+          console.log("Upload response:", response);
+
+          // Handle different response structures
+          const fileData = response?.result || response?.data || response;
+
           return {
-            url: response.result?.publicUrl || URL.createObjectURL(file),
+            url:
+              fileData?.publicUrl || fileData?.url || URL.createObjectURL(file),
             type: "IMAGE",
-            fileId: response.result?.fileId,
+            fileId: fileData?.fileId || fileData?.id,
           };
         } catch (err) {
           console.error("Failed to upload image:", err);
@@ -179,8 +548,9 @@ const AddProperty = () => {
       setUploadedImages((prev) => [...prev, ...successfulUploads]);
 
       if (successfulUploads.length < files.length) {
+        const failedCount = files.length - successfulUploads.length;
         setError(
-          `${files.length - successfulUploads.length} image(s) failed to upload`
+          `${failedCount} image(s) failed to upload. Please check file size and format.`
         );
       }
     } catch (err) {
@@ -216,16 +586,16 @@ const AddProperty = () => {
   };
 
   const validateStep2 = () => {
-    if (!propertyData.fullAddress.trim()) {
-      setError("Full address is required");
-      return false;
-    }
     if (!propertyData.province.trim()) {
       setError("Province is required");
       return false;
     }
     if (!propertyData.district.trim()) {
       setError("District is required");
+      return false;
+    }
+    if (!propertyData.fullAddress.trim()) {
+      setError("Full address is required");
       return false;
     }
     return true;
@@ -558,64 +928,119 @@ const AddProperty = () => {
       <h2 className="text-xl font-bold mb-6">Location Details</h2>
 
       <div className="space-y-6">
+        {/* Google Map */}
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Full Address <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <MapPin className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
-            <input
-              type="text"
-              name="fullAddress"
-              value={propertyData.fullAddress}
-              onChange={handleInputChange}
-              placeholder="Enter complete address"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium">
+              <MapIcon className="w-4 h-4 inline mr-1" />
+              Select Location on Map (Click or Drag Marker)
+            </label>
+            <button
+              type="button"
+              onClick={getCurrentLocation}
+              disabled={gettingLocation || !mapsLoaded}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {gettingLocation ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Getting Location...
+                </>
+              ) : (
+                <>
+                  <MapPin className="w-4 h-4" />
+                  Use My Location
+                </>
+              )}
+            </button>
+          </div>
+          <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100">
+            <div
+              ref={mapRef}
+              style={{
+                width: "100%",
+                height: "400px",
+                minHeight: "400px",
+              }}
             />
           </div>
+          {!mapsLoaded && (
+            <div className="text-center py-4 text-gray-500 text-sm">
+              Loading map...
+            </div>
+          )}
+          {propertyData.location && (
+            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 flex items-center">
+                <MapPin className="w-4 h-4 mr-2" />
+                <strong>Selected coordinates:</strong>
+                <code className="ml-2 bg-white px-2 py-1 rounded">
+                  {propertyData.location}
+                </code>
+              </p>
+            </div>
+          )}
         </div>
 
+        {/* Address Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">
               Province/City <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               name="province"
               value={propertyData.province}
               onChange={handleInputChange}
-              placeholder="Enter province"
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              <option value="">Select Province/City</option>
+              {vietnamProvinces.map((prov) => (
+                <option key={prov.code} value={prov.name}>
+                  {prov.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">
               District <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
+            <select
               name="district"
               value={propertyData.district}
               onChange={handleInputChange}
-              placeholder="Enter district"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              disabled={!propertyData.province}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Select District</option>
+              {availableDistricts.map((dist) => (
+                <option key={dist} value={dist}>
+                  {dist}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Ward</label>
-            <input
-              type="text"
+            <select
               name="ward"
               value={propertyData.ward}
               onChange={handleInputChange}
-              placeholder="Enter ward"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+              disabled={!propertyData.district}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Select Ward</option>
+              {availableWards.map((ward) => (
+                <option key={ward} value={ward}>
+                  {ward}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -631,34 +1056,37 @@ const AddProperty = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              House Number
-            </label>
-            <input
-              type="text"
-              name="houseNumber"
-              value={propertyData.houseNumber}
-              onChange={handleInputChange}
-              placeholder="Enter house number"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">House Number</label>
+          <input
+            type="text"
+            name="houseNumber"
+            value={propertyData.houseNumber}
+            onChange={handleInputChange}
+            placeholder="Enter house number"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Location Coordinates (lat, lng)
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={propertyData.location}
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Full Address <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <MapPin className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
+            <textarea
+              name="fullAddress"
+              value={propertyData.fullAddress}
               onChange={handleInputChange}
-              placeholder="10.7731, 106.6798"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Auto-filled from address fields above, or enter manually"
+              rows="2"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
             />
           </div>
+          <p className="text-xs text-gray-500 mt-1">
+            💡 This field is automatically filled based on the address
+            components above
+          </p>
         </div>
       </div>
     </div>
@@ -764,7 +1192,7 @@ const AddProperty = () => {
               <input
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
                 onChange={handleImageUpload}
                 className="hidden"
                 id="image-upload"
@@ -773,39 +1201,49 @@ const AddProperty = () => {
               <label
                 htmlFor="image-upload"
                 className={`cursor-pointer ${
-                  uploadingImages ? "opacity-50" : ""
+                  uploadingImages ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
                 <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600 mb-2">
                   {uploadingImages
-                    ? "Uploading..."
+                    ? "Uploading images..."
                     : "Click to upload or drag and drop"}
                 </p>
                 <p className="text-sm text-gray-500">
-                  PNG, JPG, JPEG up to 10MB
+                  PNG, JPG, JPEG, WEBP up to 10MB each
                 </p>
               </label>
             </div>
           </div>
 
           {uploadedImages.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {uploadedImages.map((image, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={image.url}
-                    alt={`Upload ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                  <button
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+            <div>
+              <p className="text-sm font-medium mb-3">
+                Uploaded Images ({uploadedImages.length})
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {uploadedImages.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={image.url}
+                      alt={`Upload ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                      onError={(e) => {
+                        e.target.src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3EImage%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -843,6 +1281,12 @@ const AddProperty = () => {
             {propertyData.district && `${propertyData.district}, `}
             {propertyData.province}
           </p>
+          {propertyData.location && (
+            <p className="text-sm text-gray-500 mt-1 flex items-center">
+              <MapPin className="w-3 h-3 mr-1" />
+              Coordinates: {propertyData.location}
+            </p>
+          )}
         </div>
 
         <div className="border-b pb-4">
@@ -878,17 +1322,22 @@ const AddProperty = () => {
           <h3 className="font-semibold text-lg mb-3">Media</h3>
           {uploadedImages.length > 0 ? (
             <div className="grid grid-cols-4 gap-3">
-              {uploadedImages.slice(0, 4).map((image, index) => (
+              {uploadedImages.slice(0, 8).map((image, index) => (
                 <img
                   key={index}
                   src={image.url}
                   alt={`Property ${index + 1}`}
-                  className="w-full h-24 object-cover rounded-lg"
+                  className="w-full h-24 object-cover rounded-lg border border-gray-200"
                 />
               ))}
             </div>
           ) : (
             <p className="text-gray-500 text-sm">No images uploaded</p>
+          )}
+          {uploadedImages.length > 8 && (
+            <p className="text-sm text-gray-600 mt-2">
+              +{uploadedImages.length - 8} more images
+            </p>
           )}
         </div>
 

@@ -5,7 +5,7 @@ import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx";
 import { X } from "lucide-react";
 import {
-  getAllProperties,
+  getPropertiesByOwner,
   deleteProperty,
   updateProperty,
 } from "../../services/property.service";
@@ -42,7 +42,7 @@ const MyProperties = () => {
         params.search = searchTerm;
       }
 
-      const response = await getAllProperties(params);
+      const response = await getPropertiesByOwner();
       console.log("API Response:", response);
 
       // Xử lý response - API trả về trực tiếp {code, success, message, result}

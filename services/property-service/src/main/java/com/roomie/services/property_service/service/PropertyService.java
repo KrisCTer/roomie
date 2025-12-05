@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -307,12 +308,13 @@ public class PropertyService {
     }
     public List<PropertyResponse> getAllPublicProperties() {
         return propertyRepository
-                .findByApprovalStatusAndPropertyStatus(
+                .findByStatusAndPropertyStatus(
                         ApprovalStatus.ACTIVE,
                         PropertyStatus.AVAILABLE
                 )
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+//        return null;
     }
 }
