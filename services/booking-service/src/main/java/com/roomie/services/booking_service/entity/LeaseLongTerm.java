@@ -26,6 +26,7 @@ public class LeaseLongTerm {
     Instant leaseEnd;
 
     Double monthlyRent;
+    Double rentalDeposit;
 
     LeaseStatus status =  LeaseStatus.PENDING_APPROVAL;
 

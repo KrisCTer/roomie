@@ -96,6 +96,7 @@ export const API = {
   LANDLORD_SIGN_CONTRACT: (id) => `/contract/${id}/sign/landlord`,
   CONTRACT_PDF: (id) => `/contract/${id}/pdf`,
   CONTRACT_SIGNATURE_STATUS: (id) => `/contract/${id}/signature-status`,
+  MY_CONTRACTS: "/contract/my-contracts",
 
   // ========= BILLING (Billing Service - Port 8086) =========
   CREATE_BILL: "/billing",

@@ -16,96 +16,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 
-// ========== MOCK DATA ==========
-const mockContracts = {
-  asLandlord: [
-    {
-      id: "CONTRACT_001",
-      propertyId: "PROP_456",
-      propertyTitle: "Luxury Apartment in District 1",
-      propertyAddress: "123 Nguyen Hue, District 1, HCMC",
-      tenantName: "Nguyen Van A",
-      tenantPhone: "0901234567",
-      startDate: "2024-01-01T00:00:00Z",
-      endDate: "2024-12-31T23:59:59Z",
-      monthlyRent: 15000000,
-      rentalDeposit: 30000000,
-      status: "ACTIVE",
-      landlordSigned: true,
-      tenantSigned: true,
-      createdAt: "2023-12-01T10:00:00Z",
-      signedDate: "2023-12-05T10:00:00Z",
-    },
-    {
-      id: "CONTRACT_002",
-      propertyId: "PROP_457",
-      propertyTitle: "Modern Studio in District 2",
-      propertyAddress: "456 Thao Dien, District 2, HCMC",
-      tenantName: "Tran Thi B",
-      tenantPhone: "0909876543",
-      startDate: "2024-02-01T00:00:00Z",
-      endDate: "2025-01-31T23:59:59Z",
-      monthlyRent: 12000000,
-      rentalDeposit: 24000000,
-      status: "PENDING_SIGNATURE",
-      landlordSigned: true,
-      tenantSigned: false,
-      createdAt: "2024-01-15T10:00:00Z",
-    },
-    {
-      id: "CONTRACT_003",
-      propertyId: "PROP_458",
-      propertyTitle: "Villa in District 7",
-      propertyAddress: "789 Nguyen Huu Tho, District 7, HCMC",
-      tenantName: "Le Van C",
-      tenantPhone: "0912345678",
-      startDate: "2023-06-01T00:00:00Z",
-      endDate: "2024-05-31T23:59:59Z",
-      monthlyRent: 35000000,
-      rentalDeposit: 70000000,
-      status: "EXPIRED",
-      landlordSigned: true,
-      tenantSigned: true,
-      createdAt: "2023-05-01T10:00:00Z",
-      signedDate: "2023-05-15T10:00:00Z",
-    },
-  ],
-  asTenant: [
-    {
-      id: "CONTRACT_004",
-      propertyId: "PROP_550",
-      propertyTitle: "Cozy Apartment in District 3",
-      propertyAddress: "321 Vo Van Tan, District 3, HCMC",
-      landlordName: "Pham Van D",
-      landlordPhone: "0923456789",
-      startDate: "2024-01-15T00:00:00Z",
-      endDate: "2024-12-15T23:59:59Z",
-      monthlyRent: 10000000,
-      rentalDeposit: 20000000,
-      status: "ACTIVE",
-      landlordSigned: true,
-      tenantSigned: true,
-      createdAt: "2024-01-01T10:00:00Z",
-      signedDate: "2024-01-10T10:00:00Z",
-    },
-    {
-      id: "CONTRACT_005",
-      propertyId: "PROP_551",
-      propertyTitle: "Penthouse in Binh Thanh",
-      propertyAddress: "654 Dien Bien Phu, Binh Thanh, HCMC",
-      landlordName: "Hoang Thi E",
-      landlordPhone: "0934567890",
-      startDate: "2024-03-01T00:00:00Z",
-      endDate: "2025-02-28T23:59:59Z",
-      monthlyRent: 25000000,
-      rentalDeposit: 50000000,
-      status: "PENDING_SIGNATURE",
-      landlordSigned: true,
-      tenantSigned: false,
-      createdAt: "2024-02-15T10:00:00Z",
-    },
-  ],
-};
+import { getMyContracts } from "../../services/contract.service";
 
 // ========== CONTRACT CARD COMPONENT ==========
 const ContractCard = ({ contract, role, onClick }) => {
@@ -316,8 +227,9 @@ const StatsCard = ({ icon: Icon, label, value, bgColor, textColor }) => {
 
 // ========== MAIN COMPONENT ==========
 const MyContracts = () => {
-  const [activeTab, setActiveTab] = useState("landlord"); // 'landlord' or 'tenant'
-  const [contracts, setContracts] = useState(mockContracts);
+  const [activeTab, setActiveTab] = useState("landlord");
+  const [contracts, setContracts] = useState({ asLandlord: [], asTenant: [] });
+  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Contracts");
   const navigate = useNavigate();
@@ -325,7 +237,25 @@ const MyContracts = () => {
   const currentContracts =
     activeTab === "landlord" ? contracts.asLandlord : contracts.asTenant;
 
-  // Calculate statistics
+  // Fetch real API
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        const res = await getMyContracts();
+        if (res?.success) {
+          setContracts(res.result);
+        }
+      } catch (err) {
+        console.error("Failed to load contracts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContracts();
+  }, []);
+
+  // Stats
   const calculateStats = (contractList) => {
     return {
       total: contractList.length,
@@ -339,7 +269,6 @@ const MyContracts = () => {
   const stats = calculateStats(currentContracts);
 
   const handleContractClick = (contract) => {
-    // Navigate to contract signing page with contract ID
     navigate(`/contract-signing/${contract.id}`, { state: { contract } });
   };
 
@@ -404,73 +333,87 @@ const MyContracts = () => {
             </div>
           </div>
 
-          {/* Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <StatsCard
-              icon={FileText}
-              label="Tổng hợp đồng"
-              value={stats.total}
-              bgColor="bg-blue-100"
-              textColor="text-blue-600"
-            />
-            <StatsCard
-              icon={CheckCircle}
-              label="Đang hiệu lực"
-              value={stats.active}
-              bgColor="bg-green-100"
-              textColor="text-green-600"
-            />
-            <StatsCard
-              icon={Clock}
-              label="Chờ ký"
-              value={stats.pending}
-              bgColor="bg-yellow-100"
-              textColor="text-yellow-600"
-            />
-            <StatsCard
-              icon={AlertCircle}
-              label="Đã hết hạn"
-              value={stats.expired}
-              bgColor="bg-gray-100"
-              textColor="text-gray-600"
-            />
-          </div>
-
-          {/* Contracts List */}
-          <div className="space-y-4">
-            {currentContracts.length > 0 ? (
-              currentContracts.map((contract) => (
-                <ContractCard
-                  key={contract.id}
-                  contract={contract}
-                  role={activeTab}
-                  onClick={() => handleContractClick(contract)}
+          {/* Loading */}
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Đang tải hợp đồng...
+              </h3>
+            </div>
+          ) : (
+            <>
+              {/* Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <StatsCard
+                  icon={FileText}
+                  label="Tổng hợp đồng"
+                  value={stats.total}
+                  bgColor="bg-blue-100"
+                  textColor="text-blue-600"
                 />
-              ))
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Chưa có hợp đồng nào
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {activeTab === "landlord"
-                    ? "Bạn chưa có hợp đồng nào với vai trò chủ nhà"
-                    : "Bạn chưa có hợp đồng thuê nào"}
-                </p>
-                <button
-                  onClick={() =>
-                    navigate(activeTab === "landlord" ? "/my-properties" : "/")
-                  }
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  {activeTab === "landlord"
-                    ? "Xem bất động sản của bạn"
-                    : "Tìm nhà thuê"}
-                </button>
+                <StatsCard
+                  icon={CheckCircle}
+                  label="Đang hiệu lực"
+                  value={stats.active}
+                  bgColor="bg-green-100"
+                  textColor="text-green-600"
+                />
+                <StatsCard
+                  icon={Clock}
+                  label="Chờ ký"
+                  value={stats.pending}
+                  bgColor="bg-yellow-100"
+                  textColor="text-yellow-600"
+                />
+                <StatsCard
+                  icon={AlertCircle}
+                  label="Đã hết hạn"
+                  value={stats.expired}
+                  bgColor="bg-gray-100"
+                  textColor="text-gray-600"
+                />
               </div>
-            )}
-          </div>
+
+              {/* Contracts List */}
+              <div className="space-y-4">
+                {currentContracts.length > 0 ? (
+                  currentContracts.map((contract) => (
+                    <ContractCard
+                      key={contract.id}
+                      contract={contract}
+                      role={activeTab}
+                      onClick={() => handleContractClick(contract)}
+                    />
+                  ))
+                ) : (
+                  <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Chưa có hợp đồng nào
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      {activeTab === "landlord"
+                        ? "Bạn chưa có hợp đồng nào với vai trò chủ nhà"
+                        : "Bạn chưa có hợp đồng thuê nào"}
+                    </p>
+                    <button
+                      onClick={() =>
+                        navigate(
+                          activeTab === "landlord" ? "/my-properties" : "/"
+                        )
+                      }
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                      {activeTab === "landlord"
+                        ? "Xem bất động sản của bạn"
+                        : "Tìm nhà thuê"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <Footer />

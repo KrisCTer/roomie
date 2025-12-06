@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -286,6 +287,19 @@ public class ContractService {
             log.error("Failed to regenerate final PDF for contractId={}", contract.getId(), e);
             // Don't throw - let the signing process continue
         }
+    }
+    public List<ContractResponse> getContractsAsLandlord(String userId) {
+        List<Contract> contracts = repo.findByLandlordId(userId);
+        return contracts.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<ContractResponse> getContractsAsTenant(String userId) {
+        List<Contract> contracts = repo.findByTenantId(userId);
+        return contracts.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     private String cacheKey(String id) {

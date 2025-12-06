@@ -20,4 +20,5 @@ public class BookingRequest {
     Instant leaseEnd;
 
     Double monthlyRent; // for long-term
+    Double rentalDeposit;
 }
