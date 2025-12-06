@@ -1,153 +1,192 @@
-import React, { useState } from "react";
-import {
-  Heart,
-  Star,
-  Building,
-  Search,
-  Calendar,
-  Filter,
-  Clock,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
-import StatsCard from "../../components/layout/layoutUser/StatsCard.jsx";
-import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx";
-import MessageItem from "../../components/layout/layoutUser/MessageItem.jsx";
-import ReviewItem from "../../components/layout/layoutUser/ReviewItem.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 
-// ========== MAIN DASHBOARD COMPONENT ==========
+import {
+  Home,
+  Clock,
+  DollarSign,
+  CheckCircle,
+  AlertTriangle,
+  FileText,
+} from "lucide-react";
+
+import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx"; // dùng lại card giống MyProperties :contentReference[oaicite:1]{index=1}
+import {
+  getPropertiesByOwner,
+  deleteProperty,
+  updateProperty,
+} from "../../services/property.service";
+
 const Dashboard = () => {
-  const [activeMenu, setActiveMenu] = useState("Dashboards");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeMenu, setActiveMenu] = useState("Dashboards");
+  const [loading, setLoading] = useState(false);
 
-  const listings = [
-    {
-      id: 1,
-      title: "Casa Lomas de Machali Machas",
-      date: "March 22, 2024",
-      price: "$4,498",
-      status: "Pending",
-      image:
-        "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=300&h=200&fit=crop",
-    },
-    {
-      id: 2,
-      title: "Casa Lomas de Machali Machas",
-      date: "March 22, 2024",
-      price: "$5,007",
-      status: "Approved",
-      image:
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=300&h=200&fit=crop",
-    },
-    {
-      id: 3,
-      title: "Casa Lomas de Machali Machas",
-      date: "March 22, 2024",
-      price: "$5,329",
-      status: "Sold",
-      image:
-        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&h=200&fit=crop",
-    },
-    {
-      id: 4,
-      title: "Casa Lomas de Machali Machas",
-      date: "March 22, 2024",
-      price: "$3,882",
-      status: "Pending",
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=200&fit=crop",
-    },
-    {
-      id: 5,
-      title: "Casa Lomas de Machali Machas",
-      date: "March 22, 2024",
-      price: "$2,895",
-      status: "Sold",
-      image:
-        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=300&h=200&fit=crop",
-    },
-  ];
+  const [properties, setProperties] = useState([]);
 
-  const messages = [
-    {
-      id: 1,
-      name: "Themesflat",
-      time: "1 day ago",
-      message:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean scelerisque vulputate ultricies. Maecenas eorm.",
-      avatar: "TF",
-    },
-    {
-      id: 2,
-      name: "ThemeMu",
-      time: "1 day ago",
-      message:
-        "Nullam lacinia lorem id sapien suscipit, vitae pellentesque ex facilisis. Duis eu molis odio. Proin faucibus ex lectus a eleifend.",
-      avatar: "TM",
-    },
-    {
-      id: 3,
-      name: "Cameron Williamson",
-      time: "1 day ago",
-      message: "In consequat lacus augue, a vestibulum est aliquam non",
-      avatar: "CW",
-    },
-    {
-      id: 4,
-      name: "Esther Howard",
-      time: "3 day ago",
-      message:
-        "Cras congue in justo vel dapibus. Praesent euismod, lectus et aliquam pretium",
-      avatar: "EH",
-    },
-  ];
+  const [dashboard, setDashboard] = useState({
+    totalProperties: 0,
+    pending: 0,
+    rented: 0,
+    incomeEstimate: 0,
 
-  const reviews = [
-    {
-      id: 1,
-      name: "Bessie Cooper",
-      time: "3 day ago",
-      rating: 5,
-      comment: "Maecenas eu lorem et urna accumsan vestibulum eml vitae magna.",
-    },
-    {
-      id: 2,
-      name: "Annette Black",
-      time: "3 day ago",
-      rating: 5,
-      comment:
-        "Nullam rhoncus dolor arcu, et bibendum ligula congue eu. Aenean finibus tristique iuctus, ac lobortis mauris venenatis ac.",
-    },
-    {
-      id: 3,
-      name: "Ralph Edwards",
-      time: "3 day ago",
-      rating: 5,
-      comment:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus viverra semper convallis. Integer vestibulum tempus tincidunt.",
-    },
-    {
-      id: 4,
-      name: "Jerome Bell",
-      time: "4 day ago",
-      rating: 5,
-      comment:
-        "Fusce sit amet purus eget quam eleifend hendrerit nec a erat. Sed turpis neque, iaculis blandit viverra ut, dapibus eget nisi.",
-    },
-    {
-      id: 5,
-      name: "Albert Flores",
-      time: "3 day ago",
-      rating: 5,
-      comment:
-        "Donec bibendum nibh quis nisl luctus, at aliquet ipsum faucibus. Vestibulum tincidunt nulla semper venenatis sit et magna.",
-    },
-  ];
+    totalContracts: 0,
+    activeContracts: 0,
+    pendingContracts: 0,
+    expiredContracts: 0,
 
+    latestListings: [],
+  });
+
+  // ================== LẤY DATA TỪ API (GIỐNG MyProperties) ==================
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+
+      const response = await getPropertiesByOwner();
+      console.log("Dashboard - API Response:", response);
+
+      let list = [];
+
+      // y hệt MyProperties: response { success, result } :contentReference[oaicite:2]{index=2}
+      if (response && response.success && response.result) {
+        list = response.result;
+      } else if (response && response.data) {
+        const data = response.data;
+        if (data.result) {
+          list = data.result;
+        } else if (data.content) {
+          list = data.content;
+        } else if (Array.isArray(data)) {
+          list = data;
+        }
+      } else if (Array.isArray(response)) {
+        list = response;
+      }
+
+      setProperties(list);
+      computeDashboardFromProperties(list);
+    } catch (error) {
+      console.error("Error fetching dashboard properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================== TÍNH TOÁN SỐ LIỆU TỪ DANH SÁCH PROPERTY ==================
+  const computeDashboardFromProperties = (list) => {
+    const getStatus = (p) => p.status || p.propertyStatus;
+
+    const total = list.length;
+    const pending = list.filter((p) =>
+      ["DRAFT", "PENDING"].includes(getStatus(p))
+    ).length;
+    const rented = list.filter((p) =>
+      ["SOLD", "RENTED"].includes(getStatus(p))
+    ).length;
+
+    // tạm lấy tổng tiền thuê/tháng của tất cả phòng
+    const incomeEstimate = list.reduce(
+      (sum, p) => sum + (p.monthlyRent || 0),
+      0
+    );
+
+    const latestListings = list.slice(0, 3);
+
+    setDashboard((prev) => ({
+      ...prev,
+      totalProperties: total,
+      pending,
+      rented,
+      incomeEstimate,
+      latestListings,
+      // các số liệu hợp đồng giữ nguyên = 0, sau này muốn thì thêm API contracts
+      totalContracts: prev.totalContracts,
+      activeContracts: prev.activeContracts,
+      pendingContracts: prev.pendingContracts,
+      expiredContracts: prev.expiredContracts,
+    }));
+  };
+
+  // ================== ACTION GIỐNG MyProperties (Edit/Sold/Delete) ==================
+  const handleDelete = async (propertyId) => {
+    if (window.confirm("Are you sure you want to delete this property?")) {
+      try {
+        await deleteProperty(propertyId);
+        await fetchProperties();
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        alert("Failed to delete property");
+      }
+    }
+  };
+
+  const handleSold = async (propertyId) => {
+    if (window.confirm("Mark this property as sold?")) {
+      try {
+        await updateProperty(propertyId, { status: "SOLD" });
+        await fetchProperties();
+        alert("Property marked as sold successfully!");
+      } catch (error) {
+        console.error("Error updating property:", error);
+        alert("Failed to update property status");
+      }
+    }
+  };
+
+  const handleEdit = (propertyId) => {
+    window.location.href = `/add-property?edit=${propertyId}`;
+  };
+
+  // map dữ liệu Property → props cho ListingCard (copy từ MyProperties, bỏ modal) :contentReference[oaicite:3]{index=3}
+  const transformPropertyToListing = (property) => {
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    const getStatusText = (status) => {
+      const statusMap = {
+        DRAFT: "Pending",
+        PENDING: "Pending",
+        APPROVED: "Approved",
+        AVAILABLE: "Approved",
+        SOLD: "Sold",
+        RENTED: "Sold",
+      };
+      return statusMap[status] || "Pending";
+    };
+
+    return {
+      id: property.propertyId,
+      image:
+        property.mediaList?.[0]?.url ||
+        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
+      title: property.title,
+      date: formatDate(property.createdAt),
+      price: `${property.monthlyRent?.toLocaleString()} VND`,
+      status: getStatusText(property.status || property.propertyStatus),
+      onEdit: () => handleEdit(property.propertyId),
+      onSold: () => handleSold(property.propertyId),
+      onDelete: () => handleDelete(property.propertyId),
+      onClick: () => {}, // Dashboard chỉ xem nhanh, không mở modal
+    };
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  // ================== UI (GIỮ NGUYÊN BỐ CỤC) ==================
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-gray-900">
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -155,7 +194,6 @@ const Dashboard = () => {
         setSidebarOpen={setSidebarOpen}
       />
 
-      {/* Main Content */}
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
@@ -163,178 +201,153 @@ const Dashboard = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        {/* Dashboard Content */}
-        <div className="p-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatsCard
-              icon={Building}
-              label="Your listing"
-              value="32"
-              subtitle="remaining"
-              bgColor="bg-blue-50"
-              iconColor="text-blue-600"
-            />
-            <StatsCard
-              icon={Clock}
-              label="Pending"
-              value="02"
-              bgColor="bg-orange-50"
-              iconColor="text-orange-600"
-            />
-            <StatsCard
-              icon={Heart}
-              label="Favorites"
-              value="06"
-              bgColor="bg-purple-50"
-              iconColor="text-purple-600"
-            />
-            <StatsCard
-              icon={Star}
-              label="Reviews"
-              value="1.483"
-              bgColor="bg-yellow-50"
-              iconColor="text-yellow-600"
-            />
-          </div>
+        <main className="p-8 w-full">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Dashboard chủ nhà
+          </h1>
+          <p className="text-gray-300 mb-6">
+            Tổng quan về bất động sản, hợp đồng và tình hình cho thuê của bạn.
+          </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* New Listing Section */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                  <h2 className="text-xl font-bold">New Listing</h2>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="relative flex-1 md:flex-none">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search"
-                        className="w-full md:w-auto pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span>From Date</span>
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span>To Date</span>
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
-                      <Filter className="w-4 h-4" />
-                      <span>Select</span>
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-sm text-gray-600 mb-4">26 Results found</p>
-
-                <div className="space-y-3">
-                  {listings.map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  <button className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">
-                    &lt;
-                  </button>
-                  <button className="w-9 h-9 flex items-center justify-center rounded bg-blue-600 text-white font-medium">
-                    1
-                  </button>
-                  <button className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">
-                    2
-                  </button>
-                  <button className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">
-                    3
-                  </button>
-                  <button className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">
-                    4
-                  </button>
-                  <span className="px-2">...</span>
-                  <button className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">
-                    &gt;
-                  </button>
-                </div>
+          {/* Hàng 1: thống kê bất động sản */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {/* Tổng số bất động sản */}
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Home className="w-6 h-6 text-blue-400" />
               </div>
-
-              {/* Chart Section */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-6">Page Inside</h2>
-                <div className="flex gap-2 mb-6 overflow-x-auto">
-                  <button className="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium whitespace-nowrap">
-                    Day
-                  </button>
-                  <button className="px-6 py-2 hover:bg-gray-100 rounded-lg whitespace-nowrap">
-                    Week
-                  </button>
-                  <button className="px-6 py-2 hover:bg-gray-100 rounded-lg whitespace-nowrap">
-                    Month
-                  </button>
-                  <button className="px-6 py-2 hover:bg-gray-100 rounded-lg whitespace-nowrap">
-                    Year
-                  </button>
-                </div>
-                <div className="h-64 flex items-end justify-between gap-1">
-                  {[40, 45, 90, 85, 120, 130, 140, 145, 155, 145, 150, 140].map(
-                    (height, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t transition-all hover:from-blue-600 hover:to-blue-400"
-                        style={{ height: `${height}px` }}
-                      ></div>
-                    )
-                  )}
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-3">
-                  {[
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
-                  ].map((month) => (
-                    <span key={month}>{month}</span>
-                  ))}
-                </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">
+                  Tổng số bất động sản
+                </p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.totalProperties}
+                </p>
               </div>
             </div>
 
-            {/* Right Sidebar - Messages & Reviews */}
-            <div className="space-y-6">
-              {/* Messages */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-4">Messages</h2>
-                <div className="space-y-2">
-                  {messages.map((message) => (
-                    <MessageItem key={message.id} message={message} />
-                  ))}
-                </div>
+            {/* Chờ duyệt */}
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-yellow-400" />
               </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">Chờ duyệt</p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.pending}
+                </p>
+              </div>
+            </div>
 
-              {/* Recent Reviews */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-xl font-bold mb-4">Recent Reviews</h2>
-                <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <ReviewItem key={review.id} review={review} />
-                  ))}
-                </div>
+            {/* Đang cho thuê */}
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">Đang cho thuê</p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.rented}
+                </p>
+              </div>
+            </div>
+
+            {/* Thu nhập ước tính / tháng */}
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">
+                  Thu nhập ước tính / tháng
+                </p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.incomeEstimate.toLocaleString()} đ
+                </p>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
+          {/* Hàng 2: thống kê hợp đồng (tạm thời = 0, chỉ hiển thị) */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">
+                  Tổng số hợp đồng
+                </p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.totalContracts}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">
+                  Hợp đồng hiệu lực
+                </p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.activeContracts}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">
+                  Hợp đồng chờ ký
+                </p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.pendingContracts}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-300 mb-1">Hết hạn / Hủy</p>
+                <p className="text-2xl font-semibold text-white">
+                  {dashboard.expiredContracts}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bất động sản mới nhất */}
+          <div className="bg-slate-800 p-6 rounded-xl shadow-sm mb-6">
+            <h2 className="text-xl font-bold text-white mb-4">
+              Bất động sản mới nhất
+            </h2>
+
+            {loading ? (
+              <p className="text-gray-300">Đang tải dữ liệu...</p>
+            ) : dashboard.latestListings.length === 0 ? (
+              <p className="text-gray-300">Không có dữ liệu</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {dashboard.latestListings.map((property) => (
+                  <ListingCard
+                    key={property.propertyId}
+                    listing={transformPropertyToListing(property)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
+
         <Footer />
       </div>
     </div>
