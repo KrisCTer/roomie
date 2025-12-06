@@ -73,7 +73,8 @@ public class SocketHandler {
         // Initiate call
         server.addEventListener("call-user", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     // Parse data (might be List or Map depending on socket.io version)
                     Map<String, Object> data = parseSocketData(rawData);
@@ -115,7 +116,8 @@ public class SocketHandler {
         // Answer call
         server.addEventListener("answer-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -140,7 +142,8 @@ public class SocketHandler {
         // Reject call
         server.addEventListener("reject-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -165,7 +168,8 @@ public class SocketHandler {
         // End call
         server.addEventListener("end-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -190,7 +194,8 @@ public class SocketHandler {
         // ICE candidate exchange
         server.addEventListener("ice-candidate", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");

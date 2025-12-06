@@ -34,8 +34,14 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      await loginApi(form.username, form.password);
+      const res = await loginApi(form.username, form.password);
+
+      localStorage.setItem("access_token", res.result.token);
+      localStorage.setItem("username", form.username);
+
+      // Không redirect admin nữa — tất cả vào Home
       navigate("/home");
+      
     } catch (err) {
       alert(t("auth.loginError"));
     }

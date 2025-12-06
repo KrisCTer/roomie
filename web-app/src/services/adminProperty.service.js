@@ -1,6 +1,6 @@
 // src/services/admin/adminProperty.service.js
-import BaseService from "../BaseService";
-import { API } from "../../configurations/configuration";
+import BaseService from "./BaseService";
+import { API } from "../configurations/configuration";
 
 export const adminGetPendingProperties = () =>
   BaseService.get(API.ADMIN_PENDING_PROPERTIES);

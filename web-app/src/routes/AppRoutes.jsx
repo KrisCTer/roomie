@@ -14,6 +14,8 @@ import ContractSigning from "../pages/User/ContractSigning";
 import MyContracts from "../pages/User/MyContracts";
 import MyBookings from "../pages/User/MyBooking";
 import { SocketProvider } from "../contexts/SocketContext";
+import AdminProperties from "../pages/Admin/AdminProperties"; // thêm dòng này
+
 
 const AppRoutes = () => {
   return (
@@ -27,6 +29,7 @@ const AppRoutes = () => {
         <Route path="/message" element={<Message />} />{" "}
         <Route path="/admin" element={<Admin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin/properties" element={<AdminProperties />} />
         <Route path="/add-property" element={<AddProperty />} />
         <Route path="/my-properties" element={<MyProperties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
@@ -34,6 +37,7 @@ const AppRoutes = () => {
         <Route path="/contract-signing" element={<ContractSigning />} />
         <Route path="/my-contracts" element={<MyContracts />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+        
       </Routes>
     </Router>
   );

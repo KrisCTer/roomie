@@ -31,7 +31,23 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const handleNavigation = (item) => {
     // Cập nhật activeMenu
     setActiveMenu(item.label);
+    // Lấy username từ localStorage
+    const username = localStorage.getItem("username");
 
+    // Nếu admin → override menu
+    if (username === "admin") {
+      // Nếu admin bấm Dashboard → chuyển sang admin dashboard
+      if (item.label === t("Dashboards")) {
+        navigate("/admin/dashboard");
+        return;
+      }
+
+      // Nếu admin bấm My Properties → chuyển sang admin properties
+      if (item.label === t("My Properties")) {
+        navigate("/admin/properties");
+        return;
+      }
+    }
     // Navigate không reload trang
     navigate(item.path);
   };

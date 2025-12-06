@@ -1,9 +1,9 @@
 package com.roomie.services.chat_service.configuration;
 
+import java.lang.reflect.Field;
+
 import com.corundumstudio.socketio.protocol.JacksonJsonSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.lang.reflect.Field;
 
 public class CustomJacksonJsonSupport extends JacksonJsonSupport {
 
