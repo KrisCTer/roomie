@@ -4,12 +4,16 @@ import com.roomie.services.contract_service.dto.event.ContractEvent;
 import com.roomie.services.contract_service.dto.event.PaymentCompletedEvent;
 import com.roomie.services.contract_service.dto.request.ContractRequest;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
+import com.roomie.services.contract_service.dto.response.OTPResponse;
 import com.roomie.services.contract_service.entity.Contract;
+import com.roomie.services.contract_service.entity.OTPVerification;
 import com.roomie.services.contract_service.enums.ContractStatus;
 import com.roomie.services.contract_service.exception.AppException;
 import com.roomie.services.contract_service.exception.ErrorCode;
 import com.roomie.services.contract_service.mapper.ContractMapper;
 import com.roomie.services.contract_service.repository.ContractRepository;
+import com.roomie.services.contract_service.repository.OTPVerificationRepository;
+import com.roomie.services.contract_service.repository.httpclient.ProfileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,12 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +53,9 @@ public class ContractService {
 
     @Value("${contract.template-type:FULL}")
     String templateType = "FULL";
+    private final ProfileClient profileClient;
+    private final OTPVerificationRepository oTPVerificationRepository;
+    private final EmailService emailService;
 
     /**
      * Tạo contract mới - Generate bản PREVIEW
@@ -84,9 +93,9 @@ public class ContractService {
         cacheService.put(cacheKey(saved.getId()), saved, CACHE_TTL);
 
         ContractEvent ev = new ContractEvent();
-        ev.setContractId(saved.getId());
         ev.setBookingId(saved.getBookingId());
         ev.setTenantId(saved.getTenantId());
+        ev.setLandlordId(saved.getLandlordId());
         ev.setPropertyId(saved.getPropertyId());
 
         kafkaTemplate.send("contract.created", ev);
@@ -104,7 +113,13 @@ public class ContractService {
             return mapper.toResponse(c);
         });
     }
+    public List<Contract> getContractsByLandlord(String landlordId) {
+        return repo.findByLandlordId(landlordId);
+    }
 
+    public List<Contract> getContractsByTenant(String tenantId) {
+        return repo.findByTenantId(tenantId);
+    }
     /**
      * Tenant ký hợp đồng
      */
@@ -307,13 +322,184 @@ public class ContractService {
     }
 
     private ContractEvent buildEvent(Contract c) {
-        return new ContractEvent(
-                c.getId(),
-                c.getBookingId(),
-                c.getTenantId(),
-                c.getPropertyId(),
-                c.getStartDate(),
-                c.getEndDate()
-        );
+        return null;
+    }
+
+    @Transactional
+    public OTPResponse requestTenantOTP(String contractId, String tenantId) {
+        // Get contract
+        Contract contract = repo.findById(contractId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        // Verify user is tenant
+        if (!contract.getTenantId().equals(tenantId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Check if already signed
+        if (contract.isTenantSigned()) {
+            throw new AppException(ErrorCode.ALREADY_SIGNED);
+        }
+
+        // Get tenant email
+        var profileResponse = profileClient.getProfile(tenantId);
+        if (profileResponse == null || profileResponse.getResult() == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        String email = profileResponse.getResult().getEmail();
+
+        // Delete old OTP
+        oTPVerificationRepository.deleteByContractIdAndUserId(contractId, tenantId);
+
+        // Generate new OTP
+        String otpCode = generateOTP();
+        Instant expiresAt = Instant.now().plusSeconds(300); // 5 minutes
+
+        OTPVerification otp = OTPVerification.builder()
+                .contractId(contractId)
+                .userId(tenantId)
+                .email(email)
+                .otpCode(otpCode)
+                .purpose("TENANT_SIGN")
+                .verified(false)
+                .expiresAt(expiresAt)
+                .createdAt(Instant.now())
+                .build();
+
+        oTPVerificationRepository.save(otp);
+
+        // Send email
+        emailService.sendOTPEmail(email, otpCode, "tenant");
+
+        log.info("OTP sent to tenant {} for contract {}", tenantId, contractId);
+
+        return OTPResponse.builder()
+                .message("OTP sent to your email")
+                .expiresAt(expiresAt)
+                .sent(true)
+                .build();
+    }
+
+    /**
+     * Request OTP for landlord signing
+     */
+    @Transactional
+    public OTPResponse requestLandlordOTP(String contractId, String landlordId) {
+        // Get contract
+        Contract contract = repo.findById(contractId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        // Verify user is landlord
+        if (!contract.getLandlordId().equals(landlordId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Check if already signed
+        if (contract.isLandlordSigned()) {
+            throw new AppException(ErrorCode.ALREADY_SIGNED);
+        }
+
+        // Get landlord email
+        var profileResponse = profileClient.getProfile(landlordId);
+        if (profileResponse == null || profileResponse.getResult() == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        String email = profileResponse.getResult().getEmail();
+
+        // Delete old OTP
+        oTPVerificationRepository.deleteByContractIdAndUserId(contractId, landlordId);
+
+        // Generate new OTP
+        String otpCode = generateOTP();
+        Instant expiresAt = Instant.now().plusSeconds(300); // 5 minutes
+
+        OTPVerification otp = OTPVerification.builder()
+                .contractId(contractId)
+                .userId(landlordId)
+                .email(email)
+                .otpCode(otpCode)
+                .purpose("LANDLORD_SIGN")
+                .verified(false)
+                .expiresAt(expiresAt)
+                .createdAt(Instant.now())
+                .build();
+
+        oTPVerificationRepository.save(otp);
+
+        // Send email
+        emailService.sendOTPEmail(email, otpCode, "landlord");
+
+        log.info("OTP sent to landlord {} for contract {}", landlordId, contractId);
+
+        return OTPResponse.builder()
+                .message("OTP sent to your email")
+                .expiresAt(expiresAt)
+                .sent(true)
+                .build();
+    }
+
+    /**
+     * Tenant signs contract with OTP verification
+     */
+    @Transactional
+    public ContractResponse tenantSignWithOTP(String contractId, String otpCode) {
+        String tenantId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Verify OTP
+        OTPVerification otp = oTPVerificationRepository.findByContractIdAndUserIdAndPurposeAndVerifiedFalseAndExpiresAtAfter(
+                contractId,
+                tenantId,
+                "TENANT_SIGN",
+                Instant.now()
+        ).orElseThrow(() -> new AppException(ErrorCode.INVALID_OTP));
+
+        // Check OTP code
+        if (!otp.getOtpCode().equals(otpCode)) {
+            throw new AppException(ErrorCode.INVALID_OTP);
+        }
+
+        // Mark OTP as verified
+        otp.setVerified(true);
+        oTPVerificationRepository.save(otp);
+
+        // Sign contract (use existing logic)
+        return tenantSign(contractId, null);
+    }
+
+    /**
+     * Landlord signs contract with OTP verification
+     */
+    @Transactional
+    public ContractResponse landlordSignWithOTP(String contractId, String otpCode) {
+        String landlordId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Verify OTP
+        OTPVerification otp = oTPVerificationRepository.findByContractIdAndUserIdAndPurposeAndVerifiedFalseAndExpiresAtAfter(
+                contractId,
+                landlordId,
+                "LANDLORD_SIGN",
+                Instant.now()
+        ).orElseThrow(() -> new AppException(ErrorCode.INVALID_OTP));
+
+        // Check OTP code
+        if (!otp.getOtpCode().equals(otpCode)) {
+            throw new AppException(ErrorCode.INVALID_OTP);
+        }
+
+        // Mark OTP as verified
+        otp.setVerified(true);
+        oTPVerificationRepository.save(otp);
+
+        // Sign contract (use existing logic)
+        return landlordSign(contractId, null);
+    }
+
+    /**
+     * Generate 6-digit OTP
+     */
+    private String generateOTP() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000);
+        return String.valueOf(otp);
     }
 }

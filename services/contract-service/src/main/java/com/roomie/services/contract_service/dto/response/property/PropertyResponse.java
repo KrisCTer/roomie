@@ -38,6 +38,7 @@ public class PropertyResponse {
     AddressResponse address;  // Cần có đầy đủ: fullAddress, zipCode, country, neighborhood, province, location
     AmenitiesResponse amenities;  // Cần có đầy đủ: homeSafety, bedroom, kitchen
     List<MediaResponse> mediaList;
+
     OwnerResponse owner;
     ApprovalStatus status;
 

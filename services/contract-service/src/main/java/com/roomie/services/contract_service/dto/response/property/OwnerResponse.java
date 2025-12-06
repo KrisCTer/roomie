@@ -1,17 +1,16 @@
 package com.roomie.services.contract_service.dto.response.property;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OwnerResponse {
     String ownerId;
     String name;
-    String phone;
+    String phoneNumber;
     String email;
 }

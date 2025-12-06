@@ -1,17 +1,14 @@
 package com.roomie.services.contract_service.dto.response.property;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class MediaResponse {
     String url;
     String type;
-    Boolean primary;
-    String caption;
 }

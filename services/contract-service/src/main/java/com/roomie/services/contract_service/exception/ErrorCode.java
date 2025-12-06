@@ -23,6 +23,7 @@ public enum ErrorCode {
     CONTRACT_UPLOAD_FAILED(1014,"Contract PDF upload failed",HttpStatus.CONFLICT),
     CONTRACT_GENERATE_FAILED(1015,"Failed to generate and upload PDF",HttpStatus.CONFLICT),
     INVALID_CONTRACT_STATUS(1016,"Invalid contract status",HttpStatus.CONFLICT),
+    INVALID_OTP(1017,"Invalid OTP",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

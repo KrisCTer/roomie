@@ -17,9 +17,11 @@ import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 
 import { getMyContracts } from "../../services/contract.service";
+import { getPropertyById } from "../../services/property.service";
+import { getUserProfile } from "../../services/user.service";
 
 // ========== CONTRACT CARD COMPONENT ==========
-const ContractCard = ({ contract, role, onClick }) => {
+const ContractCard = ({ contract, role, onClick, propertyData, userData }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -53,6 +55,14 @@ const ContractCard = ({ contract, role, onClick }) => {
           icon: Clock,
           iconColor: "text-yellow-600",
         };
+      case "PENDING_PAYMENT":
+        return {
+          label: "Chờ thanh toán",
+          bgColor: "bg-blue-100",
+          textColor: "text-blue-800",
+          icon: Clock,
+          iconColor: "text-blue-600",
+        };
       case "EXPIRED":
         return {
           label: "Đã hết hạn",
@@ -61,13 +71,29 @@ const ContractCard = ({ contract, role, onClick }) => {
           icon: AlertCircle,
           iconColor: "text-gray-600",
         };
-      case "CANCELLED":
+      case "TERMINATED":
         return {
-          label: "Đã hủy",
+          label: "Đã chấm dứt",
           bgColor: "bg-red-100",
           textColor: "text-red-800",
           icon: AlertCircle,
           iconColor: "text-red-600",
+        };
+      case "PAUSED":
+        return {
+          label: "Tạm dừng",
+          bgColor: "bg-orange-100",
+          textColor: "text-orange-800",
+          icon: AlertCircle,
+          iconColor: "text-orange-600",
+        };
+      case "DRAFT":
+        return {
+          label: "Bản nháp",
+          bgColor: "bg-gray-100",
+          textColor: "text-gray-800",
+          icon: FileText,
+          iconColor: "text-gray-600",
         };
       default:
         return {
@@ -83,10 +109,22 @@ const ContractCard = ({ contract, role, onClick }) => {
   const statusConfig = getStatusConfig(contract.status);
   const StatusIcon = statusConfig.icon;
 
-  const otherParty =
-    role === "landlord"
-      ? { name: contract.tenantName, phone: contract.tenantPhone }
-      : { name: contract.landlordName, phone: contract.landlordPhone };
+  // Get property info
+  const propertyTitle = propertyData?.title || "Đang tải...";
+  const propertyAddress = propertyData?.address?.fullAddress || "Đang tải...";
+  const monthlyRent = propertyData?.monthlyRent || 0;
+  const rentalDeposit = propertyData?.rentalDeposit || 0;
+
+  // Get other party info based on role
+  const otherPartyId =
+    role === "landlord" ? contract.tenantId : contract.landlordId;
+  const otherPartyData = userData[otherPartyId];
+  const otherPartyName = otherPartyData
+    ? `${otherPartyData.firstName || ""} ${
+        otherPartyData.lastName || ""
+      }`.trim() || "N/A"
+    : "Đang tải...";
+  const otherPartyPhone = otherPartyData?.phoneNumber || "N/A";
 
   const isSigned =
     role === "landlord" ? contract.landlordSigned : contract.tenantSigned;
@@ -102,13 +140,9 @@ const ContractCard = ({ contract, role, onClick }) => {
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-bold text-gray-900">
-              {contract.propertyTitle}
-            </h3>
+            <h3 className="text-lg font-bold text-gray-900">{propertyTitle}</h3>
           </div>
-          <p className="text-sm text-gray-600 mb-1">
-            {contract.propertyAddress}
-          </p>
+          <p className="text-sm text-gray-600 mb-1">{propertyAddress}</p>
           <p className="text-xs text-gray-500">Mã HĐ: {contract.id}</p>
         </div>
 
@@ -126,20 +160,20 @@ const ContractCard = ({ contract, role, onClick }) => {
           <p className="text-xs text-gray-500 mb-1">
             {role === "landlord" ? "Người thuê" : "Chủ nhà"}
           </p>
-          <p className="text-sm font-medium text-gray-900">{otherParty.name}</p>
-          <p className="text-xs text-gray-600">{otherParty.phone}</p>
+          <p className="text-sm font-medium text-gray-900">{otherPartyName}</p>
+          <p className="text-xs text-gray-600">{otherPartyPhone}</p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1">Giá thuê</p>
           <p className="text-sm font-bold text-blue-600">
-            {formatCurrency(contract.monthlyRent)}
+            {formatCurrency(monthlyRent)}
             <span className="text-xs font-normal text-gray-600">/tháng</span>
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-500 mb-1">Tiền cọc</p>
           <p className="text-sm font-medium text-gray-900">
-            {formatCurrency(contract.rentalDeposit)}
+            {formatCurrency(rentalDeposit)}
           </p>
         </div>
         <div>
@@ -229,6 +263,8 @@ const StatsCard = ({ icon: Icon, label, value, bgColor, textColor }) => {
 const MyContracts = () => {
   const [activeTab, setActiveTab] = useState("landlord");
   const [contracts, setContracts] = useState({ asLandlord: [], asTenant: [] });
+  const [propertyCache, setPropertyCache] = useState({});
+  const [userCache, setUserCache] = useState({});
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Contracts");
@@ -237,31 +273,90 @@ const MyContracts = () => {
   const currentContracts =
     activeTab === "landlord" ? contracts.asLandlord : contracts.asTenant;
 
-  // Fetch real API
+  // Fetch contracts and related data
   useEffect(() => {
-    const fetchContracts = async () => {
-      try {
-        const res = await getMyContracts();
-        if (res?.success) {
-          setContracts(res.result);
-        }
-      } catch (err) {
-        console.error("Failed to load contracts:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchContracts();
   }, []);
 
-  // Stats
+  const fetchContracts = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch all contracts
+      const res = await getMyContracts();
+      console.log("My Contracts Response:", res);
+
+      if (res?.success && res?.result) {
+        const allContracts = res.result;
+        setContracts(allContracts);
+
+        // Collect unique property and user IDs
+        const propertyIds = new Set();
+        const userIds = new Set();
+
+        [...allContracts.asLandlord, ...allContracts.asTenant].forEach(
+          (contract) => {
+            if (contract.propertyId) propertyIds.add(contract.propertyId);
+            if (contract.tenantId) userIds.add(contract.tenantId);
+            if (contract.landlordId) userIds.add(contract.landlordId);
+          }
+        );
+
+        // Fetch property data
+        const propertyPromises = Array.from(propertyIds).map(async (id) => {
+          try {
+            const propRes = await getPropertyById(id);
+            if (propRes?.success && propRes?.result) {
+              return [id, propRes.result];
+            }
+          } catch (error) {
+            console.error(`Error fetching property ${id}:`, error);
+          }
+          return [id, null];
+        });
+
+        const propertyResults = await Promise.all(propertyPromises);
+        const propertyMap = Object.fromEntries(
+          propertyResults.filter(([_, data]) => data)
+        );
+        setPropertyCache(propertyMap);
+
+        // Fetch user profiles
+        const userPromises = Array.from(userIds).map(async (id) => {
+          try {
+            const userRes = await getUserProfile(id);
+            if (userRes?.success && userRes?.result) {
+              return [id, userRes.result];
+            }
+          } catch (error) {
+            console.error(`Error fetching user ${id}:`, error);
+          }
+          return [id, null];
+        });
+
+        const userResults = await Promise.all(userPromises);
+        const userMap = Object.fromEntries(
+          userResults.filter(([_, data]) => data)
+        );
+        setUserCache(userMap);
+      }
+    } catch (err) {
+      console.error("Failed to load contracts:", err);
+      alert("Không thể tải danh sách hợp đồng. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate statistics
   const calculateStats = (contractList) => {
     return {
       total: contractList.length,
       active: contractList.filter((c) => c.status === "ACTIVE").length,
-      pending: contractList.filter((c) => c.status === "PENDING_SIGNATURE")
-        .length,
+      pending: contractList.filter(
+        (c) =>
+          c.status === "PENDING_SIGNATURE" || c.status === "PENDING_PAYMENT"
+      ).length,
       expired: contractList.filter((c) => c.status === "EXPIRED").length,
     };
   };
@@ -336,7 +431,7 @@ const MyContracts = () => {
           {/* Loading */}
           {loading ? (
             <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4 animate-pulse" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 Đang tải hợp đồng...
               </h3>
@@ -361,7 +456,7 @@ const MyContracts = () => {
                 />
                 <StatsCard
                   icon={Clock}
-                  label="Chờ ký"
+                  label="Chờ xử lý"
                   value={stats.pending}
                   bgColor="bg-yellow-100"
                   textColor="text-yellow-600"
@@ -384,6 +479,8 @@ const MyContracts = () => {
                       contract={contract}
                       role={activeTab}
                       onClick={() => handleContractClick(contract)}
+                      propertyData={propertyCache[contract.propertyId]}
+                      userData={userCache}
                     />
                   ))
                 ) : (

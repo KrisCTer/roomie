@@ -19,6 +19,7 @@ public class ChatMessageResponse {
     boolean me;
     String message;
     ParticipantInfo sender;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     Instant createdDate;
 }

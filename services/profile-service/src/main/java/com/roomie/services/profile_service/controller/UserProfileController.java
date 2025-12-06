@@ -8,6 +8,7 @@ import com.roomie.services.profile_service.service.UserProfileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -63,11 +64,11 @@ public class UserProfileController {
     }
 
     @PutMapping("/users/my-profile")
-    ApiResponse<UserProfileResponse> updateMyProfile(@RequestBody UpdateProfileRequest request) {
-        return ApiResponse.<UserProfileResponse>builder()
-                .result(userProfileService.updateMyProfile(request))
-                .build();
+    public ApiResponse<UserProfileResponse> updateMyProfile(@RequestBody UpdateProfileRequest request) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ApiResponse.success(userProfileService.updateMyProfile(userId, request),"Update user successfuly");
     }
+
 
     @PutMapping("/users/avatar")
     ApiResponse<UserProfileResponse> updateAvatar(@RequestParam("file") MultipartFile file) {
