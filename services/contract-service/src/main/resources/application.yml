@@ -32,8 +32,11 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       group-id: booking-service
+      enable-auto-commit: false
       properties:
         spring.json.trusted.packages: "*"
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
 
   cache:
     type: redis
@@ -49,6 +52,6 @@ contract:
 
 app:
   services:
-    properties: http://localhost:8083/properties
-    files: http://localhost:8084/file
-    profile: http://localhost:8081/profile
+    properties: http://localhost:8083/property
+    files: http://localhost:8088/file
+    profile: http://localhost:8082/profile
