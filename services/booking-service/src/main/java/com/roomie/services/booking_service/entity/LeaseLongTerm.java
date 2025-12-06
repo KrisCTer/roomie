@@ -20,6 +20,7 @@ public class LeaseLongTerm {
     String id;
 
     String propertyId;
+    String landLordId;
     String tenantId;
 
     Instant leaseStart;

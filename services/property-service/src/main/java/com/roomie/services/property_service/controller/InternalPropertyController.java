@@ -42,7 +42,7 @@ public class InternalPropertyController {
     @GetMapping("/{id}")
     public ApiResponse<PropertyResponse> get(@PathVariable String id) {
         PropertyResponse response = propertyService.getById(id);
-        return ApiResponse.success(response,"Property retrieved");
+        return ApiResponse.success(response, "Property retrieved");
     }
 
     @PutMapping("/{id}")
@@ -50,4 +50,10 @@ public class InternalPropertyController {
         propertyService.update(id, dto);
         return ApiResponse.success(null, "Property updated");
     }
+
+    @GetMapping("/owner/{ownerId}")
+    public ApiResponse<List<PropertyResponse>> getPropertiesByOwner(@PathVariable String ownerId) {
+        return propertyService.getPropertiesByOwner(ownerId);
+    }
 }
+

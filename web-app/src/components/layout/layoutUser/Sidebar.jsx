@@ -7,6 +7,7 @@ import {
   Plus,
   LogOut,
   Contact,
+  BookOpen,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     { icon: BarChart3, label: t("Dashboards"), path: "/dashboard" },
     { icon: User, label: t("Profile"), path: "/profile" },
     { icon: Building, label: t("My Properties"), path: "/my-properties" },
+    { icon: BookOpen, label: t("My Bookings"), path: "/my-bookings" },
     { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
     { icon: MessageSquare, label: t("Message"), path: "/message" },
     { icon: Plus, label: t("Add Property"), path: "/add-property" },

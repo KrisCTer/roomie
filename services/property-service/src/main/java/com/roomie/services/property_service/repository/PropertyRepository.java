@@ -23,4 +23,6 @@ public interface PropertyRepository extends MongoRepository<Property, String> {
     List<Property> findByAmenities_OthersContaining(String amenity);
 
     List<Property> findByStatusAndPropertyStatus(ApprovalStatus status, PropertyStatus propertyStatus);
+
+    List<Property> findByOwner_OwnerId(String ownerId);
 }

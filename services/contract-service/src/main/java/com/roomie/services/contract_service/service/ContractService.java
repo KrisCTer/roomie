@@ -311,7 +311,9 @@ public class ContractService {
                 c.getId(),
                 c.getBookingId(),
                 c.getTenantId(),
-                c.getPropertyId()
+                c.getPropertyId(),
+                c.getStartDate(),
+                c.getEndDate()
         );
     }
 }

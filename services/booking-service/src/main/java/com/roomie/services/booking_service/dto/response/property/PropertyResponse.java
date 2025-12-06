@@ -20,8 +20,8 @@ public class PropertyResponse {
     String propertyId;
     String title;
     String description;
-    BigDecimal price;
-    String priceLabel;
+
+    BigDecimal monthlyRent;
     BigDecimal rentalDeposit;
 
     PropertyType propertyType;
@@ -29,20 +29,15 @@ public class PropertyResponse {
     PropertyLabel propertyLabel;
 
     Double size;
-    Double landArea;
 
     Integer rooms;
     Integer bedrooms;
     Integer bathrooms;
     Integer garages;
 
-    Integer yearBuilt;
-
     AddressResponse address;  // Cần có đầy đủ: fullAddress, zipCode, country, neighborhood, province, location
     AmenitiesResponse amenities;  // Cần có đầy đủ: homeSafety, bedroom, kitchen
     List<MediaResponse> mediaList;
-    VirtualTourResponse virtualTour;
-    List<FloorResponse> floors;
 
     OwnerResponse owner;
     ApprovalStatus status;

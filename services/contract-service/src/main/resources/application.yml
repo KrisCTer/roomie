@@ -1,7 +1,7 @@
 server:
   port: 8085
   servlet:
-    context-path: /contracts
+    context-path: /contract
 
 spring:
   application:

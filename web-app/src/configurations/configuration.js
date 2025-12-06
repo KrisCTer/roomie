@@ -84,7 +84,7 @@ export const API = {
   PROPERTY_INTERNAL_UPDATE: (id) => `/property/internal/${id}`,
 
   // ========= BOOKING (Booking Service - Port 8084) =========
-  CREATE_BOOKING: "/booking",
+  CREATE_BOOKING: "/booking/",
   GET_BOOKING: (id) => `/booking/${id}`,
   CONFIRM_BOOKING: (id) => `/booking/${id}/confirm`,
   CANCEL_BOOKING: (id) => `/booking/${id}/cancel`,
