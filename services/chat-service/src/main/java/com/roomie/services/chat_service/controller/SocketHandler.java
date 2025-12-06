@@ -1,6 +1,7 @@
 package com.roomie.services.chat_service.controller;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ public class SocketHandler {
     IdentityService identityService;
     WebSocketSessionService webSocketSessionService;
     ObjectMapper objectMapper = new ObjectMapper();
+    static Map<String, String> users = new HashMap<>();
+    static Map<String, String> rooms = new HashMap<>();
 
     @OnConnect
     public void clientConnected(SocketIOClient client) {

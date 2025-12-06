@@ -34,7 +34,7 @@ const AppRoutes = () => {
         <Route path="/my-properties" element={<MyProperties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property-search" element={<PropertySearch />} />
-        <Route path="/contract-signing" element={<ContractSigning />} />
+        <Route path="/contract-signing/:id" element={<ContractSigning />} />
         <Route path="/my-contracts" element={<MyContracts />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         

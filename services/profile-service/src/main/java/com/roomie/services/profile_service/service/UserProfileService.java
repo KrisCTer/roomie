@@ -151,18 +151,22 @@ public class UserProfileService {
     }
 
     // 3. CẬP NHẬT PROFILE
-    @CachePut(value = "profile", key = "#userId")
-    public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
+//    @CachePut(value = "profile", key = "#userId")
+    public UserProfileResponse updateMyProfile(String userId, UpdateProfileRequest request) {
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        userProfileMapper.update(profile, request);
-        profile.setUpdatedAt(LocalDateTime.now());
+        profile.setFirstName(request.getFirstName());
+        profile.setLastName(request.getLastName());
+        profile.setPhoneNumber(request.getPhoneNumber());
+        profile.setEmail(request.getEmail());
+        profile.setDob(request.getDob());
 
-        return userProfileMapper.toUserProfileResponse(userProfileRepository.save(profile));
+        userProfileRepository.save(profile);
+
+        return userProfileMapper.toUserProfileResponse(profile);
     }
+
 
     // 4. LẤY THÔNG TIN PROFILE
     public UserProfileResponse getMyProfile() {

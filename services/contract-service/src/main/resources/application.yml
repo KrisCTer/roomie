@@ -37,7 +37,17 @@ spring:
         spring.json.trusted.packages: "*"
     listener:
       ack-mode: MANUAL_IMMEDIATE
-
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: romie.housing.tech@gmail.com
+    password: mznl wclo ddwt jrut
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   cache:
     type: redis
 
