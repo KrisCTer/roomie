@@ -51,4 +51,4 @@ admin:
 app:
   services:
     identity: http://localhost:8080/identity
-    properties: http://localhost:8083/properties
+    properties: http://localhost:8083/property

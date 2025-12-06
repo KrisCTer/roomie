@@ -21,7 +21,7 @@ public class PropertyResponse {
     String title;
     String description;
 
-    BigDecimal price;
+    BigDecimal monthlyRent;
     BigDecimal rentalDeposit;
 
     PropertyType propertyType;
