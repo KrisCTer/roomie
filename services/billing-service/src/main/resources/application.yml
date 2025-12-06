@@ -1,7 +1,7 @@
 server:
   port: 8086
   servlet:
-    context-path: /bills
+    context-path: /billing
 
 spring:
   application:
@@ -32,4 +32,4 @@ eureka:
 
 app:
   services:
-    contract: http://localhost:8091/contracts
+    contract: http://localhost:8085/contract
