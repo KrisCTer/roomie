@@ -12,7 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,6 +50,21 @@ public class ContractController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(ApiResponse.error("Contract not found", 404)));
     }
+
+    @GetMapping("/my-contracts")
+    public ApiResponse<Map<String, Object>> getMyContracts() {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<ContractResponse> asLandlord = service.getContractsAsLandlord(userId);
+        List<ContractResponse> asTenant = service.getContractsAsTenant(userId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("asLandlord", asLandlord);
+        result.put("asTenant", asTenant);
+
+        return ApiResponse.success(result,"Fetched contract successfully");
+    }
+
 
 
     /**

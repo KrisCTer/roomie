@@ -19,3 +19,5 @@ export const getContractPdf = (id) =>
 
 export const getSignatureStatus = (id) =>
   BaseService.get(API.CONTRACT_SIGNATURE_STATUS(id));
+
+export const getMyContracts = () => BaseService.get(API.MY_CONTRACTS);

@@ -17,6 +17,7 @@ public class BookingResponse {
     Instant leaseStart;
     Instant leaseEnd;
     Double monthlyRent;
+    Double rentalDeposit;
     String status;
     String bookingReference;
 }

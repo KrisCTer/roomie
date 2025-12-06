@@ -9,12 +9,12 @@ function App() {
   return (
     <>
     <ThemeProvider> 
-      <SocketProvider>
-        <CallProvider>
+      {/* <SocketProvider>
+        <CallProvider> */}
       <CssBaseline />
       <AppRoutes />
-      </CallProvider>
-      </SocketProvider>
+      {/* </CallProvider>
+      </SocketProvider> */}
     </ThemeProvider> 
     
     </>
