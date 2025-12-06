@@ -317,4 +317,18 @@ public class PropertyService {
                 .collect(Collectors.toList());
 //        return null;
     }
+    public ApiResponse<List<PropertyResponse>> getPropertiesByOwner(String ownerId) {
+        List<Property> properties = propertyRepository.findByOwner_OwnerId(ownerId);
+
+        List<PropertyResponse> response = properties.stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        return ApiResponse.<List<PropertyResponse>>builder()
+                .code(1000)
+                .success(true)
+                .result(response)
+                .build();
+    }
+
 }

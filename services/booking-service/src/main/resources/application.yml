@@ -45,5 +45,5 @@ spring:
 
 app:
   services:
-    properties: http://localhost:8083/properties
+    properties: http://localhost:8083/property
 

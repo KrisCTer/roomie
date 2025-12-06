@@ -3,6 +3,8 @@ package com.roomie.services.contract_service.dto.event;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,4 +15,6 @@ public class ContractEvent {
     String bookingId;
     String tenantId;
     String propertyId;
+    Instant startDate;
+    Instant endDate;
 }

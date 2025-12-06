@@ -56,6 +56,7 @@ public class BookingService {
             if (!available) throw new AppException(ErrorCode.LONG_TERM_NOT_AVAILABLE);
 
             LeaseLongTerm lease = bookingMapper.toLeaseEntity(req);
+            lease.setLandLordId(property.getOwner().getOwnerId());
             lease.setTenantId(tenantId);
             lease.setStatus(LeaseStatus.PENDING_APPROVAL);
             lease.setCreatedAt(Instant.now());
@@ -79,7 +80,45 @@ public class BookingService {
             return bookingMapper.leaseToResponse(e);
         });
     }
+    public List<BookingResponse> getBookingsByTenant(String tenantId) {
+        List<LeaseLongTerm> leases = ltRepo.findByTenantId(tenantId);
+        return leases.stream()
+                .map(bookingMapper::leaseToResponse)
+                .toList();
+    }
+    public List<BookingResponse> getBookingsByOwner(String ownerId) {
+        // Get all properties owned by this user
+        List<String> propertyIds = getOwnerPropertyIds(ownerId);
 
+        // Get all bookings for these properties
+        List<LeaseLongTerm> leases = ltRepo.findByPropertyIdIn(propertyIds);
+        return leases.stream()
+                .map(bookingMapper::leaseToResponse)
+                .toList();
+    }
+    public List<BookingResponse> getBookingsByProperty(String propertyId) {
+        List<LeaseLongTerm> leases = ltRepo.findByPropertyId(propertyId);
+        return leases.stream()
+                .map(bookingMapper::leaseToResponse)
+                .toList();
+    }
+    private List<String> getOwnerPropertyIds(String ownerId) {
+        // Call property service to get owner's properties
+        // This is a simplified version - you might need to handle pagination
+        try {
+            var response = propertyClient.getPropertiesByOwner(ownerId);
+            if (response != null && response.getResult() != null) {
+                return response.getResult()
+                        .stream()
+                        .map(PropertyResponse::getPropertyId)
+                        .toList();
+
+            }
+        } catch (Exception e) {
+            log.error("Error fetching owner properties", e);
+        }
+        return List.of();
+    }
     public BookingResponse confirm(String id) {
         LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         if (lease.getStatus() != LeaseStatus.PENDING_APPROVAL)

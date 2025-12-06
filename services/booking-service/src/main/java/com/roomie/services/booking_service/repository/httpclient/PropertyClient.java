@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.List;
+
 @FeignClient(name = "property-service", url = "${app.services.properties}",
         configuration = { FeignMultipartConfig.class, AuthenticationRequestInterceptor.class })
 public interface PropertyClient {
@@ -24,4 +26,8 @@ public interface PropertyClient {
 
     @PostMapping(value="/{propertyId}/deactivate", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<String> deactivate(@PathVariable String propertyId);
+
+    @GetMapping(value = "/internal/owner/{ownerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<List<PropertyResponse>> getPropertiesByOwner(@PathVariable String ownerId);
+
 }

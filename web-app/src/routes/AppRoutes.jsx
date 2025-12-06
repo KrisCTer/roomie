@@ -12,6 +12,7 @@ import PropertyDetail from "../pages/Main/PropertyDetail";
 import PropertySearch from "../pages/Main/PropertySearch";
 import ContractSigning from "../pages/User/ContractSigning";
 import MyContracts from "../pages/User/MyContracts";
+import MyBookings from "../pages/User/MyBooking";
 import { SocketProvider } from "../contexts/SocketContext";
 
 const AppRoutes = () => {
@@ -32,6 +33,7 @@ const AppRoutes = () => {
         <Route path="/property-search" element={<PropertySearch />} />
         <Route path="/contract-signing" element={<ContractSigning />} />
         <Route path="/my-contracts" element={<MyContracts />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
       </Routes>
     </Router>
   );

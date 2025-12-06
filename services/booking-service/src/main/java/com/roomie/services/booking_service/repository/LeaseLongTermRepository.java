@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LeaseLongTermRepository extends MongoRepository<LeaseLongTerm, String> {
@@ -17,5 +18,8 @@ public interface LeaseLongTermRepository extends MongoRepository<LeaseLongTerm, 
     List<LeaseLongTerm> findOverlapping(String propertyId, Instant start, Instant end);
 
     List<LeaseLongTerm> findByStatusAndLeaseEndBefore(LeaseStatus leaseStatus, Instant now);
+    List<LeaseLongTerm> findByTenantId(String tenantId);
+    List<LeaseLongTerm> findByPropertyId(String propertyId);
+    List<LeaseLongTerm> findByPropertyIdIn(List<String> propertyIds);
 }
 
