@@ -103,13 +103,12 @@ const MyProperties = () => {
   };
 
   const handleEdit = (propertyId) => {
-    // Navigate to edit page or open edit modal
     console.log("Edit property:", propertyId);
-    // TODO: Implement edit functionality
     window.location.href = `/add-property?edit=${propertyId}`;
   };
 
   const getStatusConfig = (status) => {
+    const normalized = (status || "").toUpperCase();
     const configs = {
       DRAFT: { bg: "bg-orange-500", text: "Pending" },
       PENDING: { bg: "bg-orange-500", text: "Pending" },
@@ -117,8 +116,10 @@ const MyProperties = () => {
       AVAILABLE: { bg: "bg-green-500", text: "Approved" },
       SOLD: { bg: "bg-purple-500", text: "Sold" },
       RENTED: { bg: "bg-purple-500", text: "Sold" },
+      REJECT: { bg: "bg-red-500", text: "Rejected" },
+      REJECTED: { bg: "bg-red-500", text: "Rejected" },
     };
-    return configs[status] || configs.PENDING;
+    return configs[normalized] || configs.PENDING;
   };
 
   // Transform property data to match ListingCard props
@@ -136,6 +137,7 @@ const MyProperties = () => {
 
     // Get status text
     const getStatusText = (status) => {
+      const normalized = (status || "").toUpperCase();
       const statusMap = {
         DRAFT: "Pending",
         PENDING: "Pending",
@@ -143,8 +145,10 @@ const MyProperties = () => {
         AVAILABLE: "Approved",
         SOLD: "Sold",
         RENTED: "Sold",
+        REJECT: "Rejected",
+        REJECTED: "Rejected",
       };
-      return statusMap[status] || "Pending";
+      return statusMap[normalized] || "Pending";
     };
 
     return {
@@ -293,7 +297,9 @@ const MyProperties = () => {
             {/* Amenities */}
             {property.amenities && (
               <div className="mb-6 pb-6 border-b">
-                <h3 className="font-semibold text-gray-900 mb-3">Amenities</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Amenities
+                </h3>
                 <div className="grid grid-cols-2 gap-4">
                   {property.amenities.homeSafety?.length > 0 && (
                     <div>
@@ -391,7 +397,9 @@ const MyProperties = () => {
                     </div>
                     <div>
                       <span className="text-gray-600">Email:</span>
-                      <p className="font-medium mt-1">{property.owner.email}</p>
+                      <p className="font-medium mt-1">
+                        {property.owner.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -440,6 +448,7 @@ const MyProperties = () => {
                   <option value="APPROVED">Approved</option>
                   <option value="AVAILABLE">Available</option>
                   <option value="SOLD">Sold</option>
+                  {/* có thể thêm REJECTED nếu sau này backend hỗ trợ filter */}
                 </select>
               </div>
               <div>
@@ -514,7 +523,9 @@ const MyProperties = () => {
                   )}
                   <button
                     onClick={() =>
-                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                      setCurrentPage((prev) =>
+                        Math.min(totalPages, prev + 1)
+                      )
                     }
                     disabled={currentPage === totalPages}
                     className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { getAllProperties } from "../../services/property.service";
 
 //
-// COMPONENT: PropertyCard 
+// COMPONENT: PropertyCard
 //
 function PropertyCard({ item }) {
   const navigate = useNavigate();
@@ -164,11 +164,19 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
     const res = await getAllProperties();
-    const raw = res?.result || [];
+    const all = res?.result || [];
+
+    // LỌC: chỉ giữ những căn KHÔNG ở trạng thái pending / reject
+    const raw = all.filter((p) => {
+      const status =
+        (p.status || p.propertyStatus || p.approvalStatus || "").toUpperCase();
+      return status !== "PENDING" && status !== "REJECT" && status !== "REJECTED";
+    });
 
     const formatted = raw.map((p) => ({
       id: p.propertyId,
