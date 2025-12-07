@@ -12,7 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 
-import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx"; // dùng lại card giống MyProperties :contentReference[oaicite:1]{index=1}
+import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx";
 import {
   getPropertiesByOwner,
   deleteProperty,
@@ -50,7 +50,6 @@ const Dashboard = () => {
 
       let list = [];
 
-      // y hệt MyProperties: response { success, result } :contentReference[oaicite:2]{index=2}
       if (response && response.success && response.result) {
         list = response.result;
       } else if (response && response.data) {
@@ -77,7 +76,8 @@ const Dashboard = () => {
 
   // ================== TÍNH TOÁN SỐ LIỆU TỪ DANH SÁCH PROPERTY ==================
   const computeDashboardFromProperties = (list) => {
-    const getStatus = (p) => p.status || p.propertyStatus;
+    const getStatus = (p) =>
+      (p.status || p.propertyStatus || p.approvalStatus || "").toUpperCase();
 
     const total = list.length;
     const pending = list.filter((p) =>
@@ -102,7 +102,6 @@ const Dashboard = () => {
       rented,
       incomeEstimate,
       latestListings,
-      // các số liệu hợp đồng giữ nguyên = 0, sau này muốn thì thêm API contracts
       totalContracts: prev.totalContracts,
       activeContracts: prev.activeContracts,
       pendingContracts: prev.pendingContracts,
@@ -140,7 +139,7 @@ const Dashboard = () => {
     window.location.href = `/add-property?edit=${propertyId}`;
   };
 
-  // map dữ liệu Property → props cho ListingCard (copy từ MyProperties, bỏ modal) :contentReference[oaicite:3]{index=3}
+  // map dữ liệu Property → props cho ListingCard
   const transformPropertyToListing = (property) => {
     const formatDate = (dateString) => {
       if (!dateString) return "N/A";
@@ -153,6 +152,7 @@ const Dashboard = () => {
     };
 
     const getStatusText = (status) => {
+      const normalized = (status || "").toUpperCase();
       const statusMap = {
         DRAFT: "Pending",
         PENDING: "Pending",
@@ -160,8 +160,10 @@ const Dashboard = () => {
         AVAILABLE: "Approved",
         SOLD: "Sold",
         RENTED: "Sold",
+        REJECT: "Rejected",
+        REJECTED: "Rejected",
       };
-      return statusMap[status] || "Pending";
+      return statusMap[normalized] || "Pending";
     };
 
     return {

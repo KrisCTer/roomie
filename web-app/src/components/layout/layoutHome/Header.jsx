@@ -41,6 +41,48 @@ export default function Header() {
     navigate("/login");
   };
 
+  // Lấy user từ localStorage, dùng chung cho avatar + điều hướng dashboard
+  const getStoredUser = () => {
+    if (typeof window === "undefined") return null;
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return null;
+
+    try {
+      return JSON.parse(userStr);
+    } catch (e) {
+      console.error("Cannot parse user from localStorage:", e);
+      return null;
+    }
+  };
+
+  const getUsername = () => {
+    const user = getStoredUser();
+    // ưu tiên các field thường gặp
+    return (
+      user?.username ||
+      user?.userName ||
+      user?.name ||
+      user?.email ||
+      ""
+    );
+  };
+
+  // Điều hướng dashboard theo username
+  const handleDashboardClick = () => {
+    const username = getUsername().toLowerCase();
+
+    // Debug nếu cần
+    console.log("Dashboard click, username =", username);
+
+    if (username === "admin") {
+      navigate("/admin/properties");
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
+  const username = getUsername();
+
   return (
     <AppBar
       position="sticky"
@@ -120,11 +162,9 @@ export default function Header() {
               {/* Khi ĐÃ đăng nhập */}
               <IconButton onClick={handleOpenMenu}>
                 <Avatar sx={{ bgcolor: "#2563eb" }}>
-                  {(localStorage.getItem("user") &&
-                    JSON.parse(
-                      localStorage.getItem("user")
-                    ).username[0].toUpperCase()) ||
-                    "U"}
+                  {username
+                    ? username[0].toUpperCase()
+                    : "U"}
                 </Avatar>
               </IconButton>
 
@@ -153,7 +193,7 @@ export default function Header() {
                 <MenuItem
                   onClick={() => {
                     handleCloseMenu();
-                    navigate("/dashboard");
+                    handleDashboardClick();
                   }}
                 >
                   {t("header.hostDashboard")}
