@@ -55,24 +55,26 @@ public class ChatMessageService {
 
     public ChatMessageResponse create(ChatMessageRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        // Validate conversationId
-        conversationRepository
-                .findById(request.getConversationId())
-                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND))
-                .getParticipants()
-                .stream()
-                .filter(participantInfo -> userId.equals(participantInfo.getUserId()))
-                .findAny()
+
+        // Validate conversation
+        var conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        // Get UserInfo from ProfileService
+        boolean isParticipant = conversation.getParticipants().stream()
+                .anyMatch(p -> p.getUserId().equals(userId));
+
+        if (!isParticipant) {
+            throw new AppException(ErrorCode.CONVERSATION_NOT_FOUND);
+        }
+
+        // Get user info
         var userResponse = profileClient.getProfile(userId);
-        if (Objects.isNull(userResponse)) {
+        if (userResponse == null) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
         var userInfo = userResponse.getResult();
 
-        // Build Chat message Info
+        // Build message
         ChatMessage chatMessage = chatMessageMapper.toChatMessage(request);
         chatMessage.setSender(ParticipantInfo.builder()
                 .userId(userInfo.getUserId())
@@ -83,18 +85,20 @@ public class ChatMessageService {
                 .build());
         chatMessage.setCreatedDate(Instant.now());
 
-        // Create chat message
         chatMessage = chatMessageRepository.save(chatMessage);
+
         ChatMessageResponse response = chatMessageMapper.toChatMessageResponse(chatMessage);
 
-        // Connected server
-        server.getAllClients().stream().forEach(client -> {
-            client.sendEvent("message", response);
-        });
+        String room = request.getConversationId();
 
-        // convert to Response
-        return toChatMessageResponse(chatMessage);
+        log.info("🔥 Emitting new_message to room {}", room);
+
+        server.getRoomOperations(room)
+                .sendEvent("new_message", response);
+
+        return response;
     }
+
 
     private ChatMessageResponse toChatMessageResponse(ChatMessage chatMessage) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();

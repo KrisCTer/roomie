@@ -1,7 +1,6 @@
 package com.roomie.services.chat_service.controller;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +34,6 @@ public class SocketHandler {
     IdentityService identityService;
     WebSocketSessionService webSocketSessionService;
     ObjectMapper objectMapper = new ObjectMapper();
-    static Map<String, String> users = new HashMap<>();
-    static Map<String, String> rooms = new HashMap<>();
 
     @OnConnect
     public void clientConnected(SocketIOClient client) {
@@ -72,17 +69,48 @@ public class SocketHandler {
 
         // ========== CALL SIGNALING EVENTS ==========
         // ⭐ CRITICAL: Use Object.class to handle socket.io's flexible format
+// ⭐ JOIN CONVERSATION ROOM
+        server.addEventListener("join_conversation", Map.class, (client, data, ackRequest) -> {
+            try {
+                String room = (String) data.get("conversationId");
+                if (room == null) {
+                    log.warn("⚠ join_conversation: conversationId is null");
+                    return;
+                }
+                client.joinRoom(room);
+                log.info("👥 Client {} joined room {}", client.getSessionId(), room);
+            } catch (Exception e) {
+                log.error("❌ Error processing join_conversation event", e);
+            }
+        });
 
         // Initiate call
         server.addEventListener("call-user", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(
-                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
+
                     // Parse data (might be List or Map depending on socket.io version)
                     Map<String, Object> data = parseSocketData(rawData);
 
+                    String fromUserId = (String) data.get("from");
                     String toUserId = (String) data.get("to");
+
+// FIX NPE: validate before equals
+                    if (fromUserId == null || toUserId == null) {
+                        log.warn("❌ call-user missing required fields: from={}, to={}", fromUserId, toUserId);
+                        client.sendEvent("call-failed", Map.of("reason", "Invalid call data"));
+                        return;
+                    }
+
+// Prevent self-calling
+                    if (fromUserId.equals(toUserId)) {
+                        log.warn("❌ User {} attempted to call themselves", fromUserId);
+                        client.sendEvent("call-failed", Map.of("reason", "Cannot call yourself"));
+                        return;
+                    }
+
+
                     log.info("📞 Call request from {} to {}", data.get("from"), toUserId);
 
                     // Find target user's socket session
@@ -116,11 +144,35 @@ public class SocketHandler {
             }
         });
 
+
+
+// Notify caller that callee accepted the call
+        server.addEventListener("accept-call", Object.class, (client, rawData, ack) -> {
+            try {
+                Map<String, Object> data = parseSocketData(rawData);
+                String toUserId = (String) data.get("to");
+
+                log.info("📞 Callee accepted call, notifying {}", toUserId);
+
+                var targetSession = webSocketSessionService.findByUserId(toUserId);
+                if (targetSession != null) {
+                    for (SocketIOClient targetClient : server.getAllClients()) {
+                        if (targetClient.getSessionId().toString().equals(targetSession.getSocketSessionId())) {
+                            targetClient.sendEvent("call-accepted", data);
+                            log.info("✅ call-accepted sent to {}", toUserId);
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("❌ Error processing accept-call event", e);
+            }
+        });
+
         // Answer call
         server.addEventListener("answer-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(
-                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -145,8 +197,7 @@ public class SocketHandler {
         // Reject call
         server.addEventListener("reject-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(
-                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -171,8 +222,7 @@ public class SocketHandler {
         // End call
         server.addEventListener("end-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(
-                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -197,8 +247,7 @@ public class SocketHandler {
         // ICE candidate exchange
         server.addEventListener("ice-candidate", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(
-                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");

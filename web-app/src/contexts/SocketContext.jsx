@@ -7,7 +7,10 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { io } from "socket.io-client";
+
+// â­ MUST USE DEFAULT IMPORT FOR socket.io-client v2.3.0
+import io from "socket.io-client";
+
 import { getToken } from "../services/localStorageService";
 
 const SocketContext = createContext(null);
@@ -24,18 +27,18 @@ export const SocketProvider = ({ children }) => {
     onMessageSent: null,
   });
 
-  // ========== INITIALIZE SOCKET ==========
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      console.warn("⚠️ No token found, skipping socket connection");
+      console.warn("âš  No token found, skipping socket connection");
       return;
     }
 
-    console.log("🔌 Initializing WebSocket connection...");
+    console.log("ðŸ”Œ Initializing WebSocket connection...");
 
+    // â­ Version 2.3.0 â€” Required for Netty-SocketIO compatibility
     const socketInstance = io(SOCKET_URL, {
-      query: { token },
+      query: `token=${token}`,
       transports: ["websocket"],
       reconnection: true,
       reconnectionAttempts: 5,
@@ -43,42 +46,24 @@ export const SocketProvider = ({ children }) => {
       reconnectionDelayMax: 5000,
     });
 
-    // ===== CONNECTION EVENTS =====
     socketInstance.on("connect", () => {
-      console.log("✅ WebSocket connected:", socketInstance.id);
+      console.log("âœ… WebSocket connected:", socketInstance.id);
       setIsConnected(true);
       setError(null);
     });
 
     socketInstance.on("disconnect", (reason) => {
-      console.log("❌ WebSocket disconnected:", reason);
+      console.log("âŒ WebSocket disconnected:", reason);
       setIsConnected(false);
     });
 
     socketInstance.on("connect_error", (err) => {
-      console.error("❌ WebSocket connection error:", err.message);
+      console.error("âŒ WebSocket connection error:", err.message);
       setError(err.message);
       setIsConnected(false);
     });
-
-    socketInstance.on("reconnect", (attemptNumber) => {
-      console.log("🔄 WebSocket reconnected after", attemptNumber, "attempts");
-      setIsConnected(true);
-      setError(null);
-    });
-
-    socketInstance.on("reconnect_error", (err) => {
-      console.error("❌ WebSocket reconnect error:", err.message);
-    });
-
-    socketInstance.on("reconnect_failed", () => {
-      console.error("❌ WebSocket reconnect failed after max attempts");
-      setError("Failed to reconnect to server");
-    });
-
-    // ===== MESSAGE EVENTS =====
-    socketInstance.on("message", (data) => {
-      console.log('📩 Socket event "message":', data);
+    socketInstance.on("new_message", (data) => {
+      console.log("ðŸ”¥ Realtime message received:", data);
 
       if (messageCallbacksRef.current.onMessageReceived) {
         messageCallbacksRef.current.onMessageReceived(data);
@@ -86,44 +71,35 @@ export const SocketProvider = ({ children }) => {
     });
 
     socketInstance.on("message_sent", (data) => {
-      console.log('📤 Socket event "message_sent":', data);
+      console.log("ðŸ“¤ Realtime message_sent received:", data);
 
       if (messageCallbacksRef.current.onMessageSent) {
         messageCallbacksRef.current.onMessageSent(data);
       }
     });
-
     setSocket(socketInstance);
 
-    // Cleanup
     return () => {
-      console.log("🔌 Cleaning up socket connection");
+      console.log("ðŸ”Œ Cleaning up socket connection");
       socketInstance.disconnect();
     };
   }, []);
 
-  // ========== REGISTER MESSAGE CALLBACKS ==========
   const registerMessageCallbacks = useCallback((callbacks) => {
-    console.log("📝 Registering message callbacks:", {
-      hasOnMessageReceived: !!callbacks.onMessageReceived,
-      hasOnMessageSent: !!callbacks.onMessageSent,
-    });
-
     messageCallbacksRef.current = {
       onMessageReceived: callbacks.onMessageReceived || null,
       onMessageSent: callbacks.onMessageSent || null,
     };
   }, []);
 
-  // ========== SEND MESSAGE (OPTIONAL - mainly using REST API) ==========
   const sendMessage = useCallback(
     (event, data) => {
       if (!socket || !isConnected) {
-        console.warn("⚠️ Socket not connected, cannot send message");
+        console.warn("âš  Socket not connected, cannot send message");
         return false;
       }
 
-      console.log("📤 Emitting socket event:", event, data);
+      console.log("ðŸ“¤ Emitting socket event:", event, data);
       socket.emit(event, data);
       return true;
     },
@@ -143,14 +119,11 @@ export const SocketProvider = ({ children }) => {
   );
 };
 
-// ========== CUSTOM HOOK ==========
 export const useSocket = () => {
   const context = useContext(SocketContext);
-
   if (!context) {
     throw new Error("useSocket must be used within a SocketProvider");
   }
-
   return context;
 };
 

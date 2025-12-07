@@ -1,6 +1,7 @@
 package com.roomie.services.billing_service.service;
 
 import com.roomie.services.billing_service.dto.request.BillRequest;
+import com.roomie.services.billing_service.dto.response.ApiResponse;
 import com.roomie.services.billing_service.dto.response.BillResponse;
 import com.roomie.services.billing_service.dto.response.ContractResponse;
 import com.roomie.services.billing_service.entity.Bill;
@@ -20,14 +21,16 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -273,8 +276,85 @@ public class BillingService {
 
         log.info("Marked {} bills as OVERDUE", overdueBills.size());
     }
+    /**
+     * Get all bills where current user is the LANDLORD (property owner)
+     * Lấy hóa đơn của các property mà user đang cho thuê
+     */
+    public List<BillResponse> getMyLandlordBills() {
+        try {
+            // Get all contracts where user is landlord
+            ApiResponse<Map<String, List<ContractResponse>>> contractsResponse = contractClient.getMyContracts();
 
+            if (contractsResponse == null || contractsResponse.getResult() == null) {
+                return new ArrayList<>();
+            }
 
+            Map<String, List<ContractResponse>> contracts = contractsResponse.getResult();
+            List<ContractResponse> landlordContracts = contracts.getOrDefault("asLandlord", new ArrayList<>());
+
+            // Get contract IDs
+            List<String> contractIds = landlordContracts.stream()
+                    .map(ContractResponse::getId)
+                    .collect(Collectors.toList());
+
+            if (contractIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Get all bills for these contracts
+            List<Bill> bills = billRepository.findAll().stream()
+                    .filter(bill -> contractIds.contains(bill.getContractId()))
+                    .collect(Collectors.toList());
+
+            return bills.stream()
+                    .map(billMapper::toResponse)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Error getting landlord bills", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Get all bills where current user is the TENANT
+     * Lấy hóa đơn của các property mà user đang thuê
+     */
+    public List<BillResponse> getMyTenantBills() {
+        try {
+            // Get all contracts where user is tenant
+            ApiResponse<Map<String, List<ContractResponse>>> contractsResponse = contractClient.getMyContracts();
+
+            if (contractsResponse == null || contractsResponse.getResult() == null) {
+                return new ArrayList<>();
+            }
+
+            Map<String, List<ContractResponse>> contracts = contractsResponse.getResult();
+            List<ContractResponse> tenantContracts = contracts.getOrDefault("asTenant", new ArrayList<>());
+
+            // Get contract IDs
+            List<String> contractIds = tenantContracts.stream()
+                    .map(ContractResponse::getId)
+                    .collect(Collectors.toList());
+
+            if (contractIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Get all bills for these contracts
+            List<Bill> bills = billRepository.findAll().stream()
+                    .filter(bill -> contractIds.contains(bill.getContractId()))
+                    .collect(Collectors.toList());
+
+            return bills.stream()
+                    .map(billMapper::toResponse)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            log.error("Error getting tenant bills", e);
+            return new ArrayList<>();
+        }
+    }
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
     public void deleteBill(String id) {
         billRepository.deleteById(id);

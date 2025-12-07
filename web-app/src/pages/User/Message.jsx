@@ -17,7 +17,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import { useCall } from "../../contexts/Callcontext";
+import { useCall } from "../../contexts/CallContext";
+import CallModal from "../../components/layout/layoutUser/CallModal";
 import {
   getMyConversations,
   createConversation,
@@ -27,7 +28,6 @@ import {
 import { searchUsers } from "../../services/user.service";
 import { getToken, getUserInfo } from "../../services/localStorageService";
 import { useSocket } from "../../contexts/SocketContext";
-import CallModal from "../../components/layout/layoutUser/CallModal";
 
 const Message = () => {
   const location = useLocation();
@@ -61,6 +61,11 @@ const Message = () => {
   // const { isConnected, registerMessageCallbacks } = useSocket();
   const { isConnected, registerMessageCallbacks, sendMessage } = useSocket();
   // ========== UPDATE CURRENT CONVERSATION REF ==========
+
+  console.log("Socket:", isConnected); // Should be SocketIO instance
+  console.log("Connected:", registerMessageCallbacks); // Should be true
+  console.log("Send Message Func:", sendMessage); // Should be function
+
   useEffect(() => {
     const convId =
       selectedConversation?.conversationId || selectedConversation?.id;
@@ -205,7 +210,9 @@ const Message = () => {
 
     // ⭐ Join socket room
     if (sendMessage) {
-      sendMessage("join_conversation", convId);
+      // sendMessage("join_conversation", convId);
+      sendMessage("join_conversation", { conversationId: convId });
+      console.log("🔔 Joined socket room for conversation:", convId);
     }
   }, []);
 

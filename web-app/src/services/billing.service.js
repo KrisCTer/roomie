@@ -19,3 +19,14 @@ export const updateBill = (id, payload) =>
 
 export const deleteBill = (id) =>
   BaseService.delete(API.DELETE_BILL(id));
+
+export const sendBill = (id) =>
+  BaseService.post(`/billing/${id}/send`);
+
+export const payBill = (billId, paymentId) =>
+  BaseService.post(`/billing/${billId}/pay`, null, {
+    params: { paymentId }
+  });
+
+  export const getMyBills = () =>
+  BaseService.get("/billing/my-bills");

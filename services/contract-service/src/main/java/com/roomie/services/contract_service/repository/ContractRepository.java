@@ -18,4 +18,5 @@ public interface ContractRepository extends MongoRepository<Contract, String> {
     List<Contract> findByLandlordId(String landlordId);
 
     List<Contract> findByTenantId(String userId);
+
 }
