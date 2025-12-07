@@ -90,18 +90,21 @@ export const API = {
   CANCEL_BOOKING: (id) => `/booking/${id}/cancel`,
 
   // ========= CONTRACT (Contract Service - Port 8085) =========
-  CREATE_CONTRACT: "/contract",
+  CREATE_CONTRACT: "/contract/",
   GET_CONTRACT: (id) => `/contract/${id}`,
   TENANT_SIGN_CONTRACT: (id) => `/contract/${id}/sign/tenant`,
   LANDLORD_SIGN_CONTRACT: (id) => `/contract/${id}/sign/landlord`,
   CONTRACT_PDF: (id) => `/contract/${id}/pdf`,
   CONTRACT_SIGNATURE_STATUS: (id) => `/contract/${id}/signature-status`,
   MY_CONTRACTS: "/contract/my-contracts",
+  REQUEST_TENANT_OTP: (id) => `/contract/${id}/request-otp/tenant`,
+  REQUEST_LANDLORD_OTP: (id) => `/contract/${id}/request-otp/landlord`,
+  PAUSE_CONTRACT: (id) => `/contract/${id}/pause`,
 
   // ========= BILLING (Billing Service - Port 8086) =========
-  CREATE_BILL: "/billing",
+  CREATE_BILL: "/billing/",
   GET_BILL: (id) => `/billing/${id}`,
-  GET_ALL_BILLS: "/billing",
+  GET_ALL_BILLS: "/billing/",
   GET_BILLS_BY_CONTRACT: (contractId) => `/billing/contract/${contractId}`,
   UPDATE_BILL: (id) => `/billing/${id}`,
   DELETE_BILL: (id) => `/billing/${id}`,

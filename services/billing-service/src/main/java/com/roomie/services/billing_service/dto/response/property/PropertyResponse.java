@@ -1,9 +1,9 @@
-package com.roomie.services.contract_service.dto.response.property;
+package com.roomie.services.billing_service.dto.response.property;
 
-import com.roomie.services.contract_service.enums.ApprovalStatus;
-import com.roomie.services.contract_service.enums.PropertyLabel;
-import com.roomie.services.contract_service.enums.PropertyStatus;
-import com.roomie.services.contract_service.enums.PropertyType;
+import com.roomie.services.billing_service.enums.ApprovalStatus;
+import com.roomie.services.billing_service.enums.PropertyLabel;
+import com.roomie.services.billing_service.enums.PropertyStatus;
+import com.roomie.services.billing_service.enums.PropertyType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

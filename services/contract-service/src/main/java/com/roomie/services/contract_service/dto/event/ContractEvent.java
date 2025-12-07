@@ -11,10 +11,10 @@ import java.time.Instant;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ContractEvent {
-    String contractId;
     String bookingId;
-    String tenantId;
     String propertyId;
+    String tenantId;
+    String landlordId;
     Instant startDate;
     Instant endDate;
 }

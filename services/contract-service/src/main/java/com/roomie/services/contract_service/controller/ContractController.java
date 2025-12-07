@@ -3,6 +3,9 @@ package com.roomie.services.contract_service.controller;
 import com.roomie.services.contract_service.dto.request.ContractRequest;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
+import com.roomie.services.contract_service.dto.response.OTPResponse;
+import com.roomie.services.contract_service.entity.Contract;
+import com.roomie.services.contract_service.mapper.ContractMapper;
 import com.roomie.services.contract_service.repository.httpclient.FileClient;
 import com.roomie.services.contract_service.service.ContractService;
 import lombok.AccessLevel;
@@ -25,6 +28,7 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ContractController {
     ContractService service;
+    ContractMapper contractMapper;
 
     /**
      * Tạo contract mới (sẽ tạo bản PREVIEW)
@@ -52,18 +56,32 @@ public class ContractController {
     }
 
     @GetMapping("/my-contracts")
-    public ApiResponse<Map<String, Object>> getMyContracts() {
+    public ApiResponse<Map<String, List<ContractResponse>>> getMyContracts() {
+
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        List<ContractResponse> asLandlord = service.getContractsAsLandlord(userId);
-        List<ContractResponse> asTenant = service.getContractsAsTenant(userId);
+        List<Contract> landlordContracts = service.getContractsByLandlord(userId);
+        List<Contract> tenantContracts = service.getContractsByTenant(userId);
 
-        Map<String, Object> result = new HashMap<>();
+        List<ContractResponse> asLandlord = landlordContracts.stream()
+                .map(contractMapper::toResponse)
+                .toList();
+
+        List<ContractResponse> asTenant = tenantContracts.stream()
+                .map(contractMapper::toResponse)
+                .toList();
+
+        Map<String, List<ContractResponse>> result = new HashMap<>();
         result.put("asLandlord", asLandlord);
         result.put("asTenant", asTenant);
 
-        return ApiResponse.success(result,"Fetched contract successfully");
+        return ApiResponse.<Map<String, List<ContractResponse>>>builder()
+                .code(1000)
+                .success(true)
+                .result(result)
+                .build();
     }
+
 
 
 
@@ -164,6 +182,24 @@ public class ContractController {
     ) {
         ContractResponse response = service.terminate(id, reason);
         return ApiResponse.success(response, "Contract terminated successfully");
+    }
+
+    @PostMapping("/{id}/request-otp/tenant")
+    public ResponseEntity<ApiResponse<OTPResponse>> requestTenantOTP(@PathVariable String id) {
+        String tenantId = SecurityContextHolder.getContext().getAuthentication().getName();
+        OTPResponse response = service.requestTenantOTP(id, tenantId);
+        return ResponseEntity.ok(
+                ApiResponse.success(response, "OTP sent to your email successfully")
+        );
+    }
+
+    @PostMapping("/{id}/request-otp/landlord")
+    public ResponseEntity<ApiResponse<OTPResponse>> requestLandlordOTP(@PathVariable String id) {
+        String landlordId = SecurityContextHolder.getContext().getAuthentication().getName();
+        OTPResponse response = service.requestLandlordOTP(id, landlordId);
+        return ResponseEntity.ok(
+                ApiResponse.success(response, "OTP sent to your email successfully")
+        );
     }
 
     // Inner DTO for signature status

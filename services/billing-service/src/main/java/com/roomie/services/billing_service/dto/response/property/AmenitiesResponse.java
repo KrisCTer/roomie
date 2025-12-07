@@ -1,4 +1,4 @@
-package com.roomie.services.contract_service.dto.response.property;
+package com.roomie.services.billing_service.dto.response.property;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

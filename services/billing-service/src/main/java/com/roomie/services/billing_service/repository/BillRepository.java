@@ -15,6 +15,6 @@ public interface BillRepository extends MongoRepository<Bill, String> {
     List<Bill> findByContractId(String contractId);
     Optional<Bill> findFirstByContractIdOrderByCreatedAtDesc(String contractId);
     Optional<Bill> findByContractIdAndBillingMonth(String contractId, LocalDate billingMonth);
-
     List<Bill> findByStatusAndDueDateBefore(BillStatus billStatus, LocalDate today);
+    List<Bill> findByContractIdIn(List<String> contractIds);
 }
