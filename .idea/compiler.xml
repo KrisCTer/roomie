@@ -22,7 +22,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
         <module name="profile-service" />
-        <module name="payment-service" />
         <module name="property-service" />
         <module name="admin-service" />
         <module name="booking-service" />
@@ -60,7 +59,7 @@
         <module name="file-service" />
         <module name="chat-service" />
       </profile>
-      <profile name="Annotation profile for contract-service" enabled="true">
+      <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -70,6 +69,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
         <module name="api-gateway" />
+        <module name="payment-service" />
         <module name="identity-service" />
         <module name="contract-service" />
       </profile>

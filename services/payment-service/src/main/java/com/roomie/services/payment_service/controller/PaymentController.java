@@ -1,6 +1,7 @@
 package com.roomie.services.payment_service.controller;
 
 import com.roomie.services.payment_service.dto.request.PaymentRequest;
+import com.roomie.services.payment_service.dto.response.ApiResponse;
 import com.roomie.services.payment_service.dto.response.PaymentResponse;
 import com.roomie.services.payment_service.service.PaymentService;
 import lombok.AccessLevel;
@@ -20,31 +21,36 @@ public class PaymentController {
 
     // Tạo payment → trả URL thanh toán
     @PostMapping
-    public String createPayment(@RequestBody PaymentRequest req) {
-        return paymentService.createPayment(req);
+    public ApiResponse<String> createPayment(@RequestBody PaymentRequest req) {
+        String response = paymentService.createPayment(req);
+        return ApiResponse.success(response, "Payment created");
     }
 
     @GetMapping("/{id}")
-    public PaymentResponse getPayment(@PathVariable String id) {
-        return paymentService.getPayment(id);
+    public ApiResponse<PaymentResponse> getPayment(@PathVariable String id) {
+        return ApiResponse.success(paymentService.getPayment(id),"Get payment by id successful");
     }
 
     @GetMapping
-    public List<PaymentResponse> getAllPayments() {
-        return paymentService.getAllPayments();
+    public ApiResponse<List<PaymentResponse>> getAllPayments() {
+        return ApiResponse.success(paymentService.getAllPayments(), "Get all payment successful");
     }
 
-    // VNPay callback (GET)
+    // VNPay callback
     @GetMapping("/webhook/vnpay")
-    public PaymentResponse vnPayCallback(@RequestParam String transactionId,
-                                         @RequestParam String status) {
-        return paymentService.handleVnPayCallback(transactionId, status);
+    public ApiResponse<PaymentResponse> vnPayCallback(
+            @RequestParam String transactionId,
+            @RequestParam String status
+    ) {
+        return ApiResponse.success(paymentService.handleVnPayCallback(transactionId, status), "Payment callback successful");
     }
 
-    // MoMo callback (POST)
+    // MoMo callback
     @PostMapping("/webhook/momo")
-    public PaymentResponse momoCallback(@RequestParam String transactionId,
-                                        @RequestParam String status) {
-        return paymentService.handleMoMoCallback(transactionId, status);
+    public ApiResponse<PaymentResponse> momoCallback(
+            @RequestParam String transactionId,
+            @RequestParam String status
+    ) {
+        return ApiResponse.success(paymentService.handleMoMoCallback(transactionId, status), "Payment callback successful");
     }
 }
