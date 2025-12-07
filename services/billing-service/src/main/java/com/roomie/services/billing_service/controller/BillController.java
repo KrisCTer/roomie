@@ -68,4 +68,23 @@ public class BillController {
         BillResponse response = service.pay(billId, paymentId);
         return ApiResponse.success(response, "Bill paid successfully");
     }
+    /**
+     * Get bills where current user is LANDLORD (property owner)
+     * GET /billing/landlord/my-bills
+     */
+    @GetMapping("/landlord/my-bills")
+    public ResponseEntity<ApiResponse<List<BillResponse>>> getMyLandlordBills() {
+        List<BillResponse> list = service.getMyLandlordBills();
+        return ResponseEntity.ok(ApiResponse.success(list, "Get landlord bills successfully"));
+    }
+
+    /**
+     * Get bills where current user is TENANT
+     * GET /billing/tenant/my-bills
+     */
+    @GetMapping("/tenant/my-bills")
+    public ResponseEntity<ApiResponse<List<BillResponse>>> getMyTenantBills() {
+        List<BillResponse> list = service.getMyTenantBills();
+        return ResponseEntity.ok(ApiResponse.success(list, "Get tenant bills successfully"));
+    }
 }

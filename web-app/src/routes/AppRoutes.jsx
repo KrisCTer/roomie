@@ -13,9 +13,9 @@ import PropertySearch from "../pages/Main/PropertySearch";
 import ContractSigning from "../pages/User/ContractSigning";
 import MyContracts from "../pages/User/MyContracts";
 import MyBookings from "../pages/User/MyBooking";
+import UnifiedBillsPage from "../pages/User/UnifiedBillsPage";
 import { SocketProvider } from "../contexts/SocketContext";
 import AdminProperties from "../pages/Admin/AdminProperties"; // thêm dòng này
-
 
 const AppRoutes = () => {
   return (
@@ -37,7 +37,7 @@ const AppRoutes = () => {
         <Route path="/contract-signing/:id" element={<ContractSigning />} />
         <Route path="/my-contracts" element={<MyContracts />} />
         <Route path="/my-bookings" element={<MyBookings />} />
-        
+        <Route path="/unified-bills" element={<UnifiedBillsPage />} />
       </Routes>
     </Router>
   );

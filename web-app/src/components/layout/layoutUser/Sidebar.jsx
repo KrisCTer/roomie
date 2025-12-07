@@ -8,6 +8,7 @@ import {
   LogOut,
   Contact,
   BookOpen,
+  FileText,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -22,9 +23,10 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     { icon: User, label: t("Profile"), path: "/profile" },
     { icon: Building, label: t("My Properties"), path: "/my-properties" },
     { icon: BookOpen, label: t("My Bookings"), path: "/my-bookings" },
+    { icon: Plus, label: t("Add Property"), path: "/add-property" },
     { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
     { icon: MessageSquare, label: t("Message"), path: "/message" },
-    { icon: Plus, label: t("Add Property"), path: "/add-property" },
+    { icon: FileText, label: t("My Bills"), path: "/unified-bills" },
     { icon: LogOut, label: t("Logout"), path: "/logout" },
   ];
 

@@ -102,9 +102,9 @@ export const API = {
   PAUSE_CONTRACT: (id) => `/contract/${id}/pause`,
 
   // ========= BILLING (Billing Service - Port 8086) =========
-  CREATE_BILL: "/billing",
+  CREATE_BILL: "/billing/",
   GET_BILL: (id) => `/billing/${id}`,
-  GET_ALL_BILLS: "/billing",
+  GET_ALL_BILLS: "/billing/",
   GET_BILLS_BY_CONTRACT: (contractId) => `/billing/contract/${contractId}`,
   UPDATE_BILL: (id) => `/billing/${id}`,
   DELETE_BILL: (id) => `/billing/${id}`,

@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "chat_message")
+@Document(collection = "websocket_session")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WebSocketSession {
     @MongoId

@@ -33,3 +33,4 @@ eureka:
 app:
   services:
     contract: http://localhost:8085/contract
+    property: http://localhost:8083/property
