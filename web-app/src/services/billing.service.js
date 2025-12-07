@@ -28,5 +28,11 @@ export const payBill = (billId, paymentId) =>
     params: { paymentId }
   });
 
-  export const getMyBills = () =>
-  BaseService.get("/billing/my-bills");
+  // export const getMyBills = () =>
+  // BaseService.get("/billing/my-bills");
+
+  export const getMyLandlordBills = () =>
+  BaseService.get("/billing/landlord/my-bills");
+
+  export const getMyTenantBills = () =>
+  BaseService.get("/billing/tenant/my-bills");

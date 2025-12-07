@@ -1,70 +1,106 @@
 package com.roomie.services.payment_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class MoMoService {
+
     @Value("${momo.partnerCode}")
-    private String partnerCode = "${momo.partnerCode}";
+    String partnerCode;
 
     @Value("${momo.accessKey}")
-    private String accessKey = "${momo.accessKey}";
+    String accessKey;
 
     @Value("${momo.secretKey}")
-    private String secretKey = "${momo.secretKey}";
+    String secretKey;
 
     @Value("${momo.returnUrl}")
-    private String returnUrl =  "${momo.returnUrl}";
+    String returnUrl;
 
     @Value("${momo.notifyUrl}")
-    private String notifyUrl =  "${momo.notifyUrl}";
+    String notifyUrl;
 
-    public String createPaymentUrl(String transactionId, double amount, String orderInfo) {
+    static final String MOMO_ENDPOINT = "https://test-payment.momo.vn/v2/gateway/api/create";
+    static final ObjectMapper mapper = new ObjectMapper();
+    final OkHttpClient client = new OkHttpClient();
+
+    public String createPaymentUrl(String transactionId, long amount, String orderInfo) {
         try {
-            Map<String, String> params = new HashMap<>();
-            params.put("partnerCode", partnerCode);
-            params.put("accessKey", accessKey);
-            params.put("requestId", transactionId);
-            params.put("amount", String.valueOf((long)amount));
-            params.put("orderId", transactionId);
-            params.put("orderInfo", orderInfo);
-            params.put("returnUrl", returnUrl);
-            params.put("notifyUrl", notifyUrl);
-            params.put("extraData", "");
-            params.put("requestType", "captureWallet");
+            String requestId = transactionId;
+            String orderId = transactionId;
+            String requestType = "captureWallet";
+            String extraData = "";
 
-            String rawHash = params.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(e -> e.getKey() + "=" + e.getValue())
-                    .reduce((a,b)->a+"&"+b).orElse("");
+            // Build rawSignature đúng chuẩn MoMo
+            String rawSignature =
+                    "accessKey=" + accessKey +
+                            "&amount=" + amount +
+                            "&extraData=" + extraData +
+                            "&ipnUrl=" + notifyUrl +
+                            "&orderId=" + orderId +
+                            "&orderInfo=" + orderInfo +
+                            "&partnerCode=" + partnerCode +
+                            "&redirectUrl=" + returnUrl +
+                            "&requestId=" + requestId +
+                            "&requestType=" + requestType;
 
-            String signature = hmacSHA256(rawHash, secretKey);
-            params.put("signature", signature);
+            String signature = hmacSHA256(rawSignature, secretKey);
 
-            // TODO: gọi API MoMo để trả về payUrl, giả lập test:
-            return "https://test-payment.momo.vn/pay/" + transactionId;
-        } catch(Exception e) {
-            throw new RuntimeException(e);
+            // Build request body
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("partnerCode", partnerCode);
+            body.put("partnerName", "Roomie");
+            body.put("storeId", "Roomie");
+            body.put("requestId", requestId);
+            body.put("amount", amount);
+            body.put("orderId", orderId);
+            body.put("orderInfo", orderInfo);
+            body.put("redirectUrl", returnUrl);
+            body.put("ipnUrl", notifyUrl);
+            body.put("lang", "vi");
+            body.put("extraData", extraData);
+            body.put("requestType", requestType);
+            body.put("signature", signature);
+
+            String jsonBody = mapper.writeValueAsString(body);
+
+            Request request = new Request.Builder()
+                    .url(MOMO_ENDPOINT)
+                    .post(RequestBody.create(jsonBody, MediaType.get("application/json")))
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            String responseBody = response.body().string();
+
+            log.info("MoMo response: {}", responseBody);
+
+            Map<?, ?> res = mapper.readValue(responseBody, Map.class);
+
+            return (String) res.get("payUrl");
+
+        } catch (Exception e) {
+            log.error("MoMo createPaymentUrl ERROR", e);
+            throw new RuntimeException("MoMo payment error: " + e.getMessage());
         }
     }
 
     private String hmacSHA256(String data, String key) throws Exception {
-        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "HmacSHA256");
         Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(secretKey);
+        mac.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
         byte[] hash = mac.doFinal(data.getBytes());
         StringBuilder hex = new StringBuilder();
         for (byte b : hash) hex.append(String.format("%02x", b));

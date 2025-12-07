@@ -49,9 +49,9 @@ public class PaymentService {
     private String generatePaymentUrl(Payment payment) {
         switch (payment.getMethod()) {
             case "VNPAY":
-                return vnPayService.createPaymentUrl(payment.getId(), payment.getAmount(), "Thanh toán Roomie");
+                return vnPayService.createPaymentUrl(payment.getId(), payment.getAmount(), "Thanh toan Roomie");
             case "MOMO":
-                return moMoService.createPaymentUrl(payment.getId(), payment.getAmount(), "Thanh toán Roomie");
+                return moMoService.createPaymentUrl(payment.getId(), payment.getAmount(), "Thanh toan Roomie");
             default:
                 throw new RuntimeException("Unsupported payment method");
         }

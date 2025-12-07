@@ -185,7 +185,7 @@ public class BillingService {
 
 
 
-    @Cacheable(value = "bill", key = "#id")
+//    @Cacheable(value = "bill", key = "#id")
     public BillResponse getBill(String id) {
         return billMapper.toResponse(
                 billRepository.findById(id)
