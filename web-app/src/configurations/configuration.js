@@ -134,11 +134,11 @@ export const API = {
   ADMIN_BAN_USER: (id) => `/admin/users/${id}/ban`,
 
   // Property Management
-  ADMIN_PENDING_PROPERTIES: "/admin/properties/pending",
-  ADMIN_APPROVE_PROPERTY: (id) => `/admin/properties/${id}/approve`,
-  ADMIN_REJECT_PROPERTY: (id) => `/admin/properties/${id}/reject`,
-  ADMIN_GET_PROPERTY: (id) => `/admin/properties/${id}`,
-  ADMIN_UPDATE_PROPERTY: (id) => `/admin/properties/${id}`,
+  ADMIN_PENDING_PROPERTIES: "/admin/property/pending",
+  ADMIN_APPROVE_PROPERTY: (id) => `/admin/property/${id}/approve`,
+  ADMIN_REJECT_PROPERTY: (id) => `/admin/property/${id}/reject`,
+  ADMIN_GET_PROPERTY: (id) => `/admin/property/${id}`,
+  ADMIN_UPDATE_PROPERTY: (id) => `/admin/property/${id}`,
 
   // Logs Management
   ADMIN_GET_LOGS: "/admin/logs",

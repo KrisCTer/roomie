@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Camera, Upload, X } from "lucide-react";
 
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
+import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx"; // <-- THÊM DÒNG NÀY
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 
@@ -176,7 +177,6 @@ const Profile = () => {
 
       const result = res?.result;
       if (result) {
-        // Cập nhật các field từ kết quả QR Code/OCR
         setFormData((prev) => ({
           ...prev,
           username: result.username || prev.username,
@@ -297,16 +297,27 @@ const Profile = () => {
       </div>
     );
 
+  // XÁC ĐỊNH CÓ PHẢI ADMIN KHÔNG (DÙNG username từ profile)
+  const isAdmin = formData.username?.toLowerCase() === "admin";
+
   // =============================
   // UI
   // =============================
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-        sidebarOpen={sidebarOpen}
-      />
+      {isAdmin ? (
+        <AdminSidebar
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          sidebarOpen={sidebarOpen}
+        />
+      ) : (
+        <Sidebar
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          sidebarOpen={sidebarOpen}
+        />
+      )}
 
       <div
         className={`flex-1 transition-all duration-300 ${

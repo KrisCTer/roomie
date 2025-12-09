@@ -69,7 +69,7 @@ public class SocketHandler {
 
         // ========== CALL SIGNALING EVENTS ==========
         // ⭐ CRITICAL: Use Object.class to handle socket.io's flexible format
-// ⭐ JOIN CONVERSATION ROOM
+        // ⭐ JOIN CONVERSATION ROOM
         server.addEventListener("join_conversation", Map.class, (client, data, ackRequest) -> {
             try {
                 String room = (String) data.get("conversationId");
@@ -87,7 +87,8 @@ public class SocketHandler {
         // Initiate call
         server.addEventListener("call-user", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
 
                     // Parse data (might be List or Map depending on socket.io version)
@@ -96,20 +97,19 @@ public class SocketHandler {
                     String fromUserId = (String) data.get("from");
                     String toUserId = (String) data.get("to");
 
-// FIX NPE: validate before equals
+                    // FIX NPE: validate before equals
                     if (fromUserId == null || toUserId == null) {
                         log.warn("❌ call-user missing required fields: from={}, to={}", fromUserId, toUserId);
                         client.sendEvent("call-failed", Map.of("reason", "Invalid call data"));
                         return;
                     }
 
-// Prevent self-calling
+                    // Prevent self-calling
                     if (fromUserId.equals(toUserId)) {
                         log.warn("❌ User {} attempted to call themselves", fromUserId);
                         client.sendEvent("call-failed", Map.of("reason", "Cannot call yourself"));
                         return;
                     }
-
 
                     log.info("📞 Call request from {} to {}", data.get("from"), toUserId);
 
@@ -144,9 +144,7 @@ public class SocketHandler {
             }
         });
 
-
-
-// Notify caller that callee accepted the call
+        // Notify caller that callee accepted the call
         server.addEventListener("accept-call", Object.class, (client, rawData, ack) -> {
             try {
                 Map<String, Object> data = parseSocketData(rawData);
@@ -172,7 +170,8 @@ public class SocketHandler {
         // Answer call
         server.addEventListener("answer-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -197,7 +196,8 @@ public class SocketHandler {
         // Reject call
         server.addEventListener("reject-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -222,7 +222,8 @@ public class SocketHandler {
         // End call
         server.addEventListener("end-call", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");
@@ -247,7 +248,8 @@ public class SocketHandler {
         // ICE candidate exchange
         server.addEventListener("ice-candidate", Object.class, new DataListener<Object>() {
             @Override
-            public void onData(SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
+            public void onData(
+                    SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
                     Map<String, Object> data = parseSocketData(rawData);
                     String toUserId = (String) data.get("to");

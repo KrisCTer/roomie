@@ -1,7 +1,7 @@
 // src/pages/Admin/AdminProperties.jsx
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
+import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import ListingCardAdmin from "../../components/layout/layoutAdmin/ListingCardAdmin.jsx";
@@ -16,49 +16,30 @@ const AdminProperties = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMenu, setActiveMenu] = useState("AdminProperties");
+  const [activeMenu, setActiveMenu] = useState("Admin Properties");
 
-  // ---- Chuẩn hoá dữ liệu trả về từ API ----
-  const normalizePendingResponse = (response) => {
-    console.log("Pending properties API response:", response);
-
-    // Trường hợp BaseService.get đã trả body {code, success, message, result}
-    if (response && response.success && response.result) {
-      const r = response.result;
-      if (Array.isArray(r)) return r;
-      if (Array.isArray(r.items)) return r.items;
-      if (Array.isArray(r.content)) return r.content;
-      return [];
-    }
-
-    // Nếu vì lý do nào đó vẫn còn response.data
-    if (response && response.data) {
-      const data = response.data;
-      if (data.result) {
-        const r = data.result;
-        if (Array.isArray(r)) return r;
-        if (Array.isArray(r.items)) return r.items;
-        if (Array.isArray(r.content)) return r.content;
-      }
-      if (Array.isArray(data.items)) return data.items;
-      if (Array.isArray(data.content)) return data.content;
-      if (Array.isArray(data)) return data;
-    }
-
-    // API trả thẳng mảng
-    if (Array.isArray(response)) return response;
-
-    return [];
-  };
-
+  // Đọc list pending từ API
   const loadPending = async () => {
     try {
       setLoading(true);
       const res = await adminGetPendingProperties();
-      const list = normalizePendingResponse(res);
-      setProperties(list);
-    } catch (e) {
-      console.error("Error loading pending properties:", e);
+
+      console.log("Admin pending properties response:", res);
+
+      // API chuẩn: { code, success, message, result: [...] }
+      if (res && res.success && Array.isArray(res.result)) {
+        setProperties(res.result);
+      }
+      // fallback nếu backend trả kiểu khác
+      else if (res && res.data && Array.isArray(res.data.result)) {
+        setProperties(res.data.result);
+      } else if (Array.isArray(res)) {
+        setProperties(res);
+      } else {
+        setProperties([]);
+      }
+    } catch (error) {
+      console.error("Error loading pending properties:", error);
       setProperties([]);
     } finally {
       setLoading(false);
@@ -73,8 +54,8 @@ const AdminProperties = () => {
     try {
       await adminApproveProperty(id);
       await loadPending();
-    } catch (e) {
-      console.error("Approve failed:", e);
+    } catch (error) {
+      console.error("Approve failed:", error);
     }
   };
 
@@ -82,14 +63,14 @@ const AdminProperties = () => {
     try {
       await adminRejectProperty(id);
       await loadPending();
-    } catch (e) {
-      console.error("Reject failed:", e);
+    } catch (error) {
+      console.error("Reject failed:", error);
     }
   };
 
   return (
     <div className="flex min-h-screen bg-gray-900">
-      <Sidebar
+      <AdminSidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
         sidebarOpen={sidebarOpen}
@@ -104,7 +85,7 @@ const AdminProperties = () => {
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main className="p-8 w-full">
-          <h1 className="text-3xl font-bold text-white mb-4">
+          <h1 className="text-3xl font-bold text-white mb-6">
             Pending Properties
           </h1>
 
@@ -115,18 +96,17 @@ const AdminProperties = () => {
               <p className="text-slate-200">No pending properties.</p>
             ) : (
               <div className="space-y-4">
-                {properties.map((property) => (
-                  <ListingCardAdmin
-                    key={property.propertyId || property.id}
-                    property={property}
-                    onApprove={() =>
-                      handleApprove(property.propertyId || property.id)
-                    }
-                    onReject={() =>
-                      handleReject(property.propertyId || property.id)
-                    }
-                  />
-                ))}
+                {properties.map((property) => {
+                  const id = property.propertyId || property.id;
+                  return (
+                    <ListingCardAdmin
+                      key={id}
+                      property={property}
+                      onApprove={() => handleApprove(id)}
+                      onReject={() => handleReject(id)}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>

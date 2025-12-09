@@ -63,7 +63,7 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
             </div>
             <div>
               <p className="text-sm font-medium">Administrator</p>
-              <p className="text-xs text-gray-400">admin@roomie.com</p>
+              <p className="text-xs text-gray-400">admin</p>
             </div>
           </div>
         </div>
