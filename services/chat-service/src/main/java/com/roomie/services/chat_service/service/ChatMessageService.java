@@ -2,7 +2,6 @@ package com.roomie.services.chat_service.service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -57,7 +56,8 @@ public class ChatMessageService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // Validate conversation
-        var conversation = conversationRepository.findById(request.getConversationId())
+        var conversation = conversationRepository
+                .findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
         boolean isParticipant = conversation.getParticipants().stream()
@@ -93,12 +93,10 @@ public class ChatMessageService {
 
         log.info("🔥 Emitting new_message to room {}", room);
 
-        server.getRoomOperations(room)
-                .sendEvent("new_message", response);
+        server.getRoomOperations(room).sendEvent("new_message", response);
 
         return response;
     }
-
 
     private ChatMessageResponse toChatMessageResponse(ChatMessage chatMessage) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -4,19 +4,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.protocol.JacksonJsonSupport;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class SocketIOConfig {
 
     @Bean
     public SocketIOServer socketIOServer() {
-        com.corundumstudio.socketio.Configuration conf =
-                new com.corundumstudio.socketio.Configuration();
+        com.corundumstudio.socketio.Configuration conf = new com.corundumstudio.socketio.Configuration();
 
         conf.setHostname("0.0.0.0");
         conf.setPort(8099);

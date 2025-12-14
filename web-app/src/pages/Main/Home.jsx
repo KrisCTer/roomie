@@ -1,4 +1,6 @@
 // src/pages/Home.jsx
+
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -14,223 +16,255 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
 import Footer from "../../components/layout/layoutHome/Footer";
-import { useTranslation } from "react-i18next";
 
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { getAllProperties } from "../../services/property.service";
 
-//
-// COMPONENT: PropertyCard 
-//
-function PropertyCard({ item }) {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+// Nhóm theo tỉnh/thành (nếu không có thì gom vào "Từ dữ liệu hệ thống")
+const groupByProvince = (items) => {
+  const map = new Map();
+  items.forEach((p) => {
+    const province =
+      p.province ||
+      p.provinceName ||
+      p.address?.province ||
+      "Từ dữ liệu hệ thống";
+    if (!map.has(province)) map.set(province, []);
+    map.get(province).push(p);
+  });
 
-  return (
-    <Card
-      onClick={() => navigate(`/property/${item.id}`)}
+  return Array.from(map.entries()).map(([province, list]) => ({
+    province,
+    items: list,
+  }));
+};
+
+// Lọc chỉ lấy property đã duyệt
+const filterApproved = (items) => {
+  return items.filter((p) => {
+    const status = (p.status || p.propertyStatus || "").toUpperCase();
+    // Ẩn: PENDING / DRAFT / REJECT / REJECTED
+    if (
+      ["PENDING", "DRAFT", "REJECT", "REJECTED"].includes(status)
+    ) {
+      return false;
+    }
+    // Giữ lại APPROVED, AVAILABLE, SOLD, RENTED...
+    return true;
+  });
+};
+
+const transformToCardData = (property) => {
+  const price =
+    property.monthlyRent ??
+    property.price ??
+    property.pricePerMonth ??
+    0;
+
+  const image =
+    property.mediaList?.[0]?.url ||
+    property.thumbnail ||
+    property.image ||
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800";
+
+  const province =
+    property.province ||
+    property.provinceName ||
+    property.address?.province ||
+    "";
+
+  const district =
+    property.district ||
+    property.address?.district ||
+    "";
+
+  return {
+    id: property.propertyId || property.id,
+    title: property.title || "No title",
+    image,
+    price: `${price.toLocaleString()} VND / Giá thuê tháng`,
+    location: [district, province].filter(Boolean).join(", "),
+  };
+};
+
+const ListingCard = ({ item }) => (
+  <Card
+    sx={{
+      borderRadius: 4,
+      boxShadow: "0 18px 45px rgba(15,23,42,0.15)",
+      overflow: "hidden",
+      cursor: "pointer",
+      position: "relative",
+    }}
+  >
+    {/* Ảnh */}
+    <Box
       sx={{
-        width: 280,
+        height: 220,
         borderRadius: 4,
-        bgcolor: "#fff",
-        cursor: "pointer",
-        flexShrink: 0,
-        transition: "0.25s",
-        "&:hover": { transform: "scale(1.03)" },
-        boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
+        overflow: "hidden",
+        position: "relative",
+        mx: 1,
+        mt: 1,
       }}
     >
-      {/* IMAGE */}
-      <Box
+      <CardMedia component="img" image={item.image} sx={{ height: "100%" }} />
+
+      <IconButton
         sx={{
-          height: 220,
-          borderRadius: 4,
-          overflow: "hidden",
-          position: "relative",
-          mx: 1,
-          mt: 1,
+          position: "absolute",
+          top: 12,
+          right: 12,
+          bgcolor: "rgba(15,23,42,0.6)",
+          "&:hover": { bgcolor: "rgba(15,23,42,0.8)" },
         }}
       >
-        <CardMedia
-          component="img"
-          image={item.image}
-          alt={item.title}
-          sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
-
-        {/* Badge */}
-        {item.badge && (
-          <Chip
-            label={t("propertyCard.featured")}
-            size="small"
-            sx={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              bgcolor: "#fff",
-              fontWeight: 700,
-              opacity: 0.9,
-            }}
-          />
-        )}
-
-        {/* Favorite button */}
-        <IconButton
-          size="small"
-          sx={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            bgcolor: "rgba(255,255,255,0.9)",
-          }}
-        >
-          <FavoriteBorderIcon />
-        </IconButton>
-      </Box>
-
-      {/* CONTENT */}
-      <CardContent sx={{ p: 2 }}>
-        <Typography variant="subtitle1" fontWeight={700} noWrap>
-          {item.title}
-        </Typography>
-
-        <Typography
-          variant="subtitle2"
-          fontWeight={700}
-          color="primary"
-          sx={{ mt: 0.5 }}
-        >
-          {item.price} VND / {t("property.monthlyRent")}
-        </Typography>
-
-        <Typography variant="body2" mt={0.5} color="text.secondary" noWrap>
-          {item.address}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-}
-
-//
-// COMPONENT: Section (Rooms & Stays in ...)
-//
-function Section({ province, listings = [] }) {
-  const { t } = useTranslation();
-
-  return (
-    <Box sx={{ mt: 6 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6" fontWeight={700}>
-          {t("home.roomsIn")} {province}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {t("home.fromSystemData")}
-        </Typography>
-      </Box>
-
-      {/* Horizontal scroll */}
-      <Box
-        sx={{
-          display: "flex",
-          gap: 3,
-          overflowX: "auto",
-          pb: 1,
-          "&::-webkit-scrollbar": { height: 6 },
-          "&::-webkit-scrollbar-thumb": {
-            bgcolor: "rgba(100,100,100,0.3)",
-            borderRadius: 3,
-          },
-        }}
-      >
-        {(listings || []).map((item) => (
-          <PropertyCard key={item.id} item={item} />
-        ))}
-      </Box>
+        <FavoriteBorderIcon sx={{ color: "white" }} />
+      </IconButton>
     </Box>
-  );
-}
 
-//
-// HOME PAGE
-//
+    {/* Nội dung */}
+    <CardContent sx={{ px: 3, pt: 2, pb: 3 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{ fontWeight: 700, mb: 0.5 }}
+        noWrap
+      >
+        {item.title}
+      </Typography>
+
+      <Typography
+        variant="body2"
+        sx={{ color: "text.secondary", mb: 1 }}
+        noWrap
+      >
+        {item.location}
+      </Typography>
+
+      <Typography
+        variant="subtitle1"
+        sx={{ fontWeight: 700, color: "#2563eb", mb: 1 }}
+      >
+        {item.price}
+      </Typography>
+
+      <Chip
+        label="Từ dữ liệu hệ thống"
+        size="small"
+        sx={{
+          bgcolor: "rgba(37,99,235,0.08)",
+          color: "#2563eb",
+          fontWeight: 600,
+        }}
+      />
+    </CardContent>
+  </Card>
+);
+
+const Section = ({ province, listings }) => (
+  <Box sx={{ mb: 6 }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        mb: 3,
+        alignItems: "center",
+      }}
+    >
+      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+        Phòng & Nơi lưu trú tại {province}
+      </Typography>
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        Từ dữ liệu hệ thống
+      </Typography>
+    </Box>
+
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+        gap: 3,
+      }}
+    >
+      {listings.map((p) => {
+        const card = transformToCardData(p);
+        return <ListingCard key={card.id} item={card} />;
+      })}
+    </Box>
+  </Box>
+);
+
 export default function Home() {
-  const { t } = useTranslation();
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
-    loadData();
+    const fetchData = async () => {
+      try {
+        const res = await getAllProperties();
+        console.log("Home getAllProperties response:", res);
+
+        // Chuẩn: { code, success, message, result: [...] }
+        let list = [];
+        if (res && res.success && Array.isArray(res.result)) {
+          list = res.result;
+        } else if (res && res.data && Array.isArray(res.data.result)) {
+          list = res.data.result;
+        } else if (Array.isArray(res)) {
+          list = res;
+        }
+
+        const visible = filterApproved(list);
+        setSections(groupByProvince(visible));
+      } catch (error) {
+        console.error("Error loading properties for home:", error);
+        setSections([]);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const loadData = async () => {
-    const res = await getAllProperties();
-    const raw = res?.result || [];
-
-    const formatted = raw.map((p) => ({
-      id: p.propertyId,
-      title: p.title,
-      price: Number(p.monthlyRent).toLocaleString(),
-      image:
-        p.mediaList?.[0]?.url ||
-        "https://via.placeholder.com/500x350?text=No+Image",
-      address: p.address?.fullAddress || t("home.unknownAddress"),
-      province: p.address?.province || t("home.other"),
-      badge: p.propertyLabel === "HOT" ? "HOT" : "",
-    }));
-
-    const grouped = formatted.reduce((acc, item) => {
-      if (!acc[item.province]) acc[item.province] = [];
-      acc[item.province].push(item);
-      return acc;
-    }, {});
-
-    setSections(
-      Object.entries(grouped).map(([province, items]) => ({
-        province,
-        items,
-      }))
-    );
-  };
-
   return (
-    <Box sx={{ bgcolor: "#0b1b2a", minHeight: "100vh" }}>
+    <Box sx={{ bgcolor: "#020617", minHeight: "100vh" }}>
       <Header />
 
-      {/* HERO */}
+      {/* Hero + Search */}
       <Box
         sx={{
-          pt: 8,
-          pb: 10,
           background:
-            "radial-gradient(circle at top, #1d4ed8, #0b1b2a 50%, #020617 100%)",
-          color: "#fff",
+            "radial-gradient(circle at top, #1d4ed8 0, #020617 55%, #020617 100%)",
+          pt: 10,
+          pb: 8,
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h3" fontWeight={800} textAlign="center">
-            {t("home.findPerfectPlace")}
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+              mb: 2,
+              color: "white",
+              textAlign: "center",
+            }}
+          >
+            Tìm nơi ở hoàn hảo cho bạn
           </Typography>
-
           <Typography
             variant="body1"
-            textAlign="center"
-            sx={{ mt: 1, opacity: 0.9 }}
+            sx={{
+              color: "rgba(226,232,240,0.8)",
+              textAlign: "center",
+              mb: 6,
+            }}
           >
-            {t("home.exploreThousands")}
+            Khám phá hàng ngàn căn hộ, nhà và homestay trên toàn thế giới.
           </Typography>
 
-          <Box sx={{ mt: 4 }}>
-            <SearchBar />
-          </Box>
+          <SearchBar />
         </Container>
       </Box>
 
-      {/* LISTINGS */}
-      <Box sx={{ bgcolor: "#f5f7fa", py: 6 }}>
+      {/* Danh sách */}
+      <Box sx={{ bgcolor: "#f1f5f9", py: 6 }}>
         <Container maxWidth="lg">
           {sections.map((sec) => (
             <Section

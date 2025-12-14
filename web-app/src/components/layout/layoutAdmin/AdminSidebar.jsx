@@ -1,77 +1,113 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  ClipboardList,
-  LogOut,
   Home,
+  Building,
+  Users,
+  User,
+  LogOut,
 } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
+const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
     {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: <LayoutDashboard size={20} />,
-      path: "/admin/dashboard",
+      icon: User,
+      label: "Profile",
+      path: "/profile",
     },
     {
-      id: "properties",
-      label: "Manage Properties",
-      icon: <ClipboardList size={20} />,
+      icon: Building,
+      label: "Admin Properties",
       path: "/admin/properties",
+    },
+    {
+      icon: Users,
+      label: "User Management",
+      path: "/admin/users",
     },
   ];
 
+  const isActive = (path) => {
+    if (!path) return false;
+    return location.pathname.startsWith(path);
+  };
+
+  const handleNavigation = (item) => {
+    setActiveMenu(item.label);
+    navigate(item.path);
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    // Xóa thông tin đăng nhập (tùy bạn đang lưu gì)
+    localStorage.clear();
     navigate("/login");
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white shadow-lg flex flex-col">
-      
-      {/* LOGO */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-700">
-        <div className="flex items-center gap-2 text-xl font-bold">
-          <Home size={26} className="text-blue-400" />
-          Roomie Admin
+    <div
+      className={`${
+        sidebarOpen ? "w-64" : "w-0"
+      } bg-slate-900 text-white transition-all duration-300 overflow-hidden fixed left-0 top-0 h-full z-50`}
+    >
+      <div className="flex flex-col h-full p-6">
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+            <Home className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">Roomie</h1>
+            <p className="text-xs text-gray-400">Admin Panel</p>
+          </div>
         </div>
-      </div>
 
-      {/* MENU */}
-      <nav className="flex-1 mt-4">
-        {menuItems.map((menu) => (
-          <NavLink
-            key={menu.id}
-            to={menu.path}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-6 py-3 cursor-pointer transition-colors
-              ${isActive || activeMenu === menu.id
-                ? "bg-blue-600 text-white"
-                : "text-gray-300 hover:bg-gray-800 hover:text-white"
-              }`
-            }
-            onClick={() => setActiveMenu(menu.id)}
+        {/* Admin Info */}
+        <div className="mb-8 pb-6 border-b border-gray-700">
+          <p className="text-xs text-gray-400 mb-3">Admin</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Administrator</p>
+              <p className="text-xs text-gray-400">admin</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Menu */}
+        <nav className="space-y-1 flex-1">
+          {menuItems.map((item, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => handleNavigation(item)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+                ${
+                  isActive(item.path)
+                    ? "bg-blue-600"
+                    : "hover:bg-gray-800"
+                }`}
+            >
+              <item.icon className="w-5 h-5" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Logout (bottom) */}
+        <div className="pt-4 border-t border-gray-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
           >
-            {menu.icon}
-            <span className="text-md">{menu.label}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* LOGOUT */}
-      <div className="border-t border-gray-800 p-4">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2 w-full text-left text-red-400 hover:text-red-300"
-        >
-          <LogOut size={20} />
-          Logout
-        </button>
+            <LogOut className="w-5 h-5" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
     </div>
   );
