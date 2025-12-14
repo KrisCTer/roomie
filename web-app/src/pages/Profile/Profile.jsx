@@ -3,6 +3,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
+import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 
 // Import custom components
 import AvatarAndScanner from "../../components/Profile/AvatarAndScanner.jsx";
@@ -13,6 +14,8 @@ import ProfileSkeleton from "../../components/Profile/ProfileSkeleton.jsx";
 
 // Import custom hook
 import { useProfileOperations } from "../../hooks/useProfileOperations.js";
+
+const isAdmin = formData.username?.toLowerCase() === "admin";
 
 const Profile = () => {
   // Layout state
@@ -39,11 +42,19 @@ const Profile = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-        sidebarOpen={sidebarOpen}
-      />
+      {isAdmin ? (
+        <AdminSidebar
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          sidebarOpen={sidebarOpen}
+        />
+      ) : (
+        <Sidebar
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          sidebarOpen={sidebarOpen}
+        />
+      )}
 
       {/* Main Content */}
       <div
