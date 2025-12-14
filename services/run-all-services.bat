@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 set services=api-gateway identity-service property-service booking-service chat-service notification-service billing-service file-service profile-service
 
 :: ==== ROOMIE ROOT FOLDER ====
-set ROOT=C:\Users\LoiChau\Downloads\roomie\services
+set ROOT=D:\tailieu\roomie\services
 
 echo Starting all Roomie microservices...
 echo ------------------------------------

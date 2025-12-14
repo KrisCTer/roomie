@@ -1,44 +1,61 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+// src/routes/AppRoutes.jsx (hoặc src/AppRoutes.jsx)
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+
 import Home from "../pages/Main/Home";
+import PropertyDetail from "../pages/Main/PropertyDetail";
+import PropertySearch from "../pages/Main/PropertySearch";
+
 import Profile from "../pages/User/Profile";
 import Message from "../pages/User/Message";
 import Admin from "../pages/User/Admin";
 import Dashboard from "../pages/User/Dashboard";
 import AddProperty from "../pages/User/AddProperty";
 import MyProperties from "../pages/User/MyProperties";
-import PropertyDetail from "../pages/Main/PropertyDetail";
-import PropertySearch from "../pages/Main/PropertySearch";
 import ContractSigning from "../pages/User/ContractSigning";
 import MyContracts from "../pages/User/MyContracts";
 import MyBookings from "../pages/User/MyBooking";
 import UnifiedBillsPage from "../pages/User/UnifiedBillsPage";
 import BillDetail from "../pages/User/BillDetail";
-import AdminProperties from "../pages/Admin/AdminProperties"; // thêm dòng này
+
+import AdminProperties from "../pages/Admin/AdminProperties";
+import AdminUsers from "../pages/Admin/AdminUsers";
 
 const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Main */}
+        <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/message" element={<Message />} />{" "}
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin/properties" element={<AdminProperties />} />
-        <Route path="/add-property" element={<AddProperty />} />
-        <Route path="/my-properties" element={<MyProperties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/property-search" element={<PropertySearch />} />
+
+        {/* User */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/message" element={<Message />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/add-property" element={<AddProperty />} />
+        <Route path="/my-properties" element={<MyProperties />} />
         <Route path="/contract-signing/:id" element={<ContractSigning />} />
         <Route path="/my-contracts" element={<MyContracts />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/unified-bills" element={<UnifiedBillsPage />} />
         <Route path="/bill-detail/:id" element={<BillDetail />} />
+
+        {/* Admin */}
+        <Route path="/admin/properties" element={<AdminProperties />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   );
