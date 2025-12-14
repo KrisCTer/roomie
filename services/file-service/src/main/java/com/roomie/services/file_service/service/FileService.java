@@ -67,7 +67,7 @@ public class FileService {
         return new FileData(fileMgmt.getContentType(), resource);
     }
 
-    public List<FileResponse> listFilesByEntity(String entityType, Long entityId) {
+    public List<FileResponse> listFilesByEntity(String entityType, String entityId) {
         return fileMgmtRepository.findByEntityTypeAndEntityIdAndDeletedFalse(entityType, entityId)
                 .stream()
                 .map(fileMgmtMapper::toFileResponse)

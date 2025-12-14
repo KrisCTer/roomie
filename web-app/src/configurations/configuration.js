@@ -75,6 +75,12 @@ export const API = {
   PROPERTY_BY_PRICE: "/property/by-price",
   PROPERTY_BY_PROVINCE: "/property/by-province",
   PROPERTY_BY_ME: "/property/owner/me",
+  GET_PUBLIC_PROPERTY: `/property/public`,
+  PUBLISH_PROPERTY: (propertyId) => `/property/${propertyId}/publish`,
+  MARK_AS_RENTER: (propertyId) => `/property/${propertyId}/rented`,
+  MARK_AS_AVAILABLE: (propertyId) => `/property/${propertyId}/available`,
+  MARK_AS_DEACTIVATED: (propertyId) => `/property/${propertyId}/deactivate`,
+
 
   // Internal Property endpoints
   PROPERTY_INTERNAL_PENDING: "/property/internal/pending",
@@ -82,12 +88,19 @@ export const API = {
   PROPERTY_INTERNAL_REJECT: (id) => `/property/internal/${id}/reject`,
   PROPERTY_INTERNAL_GET: (id) => `/property/internal/${id}`,
   PROPERTY_INTERNAL_UPDATE: (id) => `/property/internal/${id}`,
+  GET_PROPERTY_BY_OWNER: (ownerId) => `/property/owner/${ownerId}`,
 
   // ========= BOOKING (Booking Service - Port 8084) =========
   CREATE_BOOKING: "/booking/",
   GET_BOOKING: (id) => `/booking/${id}`,
   CONFIRM_BOOKING: (id) => `/booking/${id}/confirm`,
   CANCEL_BOOKING: (id) => `/booking/${id}/cancel`,
+  PAUSE_BOOKING: (id) => `/booking/${id}/pause`,
+  RESUME_BOOKING: (id) => `/booking/${id}/resume`,
+  TERMINATE_BOOKING: (id) => `/booking/${id}/terminate`,
+  RENEW_BOOKING: (id) => `/booking/${id}/renew`,
+  GET_TENANT_BOOKINGS: "/booking/tenant/bookings",
+  GET_LANDLORD_BOOKINGS: "/booking/landlord/bookings",
 
   // ========= CONTRACT (Contract Service - Port 8085) =========
   CREATE_CONTRACT: "/contract/",
@@ -100,6 +113,8 @@ export const API = {
   REQUEST_TENANT_OTP: (id) => `/contract/${id}/request-otp/tenant`,
   REQUEST_LANDLORD_OTP: (id) => `/contract/${id}/request-otp/landlord`,
   PAUSE_CONTRACT: (id) => `/contract/${id}/pause`,
+  RESUME_CONTRACT: (id) => `/contract/${id}/resume`,
+  TERMINATE_CONTRACT: (id) => `/contract/${id}/terminate`,
 
   // ========= BILLING (Billing Service - Port 8086) =========
   CREATE_BILL: "/billing/",
@@ -108,11 +123,15 @@ export const API = {
   GET_BILLS_BY_CONTRACT: (contractId) => `/billing/contract/${contractId}`,
   UPDATE_BILL: (id) => `/billing/${id}`,
   DELETE_BILL: (id) => `/billing/${id}`,
+  SEND_BILL: (id) => `/billing/${id}/send`,
+  PAY_BILL: (id) => `/billing/${id}/pay`,
+  GET_MY_LANDORD_BILLS: "/billing/landlord/my-bills",
+  GET_MY_TENANT_BILLS: "/billing/tenant/my-bills",
 
   // ========= PAYMENT (Payment Service - Port 8087) =========
-  CREATE_PAYMENT: "/payment",
+  CREATE_PAYMENT: "/payment/",
   GET_PAYMENT: (id) => `/payment/${id}`,
-  GET_ALL_PAYMENTS: "/payment",
+  GET_ALL_PAYMENTS: "/payment/",
   PAYMENT_VNPAY_WEBHOOK: "/payment/webhook/vnpay",
   PAYMENT_MOMO_WEBHOOK: "/payment/webhook/momo",
 

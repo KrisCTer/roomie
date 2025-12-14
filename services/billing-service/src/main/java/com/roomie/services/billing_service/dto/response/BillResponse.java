@@ -4,6 +4,7 @@ import com.roomie.services.billing_service.enums.BillStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -16,7 +17,8 @@ public class BillResponse {
     String id;
     String contractId;
 
-    Double rentPrice;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
 
     Double electricityOld;
     Double electricityNew;

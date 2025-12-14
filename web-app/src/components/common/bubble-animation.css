@@ -1,0 +1,302 @@
+/* ===================================
+   BUBBLE ANIMATIONS (Original)
+   =================================== */
+.bubble {
+  position: absolute;
+  bottom: -50px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(135, 206, 250, 0.4));
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: rise 8s infinite ease-in;
+  box-shadow: 0 4px 10px rgba(0, 150, 255, 0.3);
+  opacity: 0.7;
+}
+
+@keyframes rise {
+  0% {
+    bottom: -50px;
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 110%;
+    opacity: 0;
+  }
+}
+
+/* ===================================
+   NEW ENHANCED ANIMATIONS
+   =================================== */
+
+/* Wave Animation Background */
+.wave-animation {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  animation: wave-move 15s linear infinite;
+}
+
+@keyframes wave-move {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Sparkle Particles */
+.sparkle-particle {
+  position: absolute;
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5) rotate(180deg);
+  }
+}
+
+/* Gradient Text Animation */
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Slide In Animations */
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.6s ease-out 0.2s backwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Title Icon Animation */
+.title-icon-wrapper {
+  display: inline-flex;
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Underline Animation */
+.underline-animation {
+  width: 0;
+  animation: expandWidth 1.2s ease-out 0.3s forwards;
+}
+
+@keyframes expandWidth {
+  to {
+    width: 120px;
+  }
+}
+
+/* Floating Decorations */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out infinite 3s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(3px);
+  }
+}
+
+/* ===================================
+   ENHANCED BUBBLE VARIATIONS
+   =================================== */
+.bubble:nth-child(odd) {
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.9),
+    rgba(99, 179, 237, 0.5),
+    rgba(41, 128, 185, 0.3)
+  );
+}
+
+.bubble:nth-child(even) {
+  background: radial-gradient(
+    circle at 40% 40%,
+    rgba(255, 255, 255, 0.8),
+    rgba(174, 214, 241, 0.5),
+    rgba(93, 173, 226, 0.3)
+  );
+}
+
+/* Add shimmer to bubbles */
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent);
+  border-radius: 50%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ===================================
+   HOVER EFFECTS
+   =================================== */
+.page-title-container:hover .bubble {
+  animation-play-state: paused;
+}
+
+.page-title-container:hover .wave-animation {
+  animation-duration: 8s;
+}
+
+/* ===================================
+   RESPONSIVE ADJUSTMENTS
+   =================================== */
+@media (max-width: 768px) {
+  .bubble {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .sparkle-particle {
+    display: none; /* Hide sparkles on mobile for performance */
+  }
+  
+  .animate-gradient {
+    animation: none; /* Simplify on mobile */
+    background-position: 0% 50%;
+  }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+  .bubble,
+  .wave-animation,
+  .sparkle-particle,
+  .animate-gradient,
+  .slide-in-left,
+  .slide-in-right,
+  .title-icon-wrapper,
+  .underline-animation,
+  .animate-float,
+  .animate-float-delayed {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .underline-animation {
+    width: 120px;
+  }
+}
+
+/* ===================================
+   ADDITIONAL SPECIAL EFFECTS
+   =================================== */
+
+/* Glow effect on hover */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.3),
+                0 0 10px rgba(33, 150, 243, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(33, 150, 243, 0.5),
+                0 0 30px rgba(33, 150, 243, 0.3);
+  }
+}
+
+/* Shimmer effect for title */
+@keyframes title-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.title-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: title-shimmer 3s infinite;
+}

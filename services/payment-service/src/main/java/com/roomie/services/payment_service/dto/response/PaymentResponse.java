@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentResponse {
     String id;
-    String bookingId;
+//    String bookingId;
     String contractId;
     Double amount;
     String method;

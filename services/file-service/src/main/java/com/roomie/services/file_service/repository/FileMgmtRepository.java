@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface FileMgmtRepository extends MongoRepository<FileMgmt, String> {
     Optional<FileMgmt> findByFileId(String fileId);
-    List<FileMgmt> findByEntityTypeAndEntityIdAndDeletedFalse(String entityType, Long entityId);
+    List<FileMgmt> findByEntityTypeAndEntityIdAndDeletedFalse(String entityType, String entityId);
     List<FileMgmt> findByOwnerIdAndDeletedFalse(String ownerId);
     List<FileMgmt> findByDeletedTrueAndDeletedAtBefore(LocalDateTime dateTime);
 }

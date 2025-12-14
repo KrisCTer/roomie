@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
@@ -18,7 +19,4 @@ public class BookingRequest {
 
     Instant leaseStart;
     Instant leaseEnd;
-
-    Double monthlyRent; // for long-term
-    Double rentalDeposit;
 }

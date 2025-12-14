@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -59,9 +60,14 @@ public class IDCardQRService {
         return info;
     }
 
-    private String formatDate(String ddMMyyyy) {
-        if (ddMMyyyy == null || ddMMyyyy.length() != 8) return ddMMyyyy;
-        return ddMMyyyy.substring(4, 8) + "-" + ddMMyyyy.substring(2, 4) + "-" + ddMMyyyy.substring(0, 2);
+    private LocalDate  formatDate(String ddMMyyyy) {
+        if (ddMMyyyy == null || ddMMyyyy.length() != 8) {
+            throw new AppException(ErrorCode.INVALID_IDCARD);
+        }
+        String normalized = ddMMyyyy.substring(4, 8) + "-" +
+                ddMMyyyy.substring(2, 4) + "-" +
+                ddMMyyyy.substring(0, 2);
+        return LocalDate.parse(normalized);
     }
 
 }

@@ -4,6 +4,7 @@ import com.roomie.services.billing_service.dto.request.BillRequest;
 import com.roomie.services.billing_service.dto.response.ApiResponse;
 import com.roomie.services.billing_service.dto.response.BillResponse;
 import com.roomie.services.billing_service.service.BillingService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +22,7 @@ public class BillController {
     BillingService service;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BillResponse>> create(@RequestBody BillRequest req) {
+    public ResponseEntity<ApiResponse<BillResponse>> create(@Valid @RequestBody BillRequest req) {
         BillResponse response = service.createBill(req);
         return ResponseEntity.ok(ApiResponse.success(response, "Create billing successfully"));
     }
@@ -45,7 +46,7 @@ public class BillController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<BillResponse>> update(@PathVariable String id, @RequestBody BillRequest req) {
+    public ResponseEntity<ApiResponse<BillResponse>> update(@PathVariable String id,@Valid @RequestBody BillRequest req) {
         BillResponse response = service.updateBill(id, req);
         return ResponseEntity.ok(ApiResponse.success(response, "Update billing detail successfully"));
     }
@@ -68,20 +69,13 @@ public class BillController {
         BillResponse response = service.pay(billId, paymentId);
         return ApiResponse.success(response, "Bill paid successfully");
     }
-    /**
-     * Get bills where current user is LANDLORD (property owner)
-     * GET /billing/landlord/my-bills
-     */
+
     @GetMapping("/landlord/my-bills")
     public ResponseEntity<ApiResponse<List<BillResponse>>> getMyLandlordBills() {
         List<BillResponse> list = service.getMyLandlordBills();
         return ResponseEntity.ok(ApiResponse.success(list, "Get landlord bills successfully"));
     }
 
-    /**
-     * Get bills where current user is TENANT
-     * GET /billing/tenant/my-bills
-     */
     @GetMapping("/tenant/my-bills")
     public ResponseEntity<ApiResponse<List<BillResponse>>> getMyTenantBills() {
         List<BillResponse> list = service.getMyTenantBills();

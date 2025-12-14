@@ -2,10 +2,11 @@ package com.roomie.services.billing_service.entity;
 
 import com.roomie.services.billing_service.enums.BillStatus;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -15,51 +16,60 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Bill {
     @MongoId
     String id;
+
+    // References
     String contractId;
     String paymentId;
-    // RENT
-    Double rentPrice;
+    String landlordId;
+    String tenantId;
+    String propertyId;
 
-    // ELECTRICITY
-    Double electricityOld;  // chỉ số cũ
-    Double electricityNew;  // chỉ số mới
-    Double electricityConsumption; // auto = new - old
-    Double electricityUnitPrice;   // do chủ điền
-    Double electricityAmount;
+    // Rent
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
 
-    // WATER
+    // Electricity
+    Double electricityOld;
+    Double electricityNew;
+    Double electricityConsumption;
+    Double electricityUnitPrice;
+    BigDecimal electricityAmount;
+
+    // Water
     Double waterOld;
     Double waterNew;
     Double waterConsumption;
     Double waterUnitPrice;
-    Double waterAmount;
+    BigDecimal waterAmount;
 
-    // INTERNET (không theo chỉ số, theo gói tháng)
-    Double internetPrice;
+    // Fixed costs
+    BigDecimal internetPrice;
+    BigDecimal parkingPrice;
+    BigDecimal cleaningPrice;
+    BigDecimal maintenancePrice;
 
-    // PARKING
-    Double parkingPrice;
-
-    // CLEANING
-    Double cleaningPrice;
-
-    // MAINTENANCE
-    Double maintenancePrice;
-
-    // OTHER
+    // Other
     String otherDescription;
-    Double otherPrice;
+    BigDecimal otherPrice;
 
-    Double totalAmount;
+    // Total
+    BigDecimal totalAmount;
 
+    // Billing period
     LocalDate billingMonth;
     LocalDate dueDate;
 
+    // Status
     BillStatus status;
 
+    // Notes
+    String notes;
+
+    // Timestamps
     Instant paidAt;
     Instant createdAt;
     Instant updatedAt;

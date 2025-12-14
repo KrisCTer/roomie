@@ -31,15 +31,15 @@ public class UserProfileController {
             @RequestParam("file") MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
-            return ApiResponse.error(400, "Vui lòng upload ảnh CCCD/CMND");
+            return ApiResponse.error(400, "Please upload a photo of your Citizen Identification Card/National Identity Card.");
         }
 
         if (!file.getContentType().startsWith("image/")) {
-            return ApiResponse.error(400, "File phải là định dạng ảnh");
+            return ApiResponse.error(400, "The file must be in image format.");
         }
 
         UserProfileResponse result = userProfileService.updateProfileFromIDCard(file);
-        return ApiResponse.success(result, "Cập nhật hồ sơ thành công từ CCCD!");
+        return ApiResponse.success(result, "Profile update from Citizen Identification Card successful!");
     }
 
     @GetMapping("/users/{profileId}")
@@ -65,8 +65,7 @@ public class UserProfileController {
 
     @PutMapping("/users/my-profile")
     public ApiResponse<UserProfileResponse> updateMyProfile(@RequestBody UpdateProfileRequest request) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ApiResponse.success(userProfileService.updateMyProfile(userId, request),"Update user successfuly");
+        return ApiResponse.success(userProfileService.updateMyProfile(request),"Update user successful");
     }
 
 
@@ -79,6 +78,6 @@ public class UserProfileController {
 
     @PostMapping("/search")
     public ApiResponse<List<UserProfileResponse>> search(@RequestBody SearchUserRequest request) {
-        return ApiResponse.success(userProfileService.search(request),"Search User successfuly");
+        return ApiResponse.success(userProfileService.search(request),"Search User successful");
     }
 }

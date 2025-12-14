@@ -2,19 +2,19 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Home from "../pages/Main/Home";
-import Profile from "../pages/User/Profile";
-import Message from "../pages/User/Message";
+import Profile from "../pages/Profile/Profile";
+import Message from "../pages/Message/Message";
 import Admin from "../pages/User/Admin";
 import Dashboard from "../pages/User/Dashboard";
-import AddProperty from "../pages/User/AddProperty";
-import MyProperties from "../pages/User/MyProperties";
+import AddProperty from "../pages/Property/AddProperty";
+import MyProperties from "../pages/Property/MyProperties";
 import PropertyDetail from "../pages/Main/PropertyDetail";
 import PropertySearch from "../pages/Main/PropertySearch";
-import ContractSigning from "../pages/User/ContractSigning";
-import MyContracts from "../pages/User/MyContracts";
-import MyBookings from "../pages/User/MyBooking";
-import UnifiedBillsPage from "../pages/User/UnifiedBillsPage";
-import BillDetail from "../pages/User/BillDetail";
+import ContractSigning from "../pages/Contracts/ContractSigning";
+import MyContracts from "../pages/Contracts/MyContracts";
+import MyBookings from "../pages/Booking/MyBookings";
+import UnifiedBillsPage from "../pages/Billing/UnifiedBillsPage";
+import BillDetail from "../pages/Billing/BillDetail";
 import AdminProperties from "../pages/Admin/AdminProperties"; // thêm dòng này
 
 const AppRoutes = () => {

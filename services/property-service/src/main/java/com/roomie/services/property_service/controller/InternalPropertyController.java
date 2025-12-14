@@ -53,7 +53,8 @@ public class InternalPropertyController {
 
     @GetMapping("/owner/{ownerId}")
     public ApiResponse<List<PropertyResponse>> getPropertiesByOwner(@PathVariable String ownerId) {
-        return propertyService.getPropertiesByOwner(ownerId);
+        List<PropertyResponse> listProperty = propertyService.getPropertiesByOwner(ownerId);
+        return ApiResponse.success(listProperty,"Owner properties retrieved");
     }
 }
 

@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
@@ -26,8 +27,8 @@ public class LeaseLongTerm {
     Instant leaseStart;
     Instant leaseEnd;
 
-    Double monthlyRent;
-    Double rentalDeposit;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
 
     LeaseStatus status =  LeaseStatus.PENDING_APPROVAL;
 

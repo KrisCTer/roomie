@@ -50,7 +50,7 @@ public class FileController {
     @GetMapping("/entity/{entityType}/{entityId}")
     public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByEntity(
             @PathVariable String entityType,
-            @PathVariable Long entityId
+            @PathVariable String entityId
     ) {
         List<FileResponse> result = fileService.listFilesByEntity(entityType, entityId);
         return ResponseEntity.ok(
