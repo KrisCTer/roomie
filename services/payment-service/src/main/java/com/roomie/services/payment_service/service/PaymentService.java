@@ -28,7 +28,7 @@ public class PaymentService {
     // Tạo payment & trả URL thanh toán
     public String createPayment(PaymentRequest req) {
         Payment payment = Payment.builder()
-                .bookingId(req.getBookingId())
+//                .bookingId(req.getBookingId())
                 .contractId(req.getContractId())
                 .amount(req.getAmount())
                 .method(req.getMethod())

@@ -28,3 +28,6 @@ export const getPropertiesByProvince = (province) =>
 
 export const getPropertiesByOwner = (params) =>
   BaseService.get(API.PROPERTY_BY_ME, params);
+
+export const publishProperty = (propertyId) =>
+  BaseService.post(API.PUBLISH_PROPERTY(propertyId));

@@ -6,7 +6,10 @@ import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
 import com.roomie.services.property_service.enums.ApprovalStatus;
+import com.roomie.services.property_service.enums.PropertyLabel;
 import com.roomie.services.property_service.enums.PropertyStatus;
+import com.roomie.services.property_service.exception.AppException;
+import com.roomie.services.property_service.exception.ErrorCode;
 import com.roomie.services.property_service.mapper.PropertyMapper;
 import com.roomie.services.property_service.repository.PropertyRepository;
 import com.roomie.services.property_service.repository.PropertySearchRepository;
@@ -18,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -32,256 +34,252 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class PropertyService {
+
     PropertyRepository propertyRepository;
     PropertySearchRepository searchRepository;
     PropertyMapper mapper;
-    ProfileClient propertyClient;
+    ProfileClient profileClient;
 
+    // ============================================================
+    // CREATE PROPERTY
+    // ============================================================
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
+
         Property entity = mapper.toEntity(request);
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserProfileResponse userResponse = propertyClient.getProfile(userId).getResult();
-        Owner owner = Owner.builder()
-                .ownerId(userId)
-                .name(userResponse.getLastName()+" "+userResponse.getFirstName())
-                .email(userResponse.getEmail())
-                .phoneNumber(userResponse.getPhoneNumber())
-                .build();
+        String userId = getCurrentUserId();
+
+        Owner owner = fetchOwnerProfile(userId);
+
         entity.setOwner(owner);
         entity.setStatus(ApprovalStatus.DRAFT);
         entity.setPropertyStatus(PropertyStatus.INACTIVE);
-        Instant now = Instant.now();
-        entity.setCreatedAt(now);
-        entity.setUpdatedAt(now);
+        entity.setCreatedAt(Instant.now());
+        entity.setUpdatedAt(Instant.now());
+
         Property saved = propertyRepository.save(entity);
 
-        // Index ES
-        PropertyDocument doc = mapper.toDocument(saved);
-        doc.setPropertyId(saved.getPropertyId());
-        doc.setCreatedAt(saved.getCreatedAt());
-        doc.setUpdatedAt(saved.getUpdatedAt());
-        searchRepository.save(doc);
+        index(saved);
 
         return mapper.toResponse(saved);
     }
 
+    // ============================================================
+    // UPDATE PROPERTY (PATCH STYLE)
+    // ============================================================
     @CacheEvict(value = "properties", key = "#id")
     public PropertyResponse update(String id, PropertyRequest request) {
-        Property existing = propertyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
-        // map fields (simple)
-        Property updated = mapper.toEntity(request);
-        updated.setPropertyId(existing.getPropertyId());
-        updated.setCreatedAt(existing.getCreatedAt());
-        updated.setUpdatedAt(Instant.now());
-        Property saved = propertyRepository.save(updated);
 
-        // update ES
-        PropertyDocument doc = mapper.toDocument(saved);
-        doc.setPropertyId(saved.getPropertyId());
-        doc.setCreatedAt(saved.getCreatedAt());
-        doc.setUpdatedAt(saved.getUpdatedAt());
-        searchRepository.save(doc);
+        Property property = findPropertyOrThrow(id);
+        checkOwner(property);
+
+        updatePropertyFields(property, request);
+        property.setUpdatedAt(Instant.now());
+
+        Property saved = propertyRepository.save(property);
+
+        index(saved);
 
         return mapper.toResponse(saved);
     }
 
+    private void updatePropertyFields(Property p, PropertyRequest r) {
+        if (r.getTitle() != null) p.setTitle(r.getTitle());
+        if (r.getDescription() != null) p.setDescription(r.getDescription());
+        if (r.getMonthlyRent() != null) p.setMonthlyRent(r.getMonthlyRent());
+        if (r.getRentalDeposit() != null) p.setRentalDeposit(r.getRentalDeposit());
+        if (r.getPropertyType() != null) p.setPropertyType(r.getPropertyType());
+        if (r.getPropertyLabel() != null) p.setPropertyLabel(r.getPropertyLabel());
+        if (r.getSize() != null) p.setSize(r.getSize());
+        if (r.getRooms() != null) p.setRooms(r.getRooms());
+        if (r.getBedrooms() != null) p.setBedrooms(r.getBedrooms());
+        if (r.getBathrooms() != null) p.setBathrooms(r.getBathrooms());
+        if (r.getGarages() != null) p.setGarages(r.getGarages());
+    }
+
+    // ============================================================
+    // DELETE PROPERTY
+    // ============================================================
     @CacheEvict(value = "properties", key = "#id")
     public void delete(String id) {
+
+        Property property = findPropertyOrThrow(id);
+        checkOwner(property);
+
         propertyRepository.deleteById(id);
         searchRepository.deleteById(id);
     }
 
+    // ============================================================
+    // BASIC GETTERS
+    // ============================================================
     @Cacheable(value = "properties", key = "#id")
     public PropertyResponse getById(String id) {
-        Property p = propertyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
-        return mapper.toResponse(p);
+
+        Property property = findPropertyOrThrow(id);
+        return mapper.toResponse(property);
     }
 
     public List<PropertyResponse> findAll(int page, int size) {
-        return propertyRepository.findAll(PageRequest.of(page, size)).stream()
-                .map(mapper::toResponse).collect(Collectors.toList());
-    }
-    public List<PropertyResponse> findByStatus(ApprovalStatus status) {
-        return propertyRepository.findByStatus(status)
-                .stream().map(mapper::toResponse)
-                .collect(Collectors.toList());
-    }
-    public List<PropertyResponse> findByPriceRange(BigDecimal min, BigDecimal max) {
-        return propertyRepository.findByMonthlyRentBetween(min, max).stream().map(mapper::toResponse).collect(Collectors.toList());
-    }
-
-    public List<PropertyResponse> findByProvince(String province) {
-        return propertyRepository.findByAddress_ProvinceIgnoreCase(province).stream().map(mapper::toResponse).collect(Collectors.toList());
-    }
-
-    public List<PropertyResponse> getMyProperties() {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        List<Property> properties = propertyRepository.findAllByOwner_OwnerId(userId);
-
-        return properties.stream()
+        return propertyRepository.findAll(PageRequest.of(page, size))
+                .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-
-    public List<PropertyResponse> searchFullText(String q) {
-        List<PropertyDocument> docs = searchRepository.findByTitleContainingOrDescriptionContaining(q, q);
-        return docs.stream()
-                .map(d -> {
-                    // convert ES doc -> minimal response
-                    PropertyResponse resp = PropertyResponse.builder()
-                            .propertyId(d.getPropertyId())
-                            .title(d.getTitle())
-                            .description(d.getDescription())
-                            .createdAt(d.getCreatedAt())
-                            .updatedAt(d.getUpdatedAt())
-                            .build();
-                    return resp;
-                }).collect(Collectors.toList());
+    public List<PropertyResponse> findByStatus(ApprovalStatus status) {
+        return propertyRepository.findByStatus(status)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
+    public List<PropertyResponse> findByPriceRange(BigDecimal min, BigDecimal max) {
+        return propertyRepository.findByMonthlyRentBetween(min, max)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<PropertyResponse> findByProvince(String province) {
+        return propertyRepository.findByAddress_ProvinceIgnoreCase(province)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<PropertyResponse> getMyProperties() {
+
+        String userId = getCurrentUserId();
+
+        return propertyRepository.findAllByOwner_OwnerId(userId)
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ============================================================
+    // SEARCH FULLTEXT
+    // ============================================================
+    public List<PropertyResponse> searchFullText(String q) {
+
+        List<PropertyDocument> docs =
+                searchRepository.findByTitleContainingOrDescriptionContaining(q, q);
+
+        return docs.stream()
+                .map(d -> PropertyResponse.builder()
+                        .propertyId(d.getPropertyId())
+                        .title(d.getTitle())
+                        .description(d.getDescription())
+                        .createdAt(d.getCreatedAt())
+                        .updatedAt(d.getUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // ============================================================
+    // INDEXING
+    // ============================================================
     public void reindexAll() {
+
         searchRepository.deleteAll();
-        propertyRepository.findAll().forEach(p -> {
+
+        propertyRepository.findAll().forEach(this::index);
+    }
+
+    private void index(Property p) {
+        try {
             PropertyDocument doc = mapper.toDocument(p);
             doc.setPropertyId(p.getPropertyId());
             doc.setCreatedAt(p.getCreatedAt());
             doc.setUpdatedAt(p.getUpdatedAt());
             searchRepository.save(doc);
-        });
+        } catch (Exception e) {
+            log.error("Failed to index property {}: {}", p.getPropertyId(), e.getMessage());
+        }
     }
 
-    //Gửi đến admin duyệt
+    // ============================================================
+    // PUBLISH / APPROVE / REJECT
+    // ============================================================
     public PropertyResponse publish(String id) {
-        Property property = propertyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        Property property = findPropertyOrThrow(id);
+        checkOwner(property);
 
         if (property.getStatus() != ApprovalStatus.DRAFT) {
-            throw new IllegalStateException(
-                    "Only DRAFT properties can be published. Current: "
-                            + property.getStatus()
-            );
+            throw new AppException(ErrorCode.INVALID_STATUS_CHANGE);
         }
+
         property.setStatus(ApprovalStatus.PENDING);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-        // Thông báo admin
-//        notificationClient.send(
-//                new NotificationRequest("Admin", "New property awaiting review", property.getTitle()));
-
         return mapper.toResponse(property);
     }
 
-
     public PropertyResponse approve(String id) {
-        Property property = propertyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        Property property = findPropertyOrThrow(id);
 
         if (property.getStatus() != ApprovalStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Only PENDING properties can be approved. Current: "
-                            + property.getStatus()
-            );
+            throw new AppException(ErrorCode.INVALID_STATUS_CHANGE);
         }
+
         property.setStatus(ApprovalStatus.ACTIVE);
         property.setPropertyStatus(PropertyStatus.AVAILABLE);
+        property.setPropertyLabel(PropertyLabel.NEW);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-        // Index lại ES
-        PropertyDocument doc = mapper.toDocument(property);
-        doc.setPropertyId(property.getPropertyId());
-        searchRepository.save(doc);
-
-        // Notify landlord
-//        notificationClient.send(new NotificationRequest(
-//                property.getOwner().getEmail(),
-//                "Your property has been approved!",
-//                property.getTitle()
-//        ));
-//
-//        // Track analytics
-//        analyticsClient.track(new AnalyticsEventRequest(
-//                "PROPERTY_APPROVED",
-//                property.getPropertyId(),
-//                property.getOwner().getOwnerId()
-//        ));
+        index(property);
 
         return mapper.toResponse(property);
     }
 
     public PropertyResponse reject(String id) {
-        Property property = propertyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+
+        Property property = findPropertyOrThrow(id);
+
         if (property.getStatus() != ApprovalStatus.PENDING) {
-            throw new IllegalStateException(
-                    "Only PENDING properties can be rejected. Current: "
-                            + property.getStatus()
-            );
+            throw new AppException(ErrorCode.INVALID_STATUS_CHANGE);
         }
+
         property.setStatus(ApprovalStatus.REJECTED);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-        // Index lại ES
-        PropertyDocument doc = mapper.toDocument(property);
-        doc.setPropertyId(property.getPropertyId());
-        searchRepository.save(doc);
-
-        // Notify landlord
-//        notificationClient.send(new NotificationRequest(
-//                property.getOwner().getEmail(),
-//                "Your property has been approved!",
-//                property.getTitle()
-//        ));
-//
-//        // Track analytics
-//        analyticsClient.track(new AnalyticsEventRequest(
-//                "PROPERTY_APPROVED",
-//                property.getPropertyId(),
-//                property.getOwner().getOwnerId()
-//        ));
+        index(property);
 
         return mapper.toResponse(property);
     }
-    public void markAsRented(String propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + propertyId));
 
-        // Validation
-        if (property.getStatus() != ApprovalStatus.ACTIVE) {
-            throw new IllegalStateException("Property must be ACTIVE to rent");
-        }
+    // ============================================================
+    // RENTED / AVAILABLE / DEACTIVATE
+    // ============================================================
+    public void markAsRented(String id) {
 
-        if (property.getPropertyStatus() != PropertyStatus.AVAILABLE) {
-            throw new IllegalStateException(
-                    "Property must be AVAILABLE to rent. Current: "
-                            + property.getPropertyStatus()
-            );
+        Property property = findPropertyOrThrow(id);
+        checkOwner(property);
+
+        if (property.getStatus() != ApprovalStatus.ACTIVE ||
+                property.getPropertyStatus() != PropertyStatus.AVAILABLE) {
+            throw new AppException(ErrorCode.INVALID_STATUS_CHANGE);
         }
 
         property.setPropertyStatus(PropertyStatus.RENTED);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-        // Remove from search results
-        searchRepository.deleteById(propertyId);
+        searchRepository.deleteById(id);
     }
 
-    public void markAsAvailable(String propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + propertyId));
+    public void markAsAvailable(String id) {
+
+        Property property = findPropertyOrThrow(id);
 
         if (property.getPropertyStatus() != PropertyStatus.RENTED) {
-            throw new IllegalStateException(
-                    "Only RENTED properties can be marked as AVAILABLE. Current: "
-                            + property.getPropertyStatus()
-            );
+            throw new AppException(ErrorCode.INVALID_STATUS_CHANGE);
         }
 
         property.setPropertyStatus(PropertyStatus.AVAILABLE);
@@ -289,46 +287,95 @@ public class PropertyService {
 
         Property saved = propertyRepository.save(property);
 
-        // Re-index to search
         if (property.getStatus() == ApprovalStatus.ACTIVE) {
-            PropertyDocument doc = mapper.toDocument(saved);
-            searchRepository.save(doc);
+            index(saved);
         }
     }
-    public void deactivate(String propertyId) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + propertyId));
+
+    public void deactivate(String id) {
+
+        Property property = findPropertyOrThrow(id);
 
         property.setPropertyStatus(PropertyStatus.INACTIVE);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-        // Remove from search
-        searchRepository.deleteById(propertyId);
+        searchRepository.deleteById(id);
     }
+
+    // ============================================================
+    // PUBLIC PROPERTIES
+    // ============================================================
     public List<PropertyResponse> getAllPublicProperties() {
-        return propertyRepository
-                .findByStatusAndPropertyStatus(
+
+        return propertyRepository.findByStatusAndPropertyStatus(
                         ApprovalStatus.ACTIVE,
-                        PropertyStatus.AVAILABLE
-                )
+                        PropertyStatus.AVAILABLE)
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
-//        return null;
     }
-    public ApiResponse<List<PropertyResponse>> getPropertiesByOwner(String ownerId) {
-        List<Property> properties = propertyRepository.findByOwner_OwnerId(ownerId);
 
-        List<PropertyResponse> response = properties.stream()
+    public List<PropertyResponse> getPropertiesByOwner(String ownerId) {
+
+        return propertyRepository.findByOwner_OwnerId(ownerId)
+                .stream()
                 .map(mapper::toResponse)
-                .toList();
-
-        return ApiResponse.<List<PropertyResponse>>builder()
-                .code(1000)
-                .success(true)
-                .result(response)
-                .build();
+                .collect(Collectors.toList());
     }
 
+    // ============================================================
+    // HELPER METHODS
+    // ============================================================
+    private Property findPropertyOrThrow(String id) {
+        return propertyRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PROPERTY_NOT_FOUND));
+    }
+
+    private Owner fetchOwnerProfile(String userId) {
+        try {
+            ApiResponse<UserProfileResponse> response = profileClient.getProfile(userId);
+
+            if (response == null || response.getResult() == null)
+                throw new AppException(ErrorCode.USER_NOT_EXISTED);
+
+            UserProfileResponse u = response.getResult();
+
+            return Owner.builder()
+                    .ownerId(userId)
+                    .name(u.getLastName() + " " + u.getFirstName())
+                    .email(u.getEmail())
+                    .phoneNumber(u.getPhoneNumber())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to fetch user profile: {}", userId, e);
+            throw new AppException(ErrorCode.PROFILE_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    private void checkOwner(Property property) {
+
+        String userId = getCurrentUserId();
+        String role = getCurrentUserRole();
+
+        if ("ADMIN".equals(role)) return;
+
+        if (!property.getOwner().getOwnerId().equals(userId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    private String getCurrentUserId() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    private String getCurrentUserRole() {
+        return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .iterator()
+                .next()
+                .getAuthority();
+    }
 }

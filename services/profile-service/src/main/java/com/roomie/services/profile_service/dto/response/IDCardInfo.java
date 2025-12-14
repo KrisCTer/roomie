@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class IDCardInfo {
     String fullName;
     String idNumber;
-    String dob; // yyyy-MM-dd
+    LocalDate dob; // yyyy-MM-dd
     String gender;
     String address;
 }

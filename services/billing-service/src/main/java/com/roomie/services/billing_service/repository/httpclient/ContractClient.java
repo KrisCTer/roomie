@@ -18,7 +18,7 @@ import java.util.Map;
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
 public interface ContractClient {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<ContractResponse> get(@PathVariable String id);
+    ResponseEntity<ApiResponse<ContractResponse>> get(@PathVariable String id);
     @GetMapping("/my-contracts")
     ApiResponse<Map<String, List<ContractResponse>>> getMyContracts();
 }

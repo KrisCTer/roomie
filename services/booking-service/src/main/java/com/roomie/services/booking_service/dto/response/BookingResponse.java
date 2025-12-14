@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
@@ -18,8 +19,8 @@ public class BookingResponse {
     String tenantId;
     Instant leaseStart;
     Instant leaseEnd;
-    Double monthlyRent;
-    Double rentalDeposit;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
     String status;
     String bookingReference;
 }

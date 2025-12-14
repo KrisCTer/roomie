@@ -97,7 +97,7 @@ public class UserProfileService {
         profile.setFirstName(firstName);
         profile.setLastName(lastName);
         profile.setGender(gender);
-        profile.setDob(LocalDate.parse(idCardInfo.getDob())); // yyyy-MM-dd
+        profile.setDob(idCardInfo.getDob()); // yyyy-MM-dd
         profile.setIdCardNumber(idCardInfo.getIdNumber());
 
         // Chỉ cập nhật địa chỉ nếu chưa có
@@ -152,9 +152,10 @@ public class UserProfileService {
 
     // 3. CẬP NHẬT PROFILE
 //    @CachePut(value = "profile", key = "#userId")
-    public UserProfileResponse updateMyProfile(String userId, UpdateProfileRequest request) {
+    public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         profile.setFirstName(request.getFirstName());
         profile.setLastName(request.getLastName());

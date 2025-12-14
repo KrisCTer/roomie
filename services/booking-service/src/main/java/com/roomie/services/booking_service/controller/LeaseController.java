@@ -46,7 +46,7 @@ public class LeaseController {
                 "Fetched tenant bookings successfully"
         ));
     }
-    @GetMapping("/owner/bookings")
+    @GetMapping("/landlord/bookings")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> getOwnerBookings() {
         String ownerId = SecurityContextHolder.getContext().getAuthentication().getName();
         List<BookingResponse> bookings = bookingService.getBookingsByOwner(ownerId);

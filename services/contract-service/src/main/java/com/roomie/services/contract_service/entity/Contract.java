@@ -27,7 +27,8 @@ public class Contract {
     Instant startDate;
     Instant endDate;
 
-    BigDecimal totalAmount;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
 
     ContractStatus status;
 

@@ -8,6 +8,7 @@ import lombok.*;
 import com.roomie.services.property_service.service.PropertyService;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,7 +62,7 @@ public class PropertyController {
 
     @GetMapping("/public")
     public ApiResponse<List<PropertyResponse>> getPublicProperties() {
-        return ApiResponse.success(propertyService.getAllPublicProperties(), "");
+        return ApiResponse.success(propertyService.getAllPublicProperties(), "Get All public property successfully");
     }
 
     @GetMapping("/search")
@@ -71,7 +72,7 @@ public class PropertyController {
     }
 
     @PostMapping("/{id}/publish")
-    public ApiResponse<PropertyResponse> publishProperty(@PathVariable String id) {
+    public ApiResponse<PropertyResponse> publishProperty(@Valid @PathVariable String id) {
         return ApiResponse.success(propertyService.publish(id), "Property published successfully");
     }
 

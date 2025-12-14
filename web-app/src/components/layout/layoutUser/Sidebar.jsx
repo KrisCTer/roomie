@@ -23,7 +23,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     { icon: User, label: t("Profile"), path: "/profile" },
     { icon: Building, label: t("My Properties"), path: "/my-properties" },
     { icon: BookOpen, label: t("My Bookings"), path: "/my-bookings" },
-    { icon: Plus, label: t("Add Property"), path: "/add-property" },
+    { icon: Plus, label: t("Property Form"), path: "/add-property" },
     { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
     { icon: MessageSquare, label: t("Message"), path: "/message" },
     { icon: FileText, label: t("My Bills"), path: "/unified-bills" },

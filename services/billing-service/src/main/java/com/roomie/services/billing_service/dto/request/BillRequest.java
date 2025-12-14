@@ -3,6 +3,7 @@ package com.roomie.services.billing_service.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -13,7 +14,8 @@ import java.time.LocalDate;
 public class BillRequest {
     String contractId;
 
-    Double rentPrice;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
 
     // Electricity
     Double ElectricityOld;

@@ -75,11 +75,7 @@ public class ContractController {
         result.put("asLandlord", asLandlord);
         result.put("asTenant", asTenant);
 
-        return ApiResponse.<Map<String, List<ContractResponse>>>builder()
-                .code(1000)
-                .success(true)
-                .result(result)
-                .build();
+        return ApiResponse.success(result,"Fetched contract successfully");
     }
 
 

@@ -1,5 +1,7 @@
 package com.roomie.services.billing_service.service;
 
+import com.roomie.services.billing_service.dto.internal.BillCalculation;
+import com.roomie.services.billing_service.dto.internal.MeterReadings;
 import com.roomie.services.billing_service.dto.request.BillRequest;
 import com.roomie.services.billing_service.dto.response.ApiResponse;
 import com.roomie.services.billing_service.dto.response.BillResponse;
@@ -20,154 +22,103 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Slf4j
+@Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Service
+@Slf4j
 public class BillingService {
+
     BillRepository billRepository;
     BillMapper billMapper;
     ContractClient contractClient;
+    BillValidationService validationService;
+    BillCalculationService calculationService;
+    KafkaTemplate<String, Object> kafkaTemplate;
+
+    // ==================== CREATE ====================
 
     @Transactional
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
-    public BillResponse createBill(BillRequest req) {
-        ResponseEntity<ContractResponse> contractResp;
-        try {
-            contractResp = contractClient.get(req.getContractId());
-        } catch (FeignException.NotFound ex) {
-            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
-        } catch (FeignException ex) {
-            throw new AppException(ErrorCode.CONTRACT_SERVICE_ERROR);
-        }
+    public BillResponse createBill(BillRequest request) {
+        log.info("Creating bill for contract: {}", request.getContractId());
 
-        if (contractResp == null || contractResp.getBody() == null) {
-            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
-        }
+        // 1. Fetch and validate contract
+        ContractResponse contract = fetchContractSafely(request.getContractId());
 
-        if (req.getBillingMonth() == null) {
-            throw new AppException(ErrorCode.BILLING_MONTH_REQUIRED);
-        }
+        // 2. Validate and parse billing month
+        LocalDate billingMonth = validationService.validateAndParseBillingMonth(
+                request.getBillingMonth()
+        );
 
-        LocalDate billMonth;
-        try {
-            billMonth = LocalDate.parse(req.getBillingMonth() + "-01");
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.BILLING_MONTH_INVALID);
-        }
+        // 3. Check for duplicate
+        validationService.validateNoDuplicateBill(request.getContractId(), billingMonth);
 
-        Optional<Bill> existing = billRepository
-                .findByContractIdAndBillingMonth(req.getContractId(), billMonth);
+        // 4. Get previous meter readings
+        MeterReadings previousReadings = getPreviousReadings(request, contract.getId());
 
-        if (existing.isPresent()) {
-            throw new AppException(ErrorCode.BILL_ALREADY_EXISTS);
-        }
+        // 5. Validate meter readings
+        validationService.validateMeterReadings(request, previousReadings);
 
-        Optional<Bill> prevBill = billRepository
-                .findFirstByContractIdOrderByCreatedAtDesc(req.getContractId());
+        // 6. Calculate amounts
+        BillCalculation calculation = calculationService.calculate(request, previousReadings);
 
-        Double electricityOld;
-        Double waterOld;
+        // 7. Calculate due date
+        LocalDate dueDate = calculationService.calculateDueDate(billingMonth);
 
-        if (prevBill.isPresent()) {
-            electricityOld = prevBill.get().getElectricityNew();
-            waterOld = prevBill.get().getWaterNew();
-        } else {
-            if (req.getElectricityOld() == null || req.getWaterOld() == null) {
-                throw new AppException(ErrorCode.FIRST_BILL_MISSING_OLD_VALUES);
-            }
-            electricityOld = req.getElectricityOld();
-            waterOld = req.getWaterOld();
-        }
+        // 8. Build and save bill
+        Bill bill = buildBill(request, contract, billingMonth, dueDate,
+                previousReadings, calculation);
 
-        double electricityConsumption = req.getElectricityNew() - electricityOld;
-        double electricityAmount = electricityConsumption * req.getElectricityUnitPrice();
-
-        double waterConsumption = req.getWaterNew() - waterOld;
-        double waterAmount = waterConsumption * req.getWaterUnitPrice();
-
-        double total = electricityAmount + waterAmount
-                + (req.getInternetPrice() != null ? req.getInternetPrice() : 0)
-                + (req.getParkingPrice() != null ? req.getParkingPrice() : 0)
-                + (req.getCleaningPrice() != null ? req.getCleaningPrice() : 0)
-                + (req.getMaintenancePrice() != null ? req.getMaintenancePrice() : 0)
-                + (req.getOtherPrice() != null ? req.getOtherPrice() : 0)
-                + (req.getRentPrice() != null ? req.getRentPrice() : 0);
-
-        Bill bill = Bill.builder()
-                .contractId(req.getContractId())
-                .billingMonth(billMonth)
-                .dueDate(billMonth.plusMonths(1).withDayOfMonth(5)) // ví dụ hạn 5 của tháng kế tiếp
-
-                .electricityOld(electricityOld)
-                .electricityNew(req.getElectricityNew())
-                .electricityConsumption(electricityConsumption)
-                .electricityUnitPrice(req.getElectricityUnitPrice())
-                .electricityAmount(electricityAmount)
-
-                .waterOld(waterOld)
-                .waterNew(req.getWaterNew())
-                .waterConsumption(waterConsumption)
-                .waterUnitPrice(req.getWaterUnitPrice())
-                .waterAmount(waterAmount)
-
-                .internetPrice(req.getInternetPrice())
-                .parkingPrice(req.getParkingPrice())
-                .cleaningPrice(req.getCleaningPrice())
-                .maintenancePrice(req.getMaintenancePrice())
-
-                .otherPrice(req.getOtherPrice())
-                .otherDescription(req.getOtherDescription())
-
-                .rentPrice(req.getRentPrice())
-                .totalAmount(total)
-                .status(BillStatus.DRAFT)
-
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
-
-        return billMapper.toResponse(billRepository.save(bill));
-    }
-    public BillResponse send(String billId) {
-        Bill bill = billRepository.findById(billId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + billId));
-
-        // Validation
-        if (bill.getStatus() != BillStatus.DRAFT) {
-            throw new AppException(ErrorCode.INVALID_BILL_STATUS);
-        }
-
-        // State transition
-        bill.setStatus(BillStatus.PENDING);
-        bill.setUpdatedAt(Instant.now());
         Bill saved = billRepository.save(bill);
 
-        // Notify tenant
-//        kafkaTemplate.send("bill.sent",
-//                new BillEvent(saved.getId(), saved.getContractId(), saved.getTotalAmount())
-//        );
+        log.info("Bill created successfully: {}", saved.getId());
 
         return billMapper.toResponse(saved);
     }
 
-    public BillResponse pay(String billId, String paymentId) {
-        Bill bill = billRepository.findById(billId)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + billId));
+    // ==================== STATE TRANSITIONS ====================
 
-        // State transition
+    @Transactional
+    @CacheEvict(value = {"bill", "bill_by_contract"}, key = "#billId")
+    public BillResponse send(String billId) {
+        log.info("Sending bill: {}", billId);
+
+        Bill bill = getBillEntity(billId);
+        validationService.validateStatusTransition(bill, BillStatus.DRAFT, "send");
+
+        bill.setStatus(BillStatus.PENDING);
+        bill.setUpdatedAt(Instant.now());
+
+        Bill saved = billRepository.save(bill);
+
+        // Publish event
+        publishBillEvent("bill.sent", saved);
+
+        log.info("Bill sent successfully: {}", billId);
+
+        return billMapper.toResponse(saved);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"bill", "bill_by_contract"}, key = "#billId")
+    public BillResponse pay(String billId, String paymentId) {
+        log.info("Processing payment for bill: {}, paymentId: {}", billId, paymentId);
+
+        Bill bill = getBillEntity(billId);
+        validationService.validateStatusTransition(bill, BillStatus.PENDING, "pay");
+
         bill.setStatus(BillStatus.PAID);
         bill.setPaymentId(paymentId);
         bill.setPaidAt(Instant.now());
@@ -176,187 +127,283 @@ public class BillingService {
         Bill saved = billRepository.save(bill);
 
         // Publish event
-//        kafkaTemplate.send("bill.paid",
-//                new BillPaidEvent(saved.getId(), saved.getContractId(), saved.getTotalAmount())
-//        );
+        publishBillEvent("bill.paid", saved);
+
+        log.info("Bill paid successfully: {}", billId);
 
         return billMapper.toResponse(saved);
     }
 
+    // ==================== QUERIES ====================
 
-
-//    @Cacheable(value = "bill", key = "#id")
+    @Cacheable(value = "bill", key = "#id")
     public BillResponse getBill(String id) {
-        return billMapper.toResponse(
-                billRepository.findById(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND))
-        );
+        log.debug("Fetching bill: {}", id);
+        return billMapper.toResponse(getBillEntity(id));
     }
 
     public List<BillResponse> getAll() {
+        log.debug("Fetching all bills");
         return billRepository.findAll().stream()
                 .map(billMapper::toResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Cacheable(value = "bill_by_contract", key = "#contractId")
     public List<BillResponse> getByContract(String contractId) {
+        log.debug("Fetching bills for contract: {}", contractId);
         return billRepository.findByContractId(contractId).stream()
                 .map(billMapper::toResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
+    public List<BillResponse> getMyLandlordBills() {
+        String userId = getCurrentUserId();
+        log.debug("Fetching landlord bills for user: {}", userId);
+
+        return billRepository.findByLandlordId(userId).stream()
+                .map(billMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<BillResponse> getMyTenantBills() {
+        String userId = getCurrentUserId();
+        log.debug("Fetching tenant bills for user: {}", userId);
+
+        return billRepository.findByTenantId(userId).stream()
+                .map(billMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ==================== UPDATE ====================
+
+    @Transactional
     @CachePut(value = "bill", key = "#id")
-    public BillResponse updateBill(String id, BillRequest req) {
-        Bill bill = billRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND));
+    @CacheEvict(value = "bill_by_contract", allEntries = true)
+    public BillResponse updateBill(String id, BillRequest request) {
+        log.info("Updating bill: {}", id);
 
-        // BILL THÁNG TRƯỚC LUÔN LÀ bill hiện tại → old không đổi
-        Double electricityOld = bill.getElectricityOld();
-        Double waterOld = bill.getWaterOld();
+        Bill bill = getBillEntity(id);
 
-        // UPDATE NEW VALUES
-        bill.setElectricityNew(req.getElectricityNew());
-        bill.setElectricityUnitPrice(req.getElectricityUnitPrice());
+        // Get current meter readings as "previous"
+        MeterReadings currentReadings = MeterReadings.builder()
+                .electricityOld(bill.getElectricityOld())
+                .waterOld(bill.getWaterOld())
+                .build();
 
-        bill.setElectricityConsumption(req.getElectricityNew() - electricityOld);
-        bill.setElectricityAmount(bill.getElectricityConsumption() * req.getElectricityUnitPrice());
+        // Validate new readings
+        validationService.validateMeterReadings(request, currentReadings);
 
-        // Water
-        bill.setWaterNew(req.getWaterNew());
-        bill.setWaterUnitPrice(req.getWaterUnitPrice());
-        bill.setWaterConsumption(req.getWaterNew() - waterOld);
-        bill.setWaterAmount(bill.getWaterConsumption() * req.getWaterUnitPrice());
+        // Recalculate amounts
+        BillCalculation calculation = calculationService.calculate(request, currentReadings);
 
-        bill.setInternetPrice(req.getInternetPrice());
-        bill.setParkingPrice(req.getParkingPrice());
-        bill.setCleaningPrice(req.getCleaningPrice());
-        bill.setMaintenancePrice(req.getMaintenancePrice());
-        bill.setRentPrice(req.getRentPrice());
-        bill.setOtherPrice(req.getOtherPrice());
-        bill.setOtherDescription(req.getOtherDescription());
+        // Update bill fields
+        updateBillFields(bill, request, calculation);
 
-        // Total
-        bill.setTotalAmount(
-                bill.getElectricityAmount()
-                        + bill.getWaterAmount()
-                        + (bill.getInternetPrice() != null ? bill.getInternetPrice() : 0)
-                        + (bill.getParkingPrice() != null ? bill.getParkingPrice() : 0)
-                        + (bill.getCleaningPrice() != null ? bill.getCleaningPrice() : 0)
-                        + (bill.getMaintenancePrice() != null ? bill.getMaintenancePrice() : 0)
-                        + (bill.getOtherPrice() != null ? bill.getOtherPrice() : 0)
-                        + (bill.getRentPrice() != null ? bill.getRentPrice() : 0)
-        );
+        Bill saved = billRepository.save(bill);
 
-        bill.setUpdatedAt(Instant.now());
+        log.info("Bill updated successfully: {}", id);
 
-        return billMapper.toResponse(billRepository.save(bill));
+        return billMapper.toResponse(saved);
     }
 
-    @Scheduled(cron = "0 0 3 * * *") // Daily at 3 AM
+    // ==================== DELETE ====================
+
+    @Transactional
+    @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
+    public void deleteBill(String id) {
+        log.info("Deleting bill: {}", id);
+
+        if (!billRepository.existsById(id)) {
+            throw new AppException(ErrorCode.BILL_NOT_FOUND);
+        }
+
+        billRepository.deleteById(id);
+
+        log.info("Bill deleted successfully: {}", id);
+    }
+
+    // ==================== SCHEDULED TASKS ====================
+
+    @Scheduled(cron = "${billing.overdue-check-cron:0 0 3 * * *}")
     public void markOverdueBills() {
+        log.info("Running scheduled task: markOverdueBills");
+
         LocalDate today = LocalDate.now();
 
         List<Bill> overdueBills = billRepository.findByStatusAndDueDateBefore(
-                BillStatus.PENDING,
-                today
+                BillStatus.PENDING, today
         );
 
-        for (Bill bill : overdueBills) {
+        if (overdueBills.isEmpty()) {
+            log.info("No overdue bills found");
+            return;
+        }
+
+        overdueBills.forEach(bill -> {
             bill.setStatus(BillStatus.OVERDUE);
             bill.setUpdatedAt(Instant.now());
 
             Bill saved = billRepository.save(bill);
-
-            // Notify tenant and landlord
-//            kafkaTemplate.send("bill.overdue",
-//                    new BillOverdueEvent(saved.getId(), saved.getContractId())
-//            );
-        }
+            publishBillEvent("bill.overdue", saved);
+        });
 
         log.info("Marked {} bills as OVERDUE", overdueBills.size());
     }
-    /**
-     * Get all bills where current user is the LANDLORD (property owner)
-     * Lấy hóa đơn của các property mà user đang cho thuê
-     */
-    public List<BillResponse> getMyLandlordBills() {
+
+    // ==================== PRIVATE HELPERS ====================
+
+    private ContractResponse fetchContractSafely(String contractId) {
         try {
-            // Get all contracts where user is landlord
-            ApiResponse<Map<String, List<ContractResponse>>> contractsResponse = contractClient.getMyContracts();
+            ResponseEntity<ApiResponse<ContractResponse>> response =
+                    contractClient.get(contractId);
 
-            if (contractsResponse == null || contractsResponse.getResult() == null) {
-                return new ArrayList<>();
+            if (response == null || response.getBody() == null) {
+                throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
             }
 
-            Map<String, List<ContractResponse>> contracts = contractsResponse.getResult();
-            List<ContractResponse> landlordContracts = contracts.getOrDefault("asLandlord", new ArrayList<>());
+            ApiResponse<ContractResponse> body = response.getBody();
 
-            // Get contract IDs
-            List<String> contractIds = landlordContracts.stream()
-                    .map(ContractResponse::getId)
-                    .collect(Collectors.toList());
-
-            if (contractIds.isEmpty()) {
-                return new ArrayList<>();
+            if (!body.isSuccess() || body.getResult() == null) {
+                throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
             }
 
-            // Get all bills for these contracts
-            List<Bill> bills = billRepository.findAll().stream()
-                    .filter(bill -> contractIds.contains(bill.getContractId()))
-                    .collect(Collectors.toList());
+            return body.getResult();
 
-            return bills.stream()
-                    .map(billMapper::toResponse)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            log.error("Error getting landlord bills", e);
-            return new ArrayList<>();
+        } catch (FeignException.NotFound ex) {
+            log.error("Contract not found: {}", contractId);
+            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
+        } catch (FeignException ex) {
+            log.error("Contract service error for contractId: {}", contractId, ex);
+            throw new AppException(ErrorCode.CONTRACT_SERVICE_ERROR);
         }
     }
 
-    /**
-     * Get all bills where current user is the TENANT
-     * Lấy hóa đơn của các property mà user đang thuê
-     */
-    public List<BillResponse> getMyTenantBills() {
-        try {
-            // Get all contracts where user is tenant
-            ApiResponse<Map<String, List<ContractResponse>>> contractsResponse = contractClient.getMyContracts();
+    private MeterReadings getPreviousReadings(BillRequest request, String contractId) {
+        Optional<Bill> previousBill = billRepository
+                .findFirstByContractIdOrderByCreatedAtDesc(contractId);
 
-            if (contractsResponse == null || contractsResponse.getResult() == null) {
-                return new ArrayList<>();
-            }
-
-            Map<String, List<ContractResponse>> contracts = contractsResponse.getResult();
-            List<ContractResponse> tenantContracts = contracts.getOrDefault("asTenant", new ArrayList<>());
-
-            // Get contract IDs
-            List<String> contractIds = tenantContracts.stream()
-                    .map(ContractResponse::getId)
-                    .collect(Collectors.toList());
-
-            if (contractIds.isEmpty()) {
-                return new ArrayList<>();
-            }
-
-            // Get all bills for these contracts
-            List<Bill> bills = billRepository.findAll().stream()
-                    .filter(bill -> contractIds.contains(bill.getContractId()))
-                    .collect(Collectors.toList());
-
-            return bills.stream()
-                    .map(billMapper::toResponse)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            log.error("Error getting tenant bills", e);
-            return new ArrayList<>();
+        if (previousBill.isPresent()) {
+            return MeterReadings.fromPreviousBill(previousBill.get());
+        } else {
+            // First bill - validate required fields
+            validationService.validateFirstBillReadings(request);
+            return MeterReadings.fromRequest(request);
         }
     }
-    @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
-    public void deleteBill(String id) {
-        billRepository.deleteById(id);
+
+    private Bill buildBill(
+            BillRequest request,
+            ContractResponse contract,
+            LocalDate billingMonth,
+            LocalDate dueDate,
+            MeterReadings previousReadings,
+            BillCalculation calculation
+    ) {
+        return Bill.builder()
+                // References
+                .contractId(contract.getId())
+                .propertyId(contract.getPropertyId())
+                .landlordId(contract.getLandlordId())
+                .tenantId(contract.getTenantId())
+
+                // Billing period
+                .billingMonth(billingMonth)
+                .dueDate(dueDate)
+
+                // Electricity
+                .electricityOld(previousReadings.getElectricityOld())
+                .electricityNew(request.getElectricityNew())
+                .electricityConsumption(calculation.getElectricityConsumption())
+                .electricityUnitPrice(request.getElectricityUnitPrice())
+                .electricityAmount(calculation.getElectricityAmount())
+
+                // Water
+                .waterOld(previousReadings.getWaterOld())
+                .waterNew(request.getWaterNew())
+                .waterConsumption(calculation.getWaterConsumption())
+                .waterUnitPrice(request.getWaterUnitPrice())
+                .waterAmount(calculation.getWaterAmount())
+
+                // Fixed costs
+                .internetPrice(calculation.getInternetAmount())
+                .parkingPrice(calculation.getParkingAmount())
+                .cleaningPrice(calculation.getCleaningAmount())
+                .maintenancePrice(calculation.getMaintenanceAmount())
+
+                // Rent
+                .monthlyRent(calculation.getMonthlyRentAmount())
+                .rentalDeposit(calculation.getRentalDepositAmount())
+
+                // Other
+                .otherDescription(request.getOtherDescription())
+                .otherPrice(calculation.getOtherAmount())
+
+                // Total & Status
+                .totalAmount(calculation.getTotalAmount())
+                .status(BillStatus.DRAFT)
+
+                // Timestamps
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+    }
+
+    private void updateBillFields(
+            Bill bill,
+            BillRequest request,
+            BillCalculation calculation
+    ) {
+        // Electricity
+        bill.setElectricityNew(request.getElectricityNew());
+        bill.setElectricityUnitPrice(request.getElectricityUnitPrice());
+        bill.setElectricityConsumption(calculation.getElectricityConsumption());
+        bill.setElectricityAmount(calculation.getElectricityAmount());
+
+        // Water
+        bill.setWaterNew(request.getWaterNew());
+        bill.setWaterUnitPrice(request.getWaterUnitPrice());
+        bill.setWaterConsumption(calculation.getWaterConsumption());
+        bill.setWaterAmount(calculation.getWaterAmount());
+
+        // Fixed costs
+        bill.setInternetPrice(calculation.getInternetAmount());
+        bill.setParkingPrice(calculation.getParkingAmount());
+        bill.setCleaningPrice(calculation.getCleaningAmount());
+        bill.setMaintenancePrice(calculation.getMaintenanceAmount());
+
+        // Rent
+        bill.setMonthlyRent(calculation.getMonthlyRentAmount());
+        bill.setRentalDeposit(calculation.getRentalDepositAmount());
+
+        // Other
+        bill.setOtherDescription(request.getOtherDescription());
+        bill.setOtherPrice(calculation.getOtherAmount());
+
+        // Total
+        bill.setTotalAmount(calculation.getTotalAmount());
+        bill.setUpdatedAt(Instant.now());
+    }
+
+    private Bill getBillEntity(String id) {
+        return billRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BILL_NOT_FOUND));
+    }
+
+    private String getCurrentUserId() {
+        return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+    }
+
+    private void publishBillEvent(String topic, Bill bill) {
+        try {
+            // TODO: Create proper event DTOs
+            kafkaTemplate.send(topic, bill.getId());
+            log.debug("Published event {} for bill {}", topic, bill.getId());
+        } catch (Exception e) {
+            log.error("Failed to publish event {} for bill {}", topic, bill.getId(), e);
+            // Don't fail the main operation
+        }
     }
 }

@@ -58,13 +58,17 @@ public class BookingService {
             LeaseLongTerm lease = bookingMapper.toLeaseEntity(req);
             lease.setLandLordId(property.getOwner().getOwnerId());
             lease.setTenantId(tenantId);
+            lease.setMonthlyRent(property.getMonthlyRent());
+            lease.setRentalDeposit(property.getRentalDeposit());
+            lease.setLeaseStart(req.getLeaseStart());
+            lease.setLeaseEnd(req.getLeaseEnd());
             lease.setStatus(LeaseStatus.PENDING_APPROVAL);
             lease.setCreatedAt(Instant.now());
             lease.setUpdatedAt(Instant.now());
             ltRepo.save(lease);
             cacheService.put(cacheKey(lease.getId()), lease, CACHE_TTL_SECONDS);
 
-            kafkaTemplate.send("lease.created", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent()));
+            kafkaTemplate.send("lease.created", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent(), lease.getRentalDeposit()));
 
             return bookingMapper.leaseToResponse(lease);
         } finally {
@@ -80,12 +84,14 @@ public class BookingService {
             return bookingMapper.leaseToResponse(e);
         });
     }
+
     public List<BookingResponse> getBookingsByTenant(String tenantId) {
         List<LeaseLongTerm> leases = ltRepo.findByTenantId(tenantId);
         return leases.stream()
                 .map(bookingMapper::leaseToResponse)
                 .toList();
     }
+
     public List<BookingResponse> getBookingsByOwner(String ownerId) {
         // Get all properties owned by this user
         List<String> propertyIds = getOwnerPropertyIds(ownerId);
@@ -96,12 +102,14 @@ public class BookingService {
                 .map(bookingMapper::leaseToResponse)
                 .toList();
     }
+
     public List<BookingResponse> getBookingsByProperty(String propertyId) {
         List<LeaseLongTerm> leases = ltRepo.findByPropertyId(propertyId);
         return leases.stream()
                 .map(bookingMapper::leaseToResponse)
                 .toList();
     }
+
     private List<String> getOwnerPropertyIds(String ownerId) {
         // Call property service to get owner's properties
         // This is a simplified version - you might need to handle pagination
@@ -119,6 +127,7 @@ public class BookingService {
         }
         return List.of();
     }
+
     public BookingResponse confirm(String id) {
         LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         if (lease.getStatus() != LeaseStatus.PENDING_APPROVAL)
@@ -133,7 +142,7 @@ public class BookingService {
         lease.setUpdatedAt(Instant.now());
         ltRepo.save(lease);
         cacheService.put(cacheKey(id), lease, CACHE_TTL_SECONDS);
-        kafkaTemplate.send("lease.confirmed", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent()));
+        kafkaTemplate.send("lease.confirmed", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent(), lease.getRentalDeposit()));
         return bookingMapper.leaseToResponse(lease);
     }
 
@@ -143,7 +152,7 @@ public class BookingService {
         lease.setUpdatedAt(Instant.now());
         ltRepo.save(lease);
         cacheService.evict(cacheKey(id));
-        kafkaTemplate.send("lease.cancelled", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent()));
+        kafkaTemplate.send("lease.cancelled", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent(), lease.getRentalDeposit()));
         return bookingMapper.leaseToResponse(lease);
     }
 
@@ -220,6 +229,7 @@ public class BookingService {
 //            );
         }
     }
+
     public BookingResponse renew(String id, BookingRequest renewalRequest) {
         LeaseLongTerm oldLease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 

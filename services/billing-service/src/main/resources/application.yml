@@ -19,6 +19,8 @@ spring:
 
   cache:
     type: redis
+    redis:
+      time-to-live: 300000
 
   kafka:
     bootstrap-servers: localhost:9092
@@ -29,6 +31,12 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+billing:
+  overdue-check-cron: "0 0 3 * * *"
+  validation:
+    max-electricity-consumption: 10000  # kWh
+    max-water-consumption: 1000
 
 app:
   services:
