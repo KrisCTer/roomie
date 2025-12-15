@@ -92,7 +92,7 @@ const BookingCard = ({ booking }) => {
               {statusConfig.label}
             </span>
           </div>
-          <p className="text-sm text-gray-600">Property ID: {propertyId}</p>
+          {/* <p className="text-sm text-gray-600">Property ID: {propertyId}</p> */}
         </div>
         <div className="text-right">
           <div className="text-sm text-gray-500">Created</div>

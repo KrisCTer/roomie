@@ -51,7 +51,7 @@ export const getMyBookings = () =>
  * @returns {Promise} List of bookings
  */
 export const getOwnerBookings = () =>
-  BaseService.get("/booking/owner/bookings");
+  BaseService.get("/booking/landlord/bookings");
 
 /**
  * Get bookings by property ID (Owner)

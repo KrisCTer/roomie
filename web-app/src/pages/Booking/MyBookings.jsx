@@ -83,12 +83,6 @@ const MyBookings = () => {
 
             {/* Bookings List */}
             <div className="bg-white rounded-lg shadow-sm">
-              <h2 className="text-2xl font-semibold text-gray-900 p-6 border-b">
-                {viewMode === "OWNER"
-                  ? "Property Bookings (As Owner)"
-                  : "My Bookings (As Tenant)"}
-              </h2>
-
               <BookingsList
                 bookings={transformedBookings}
                 loading={loading}

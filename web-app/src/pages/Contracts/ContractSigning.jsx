@@ -34,6 +34,8 @@ const ContractSigning = () => {
   const {
     contract,
     property,
+    tenantData,
+    landlordData,
     loading,
     signing,
     showSignModal,
@@ -202,6 +204,8 @@ const ContractSigning = () => {
               {/* Contract Info */}
               <ContractInfoCard
                 contract={contract}
+                tenant={tenantData}
+                landlord={landlordData}
                 formatDateTime={formatDateTime}
               />
             </div>

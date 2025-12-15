@@ -9,6 +9,7 @@ import {
 } from "../services/contract.service";
 import { getPropertyById } from "../services/property.service";
 import { getUserInfo } from "../services/localStorageService";
+import { getUserProfile } from "../services/user.service";
 
 export const useContractSigning = () => {
   const { id } = useParams();
@@ -20,6 +21,8 @@ export const useContractSigning = () => {
   const [signing, setSigning] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showSignModal, setShowSignModal] = useState(false);
+  const [tenantData, setTenantData] = useState(null);
+  const [landlordData, setLandlordData] = useState(null);
 
   // OTP States
   const [showOTPModal, setShowOTPModal] = useState(false);
@@ -82,6 +85,36 @@ export const useContractSigning = () => {
             console.error("❌ Error fetching property:", error);
           }
         }
+       // Fetch tenant profile
+        if (contractData.tenantId) {
+          try {
+            console.log("👤 Fetch tenant profile:", contractData.tenantId);
+            const res = await getUserProfile(contractData.tenantId);
+
+            if (res?.result) {
+              setTenantData(res.result);
+              console.log("✅ Tenant Data:", res.result);
+            }
+          } catch (e) {
+            console.error("❌ Fetch tenant failed", e);
+          }
+        }
+
+        // Fetch landlord profile
+        if (contractData.landlordId) {
+          try {
+            console.log("👤 Fetch landlord profile:", contractData.landlordId);
+            const res = await getUserProfile(contractData.landlordId);
+
+            if (res?.result) {
+              setLandlordData(res.result);
+              console.log("✅ Landlord Data:", res.result);
+            }
+          } catch (e) {
+            console.error("❌ Fetch landlord failed", e);
+          }
+        }
+
       }
     } catch (error) {
       console.error("❌ Error fetching contract:", error);
@@ -339,7 +372,8 @@ export const useContractSigning = () => {
     otpSuccess,
     countdown,
     canResend,
-
+    tenantData,
+    landlordData,
     // User checks
     isCurrentUserTenant: isCurrentUserTenant(),
     isCurrentUserLandlord: isCurrentUserLandlord(),
