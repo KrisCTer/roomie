@@ -104,11 +104,11 @@ const BookingDetailModal = ({
           />
 
           {/* Property Information */}
-          <PropertyInfoSection
+          {/* <PropertyInfoSection
             property={property}
             loading={loadingProperty}
             propertyId={booking.propertyId}
-          />
+          /> */}
 
           {/* Lease Period */}
           <LeasePeriodSection

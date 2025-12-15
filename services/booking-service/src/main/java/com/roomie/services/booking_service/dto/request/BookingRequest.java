@@ -17,6 +17,9 @@ public class BookingRequest {
     @NotNull
     String propertyId;
 
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
+
     Instant leaseStart;
     Instant leaseEnd;
 }

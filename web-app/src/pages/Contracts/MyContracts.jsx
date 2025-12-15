@@ -29,6 +29,7 @@ const MyContracts = () => {
     userCache,
     loading,
     stats,
+    currentUserId,
     handleContractClick,
     handleTabChange,
   } = useContractOperations();
@@ -109,6 +110,7 @@ const MyContracts = () => {
                   onContractClick={handleContractClick}
                   propertyCache={propertyCache}
                   userCache={userCache}
+                  currentUserId={currentUserId}
                 />
               ) : (
                 <EmptyState activeTab={activeTab} />

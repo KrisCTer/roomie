@@ -6,9 +6,6 @@ import Register from "../pages/Register";
 
 import Home from "../pages/Main/Home";
 
-import PropertyDetail from "../pages/Main/PropertyDetail";
-import PropertySearch from "../pages/Main/PropertySearch";
-
 import Profile from "../pages/Profile/Profile";
 import Message from "../pages/Message/Message";
 import Admin from "../pages/User/Admin";

@@ -6,10 +6,22 @@ import {
   Eye,
   PenTool,
   FileText,
+  User,
+  Phone,
+  Mail,
 } from "lucide-react";
 
-const ContractCard = ({ contract, role, onClick, propertyData, userData }) => {
+const ContractCard = ({
+  contract,
+  role,
+  onClick,
+  propertyData,
+  tenantData,
+  landlordData,
+  currentUserId,
+}) => {
   const formatCurrency = (amount) => {
+    if (!amount) return "N/A";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
@@ -17,6 +29,7 @@ const ContractCard = ({ contract, role, onClick, propertyData, userData }) => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
@@ -82,39 +95,70 @@ const ContractCard = ({ contract, role, onClick, propertyData, userData }) => {
   const statusConfig = getStatusConfig(contract.status);
   const StatusIcon = statusConfig.icon;
 
+  // Property info
   const propertyTitle = propertyData?.title || "Đang tải...";
   const propertyAddress = propertyData?.address?.fullAddress || "Đang tải...";
   const monthlyRent = propertyData?.monthlyRent || 0;
   const rentalDeposit = propertyData?.rentalDeposit || 0;
 
-  const otherPartyId =
-    role === "landlord" ? contract.tenantId : contract.landlordId;
-  const otherPartyData = userData[otherPartyId];
-  const otherPartyName = otherPartyData
-    ? `${otherPartyData.firstName || ""} ${
-        otherPartyData.lastName || ""
-      }`.trim() || "N/A"
-    : "Đang tải...";
-  const otherPartyPhone = otherPartyData?.phoneNumber || "N/A";
+  // Determine which data to show based on role
 
+  const isLandlord = contract.landlordId === currentUserId;
+  const isTenant = contract.tenantId === currentUserId;
+
+  const otherPartyData = isLandlord ? tenantData : landlordData;
+  const otherPartyLabel = isLandlord ? "Người thuê" : "Chủ nhà";
+
+  // Get full name
+  const getFullName = (userData) => {
+    if (!userData) return "Đang tải...";
+    const firstName = userData?.firstName || "";
+    const lastName = userData?.lastName || "";
+    const fullName = `${firstName} ${lastName}`.trim();
+    return fullName || "N/A";
+  };
+
+  const otherPartyName = getFullName(otherPartyData);
+  const otherPartyPhone = otherPartyData?.phoneNumber || "N/A";
+  const otherPartyEmail = otherPartyData?.email || "N/A";
+
+  // Signature status
   const isSigned =
     role === "landlord" ? contract.landlordSigned : contract.tenantSigned;
   const otherPartySigned =
     role === "landlord" ? contract.tenantSigned : contract.landlordSigned;
 
+  // Loading state
+  const isPropertyLoading = !propertyData;
+  const isUserLoading = !otherPartyData;
+
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 cursor-pointer border border-gray-100"
+      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 cursor-pointer border border-gray-100 hover:border-blue-200"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-bold text-gray-900">{propertyTitle}</h3>
+            <h3 className="text-lg font-bold text-gray-900">
+              {isPropertyLoading ? (
+                <span className="animate-pulse bg-gray-200 rounded h-6 w-48 inline-block"></span>
+              ) : (
+                propertyTitle
+              )}
+            </h3>
           </div>
-          <p className="text-sm text-gray-600 mb-1">{propertyAddress}</p>
-          <p className="text-xs text-gray-500">Mã HĐ: {contract.id}</p>
+          <p className="text-sm text-gray-600 mb-1">
+            {isPropertyLoading ? (
+              <span className="animate-pulse bg-gray-200 rounded h-4 w-64 inline-block"></span>
+            ) : (
+              propertyAddress
+            )}
+          </p>
+          <p className="text-xs text-gray-500">
+            Mã HĐ: {contract.id?.substring(0, 8)}...
+          </p>
         </div>
 
         <span
@@ -126,35 +170,77 @@ const ContractCard = ({ contract, role, onClick, propertyData, userData }) => {
       </div>
 
       {/* Details Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pb-4 border-b">
-        <div>
-          <p className="text-xs text-gray-500 mb-1">
-            {role === "landlord" ? "Người thuê" : "Chủ nhà"}
-          </p>
-          <p className="text-sm font-medium text-gray-900">{otherPartyName}</p>
-          <p className="text-xs text-gray-600">{otherPartyPhone}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pb-4 border-b">
+        {/* Other Party Info */}
+        <div className="bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <User className="w-4 h-4 text-gray-500" />
+            <p className="text-xs font-medium text-gray-700">
+              {otherPartyLabel}
+            </p>
+          </div>
+
+          {isUserLoading ? (
+            <div className="space-y-2">
+              <div className="animate-pulse bg-gray-200 rounded h-4 w-32"></div>
+              <div className="animate-pulse bg-gray-200 rounded h-3 w-24"></div>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm font-bold text-gray-900 mb-1">
+                {otherPartyName}
+              </p>
+              <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                <Phone className="w-3 h-3" />
+                <span>{otherPartyPhone}</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-600">
+                <Mail className="w-3 h-3" />
+                <span className="truncate">{otherPartyEmail}</span>
+              </div>
+            </>
+          )}
         </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Giá thuê</p>
-          <p className="text-sm font-bold text-blue-600">
-            {formatCurrency(monthlyRent)}
-            <span className="text-xs font-normal text-gray-600">/tháng</span>
-          </p>
+
+        {/* Financial Info */}
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs text-gray-500 mb-1">💰 Giá thuê</p>
+            {isPropertyLoading ? (
+              <div className="animate-pulse bg-gray-200 rounded h-5 w-32"></div>
+            ) : (
+              <p className="text-sm font-bold text-blue-600">
+                {formatCurrency(monthlyRent)}
+                <span className="text-xs font-normal text-gray-600">
+                  /tháng
+                </span>
+              </p>
+            )}
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1">🏦 Tiền cọc</p>
+            {isPropertyLoading ? (
+              <div className="animate-pulse bg-gray-200 rounded h-5 w-32"></div>
+            ) : (
+              <p className="text-sm font-medium text-gray-900">
+                {formatCurrency(rentalDeposit)}
+              </p>
+            )}
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Tiền cọc</p>
-          <p className="text-sm font-medium text-gray-900">
-            {formatCurrency(rentalDeposit)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 mb-1">Thời hạn</p>
-          <p className="text-sm font-medium text-gray-900">
+      </div>
+
+      {/* Lease Period */}
+      <div className="mb-4 pb-4 border-b">
+        <p className="text-xs text-gray-500 mb-2">📅 Thời hạn hợp đồng</p>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-medium text-gray-900">
             {formatDate(contract.startDate)}
-          </p>
-          <p className="text-xs text-gray-600">
-            đến {formatDate(contract.endDate)}
-          </p>
+          </span>
+          <span className="text-gray-400">→</span>
+          <span className="font-medium text-gray-900">
+            {formatDate(contract.endDate)}
+          </span>
         </div>
       </div>
 

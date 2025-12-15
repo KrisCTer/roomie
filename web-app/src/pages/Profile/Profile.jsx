@@ -15,8 +15,6 @@ import ProfileSkeleton from "../../components/Profile/ProfileSkeleton.jsx";
 // Import custom hook
 import { useProfileOperations } from "../../hooks/useProfileOperations.js";
 
-const isAdmin = formData.username?.toLowerCase() === "admin";
-
 const Profile = () => {
   // Layout state
   const [activeMenu, setActiveMenu] = useState("Profile");
@@ -38,7 +36,7 @@ const Profile = () => {
     handleCloseCamera,
     handleCameraCapture,
   } = useProfileOperations();
-
+  const isAdmin = formData.username?.toLowerCase() === "admin";
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
