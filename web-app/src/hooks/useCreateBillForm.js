@@ -20,7 +20,7 @@ export const useCreateBillForm = (bill, properties, contracts, onSuccess) => {
 
   const [formData, setFormData] = useState({
     billingMonth: bill?.billingMonth || "",
-    rentPrice: bill?.rentPrice || "",
+    monthlyRent: bill?.monthlyRent || "",
     electricityOld: bill?.electricityOld || "",
     electricityNew: bill?.electricityNew || "",
     electricityUnitPrice: bill?.electricityUnitPrice || "3500",
@@ -55,6 +55,14 @@ export const useCreateBillForm = (bill, properties, contracts, onSuccess) => {
   useEffect(() => {
     if (selectedContract && !bill) {
       loadPreviousBill();
+      const contract = contracts.find((c) => c.id === selectedContract);
+      console.log("Selected contract:", contract);
+    if (contract?.monthlyRent) {
+      setFormData((prev) => ({
+        ...prev,
+        monthlyRent: contract.monthlyRent,
+      }));
+    }
     }
   }, [selectedContract]);
 
@@ -110,7 +118,7 @@ export const useCreateBillForm = (bill, properties, contracts, onSuccess) => {
       const payload = {
         contractId: selectedContract,
         billingMonth: formData.billingMonth,
-        rentPrice: parseFloat(formData.rentPrice),
+        monthlyRent: parseFloat(formData.monthlyRent),
         electricityOld: parseFloat(formData.electricityOld || 0),
         electricityNew: parseFloat(formData.electricityNew),
         electricityUnitPrice: parseFloat(formData.electricityUnitPrice),

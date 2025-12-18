@@ -333,7 +333,7 @@ const Dashboard = () => {
             ) : dashboard.latestListings.length === 0 ? (
               <p className="text-gray-300">Không có dữ liệu</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {dashboard.latestListings.map((property) => (
                   <ListingCard
                     key={property.propertyId}

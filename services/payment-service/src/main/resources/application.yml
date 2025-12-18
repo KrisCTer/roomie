@@ -29,5 +29,5 @@ momo:
   partnerCode: MOMORZW420251202_TEST
   accessKey: BeMUhv9rHCRg517u
   secretKey: nl90qNFWwXrVOkf9uDWsYPUZ4bIr4gTb
-  returnUrl: http://localhost:8087/api/payments/webhook/momo
+  returnUrl: http://localhost:8087/api/payments/momo/return
   notifyUrl: http://localhost:8087/api/payments/webhook/momo

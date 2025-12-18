@@ -16,4 +16,4 @@ export const handleVnPayWebhook = (params) =>
   BaseService.get(API.PAYMENT_VNPAY_WEBHOOK, params);
 
 export const handleMomoWebhook = (params) =>
-  BaseService.post(API.PAYMENT_MOMO_WEBHOOK, params);
+  BaseService.get(API.PAYMENT_MOMO_WEBHOOK, params);

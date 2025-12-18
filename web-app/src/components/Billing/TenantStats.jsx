@@ -16,28 +16,28 @@ const TenantStats = ({ stats }) => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatsCard
           icon={FileText}
-          label="Tổng hóa đơn"
+          label="Total Bills"
           value={stats.total}
           bgColor="bg-blue-100"
           textColor="text-blue-600"
         />
         <StatsCard
           icon={Clock}
-          label="Chờ thanh toán"
+          label="Pending Payment"
           value={stats.pending}
           bgColor="bg-yellow-100"
           textColor="text-yellow-600"
         />
         <StatsCard
           icon={CheckCircle}
-          label="Đã thanh toán"
+          label="Paid"
           value={stats.paid}
           bgColor="bg-green-100"
           textColor="text-green-600"
         />
         <StatsCard
           icon={AlertCircle}
-          label="Quá hạn"
+          label="Overdue"
           value={stats.overdue}
           bgColor="bg-red-100"
           textColor="text-red-600"
@@ -49,7 +49,7 @@ const TenantStats = ({ stats }) => {
         <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg p-6 mb-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-orange-100 mb-2">Tổng tiền cần thanh toán</p>
+              <p className="text-orange-100 mb-2">Total Amount Due</p>
               <p className="text-4xl font-bold">
                 {formatCurrency(stats.totalPending)}
               </p>

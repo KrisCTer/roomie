@@ -57,10 +57,13 @@ export default function Header() {
 
   const getUsername = () => {
     const user = getStoredUser();
-
+    
+    // ưu tiên các field thường gặp
+    //return user?.username || user?.userName || user?.name || user?.email || "";
+    
     // 1) ưu tiên lấy từ object user (nếu có)
     const fromUser =
-      user?.username || user?.userName || user?.name || user?.email;
+      user?.username || user?.userName || user?.name || user?.email || "";
 
     // 2) fallback: lấy từ key "username" (trường hợp của bạn)
     const fromKey = localStorage.getItem("username");

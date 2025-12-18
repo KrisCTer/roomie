@@ -1,8 +1,15 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+} from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
+import PageTitle from "../../components/common/PageTitle.jsx";
 
 // Import components
 import PropertyInfoCard from "../../components/Billing/PropertyInfoCard";
@@ -22,10 +29,19 @@ const BillDetail = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Bills");
 
+  const statusIconMap = {
+    PENDING: Clock,
+    OVERDUE: AlertTriangle,
+    PAID: CheckCircle,
+    FAILED: XCircle,
+  };
+
   const {
     bill,
     contract,
     property,
+    tenant,
+    landlord,
     loading,
     paying,
     showPaymentModal,
@@ -54,7 +70,7 @@ const BillDetail = () => {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Đang tải hóa đơn...</p>
+              <p className="text-gray-600">Loading bill...</p>
             </div>
           </div>
         </div>
@@ -80,13 +96,13 @@ const BillDetail = () => {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Không tìm thấy hóa đơn
+                Bill not found
               </h2>
               <button
                 onClick={goBack}
                 className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Quay lại danh sách
+                Back to list
               </button>
             </div>
           </div>
@@ -96,6 +112,8 @@ const BillDetail = () => {
   }
 
   const statusConfig = getStatusConfig(bill.status);
+  const StatusIcon = statusIconMap[bill.status] || Clock;
+
   const isOverdue = bill.status === "OVERDUE";
   const isPaid = bill.status === "PAID";
   const canPay = bill.status === "PENDING" || bill.status === "OVERDUE";
@@ -114,36 +132,12 @@ const BillDetail = () => {
         }`}
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <PageTitle
+          title="Bill Details"
+          subtitle="View details and manage your bill"
+        />
 
         <main className="p-6">
-          {/* Header */}
-          <div className="mb-6">
-            <button
-              onClick={goBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Quay lại</span>
-            </button>
-
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Chi tiết hóa đơn
-                </h1>
-                <p className="text-gray-600">
-                  Mã hóa đơn: <span className="font-mono">{bill.id}</span>
-                </p>
-              </div>
-
-              <span
-                className={`${statusConfig.bg} ${statusConfig.text} px-4 py-2 rounded-full font-medium`}
-              >
-                {statusConfig.label}
-              </span>
-            </div>
-          </div>
-
           {/* Status Banner */}
           <StatusBanner bill={bill} isOverdue={isOverdue} isPaid={isPaid} />
 
@@ -157,14 +151,28 @@ const BillDetail = () => {
 
             {/* Right Column */}
             <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <div
+                  className={`${statusConfig.bg} ${statusConfig.text}
+                  w-full px-4 py-3 rounded-lg
+                  font-semibold flex items-center justify-center gap-2`}
+                >
+                  <StatusIcon className="w-5 h-5" />
+                  {statusConfig.label}
+                </div>
+              </div>
+
               <BillDetailInfo
                 bill={bill}
                 isOverdue={isOverdue}
                 isPaid={isPaid}
+                tenant={tenant}
+                landlord={landlord}
               />
               <BillActions
                 canPay={canPay}
                 onPayment={() => setShowPaymentModal(true)}
+                onBack={goBack}
               />
             </div>
           </div>

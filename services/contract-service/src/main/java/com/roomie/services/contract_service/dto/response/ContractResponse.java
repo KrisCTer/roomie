@@ -18,6 +18,8 @@ public class ContractResponse {
     String propertyId;
     String tenantId;
     String landlordId;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
     Instant startDate;
     Instant endDate;
     ContractStatus status;

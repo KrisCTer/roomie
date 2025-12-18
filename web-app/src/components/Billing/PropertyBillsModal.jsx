@@ -131,13 +131,13 @@ const PropertyBillsModal = ({
         <div className="bg-blue-50 border-b border-blue-100 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 mb-1">Giá thuê</p>
+              <p className="text-sm text-gray-600 mb-1">Rental Price</p>
               <p className="text-2xl font-bold text-blue-600">
-                {formatCurrency(property.monthlyRent)}/tháng
+                {formatCurrency(property.monthlyRent)}/month
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Tổng hóa đơn</p>
+              <p className="text-sm text-gray-600 mb-1">Total Bills</p>
               <p className="text-2xl font-bold text-gray-900">{bills.length}</p>
             </div>
           </div>
@@ -151,19 +151,19 @@ const PropertyBillsModal = ({
             className="w-full mb-4 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow-lg font-semibold"
           >
             <Plus className="w-5 h-5" />
-            Tạo hóa đơn mới
+            Create New Bill
           </button>
 
           {/* Bills History */}
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-4">
-              Lịch sử hóa đơn
+              Bill History
             </h3>
 
             {loading ? (
               <div className="text-center py-8">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-gray-600">Đang tải...</p>
+                <p className="text-gray-600">Loading...</p>
               </div>
             ) : (
               <BillHistoryList

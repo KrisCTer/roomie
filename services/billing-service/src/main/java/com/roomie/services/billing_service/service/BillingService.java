@@ -136,7 +136,7 @@ public class BillingService {
 
     // ==================== QUERIES ====================
 
-    @Cacheable(value = "bill", key = "#id")
+//    @Cacheable(value = "bill", key = "#id")
     public BillResponse getBill(String id) {
         log.debug("Fetching bill: {}", id);
         return billMapper.toResponse(getBillEntity(id));

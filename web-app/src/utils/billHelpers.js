@@ -24,28 +24,28 @@ export const formatDateTime = (date) => {
 export const getStatusConfig = (status) => {
   const configs = {
     DRAFT: {
-      label: "Nháp",
+      label: "Draft",
       bg: "bg-gray-100",
       text: "text-gray-800",
       badgeBg: "bg-gray-100",
       badgeText: "text-gray-800",
     },
     PENDING: {
-      label: "Chờ thanh toán",
+      label: "Pending Payment",
       bg: "bg-yellow-100",
       text: "text-yellow-800",
       badgeBg: "bg-yellow-100",
       badgeText: "text-yellow-800",
     },
     PAID: {
-      label: "Đã thanh toán",
+      label: "Paid",
       bg: "bg-green-100",
       text: "text-green-800",
       badgeBg: "bg-green-100",
       badgeText: "text-green-800",
     },
     OVERDUE: {
-      label: "Quá hạn",
+      label: "Overdue",
       bg: "bg-red-100",
       text: "text-red-800",
       badgeBg: "bg-red-100",
@@ -67,7 +67,7 @@ export const calculateBillTotal = (formData) => {
     parseFloat(formData.waterUnitPrice || 0);
 
   const total =
-    parseFloat(formData.rentPrice || 0) +
+    parseFloat(formData.monthlyRent || 0) +
     electricityAmount +
     waterAmount +
     parseFloat(formData.internetPrice || 0) +

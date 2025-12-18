@@ -15,7 +15,7 @@ const BillTabs = ({ activeTab, onTabChange, landlordCount, tenantCount }) => {
         >
           <div className="flex items-center justify-center gap-2">
             <Home className="w-5 h-5" />
-            <span>Vai trò Chủ nhà</span>
+            <span>As Landlord</span>
             <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
               {landlordCount}
             </span>
@@ -35,7 +35,7 @@ const BillTabs = ({ activeTab, onTabChange, landlordCount, tenantCount }) => {
         >
           <div className="flex items-center justify-center gap-2">
             <User className="w-5 h-5" />
-            <span>Vai trò Người thuê</span>
+            <span>As Tenant</span>
             <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
               {tenantCount}
             </span>

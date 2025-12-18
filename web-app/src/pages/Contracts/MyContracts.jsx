@@ -51,10 +51,12 @@ const MyContracts = () => {
         }`}
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
         <PageTitle
           title="My Contracts"
           subtitle="View and manage your rental contracts"
         />
+
         {/* Content */}
         <div className="p-6">
           {/* Tabs */}
@@ -74,28 +76,28 @@ const MyContracts = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <StatsCard
                   icon={FileText}
-                  label="Tổng hợp đồng"
+                  label="Total Contracts"
                   value={stats.total}
                   bgColor="bg-blue-100"
                   textColor="text-blue-600"
                 />
                 <StatsCard
                   icon={CheckCircle}
-                  label="Đang hiệu lực"
+                  label="Active"
                   value={stats.active}
                   bgColor="bg-green-100"
                   textColor="text-green-600"
                 />
                 <StatsCard
                   icon={Clock}
-                  label="Chờ xử lý"
+                  label="Pending"
                   value={stats.pending}
                   bgColor="bg-yellow-100"
                   textColor="text-yellow-600"
                 />
                 <StatsCard
                   icon={AlertCircle}
-                  label="Đã hết hạn"
+                  label="Expired"
                   value={stats.expired}
                   bgColor="bg-gray-100"
                   textColor="text-gray-600"

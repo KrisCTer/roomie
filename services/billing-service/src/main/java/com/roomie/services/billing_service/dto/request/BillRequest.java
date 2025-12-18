@@ -18,7 +18,7 @@ public class BillRequest {
     BigDecimal rentalDeposit;
 
     // Electricity
-    Double ElectricityOld;
+    Double electricityOld;
     Double electricityNew;
     Double electricityUnitPrice;
 
@@ -42,6 +42,8 @@ public class BillRequest {
     // Other
     String otherDescription;
     Double otherPrice;
+
+    String notes;
 
     String billingMonth;
 }

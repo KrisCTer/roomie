@@ -40,49 +40,49 @@ const ContractCard = ({
   const getStatusConfig = (status) => {
     const configs = {
       ACTIVE: {
-        label: "Đang hiệu lực",
+        label: "Active",
         bgColor: "bg-green-100",
         textColor: "text-green-800",
         icon: CheckCircle,
         iconColor: "text-green-600",
       },
       PENDING_SIGNATURE: {
-        label: "Chờ ký",
+        label: "Pending Signature",
         bgColor: "bg-yellow-100",
         textColor: "text-yellow-800",
         icon: Clock,
         iconColor: "text-yellow-600",
       },
       PENDING_PAYMENT: {
-        label: "Chờ thanh toán",
+        label: "Pending Payment",
         bgColor: "bg-blue-100",
         textColor: "text-blue-800",
         icon: Clock,
         iconColor: "text-blue-600",
       },
       EXPIRED: {
-        label: "Đã hết hạn",
+        label: "Expired",
         bgColor: "bg-gray-100",
         textColor: "text-gray-800",
         icon: AlertCircle,
         iconColor: "text-gray-600",
       },
       TERMINATED: {
-        label: "Đã chấm dứt",
+        label: "Terminated",
         bgColor: "bg-red-100",
         textColor: "text-red-800",
         icon: AlertCircle,
         iconColor: "text-red-600",
       },
       PAUSED: {
-        label: "Tạm dừng",
+        label: "Paused",
         bgColor: "bg-orange-100",
         textColor: "text-orange-800",
         icon: AlertCircle,
         iconColor: "text-orange-600",
       },
       DRAFT: {
-        label: "Bản nháp",
+        label: "Draft",
         bgColor: "bg-gray-100",
         textColor: "text-gray-800",
         icon: FileText,
@@ -96,26 +96,23 @@ const ContractCard = ({
   const StatusIcon = statusConfig.icon;
 
   // Property info
-  const propertyTitle = propertyData?.title || "Đang tải...";
-  const propertyAddress = propertyData?.address?.fullAddress || "Đang tải...";
+  const propertyTitle = propertyData?.title || "Loading...";
+  const propertyAddress = propertyData?.address?.fullAddress || "Loading...";
   const monthlyRent = propertyData?.monthlyRent || 0;
   const rentalDeposit = propertyData?.rentalDeposit || 0;
 
-  // Determine which data to show based on role
-
+  // Determine current role
   const isLandlord = contract.landlordId === currentUserId;
   const isTenant = contract.tenantId === currentUserId;
 
   const otherPartyData = isLandlord ? tenantData : landlordData;
-  const otherPartyLabel = isLandlord ? "Người thuê" : "Chủ nhà";
+  const otherPartyLabel = isLandlord ? "Tenant" : "Landlord";
 
-  // Get full name
   const getFullName = (userData) => {
-    if (!userData) return "Đang tải...";
+    if (!userData) return "Loading...";
     const firstName = userData?.firstName || "";
     const lastName = userData?.lastName || "";
-    const fullName = `${firstName} ${lastName}`.trim();
-    return fullName || "N/A";
+    return `${firstName} ${lastName}`.trim() || "N/A";
   };
 
   const otherPartyName = getFullName(otherPartyData);
@@ -128,7 +125,6 @@ const ContractCard = ({
   const otherPartySigned =
     role === "landlord" ? contract.tenantSigned : contract.landlordSigned;
 
-  // Loading state
   const isPropertyLoading = !propertyData;
   const isUserLoading = !otherPartyData;
 
@@ -140,15 +136,14 @@ const ContractCard = ({
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-lg font-bold text-gray-900">
-              {isPropertyLoading ? (
-                <span className="animate-pulse bg-gray-200 rounded h-6 w-48 inline-block"></span>
-              ) : (
-                propertyTitle
-              )}
-            </h3>
-          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">
+            {isPropertyLoading ? (
+              <span className="animate-pulse bg-gray-200 rounded h-6 w-48 inline-block"></span>
+            ) : (
+              propertyTitle
+            )}
+          </h3>
+
           <p className="text-sm text-gray-600 mb-1">
             {isPropertyLoading ? (
               <span className="animate-pulse bg-gray-200 rounded h-4 w-64 inline-block"></span>
@@ -156,22 +151,23 @@ const ContractCard = ({
               propertyAddress
             )}
           </p>
+
           <p className="text-xs text-gray-500">
-            Mã HĐ: {contract.id?.substring(0, 8)}...
+            Contract ID: {contract.id?.substring(0, 8)}...
           </p>
         </div>
 
         <span
-          className={`${statusConfig.bgColor} ${statusConfig.textColor} px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1 flex-shrink-0`}
+          className={`${statusConfig.bgColor} ${statusConfig.textColor} px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1`}
         >
           <StatusIcon className="w-4 h-4" />
           {statusConfig.label}
         </span>
       </div>
 
-      {/* Details Grid */}
+      {/* Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pb-4 border-b">
-        {/* Other Party Info */}
+        {/* Other party */}
         <div className="bg-gray-50 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
             <User className="w-4 h-4 text-gray-500" />
@@ -192,7 +188,7 @@ const ContractCard = ({
               </p>
               <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
                 <Phone className="w-3 h-3" />
-                <span>{otherPartyPhone}</span>
+                {otherPartyPhone}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-600">
                 <Mail className="w-3 h-3" />
@@ -202,23 +198,24 @@ const ContractCard = ({
           )}
         </div>
 
-        {/* Financial Info */}
+        {/* Financial */}
         <div className="space-y-3">
           <div>
-            <p className="text-xs text-gray-500 mb-1">💰 Giá thuê</p>
+            <p className="text-xs text-gray-500 mb-1">💰 Monthly Rent</p>
             {isPropertyLoading ? (
               <div className="animate-pulse bg-gray-200 rounded h-5 w-32"></div>
             ) : (
               <p className="text-sm font-bold text-blue-600">
                 {formatCurrency(monthlyRent)}
                 <span className="text-xs font-normal text-gray-600">
-                  /tháng
+                  /month
                 </span>
               </p>
             )}
           </div>
+
           <div>
-            <p className="text-xs text-gray-500 mb-1">🏦 Tiền cọc</p>
+            <p className="text-xs text-gray-500 mb-1">🏦 Deposit</p>
             {isPropertyLoading ? (
               <div className="animate-pulse bg-gray-200 rounded h-5 w-32"></div>
             ) : (
@@ -230,9 +227,9 @@ const ContractCard = ({
         </div>
       </div>
 
-      {/* Lease Period */}
+      {/* Lease period */}
       <div className="mb-4 pb-4 border-b">
-        <p className="text-xs text-gray-500 mb-2">📅 Thời hạn hợp đồng</p>
+        <p className="text-xs text-gray-500 mb-2">📅 Lease Period</p>
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-gray-900">
             {formatDate(contract.startDate)}
@@ -244,7 +241,7 @@ const ContractCard = ({
         </div>
       </div>
 
-      {/* Footer - Signature Status */}
+      {/* Footer */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 text-sm">
           <div
@@ -258,10 +255,11 @@ const ContractCard = ({
               <Clock className="w-4 h-4" />
             )}
             <span className="font-medium">
-              {role === "landlord" ? "Chủ nhà" : "Người thuê"}:{" "}
-              {isSigned ? "Đã ký" : "Chưa ký"}
+              {role === "landlord" ? "Landlord" : "Tenant"}:{" "}
+              {isSigned ? "Signed" : "Not signed"}
             </span>
           </div>
+
           <div
             className={`flex items-center gap-1.5 ${
               otherPartySigned ? "text-green-600" : "text-gray-400"
@@ -273,22 +271,22 @@ const ContractCard = ({
               <Clock className="w-4 h-4" />
             )}
             <span className="font-medium">
-              {role === "landlord" ? "Người thuê" : "Chủ nhà"}:{" "}
-              {otherPartySigned ? "Đã ký" : "Chưa ký"}
+              {role === "landlord" ? "Tenant" : "Landlord"}:{" "}
+              {otherPartySigned ? "Signed" : "Not signed"}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div>
           {contract.status === "PENDING_SIGNATURE" && !isSigned ? (
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
               <PenTool className="w-4 h-4" />
-              Ký ngay
+              Sign Now
             </button>
           ) : (
             <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center gap-2">
               <Eye className="w-4 h-4" />
-              Xem chi tiết
+              View Details
             </button>
           )}
         </div>

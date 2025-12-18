@@ -10,6 +10,7 @@ const ContractTabs = ({
   return (
     <div className="bg-white rounded-xl shadow-sm mb-6">
       <div className="flex border-b">
+        {/* Landlord tab */}
         <button
           onClick={() => onTabChange("landlord")}
           className={`flex-1 px-6 py-4 text-center font-medium transition-colors relative ${
@@ -20,7 +21,7 @@ const ContractTabs = ({
         >
           <div className="flex items-center justify-center gap-2">
             <Home className="w-5 h-5" />
-            <span>Với vai trò Chủ nhà</span>
+            <span>As Landlord</span>
             <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
               {landlordCount}
             </span>
@@ -30,6 +31,7 @@ const ContractTabs = ({
           )}
         </button>
 
+        {/* Tenant tab */}
         <button
           onClick={() => onTabChange("tenant")}
           className={`flex-1 px-6 py-4 text-center font-medium transition-colors relative ${
@@ -40,7 +42,7 @@ const ContractTabs = ({
         >
           <div className="flex items-center justify-center gap-2">
             <User className="w-5 h-5" />
-            <span>Với vai trò Người thuê</span>
+            <span>As Tenant</span>
             <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
               {tenantCount}
             </span>
