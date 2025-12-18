@@ -1,11 +1,6 @@
+// src/components/layout/layoutAdmin/AdminSidebar.jsx
 import React from "react";
-import {
-  Home,
-  Building,
-  Users,
-  User,
-  LogOut,
-} from "lucide-react";
+import { Home, Building, Users, User, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
@@ -14,9 +9,9 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
 
   const menuItems = [
     {
-      icon: User,
-      label: "Profile",
-      path: "/profile",
+      icon: Home,
+      label: "Admin Dashboard",
+      path: "/admin/dashboard",
     },
     {
       icon: Building,
@@ -30,83 +25,101 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     },
   ];
 
-  const isActive = (path) => {
-    if (!path) return false;
-    return location.pathname.startsWith(path);
+  const isActive = (item) => {
+    if (activeMenu && item.label === activeMenu) return true;
+    return location.pathname === item.path;
   };
 
-  const handleNavigation = (item) => {
-    setActiveMenu(item.label);
+  const handleNavigate = (item) => {
+    setActiveMenu?.(item.label);
     navigate(item.path);
   };
 
   const handleLogout = () => {
-    // Xóa thông tin đăng nhập (tùy bạn đang lưu gì)
-    localStorage.clear();
+    // xoá các key phổ biến (tuỳ dự án bạn có thể đang dùng key khác)
+    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("auth");
+    localStorage.removeItem("userInfo");
+    localStorage.removeItem("username");
+
     navigate("/login");
   };
 
   return (
     <div
-      className={`${
-        sidebarOpen ? "w-64" : "w-0"
-      } bg-slate-900 text-white transition-all duration-300 overflow-hidden fixed left-0 top-0 h-full z-50`}
+      className={`fixed top-0 left-0 h-screen z-40 transition-all duration-300
+      ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
     >
-      <div className="flex flex-col h-full p-6">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-            <Home className="w-6 h-6" />
+      <div className="h-full bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800">
+        {/* Brand */}
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-blue-600 flex items-center justify-center shadow-md">
+            <Home className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Roomie</h1>
-            <p className="text-xs text-gray-400">Admin Panel</p>
+            <div className="text-white font-bold text-lg leading-tight">
+              Roomie
+            </div>
+            <div className="text-slate-400 text-xs">Admin Panel</div>
           </div>
         </div>
 
-        {/* Admin Info */}
-        <div className="mb-8 pb-6 border-b border-gray-700">
-          <p className="text-xs text-gray-400 mb-3">Admin</p>
+        {/* Admin Card */}
+        <div className="px-6">
+          <div className="text-slate-400 text-xs mb-2">Admin</div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-              <Users className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center">
+              <Users className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <p className="text-sm font-medium">Administrator</p>
-              <p className="text-xs text-gray-400">admin</p>
+            <div className="min-w-0">
+              <div className="text-white font-semibold truncate">
+                Administrator
+              </div>
+              <div className="text-slate-400 text-sm truncate">admin</div>
             </div>
           </div>
+          <div className="mt-4 border-t border-slate-800" />
         </div>
 
         {/* Menu */}
-        <nav className="space-y-1 flex-1">
-          {menuItems.map((item, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleNavigation(item)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                ${
-                  isActive(item.path)
-                    ? "bg-blue-600"
-                    : "hover:bg-gray-800"
-                }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
+        <div className="p-4">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item);
 
-        {/* Logout (bottom) */}
-        <div className="pt-4 border-t border-gray-700">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Logout</span>
-          </button>
+            return (
+              <button
+                key={item.label}
+                onClick={() => handleNavigate(item)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors mb-2
+                  ${
+                    active
+                      ? "bg-blue-600 text-white shadow"
+                      : "text-slate-200 hover:bg-slate-800/60"
+                  }`}
+                type="button"
+              >
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Logout */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className="border-t border-slate-800 pt-4">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
+              type="button"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -22,6 +22,7 @@ import BillDetail from "../pages/Billing/BillDetail";
 
 import AdminProperties from "../pages/Admin/AdminProperties";
 import AdminUsers from "../pages/Admin/AdminUsers";
+import AdminDashboard from "../pages/Admin/AdminDashboard";
 
 const AppRoutes = () => {
   return (
@@ -53,6 +54,7 @@ const AppRoutes = () => {
         {/* Admin */}
         <Route path="/admin/properties" element={<AdminProperties />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         {/* Fallback */}
         <Route path="*" element={<Home />} />

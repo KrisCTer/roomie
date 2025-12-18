@@ -154,16 +154,17 @@ const Dashboard = () => {
     const getStatusText = (status) => {
       const normalized = (status || "").toUpperCase();
       const statusMap = {
-        DRAFT: "Pending",
+        DRAFT: "Draft",
         PENDING: "Pending",
         APPROVED: "Approved",
+        ACTIVE: "Approved",
         AVAILABLE: "Approved",
         SOLD: "Sold",
         RENTED: "Sold",
         REJECT: "Rejected",
         REJECTED: "Rejected",
       };
-      return statusMap[normalized] || "Pending";
+      return statusMap[normalized];
     };
 
     return {
@@ -277,9 +278,7 @@ const Dashboard = () => {
                 <FileText className="w-6 h-6 text-blue-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">
-                  Tổng số hợp đồng
-                </p>
+                <p className="text-sm text-slate-300 mb-1">Tổng số hợp đồng</p>
                 <p className="text-2xl font-semibold text-white">
                   {dashboard.totalContracts}
                 </p>
@@ -291,9 +290,7 @@ const Dashboard = () => {
                 <CheckCircle className="w-6 h-6 text-green-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">
-                  Hợp đồng hiệu lực
-                </p>
+                <p className="text-sm text-slate-300 mb-1">Hợp đồng hiệu lực</p>
                 <p className="text-2xl font-semibold text-white">
                   {dashboard.activeContracts}
                 </p>
@@ -305,9 +302,7 @@ const Dashboard = () => {
                 <Clock className="w-6 h-6 text-yellow-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">
-                  Hợp đồng chờ ký
-                </p>
+                <p className="text-sm text-slate-300 mb-1">Hợp đồng chờ ký</p>
                 <p className="text-2xl font-semibold text-white">
                   {dashboard.pendingContracts}
                 </p>

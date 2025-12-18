@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Profile.jsx
+import React, { useState, useMemo } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
@@ -36,7 +37,14 @@ const Profile = () => {
     handleCloseCamera,
     handleCameraCapture,
   } = useProfileOperations();
-  const isAdmin = formData.username?.toLowerCase() === "admin";
+
+  // ✅ Ưu tiên username trong localStorage để quyết định sidebar NGAY khi vào trang
+  const isAdmin = useMemo(() => {
+    const lsUsername = (localStorage.getItem("username") || "").toLowerCase();
+    const apiUsername = (formData?.username || "").toLowerCase();
+    return lsUsername === "admin" || apiUsername === "admin";
+  }, [formData?.username]);
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -66,6 +74,7 @@ const Profile = () => {
           title="Profile"
           subtitle="View and update your profile information"
         />
+
         {/* Content */}
         <div className="px-10 py-8 w-full">
           {loading ? (

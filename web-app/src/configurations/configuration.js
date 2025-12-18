@@ -25,7 +25,8 @@ export const API = {
   INTERNAL_GET_USER: (userId) => `/identity/internal/users/${userId}`,
   INTERNAL_UPDATE_USER: (userId) => `/identity/internal/users/${userId}`,
   INTERNAL_DELETE_USER: (userId) => `/identity/internal/users/${userId}`,
-  INTERNAL_SUSPEND_USER: (userId) => `/identity/internal/users/${userId}/suspend`,
+  INTERNAL_SUSPEND_USER: (userId) =>
+    `/identity/internal/users/${userId}/suspend`,
   INTERNAL_BAN_USER: (userId) => `/identity/internal/users/${userId}/ban`,
 
   // ========= ROLE & PERMISSION (Identity Service - Port 8080) =========
@@ -61,7 +62,8 @@ export const API = {
   FILE_UPLOAD: "/file/upload",
   FILE_DOWNLOAD: (fileId) => `/file/download/${fileId}`,
   FILE_DELETE: (fileId) => `/file/${fileId}`,
-  FILE_GET_BY_ENTITY: (entityType, entityId) => `/file/entity/${entityType}/${entityId}`,
+  FILE_GET_BY_ENTITY: (entityType, entityId) =>
+    `/file/entity/${entityType}/${entityId}`,
   FILE_GET_BY_OWNER: (ownerId) => `/file/owner/${ownerId}`,
 
   // ========= PROPERTY (Property Service - Port 8083) =========
@@ -80,7 +82,6 @@ export const API = {
   MARK_AS_RENTER: (propertyId) => `/property/${propertyId}/rented`,
   MARK_AS_AVAILABLE: (propertyId) => `/property/${propertyId}/available`,
   MARK_AS_DEACTIVATED: (propertyId) => `/property/${propertyId}/deactivate`,
-
 
   // Internal Property endpoints
   PROPERTY_INTERNAL_PENDING: "/property/internal/pending",
@@ -217,4 +218,12 @@ export const buildWebSocketUrl = (path) => {
   return `${host}${path}`;
 };
 
-export default { CONFIG, API, SERVICE_PORTS, HTTP_METHODS, buildQueryString, buildFullUrl, buildWebSocketUrl };
+export default {
+  CONFIG,
+  API,
+  SERVICE_PORTS,
+  HTTP_METHODS,
+  buildQueryString,
+  buildFullUrl,
+  buildWebSocketUrl,
+};
