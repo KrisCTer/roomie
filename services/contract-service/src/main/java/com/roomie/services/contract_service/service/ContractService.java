@@ -5,6 +5,7 @@ import com.roomie.services.contract_service.dto.event.PaymentCompletedEvent;
 import com.roomie.services.contract_service.dto.request.ContractRequest;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
 import com.roomie.services.contract_service.dto.response.OTPResponse;
+import com.roomie.services.contract_service.dto.response.property.PropertyResponse;
 import com.roomie.services.contract_service.entity.Contract;
 import com.roomie.services.contract_service.entity.OTPVerification;
 import com.roomie.services.contract_service.enums.ContractStatus;
@@ -14,6 +15,7 @@ import com.roomie.services.contract_service.mapper.ContractMapper;
 import com.roomie.services.contract_service.repository.ContractRepository;
 import com.roomie.services.contract_service.repository.OTPVerificationRepository;
 import com.roomie.services.contract_service.repository.httpclient.ProfileClient;
+import com.roomie.services.contract_service.repository.httpclient.PropertyClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,6 +46,7 @@ public class ContractService {
     RedisLockService lockService;
     RedisCacheService cacheService;
     KafkaTemplate<String, Object> kafkaTemplate;
+    PropertyClient propertyClient;
 
     @Value("${contract.lock-ttl-seconds:30}")
     long LOCK_TTL = 30;
@@ -65,10 +68,13 @@ public class ContractService {
             Optional<Contract> exists = repo.findByBookingId(req.getBookingId());
             if (exists.isPresent()) throw new AppException(ErrorCode.CONTRACT_EXISTS);
         }
+        PropertyResponse property = propertyClient.getProperty(req.getPropertyId()).getResult();
 
         Contract c = mapper.toEntity(req);
         c.setTenantSigned(false);
         c.setLandlordSigned(false);
+        c.setMonthlyRent(property.getMonthlyRent());
+        c.setRentalDeposit(property.getRentalDeposit());
         c.setCreatedAt(Instant.now());
         c.setUpdatedAt(Instant.now());
         c.setStatus(ContractStatus.DRAFT);

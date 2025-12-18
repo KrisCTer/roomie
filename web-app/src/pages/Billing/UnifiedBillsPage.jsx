@@ -20,12 +20,6 @@ import CreateBillModal from "../../components/Billing/CreateBillModal";
 // Import custom hook
 import { useBillOperations } from "../../hooks/useBillOperations";
 
-// Import helpers
-import {
-  getPropertyForContract,
-  getTenantForContract,
-} from "../../utils/billHelpers";
-
 const UnifiedBillsPage = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -105,10 +99,12 @@ const UnifiedBillsPage = () => {
         }`}
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
         <PageTitle
-          title="Quản lý hóa đơn"
-          subtitle="Quản lý hóa đơn cho thuê và thanh toán hóa đơn thuê nhà"
+          title="Bill Management"
+          subtitle="Manage rental bills and tenant payments"
         />
+
         <main className="p-6">
           {/* Tabs */}
           <BillTabs
@@ -139,20 +135,20 @@ const UnifiedBillsPage = () => {
 
           {/* Bills List */}
           <div className="bg-white rounded-xl shadow-sm">
-            {/* Header của danh sách + Nút tạo hóa đơn */}
+            {/* List header + Create bill button */}
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">
-                Danh sách hóa đơn ({filteredBills.length})
+                Bills List ({filteredBills.length})
               </h2>
 
-              {/* Nút Tạo hóa đơn mới - chỉ hiển thị khi là chủ nhà */}
+              {/* Create bill button - landlord only */}
               {activeTab === "landlord" && (
                 <button
                   onClick={handleCreateBill}
                   className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md font-medium"
                 >
                   <Plus className="w-5 h-5" />
-                  Tạo hóa đơn mới
+                  Create New Bill
                 </button>
               )}
             </div>

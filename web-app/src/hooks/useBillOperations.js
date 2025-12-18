@@ -95,29 +95,40 @@ export const useBillOperations = () => {
           asTenant: contractsRes.result.asTenant || [],
         });
 
-        // Load tenant info for landlord contracts
-        const landlordContracts = contractsRes.result.asLandlord || [];
-        const tenantIds = [
-          ...new Set(landlordContracts.map((c) => c.tenantId)),
+        const allContracts = [
+          ...(contractsRes.result.asLandlord || []),
+          ...(contractsRes.result.asTenant || []),
         ];
 
-        const tenantPromises = tenantIds.map(async (id) => {
-          try {
-            const res = await getUserProfile(id);
-            if (res?.success && res?.result) {
-              return [id, res.result];
-            }
-          } catch (error) {
-            console.error(`Error loading tenant ${id}:`, error);
+        // Map contractId -> tenantId
+        const contractTenantMap = {};
+        allContracts.forEach((c) => {
+          if (c.id && c.tenantId) {
+            contractTenantMap[c.id] = c.tenantId;
           }
-          return [id, null];
         });
 
-        const tenantResults = await Promise.all(tenantPromises);
-        const tenantMap = Object.fromEntries(
-          tenantResults.filter(([_, data]) => data)
-        );
-        setTenants(tenantMap);
+        // Unique tenantIds
+        const tenantIds = [...new Set(Object.values(contractTenantMap))];
+
+        const tenantPromises = tenantIds.map(async (id) => {
+        try {
+          const res = await getUserProfile(id);
+          if (res?.result) {
+            return [id, res.result];
+          }
+        } catch (error) {
+          console.error(`Error loading tenant ${id}:`, error);
+        }
+        return [id, null];
+      });
+
+      const tenantResults = await Promise.all(tenantPromises);
+      const tenantMap = Object.fromEntries(
+        tenantResults.filter(([_, data]) => data)
+      );
+
+      setTenants(tenantMap);
       }
     } catch (error) {
       console.error("Error loading data:", error);

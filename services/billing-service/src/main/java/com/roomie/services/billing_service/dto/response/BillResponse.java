@@ -24,30 +24,32 @@ public class BillResponse {
     Double electricityNew;
     Double electricityConsumption;
     Double electricityUnitPrice;
-    Double electricityAmount;
+    BigDecimal electricityAmount;
 
     Double waterOld;
     Double waterNew;
     Double waterConsumption;
     Double waterUnitPrice;
-    Double waterAmount;
+    BigDecimal waterAmount;
 
-    Double internetPrice;
+    BigDecimal internetPrice;
 
-    Double parkingPrice;
+    BigDecimal parkingPrice;
 
-    Double cleaningPrice;
+    BigDecimal cleaningPrice;
 
-    Double maintenancePrice;
+    BigDecimal maintenancePrice;
 
     String otherDescription;
-    Double otherPrice;
+    BigDecimal otherPrice;
 
-    Double totalAmount;
+    BigDecimal totalAmount;
 
     LocalDate billingMonth;
     LocalDate dueDate;
     BillStatus status;
+
+    String notes;
 
     Instant createdAt;
     Instant updatedAt;

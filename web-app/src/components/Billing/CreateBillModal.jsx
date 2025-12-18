@@ -56,7 +56,7 @@ const CreateBillModal = ({
                 <DollarSign className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-white">
-                {bill ? "Cập nhật hóa đơn" : "Tạo hóa đơn mới"}
+                {bill ? "Update the invoice" : "Create a new invoice"}
               </h2>
             </div>
             <button
@@ -78,14 +78,14 @@ const CreateBillModal = ({
               <div className="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
                 1
               </div>
-              Thông tin hợp đồng
+              Contract information
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Property Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Chọn bất động sản <span className="text-red-500">*</span>
+                  Choose a property <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={selectedProperty}
@@ -94,7 +94,7 @@ const CreateBillModal = ({
                   required
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 transition"
                 >
-                  <option value="">-- Chọn bất động sản --</option>
+                  <option value="">-- Choose a property --</option>
                   {activeProperties.map((property) => (
                     <option
                       key={property.propertyId}
@@ -107,7 +107,7 @@ const CreateBillModal = ({
 
                 {activeProperties.length === 0 && (
                   <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
-                    ⚠️ Không có hợp đồng ACTIVE nào
+                    ⚠️ No ACTIVE contracts available
                   </p>
                 )}
               </div>
@@ -116,7 +116,7 @@ const CreateBillModal = ({
               {selectedProperty && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Chọn hợp đồng <span className="text-red-500">*</span>
+                    Choose a contract <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={selectedContract}
@@ -125,7 +125,7 @@ const CreateBillModal = ({
                     required
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 transition"
                   >
-                    <option value="">-- Chọn hợp đồng --</option>
+                    <option value="">-- Choose a contract --</option>
                     {availableContracts.map((contract) => {
                       const tenant = tenants[contract.tenantId];
                       return (
@@ -140,7 +140,7 @@ const CreateBillModal = ({
                   </select>
                   {availableContracts.length === 0 && (
                     <p className="text-sm text-red-600 mt-2">
-                      ⚠️ Không có hợp đồng ACTIVE
+                      ⚠️ No ACTIVE contracts available
                     </p>
                   )}
                 </div>
@@ -162,8 +162,8 @@ const CreateBillModal = ({
                       {selectedPropertyData.address?.fullAddress}
                     </p>
                     <p className="text-sm font-semibold text-blue-600 mt-2">
-                      💰 Giá thuê:{" "}
-                      {formatCurrency(selectedPropertyData.monthlyRent)}/tháng
+                      💰 Rent Price:{" "}
+                      {formatCurrency(selectedPropertyData.monthlyRent)}/month
                     </p>
                   </div>
                 </div>
@@ -199,36 +199,34 @@ const CreateBillModal = ({
               <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
                 2
               </div>
-              Thông tin thanh toán
+              Payment Information
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  Tháng thanh toán <span className="text-red-500">*</span>
+                  Billing Month <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
+                  type="month"
                   name="billingMonth"
                   value={formData.billingMonth}
                   onChange={handleChange}
-                  placeholder="2024-12"
                   required
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition"
                 />
-                <p className="text-xs text-gray-500 mt-1">Định dạng: YYYY-MM</p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
-                  Tiền thuê nhà <span className="text-red-500">*</span>
+                  Rent Price <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
-                  name="rentPrice"
-                  value={formData.rentPrice}
+                  name="monthlyRent"
+                  value={formData.monthlyRent}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition"
@@ -244,7 +242,7 @@ const CreateBillModal = ({
               <div className="w-8 h-8 bg-green-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
                 3
               </div>
-              Tiện ích
+              Utilities
             </h3>
 
             {/* Electricity */}
@@ -253,13 +251,13 @@ const CreateBillModal = ({
                 <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
                   <Zap className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="font-bold text-gray-900 text-lg">Điện</h4>
+                <h4 className="font-bold text-gray-900 text-lg">Electricity</h4>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Chỉ số cũ
+                    Old Index
                   </label>
                   <input
                     type="number"
@@ -274,7 +272,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Chỉ số mới <span className="text-red-500">*</span>
+                    New Index <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -289,7 +287,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Đơn giá (đ/kWh)
+                    Unit Price (VND/kWh)
                   </label>
                   <input
                     type="number"
@@ -303,7 +301,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Thành tiền
+                    Total Amount
                   </label>
                   <div className="w-full px-3 py-2 bg-yellow-100 border-2 border-yellow-300 rounded-lg font-bold text-yellow-800 text-sm flex items-center">
                     {formatCurrency(
@@ -322,13 +320,13 @@ const CreateBillModal = ({
                 <div className="w-10 h-10 bg-blue-400 rounded-lg flex items-center justify-center">
                   <Droplet className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="font-bold text-gray-900 text-lg">Nước</h4>
+                <h4 className="font-bold text-gray-900 text-lg">Water</h4>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Chỉ số cũ
+                    Old Index
                   </label>
                   <input
                     type="number"
@@ -343,7 +341,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Chỉ số mới <span className="text-red-500">*</span>
+                    New Index <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -358,7 +356,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Đơn giá (đ/m³)
+                    Unit Price (VND/m³)
                   </label>
                   <input
                     type="number"
@@ -372,7 +370,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2">
-                    Thành tiền
+                    Total Amount
                   </label>
                   <div className="w-full px-3 py-2 bg-blue-100 border-2 border-blue-300 rounded-lg font-bold text-blue-800 text-sm flex items-center">
                     {formatCurrency(
@@ -387,7 +385,7 @@ const CreateBillModal = ({
 
             {/* Other Services */}
             <div className="bg-gray-50 rounded-xl p-5 border-2 border-gray-200">
-              <h4 className="font-bold text-gray-900 mb-4">Dịch vụ khác</h4>
+              <h4 className="font-bold text-gray-900 mb-4">Other Services</h4>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -408,7 +406,7 @@ const CreateBillModal = ({
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <Car className="w-4 h-4 text-green-600" />
-                    Gửi xe
+                    Parking
                   </label>
                   <input
                     type="number"
@@ -422,7 +420,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Vệ sinh
+                    Cleaning
                   </label>
                   <input
                     type="number"
@@ -437,7 +435,7 @@ const CreateBillModal = ({
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <Wrench className="w-4 h-4 text-orange-600" />
-                    Bảo trì
+                    Maintenance
                   </label>
                   <input
                     type="number"
@@ -453,12 +451,12 @@ const CreateBillModal = ({
 
             {/* Other Fees */}
             <div className="bg-orange-50 rounded-xl p-5 border-2 border-orange-200">
-              <h4 className="font-bold text-gray-900 mb-4">Phí khác</h4>
+              <h4 className="font-bold text-gray-900 mb-4">Other Fees</h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Mô tả
+                    Description
                   </label>
                   <input
                     type="text"
@@ -472,7 +470,7 @@ const CreateBillModal = ({
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Số tiền
+                    Amount
                   </label>
                   <input
                     type="number"
@@ -491,7 +489,7 @@ const CreateBillModal = ({
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm mb-1">TỔNG CỘNG</p>
+                <p className="text-green-100 text-sm mb-1">TOTAL</p>
                 <p className="text-4xl font-bold">
                   {formatCurrency(calculateTotal())}
                 </p>
@@ -509,7 +507,7 @@ const CreateBillModal = ({
               onClick={onClose}
               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-semibold"
             >
-              Hủy
+              Cancel
             </button>
             <button
               type="submit"
@@ -519,12 +517,12 @@ const CreateBillModal = ({
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Đang lưu...
+                  Saving...
                 </span>
               ) : bill ? (
-                "Cập nhật hóa đơn"
+                "Update Bill"
               ) : (
-                "Tạo hóa đơn"
+                "Create Bill"
               )}
             </button>
           </div>

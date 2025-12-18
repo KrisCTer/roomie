@@ -34,28 +34,29 @@ const LandlordBillTable = ({
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Bất động sản
+              Property
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Người thuê
+              Tenant
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Tháng
+              Month
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Hạn thanh toán
+              Due Date
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Tổng tiền
+              Total Amount
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Trạng thái
+              Status
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-              Thao tác
+              Actions
             </th>
           </tr>
         </thead>
+
         <tbody className="divide-y divide-gray-200">
           {bills.map((bill) => {
             const statusConfig = getStatusConfig(bill.status);
@@ -128,7 +129,7 @@ const LandlordBillTable = ({
                     <button
                       onClick={() => onView(bill)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                      title="Xem chi tiết"
+                      title="View details"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
@@ -138,21 +139,21 @@ const LandlordBillTable = ({
                         <button
                           onClick={() => onEdit(bill)}
                           className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                          title="Sửa"
+                          title="Edit"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onSend(bill.id)}
                           className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                          title="Gửi hóa đơn"
+                          title="Send bill"
                         >
                           <Send className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDelete(bill.id)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Xóa"
+                          title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

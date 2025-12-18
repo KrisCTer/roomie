@@ -3,6 +3,7 @@ package com.roomie.services.payment_service.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -13,9 +14,12 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentResponse {
     String id;
-//    String bookingId;
+    String bookingId;
+    String billId;
     String contractId;
-    Double amount;
+    BigDecimal amount;
+    String description;
+    String paymentUrl;
     String method;
     String status;
     String transactionId;

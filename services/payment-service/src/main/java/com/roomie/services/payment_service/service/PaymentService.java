@@ -26,32 +26,48 @@ public class PaymentService {
     PaymentMapper paymentMapper = PaymentMapper.INSTANCE;
 
     // Tạo payment & trả URL thanh toán
-    public String createPayment(PaymentRequest req) {
+    public Payment createPayment(PaymentRequest req) {
         Payment payment = Payment.builder()
-//                .bookingId(req.getBookingId())
+                .bookingId(req.getBookingId())
+                .billId(req.getBillId())
                 .contractId(req.getContractId())
                 .amount(req.getAmount())
+                .description(req.getDescription())
                 .method(req.getMethod())
                 .status("PENDING")
-                .transactionId(null)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
 
         Payment saved = paymentRepository.save(payment);
 
-        // TODO: publish PaymentCreated event
+        String paymentUrl = generatePaymentUrl(saved);
 
-        // Trả về URL thanh toán tùy gateway
-        return generatePaymentUrl(saved);
+        saved.setPaymentUrl(paymentUrl);
+        saved.setUpdatedAt(Instant.now());
+
+        paymentRepository.save(saved);
+
+        return saved;
     }
+
 
     private String generatePaymentUrl(Payment payment) {
         switch (payment.getMethod()) {
             case "VNPAY":
-                return vnPayService.createPaymentUrl(payment.getId(), payment.getAmount(), "Thanh toan Roomie");
+                return vnPayService.createPaymentUrl(
+                        payment.getId(),
+                        payment.getAmount(),
+                        "Thanh toan Roomie: " + payment.getDescription()
+                );
             case "MOMO":
-                return moMoService.createPaymentUrl(payment.getId(), payment.getAmount(), "Thanh toan Roomie");
+                return moMoService.createPaymentUrl(
+                        payment.getId(),
+                        payment.getAmount(),
+                        "Thanh toan Roomie: " + payment.getDescription()
+                );
+            case "CASH":
+                return null;
             default:
                 throw new RuntimeException("Unsupported payment method");
         }

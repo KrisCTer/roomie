@@ -9,8 +9,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentRequest {
-//    String bookingId;
+    String bookingId;
     String contractId;
+    String billId;
     long amount;
     String method; // VNPAY, MOMO, CASH
+    String description;
 }

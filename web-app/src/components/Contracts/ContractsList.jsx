@@ -27,11 +27,11 @@ const ContractsList = ({
             />
           </svg>
         </div>
-        <p className="text-gray-600 mb-2">Chưa có hợp đồng nào</p>
+        <p className="text-gray-600 mb-2">No contracts found</p>
         <p className="text-sm text-gray-500">
           {role === "landlord"
-            ? "Hợp đồng sẽ xuất hiện khi có người thuê xác nhận booking"
-            : "Hợp đồng sẽ xuất hiện sau khi chủ nhà xác nhận booking của bạn"}
+            ? "Contracts will appear once a tenant confirms a booking"
+            : "Contracts will appear after the landlord confirms your booking"}
         </p>
       </div>
     );

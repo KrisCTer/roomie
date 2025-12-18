@@ -17,12 +17,16 @@ public class Payment {
     @MongoId
     String id;
 
-//    String bookingId;       // liên kết booking
+    String bookingId;       // liên kết booking
     String contractId;      // cho deposit hoặc bill
+    String billId;
+
     long amount;
     String method;          // VNPAY, MOMO, CASH
     String status;          // PENDING, PROCESSING, COMPLETED, FAILED
     String transactionId;   // ID do payment gateway tạo ra
+    String description;
+    String paymentUrl;
     Instant createdAt;
     Instant updatedAt;
 }

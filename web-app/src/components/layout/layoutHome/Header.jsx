@@ -58,13 +58,7 @@ export default function Header() {
   const getUsername = () => {
     const user = getStoredUser();
     // ưu tiên các field thường gặp
-    return (
-      user?.username ||
-      user?.userName ||
-      user?.name ||
-      user?.email ||
-      ""
-    );
+    return user?.username || user?.userName || user?.name || user?.email || "";
   };
 
   // Điều hướng dashboard theo username
@@ -162,9 +156,7 @@ export default function Header() {
               {/* Khi ĐÃ đăng nhập */}
               <IconButton onClick={handleOpenMenu}>
                 <Avatar sx={{ bgcolor: "#2563eb" }}>
-                  {username
-                    ? username[0].toUpperCase()
-                    : "U"}
+                  {username ? username[0].toUpperCase() : "U"}
                 </Avatar>
               </IconButton>
 

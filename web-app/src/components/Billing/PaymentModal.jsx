@@ -35,14 +35,14 @@ const PaymentModal = ({
       <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 rounded-t-xl z-10">
           <h2 className="text-2xl font-bold text-gray-900">
-            Chọn phương thức thanh toán
+            Select Payment Method
           </h2>
         </div>
 
         <div className="p-6">
           {/* Amount */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white mb-6">
-            <p className="text-blue-100 mb-2">Số tiền cần thanh toán</p>
+            <p className="text-blue-100 mb-2">Amount to Pay</p>
             <p className="text-4xl font-bold">
               {formatCurrency(bill.totalAmount)}
             </p>
@@ -100,9 +100,9 @@ const PaymentModal = ({
           {/* Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-800">
-              <strong>Lưu ý:</strong> Sau khi chọn phương thức thanh toán và
-              nhấn "Thanh toán", bạn sẽ được chuyển đến trang thanh toán tương
-              ứng.
+              <strong>Note:</strong> After selecting a payment method and
+              clicking “Pay”, you will be redirected to the corresponding
+              payment page.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ const PaymentModal = ({
               disabled={paying}
               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium disabled:opacity-50"
             >
-              Hủy
+              Cancel
             </button>
             <button
               onClick={onPay}
@@ -123,12 +123,12 @@ const PaymentModal = ({
               {paying ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Đang xử lý...
+                  Processing...
                 </>
               ) : (
                 <>
                   <DollarSign className="w-5 h-5" />
-                  Thanh toán
+                  Pay
                 </>
               )}
             </button>

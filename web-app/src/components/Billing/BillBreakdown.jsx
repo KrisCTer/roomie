@@ -35,14 +35,14 @@ const BillBreakdown = ({ bill }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Chi tiết hóa đơn</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Bill Breakdown</h2>
 
       <div className="space-y-4">
         {/* Rent */}
         <BillItem
           icon={FileText}
-          label="Tiền thuê nhà"
-          amount={bill.rentPrice}
+          label="Monthly Rent"
+          amount={bill.monthlyRent}
           iconColor="text-blue-600"
           iconBg="bg-blue-100"
         />
@@ -50,7 +50,7 @@ const BillBreakdown = ({ bill }) => {
         {/* Electricity */}
         <BillItem
           icon={Zap}
-          label="Tiền điện"
+          label="Electricity"
           amount={bill.electricityAmount}
           iconColor="text-yellow-600"
           iconBg="bg-yellow-100"
@@ -62,7 +62,7 @@ const BillBreakdown = ({ bill }) => {
         {/* Water */}
         <BillItem
           icon={Droplet}
-          label="Tiền nước"
+          label="Water"
           amount={bill.waterAmount}
           iconColor="text-blue-600"
           iconBg="bg-blue-100"
@@ -86,7 +86,7 @@ const BillBreakdown = ({ bill }) => {
         {bill.parkingPrice > 0 && (
           <BillItem
             icon={Car}
-            label="Gửi xe"
+            label="Parking"
             amount={bill.parkingPrice}
             iconColor="text-green-600"
             iconBg="bg-green-100"
@@ -97,7 +97,7 @@ const BillBreakdown = ({ bill }) => {
         {bill.cleaningPrice > 0 && (
           <BillItem
             icon={FileText}
-            label="Vệ sinh chung"
+            label="Cleaning Service"
             amount={bill.cleaningPrice}
             iconColor="text-orange-600"
             iconBg="bg-orange-100"
@@ -108,7 +108,7 @@ const BillBreakdown = ({ bill }) => {
         {bill.maintenancePrice > 0 && (
           <BillItem
             icon={Wrench}
-            label="Bảo trì"
+            label="Maintenance"
             amount={bill.maintenancePrice}
             iconColor="text-red-600"
             iconBg="bg-red-100"
@@ -120,7 +120,7 @@ const BillBreakdown = ({ bill }) => {
           <div className="border-t pt-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-medium text-gray-900">Phí khác</p>
+                <p className="font-medium text-gray-900">Other Fees</p>
                 <p className="text-sm text-gray-600">{bill.otherDescription}</p>
               </div>
               <span className="font-bold text-gray-900">
@@ -134,7 +134,7 @@ const BillBreakdown = ({ bill }) => {
       {/* Total */}
       <div className="mt-6 pt-6 border-t-2 border-gray-200">
         <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-gray-900">TỔNG CỘNG</span>
+          <span className="text-xl font-bold text-gray-900">TOTAL</span>
           <span className="text-3xl font-bold text-blue-600">
             {formatCurrency(bill.totalAmount)}
           </span>

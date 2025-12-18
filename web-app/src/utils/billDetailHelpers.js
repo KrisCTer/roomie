@@ -20,22 +20,22 @@ export const formatDateTime = (date) => {
 export const getStatusConfig = (status) => {
   const configs = {
     DRAFT: {
-      label: "Nháp",
+      label: "Draft",
       bg: "bg-gray-100",
       text: "text-gray-800",
     },
     PENDING: {
-      label: "Chờ thanh toán",
+      label: "Pending Payment",
       bg: "bg-yellow-100",
       text: "text-yellow-800",
     },
     PAID: {
-      label: "Đã thanh toán",
+      label: "Paid",
       bg: "bg-green-100",
       text: "text-green-800",
     },
     OVERDUE: {
-      label: "Quá hạn",
+      label: "Overdue",
       bg: "bg-red-100",
       text: "text-red-800",
     },
@@ -48,7 +48,7 @@ export const getPaymentMethods = () => {
     {
       id: "VNPAY",
       name: "VNPay",
-      description: "Thanh toán qua VNPay",
+      description: "Pay via VNPay",
       color: "text-blue-600",
       bg: "bg-blue-50",
       border: "border-blue-200",
@@ -56,15 +56,15 @@ export const getPaymentMethods = () => {
     {
       id: "MOMO",
       name: "MoMo",
-      description: "Thanh toán qua ví MoMo",
+      description: "Pay via MoMo wallet",
       color: "text-pink-600",
       bg: "bg-pink-50",
       border: "border-pink-200",
     },
     {
       id: "CASH",
-      name: "Tiền mặt",
-      description: "Thanh toán trực tiếp bằng tiền mặt",
+      name: "Cash",
+      description: "Pay in cash",
       color: "text-green-600",
       bg: "bg-green-50",
       border: "border-green-200",

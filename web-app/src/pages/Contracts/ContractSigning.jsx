@@ -7,7 +7,6 @@ import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 
 // Import custom components
-import ContractHeader from "../../components/Contracts/signing/ContractHeader.jsx";
 import OTPModal from "../../components/Contracts/signing/OTPModal.jsx";
 import SignModal from "../../components/Contracts/signing/SignModal.jsx";
 import PropertyInfoCard from "../../components/Contracts/signing/PropertyInfoCard.jsx";
@@ -84,7 +83,7 @@ const ContractSigning = () => {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Đang tải thông tin hợp đồng...</p>
+              <p className="text-gray-600">Loading contract information...</p>
             </div>
           </div>
         </div>
@@ -113,13 +112,13 @@ const ContractSigning = () => {
             <div className="text-center">
               <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Không tìm thấy hợp đồng
+                No contract found
               </h2>
               <button
                 onClick={() => navigate("/my-contracts")}
                 className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Quay lại danh sách
+                Back to list
               </button>
             </div>
           </div>
@@ -128,7 +127,7 @@ const ContractSigning = () => {
     );
   }
 
-  // Get status config and party
+  // Status & role
   const statusConfig = getStatusConfig(contract.status);
   const party = getCurrentUserParty;
   const isSigned = isCurrentUserTenant
@@ -139,7 +138,6 @@ const ContractSigning = () => {
     : contract.tenantSigned;
   const pdfUrl = contract.pdfUrl;
 
-  // Main render
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -157,23 +155,17 @@ const ContractSigning = () => {
         }`}
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle title="Ký hợp đồng" subtitle="Xem và ký hợp đồng của bạn" />
-        <main className="p-6">
-          {/* Header */}
-          <ContractHeader
-            contract={contract}
-            statusConfig={statusConfig}
-            party={party}
-          />
+        <PageTitle
+          title="Contract Signing"
+          subtitle="Review and sign your contract"
+        />
 
-          {/* Main Content Grid */}
+        <main className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Property Info */}
               <PropertyInfoCard property={property} />
 
-              {/* Payment Terms */}
               <PaymentTermsCard
                 property={property}
                 contract={contract}
@@ -181,16 +173,25 @@ const ContractSigning = () => {
                 formatDate={formatDate}
               />
 
-              {/* PDF Viewer */}
               <PDFViewer pdfUrl={pdfUrl} />
             </div>
 
             {/* Right Column */}
             <div className="space-y-6">
-              {/* Signature Status */}
+              {/* Contract Status */}
+              <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <div
+                  className={`${statusConfig.bg} ${statusConfig.text}
+                  w-full px-4 py-3 rounded-lg
+                  font-semibold flex items-center justify-center gap-2`}
+                >
+                  <statusConfig.icon className="w-5 h-5" />
+                  {statusConfig.label}
+                </div>
+              </div>
+
               <SignatureStatusCard contract={contract} />
 
-              {/* Actions */}
               <ActionsCard
                 contract={contract}
                 canSign={canCurrentUserSign}
@@ -201,7 +202,6 @@ const ContractSigning = () => {
                 onSignClick={handleOpenSignModal}
               />
 
-              {/* Contract Info */}
               <ContractInfoCard
                 contract={contract}
                 tenant={tenantData}

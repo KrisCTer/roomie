@@ -4,6 +4,7 @@ import { getBill, payBill } from "../services/billing.service";
 import { createPayment } from "../services/payment.service";
 import { getContract } from "../services/contract.service";
 import { getPropertyById } from "../services/property.service";
+import { getUserProfile } from "../services/user.service";
 
 export const useBillDetail = () => {
   const { id } = useParams();
@@ -18,6 +19,9 @@ export const useBillDetail = () => {
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+
+  const [tenant, setTenant] = useState(null);
+  const [landlord, setLandlord] = useState(null);
 
   useEffect(() => {
     loadBillData();
@@ -47,6 +51,29 @@ export const useBillDetail = () => {
                 setProperty(propertyRes.result);
               }
             }
+            // Load tenant profile
+            if (contractData.tenantId) {
+              try {
+                const tenantRes = await getUserProfile(contractData.tenantId);
+                if (tenantRes?.result) {
+                  setTenant(tenantRes.result);
+                }
+              } catch (e) {
+                console.error("Error loading tenant profile", e);
+              }
+            }
+
+            // Load landlord profile
+            if (contractData.landlordId) {
+              try {
+                const landlordRes = await getUserProfile(contractData.landlordId);
+                if (landlordRes?.result) {
+                  setLandlord(landlordRes.result);
+                }
+              } catch (e) {
+                console.error("Error loading landlord profile", e);
+              }
+            }
           }
         }
       }
@@ -71,8 +98,9 @@ export const useBillDetail = () => {
       const paymentPayload = {
         billId: bill.id,
         contractId: bill.contractId,
+        propertyId: contract.propertyId,
         amount: bill.totalAmount,
-        paymentMethod: selectedPaymentMethod,
+        method: selectedPaymentMethod,
         description: `Thanh toán hóa đơn tháng ${formatDate(bill.billingMonth)}`,
       };
 
@@ -86,21 +114,20 @@ export const useBillDetail = () => {
           selectedPaymentMethod === "VNPAY" ||
           selectedPaymentMethod === "MOMO"
         ) {
-          if (payment.paymentUrl) {
-            window.location.href = payment.paymentUrl;
+          const redirectUrl = payment.paymentUrl || payment.payUrl;
+          console.log("Redirecting to payment URL:", redirectUrl);
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
           } else {
             alert("Không thể tạo link thanh toán!");
           }
         }
         // For CASH, mark as paid directly
         else if (selectedPaymentMethod === "CASH") {
-          const payRes = await payBill(bill.id, payment.id);
-          if (payRes?.success) {
-            alert("✅ Đã xác nhận thanh toán bằng tiền mặt!");
-            loadBillData();
-            setShowPaymentModal(false);
-          }
-        }
+        alert("ℹ️ Vui lòng thanh toán tiền mặt trực tiếp cho chủ nhà.");
+        setShowPaymentModal(false);
+        loadBillData();
+      }
       }
     } catch (error) {
       console.error("Error processing payment:", error);
@@ -125,6 +152,8 @@ export const useBillDetail = () => {
     bill,
     contract,
     property,
+    tenant,
+    landlord,
     loading,
     paying,
     showPaymentModal,
