@@ -1,17 +1,44 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Ban, PauseCircle, RefreshCw, Search, Menu } from "lucide-react";
+import { Ban, PauseCircle, RefreshCw, Search } from "lucide-react";
 
-import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar"; // <-- đúng đường dẫn nếu AdminSidebar nằm trong src/components
+import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar";
+import Header from "../../components/layout/layoutUser/Header";
+import Footer from "../../components/layout/layoutUser/Footer";
+
 import {
   adminGetUsers,
   adminSuspendUser,
   adminBanUser,
 } from "../../services/adminUser.service";
 
-const AdminUsers = () => {
-  const navigate = useNavigate();
+/* =========================
+   Helpers
+========================= */
 
+const unwrapList = (res) => {
+  const candidates = [res?.result, res?.data?.result, res?.data, res];
+  for (const c of candidates) if (Array.isArray(c)) return c;
+  return [];
+};
+
+const getUserId = (u) => u?.id ?? u?._id ?? u?.userId ?? u?.uuid ?? null;
+
+const getStatus = (u) =>
+  String(u?.status ?? u?.state ?? u?.accountStatus ?? "UNKNOWN").toUpperCase();
+
+const isAdminUser = (u) => u?.username?.toLowerCase() === "admin";
+
+const badgeClass = (status) => {
+  const s = String(status).toUpperCase();
+  if (s.includes("BAN")) return "bg-red-500/15 text-red-300 border-red-500/30";
+  if (s.includes("SUSPEND"))
+    return "bg-yellow-500/15 text-yellow-200 border-yellow-500/30";
+  if (s.includes("ACTIVE"))
+    return "bg-green-500/15 text-green-200 border-green-500/30";
+  return "bg-gray-500/15 text-gray-300 border-gray-500/30";
+};
+
+const AdminUsers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("User Management");
 
@@ -20,17 +47,14 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [q, setQ] = useState("");
 
-  useEffect(() => {
-    const username = localStorage.getItem("username");
-    if (username !== "admin") navigate("/profile");
-  }, [navigate]);
-
   const loadUsers = async () => {
     try {
       setLoading(true);
       const res = await adminGetUsers();
-      const list = res?.result ?? res?.data?.result ?? res ?? [];
-      setUsers(Array.isArray(list) ? list : []);
+
+      // ✅ ẨN user admin
+      const list = unwrapList(res).filter((u) => !isAdminUser(u));
+      setUsers(list);
     } catch (e) {
       console.error("Load users failed:", e);
       setUsers([]);
@@ -40,40 +64,14 @@ const AdminUsers = () => {
   };
 
   useEffect(() => {
-    setActiveMenu("User Management");
     loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const getStatus = (u) => {
-    const raw =
-      u?.status ??
-      u?.state ??
-      u?.accountStatus ??
-      u?.accessStatus ??
-      (typeof u?.enabled === "boolean" ? (u.enabled ? "ACTIVE" : "DISABLED") : null) ??
-      (typeof u?.active === "boolean" ? (u.active ? "ACTIVE" : "INACTIVE") : null);
-
-    return raw ? String(raw).toUpperCase() : "UNKNOWN";
-  };
-
-  const isBanned = (u) => getStatus(u).includes("BAN");
-  const isSuspended = (u) =>
-    getStatus(u).includes("SUSPEND") || getStatus(u).includes("PAUSE");
 
   const filtered = useMemo(() => {
     const kw = q.trim().toLowerCase();
     if (!kw) return users;
     return users.filter((u) => {
-      const hay = [
-        u?.id,
-        u?.username,
-        u?.email,
-        u?.firstName,
-        u?.lastName,
-        u?.fullName,
-        getStatus(u),
-      ]
+      const hay = [u?.username, u?.email, getStatus(u), getUserId(u)]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -81,45 +79,35 @@ const AdminUsers = () => {
     });
   }, [q, users]);
 
-  const badgeClass = (status) => {
-    const s = String(status).toUpperCase();
-    if (s.includes("BAN")) return "bg-red-500/15 text-red-300 border-red-500/30";
-    if (s.includes("SUSPEND") || s.includes("PAUSE"))
-      return "bg-yellow-500/15 text-yellow-200 border-yellow-500/30";
-    if (s.includes("ACTIVE") || s.includes("ENABLE"))
-      return "bg-green-500/15 text-green-200 border-green-500/30";
-    if (s.includes("INACTIVE") || s.includes("DISABLE"))
-      return "bg-gray-500/15 text-gray-300 border-gray-500/30";
-    return "bg-blue-500/15 text-blue-200 border-blue-500/30";
-  };
-
   const handleSuspend = async (u) => {
-    if (!u?.id) return;
-    if (!window.confirm(`Suspend user "${u.username ?? u.id}"?`)) return;
+    const id = getUserId(u);
+    if (!id) return;
+    if (!window.confirm(`Suspend user "${u?.username ?? id}"?`)) return;
 
     try {
-      setActionLoadingId(u.id);
-      await adminSuspendUser(u.id);
+      setActionLoadingId(id);
+      await adminSuspendUser(id);
       await loadUsers();
     } catch (e) {
       console.error("Suspend failed:", e);
-      alert("Suspend failed. Check console/network.");
+      alert("Suspend failed. Check Network/Console.");
     } finally {
       setActionLoadingId(null);
     }
   };
 
   const handleBan = async (u) => {
-    if (!u?.id) return;
-    if (!window.confirm(`Ban user "${u.username ?? u.id}"?`)) return;
+    const id = getUserId(u);
+    if (!id) return;
+    if (!window.confirm(`Ban user "${u?.username ?? id}"?`)) return;
 
     try {
-      setActionLoadingId(u.id);
-      await adminBanUser(u.id);
+      setActionLoadingId(id);
+      await adminBanUser(id);
       await loadUsers();
     } catch (e) {
       console.error("Ban failed:", e);
-      alert("Ban failed. Check console/network.");
+      alert("Ban failed. Check Network/Console.");
     } finally {
       setActionLoadingId(null);
     }
@@ -127,34 +115,33 @@ const AdminUsers = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* SIDEBAR */}
       <AdminSidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
         sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
       />
 
-      {/* CONTENT */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
-        <div className="p-6">
-          {/* Top bar (toggle sidebar) */}
-          <div className="flex items-center justify-between mb-6">
-            <button
-              type="button"
-              onClick={() => setSidebarOpen((v) => !v)}
-              className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-800"
-              title="Toggle sidebar"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+      <div
+        className={`transition-all duration-300 ${
+          sidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
+        {/* ✅ HEADER */}
+        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
+        <div className="p-6">
+          {/* Page top actions */}
+          <div className="flex items-center justify-end mb-6">
             <button
               onClick={loadUsers}
               className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center gap-2"
               disabled={loading}
               type="button"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
               Refresh
             </button>
           </div>
@@ -166,7 +153,6 @@ const AdminUsers = () => {
             </p>
           </div>
 
-          {/* Search */}
           <div className="mb-4 flex items-center gap-3">
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 w-full max-w-md">
               <Search className="w-4 h-4 text-gray-400" />
@@ -182,88 +168,27 @@ const AdminUsers = () => {
             </div>
           </div>
 
-          {/* Table */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
             <div className="overflow-auto">
               <table className="w-full text-sm">
                 <thead className="bg-slate-900/80 border-b border-slate-800">
                   <tr className="text-left">
-                    <th className="px-4 py-3 whitespace-nowrap">#</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Username</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Email</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Status</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Actions</th>
+                    <th className="px-4 py-3">#</th>
+                    <th className="px-4 py-3">Username</th>
+                    <th className="px-4 py-3">Email</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {filtered.map((u, idx) => {
-                    const status = getStatus(u);
-                    const busy = actionLoadingId === u.id;
-                    const disableSuspend = busy || isBanned(u) || isSuspended(u);
-                    const disableBan = busy || isBanned(u);
-
-                    return (
-                      <tr
-                        key={u?.id ?? idx}
-                        className="border-b border-slate-800 hover:bg-slate-800/40"
-                      >
-                        <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
-                          {idx + 1}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-medium">{u?.username ?? "-"}</div>
-                          <div className="text-xs text-gray-400">{u?.id}</div>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">{u?.email ?? "-"}</td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs ${badgeClass(
-                              status
-                            )}`}
-                          >
-                            {status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleSuspend(u)}
-                              disabled={disableSuspend}
-                              className={`px-3 py-2 rounded-lg flex items-center gap-2 border
-                                ${
-                                  disableSuspend
-                                    ? "opacity-40 cursor-not-allowed border-slate-700"
-                                    : "border-yellow-500/30 hover:bg-yellow-500/10 text-yellow-200"
-                                }`}
-                            >
-                              <PauseCircle className="w-4 h-4" />
-                              Suspend
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleBan(u)}
-                              disabled={disableBan}
-                              className={`px-3 py-2 rounded-lg flex items-center gap-2 border
-                                ${
-                                  disableBan
-                                    ? "opacity-40 cursor-not-allowed border-slate-700"
-                                    : "border-red-500/30 hover:bg-red-500/10 text-red-300"
-                                }`}
-                            >
-                              <Ban className="w-4 h-4" />
-                              Ban
-                            </button>
-
-                            {busy && (
-                              <span className="text-xs text-gray-400">Processing...</span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {loading && (
+                    <tr>
+                      <td className="px-4 py-6 text-gray-400" colSpan={5}>
+                        Loading...
+                      </td>
+                    </tr>
+                  )}
 
                   {!loading && filtered.length === 0 && (
                     <tr>
@@ -273,22 +198,83 @@ const AdminUsers = () => {
                     </tr>
                   )}
 
-                  {loading && (
-                    <tr>
-                      <td className="px-4 py-6 text-gray-400" colSpan={5}>
-                        Loading...
-                      </td>
-                    </tr>
-                  )}
+                  {!loading &&
+                    filtered.map((u, idx) => {
+                      const id = getUserId(u);
+                      const status = getStatus(u);
+                      const busy = actionLoadingId === id;
+
+                      return (
+                        <tr
+                          key={id ?? idx}
+                          className="border-b border-slate-800 hover:bg-slate-800/40"
+                        >
+                          <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
+
+                          <td className="px-4 py-3">
+                            <div className="font-medium">{u?.username}</div>
+                            <div className="text-xs text-gray-400">{id}</div>
+                          </td>
+
+                          <td className="px-4 py-3">{u?.email ?? "-"}</td>
+
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs ${badgeClass(
+                                status
+                              )}`}
+                            >
+                              {status}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleSuspend(u)}
+                                disabled={busy}
+                                className={`px-3 py-2 rounded-lg flex items-center gap-2 border ${
+                                  busy
+                                    ? "opacity-40 cursor-not-allowed border-slate-700"
+                                    : "border-yellow-500/30 hover:bg-yellow-500/10 text-yellow-200"
+                                }`}
+                              >
+                                <PauseCircle className="w-4 h-4" />
+                                Suspend
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleBan(u)}
+                                disabled={busy}
+                                className={`px-3 py-2 rounded-lg flex items-center gap-2 border ${
+                                  busy
+                                    ? "opacity-40 cursor-not-allowed border-slate-700"
+                                    : "border-red-500/30 hover:bg-red-500/10 text-red-300"
+                                }`}
+                              >
+                                <Ban className="w-4 h-4" />
+                                Ban
+                              </button>
+
+                              {busy && (
+                                <span className="text-xs text-gray-400">
+                                  Processing...
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div className="mt-4 text-xs text-gray-500">
-            Nếu danh sách vẫn trống: kiểm tra Network xem API GET users có trả về
-            `result` hay không, và endpoint có đúng không.
-          </div>
+          {/* ✅ FOOTER */}
+          <Footer />
         </div>
       </div>
     </div>

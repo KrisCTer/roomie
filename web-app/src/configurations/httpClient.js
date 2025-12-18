@@ -1,4 +1,3 @@
-// src/services/httpClient.js
 import axios from "axios";
 import { CONFIG } from "./configuration";
 import { getToken } from "../services/localStorageService";
@@ -11,7 +10,9 @@ const httpClient = axios.create({
 
 httpClient.interceptors.request.use((config) => {
   const token = getToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
