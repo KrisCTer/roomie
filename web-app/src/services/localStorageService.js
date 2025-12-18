@@ -2,8 +2,14 @@
 const ACCESS_TOKEN_KEY = "access_token";
 const USER_INFO_KEY = "userInfo";
 
-export const setToken = (token) => localStorage.setItem(ACCESS_TOKEN_KEY, token);
-export const getToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
+export const setToken = (token) =>
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+export const getToken = () =>
+  localStorage.getItem("access_token") ||
+  localStorage.getItem("token") ||
+  localStorage.getItem("accessToken") ||
+  JSON.parse(localStorage.getItem("auth") || "{}")?.token ||
+  null;
 export const removeToken = () => localStorage.removeItem(ACCESS_TOKEN_KEY);
 export const isAuthenticated = () => Boolean(getToken());
 

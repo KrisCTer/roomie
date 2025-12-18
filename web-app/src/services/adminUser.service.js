@@ -2,17 +2,30 @@
 import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
+const isAuthError = (e) => {
+  const status = e?.response?.status;
+  return status === 401 || status === 403;
+};
+
+const doRequest = async (primaryFn, fallbackFn) => {
+  try {
+    return await primaryFn();
+  } catch (e) {
+    if (isAuthError(e) && fallbackFn) return await fallbackFn();
+    throw e;
+  }
+};
+
 export const adminGetUsers = () =>
-  BaseService.get(API.ADMIN_GET_ALL_USERS);
+  doRequest(
+    () => BaseService.get(API.ADMIN_GET_ALL_USERS),
+    () => BaseService.get(API.INTERNAL_GET_ALL_USERS)
+  );
 
-export const adminGetUser = (id) =>
-  BaseService.get(API.ADMIN_GET_USER(id));
+export const adminSuspendUser = (userId) => {
+  return BaseService.post(API.ADMIN_SUSPEND_USER(userId));
+};
 
-export const adminDeleteUser = (id) =>
-  BaseService.delete(API.ADMIN_DELETE_USER(id));
-
-export const adminSuspendUser = (id) =>
-  BaseService.post(API.ADMIN_SUSPEND_USER(id));
-
-export const adminBanUser = (id) =>
-  BaseService.post(API.ADMIN_BAN_USER(id));
+export const adminBanUser = (userId) => {
+  return BaseService.post(API.ADMIN_BAN_USER(userId));
+};

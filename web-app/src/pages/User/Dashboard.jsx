@@ -154,16 +154,17 @@ const Dashboard = () => {
     const getStatusText = (status) => {
       const normalized = (status || "").toUpperCase();
       const statusMap = {
-        DRAFT: "Pending",
+        DRAFT: "Draft",
         PENDING: "Pending",
         APPROVED: "Approved",
+        ACTIVE: "Approved",
         AVAILABLE: "Approved",
         SOLD: "Sold",
         RENTED: "Sold",
         REJECT: "Rejected",
         REJECTED: "Rejected",
       };
-      return statusMap[normalized] || "Pending";
+      return statusMap[normalized];
     };
 
     return {

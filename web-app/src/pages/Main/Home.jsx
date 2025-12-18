@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
-
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ thêm
 import {
   Box,
   Container,
@@ -8,10 +8,7 @@ import {
   Card,
   CardMedia,
   CardContent,
-  Chip,
-  IconButton,
 } from "@mui/material";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 import Header from "../../components/layout/layoutHome/Header";
 import SearchBar from "../../components/layout/layoutHome/SearchBar";
@@ -42,13 +39,7 @@ const groupByProvince = (items) => {
 const filterApproved = (items) => {
   return items.filter((p) => {
     const status = (p.status || p.propertyStatus || "").toUpperCase();
-    // Ẩn: PENDING / DRAFT / REJECT / REJECTED
-    if (
-      ["PENDING", "DRAFT", "REJECT", "REJECTED"].includes(status)
-    ) {
-      return false;
-    }
-    // Giữ lại APPROVED, AVAILABLE, SOLD, RENTED...
+    if (["PENDING", "DRAFT", "REJECT", "REJECTED"].includes(status)) return false;
     return true;
   });
 };
@@ -86,17 +77,23 @@ const transformToCardData = (property) => {
   };
 };
 
-const ListingCard = ({ item }) => (
+const ListingCard = ({ item, onClick }) => (
   <Card
+    onClick={onClick} // ✅ click để chuyển trang
+    role="button"
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" || e.key === " ") onClick?.();
+    }}
     sx={{
       borderRadius: 4,
       boxShadow: "0 18px 45px rgba(15,23,42,0.15)",
       overflow: "hidden",
       cursor: "pointer",
       position: "relative",
+      "&:hover": { transform: "translateY(-2px)", transition: "0.2s" },
     }}
   >
-    {/* Ảnh */}
     <Box
       sx={{
         height: 220,
@@ -108,59 +105,25 @@ const ListingCard = ({ item }) => (
       }}
     >
       <CardMedia component="img" image={item.image} sx={{ height: "100%" }} />
-
-      <IconButton
-        sx={{
-          position: "absolute",
-          top: 12,
-          right: 12,
-          bgcolor: "rgba(15,23,42,0.6)",
-          "&:hover": { bgcolor: "rgba(15,23,42,0.8)" },
-        }}
-      >
-        <FavoriteBorderIcon sx={{ color: "white" }} />
-      </IconButton>
     </Box>
 
-    {/* Nội dung */}
     <CardContent sx={{ px: 3, pt: 2, pb: 3 }}>
-      <Typography
-        variant="subtitle1"
-        sx={{ fontWeight: 700, mb: 0.5 }}
-        noWrap
-      >
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }} noWrap>
         {item.title}
       </Typography>
 
-      <Typography
-        variant="body2"
-        sx={{ color: "text.secondary", mb: 1 }}
-        noWrap
-      >
+      <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }} noWrap>
         {item.location}
       </Typography>
 
-      <Typography
-        variant="subtitle1"
-        sx={{ fontWeight: 700, color: "#2563eb", mb: 1 }}
-      >
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2563eb", mb: 1 }}>
         {item.price}
       </Typography>
-
-      <Chip
-        label="Từ dữ liệu hệ thống"
-        size="small"
-        sx={{
-          bgcolor: "rgba(37,99,235,0.08)",
-          color: "#2563eb",
-          fontWeight: 600,
-        }}
-      />
     </CardContent>
   </Card>
 );
 
-const Section = ({ province, listings }) => (
+const Section = ({ province, listings, onOpenDetail }) => (
   <Box sx={{ mb: 6 }}>
     <Box
       sx={{
@@ -187,14 +150,27 @@ const Section = ({ province, listings }) => (
     >
       {listings.map((p) => {
         const card = transformToCardData(p);
-        return <ListingCard key={card.id} item={card} />;
+        return (
+          <ListingCard
+            key={card.id}
+            item={card}
+            onClick={() => onOpenDetail(card.id)}
+          />
+        );
       })}
     </Box>
   </Box>
 );
 
 export default function Home() {
+  const navigate = useNavigate(); // ✅ thêm
   const [sections, setSections] = useState([]);
+
+  const openDetail = (id) => {
+    if (!id) return;
+    // ✅ Route detail (đảm bảo Router của bạn có path này)
+    navigate(`/property/${id}`);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -202,7 +178,6 @@ export default function Home() {
         const res = await getAllProperties();
         console.log("Home getAllProperties response:", res);
 
-        // Chuẩn: { code, success, message, result: [...] }
         let list = [];
         if (res && res.success && Array.isArray(res.result)) {
           list = res.result;
@@ -227,7 +202,6 @@ export default function Home() {
     <Box sx={{ bgcolor: "#020617", minHeight: "100vh" }}>
       <Header />
 
-      {/* Hero + Search */}
       <Box
         sx={{
           background:
@@ -239,12 +213,7 @@ export default function Home() {
         <Container maxWidth="lg">
           <Typography
             variant="h3"
-            sx={{
-              fontWeight: 800,
-              mb: 2,
-              color: "white",
-              textAlign: "center",
-            }}
+            sx={{ fontWeight: 800, mb: 2, color: "white", textAlign: "center" }}
           >
             Tìm nơi ở hoàn hảo cho bạn
           </Typography>
@@ -263,7 +232,6 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* Danh sách */}
       <Box sx={{ bgcolor: "#f1f5f9", py: 6 }}>
         <Container maxWidth="lg">
           {sections.map((sec) => (
@@ -271,6 +239,7 @@ export default function Home() {
               key={sec.province}
               province={sec.province}
               listings={sec.items}
+              onOpenDetail={openDetail}
             />
           ))}
         </Container>

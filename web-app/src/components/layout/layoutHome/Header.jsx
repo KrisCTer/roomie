@@ -57,8 +57,18 @@ export default function Header() {
 
   const getUsername = () => {
     const user = getStoredUser();
+    
     // ưu tiên các field thường gặp
-    return user?.username || user?.userName || user?.name || user?.email || "";
+    //return user?.username || user?.userName || user?.name || user?.email || "";
+    
+    // 1) ưu tiên lấy từ object user (nếu có)
+    const fromUser =
+      user?.username || user?.userName || user?.name || user?.email || "";
+
+    // 2) fallback: lấy từ key "username" (trường hợp của bạn)
+    const fromKey = localStorage.getItem("username");
+
+    return (fromUser || fromKey || "").toString().trim();
   };
 
   // Điều hướng dashboard theo username
@@ -69,13 +79,14 @@ export default function Header() {
     console.log("Dashboard click, username =", username);
 
     if (username === "admin") {
-      navigate("/admin/properties");
+      navigate("/admin/dashboard");
     } else {
       navigate("/dashboard");
     }
   };
 
   const username = getUsername();
+  const isAdmin = username?.toLowerCase() === "admin";
 
   return (
     <AppBar
@@ -173,14 +184,16 @@ export default function Header() {
                   },
                 }}
               >
-                <MenuItem
-                  onClick={() => {
-                    handleCloseMenu();
-                    navigate("/profile");
-                  }}
-                >
-                  {t("header.myProfile")}
-                </MenuItem>
+                {!isAdmin && (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseMenu();
+                      navigate("/profile");
+                    }}
+                  >
+                    {t("header.myProfile")}
+                  </MenuItem>
+                )}
 
                 <MenuItem
                   onClick={() => {
