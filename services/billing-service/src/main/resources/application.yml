@@ -27,6 +27,20 @@ spring:
     consumer:
       group-id: billing-service
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: romie.housing.tech@gmail.com
+    password: mznl wclo ddwt jrut
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 eureka:
   client:
     service-url:
@@ -37,7 +51,20 @@ billing:
   validation:
     max-electricity-consumption: 10000  # kWh
     max-water-consumption: 1000
+  # Payment Configuration
+  payment:
+    momo:
+      partnerCode: ${MOMO_PARTNER_CODE:MOMORZW420251202_TEST}
+      accessKey: ${MOMO_ACCESS_KEY:BeMUhv9rHCRg517u}
+      secretKey: ${MOMO_SECRET_KEY:nl90qNFWwXrVOkf9uDWsYPUZ4bIr4gTb}
+      endpoint: ${MOMO_ENDPOINT:https://test-payment.momo.vn/v2/gateway/api/create}
+      returnUrl: ${MOMO_RETURN_URL:http://localhost:3000/payment/return}
+      notifyUrl: ${MOMO_NOTIFY_URL:http://localhost:8086/billing/webhook/momo}
 
+    bank:
+      code: "VCB"  # Mã ngân hàng (VCB = Vietcombank)
+      account: "1234567890"  # Số tài khoản
+      name: "ROOMIE TECHNOLOGIES LTD"  # Tên chủ tài khoản
 ocr:
   tesseract:
     datapath: /usr/share/tesseract-ocr/4.00/tessdata

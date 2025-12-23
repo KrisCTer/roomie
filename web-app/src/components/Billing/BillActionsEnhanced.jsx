@@ -26,9 +26,6 @@ const BillActionsEnhanced = ({ bill, canPay, onPayment, onBack }) => {
 
         {/* PDF Download */}
         <div className="pt-2 border-t">
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            📄 Invoice PDF
-          </p>
           <BillPdfDownloader
             billId={bill.id}
             billMonth={bill.billingMonth?.substring(0, 7)}

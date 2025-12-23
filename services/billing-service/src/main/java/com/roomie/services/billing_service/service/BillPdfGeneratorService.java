@@ -5,8 +5,11 @@ import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import com.roomie.services.billing_service.entity.Bill;
 import com.roomie.services.billing_service.dto.response.ContractResponse;
+import com.roomie.services.billing_service.dto.response.MoMoPaymentResponse;
 import com.roomie.services.billing_service.dto.response.property.PropertyResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -18,17 +21,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * Professional PDF Invoice Generator
- * Creates beautiful, standardized invoices with:
- * - Company logo and branding
- * - Contract and property details
- * - Detailed breakdown table
- * - Payment information
- * - QR code for payment (optional)
+ * Professional PDF Invoice Generator with REAL MoMo Payment QR Code
+ *
+ * Uses MoMo API to generate actual payment transaction and QR code
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class BillPdfGeneratorService {
+
+    private final MoMoPaymentService moMoPaymentService;
+
+    @Value("${billing.payment.bank.code:VCB}")
+    private String bankCode;
+
+    @Value("${billing.payment.bank.account:1234567890}")
+    private String bankAccount;
+
+    @Value("${billing.payment.bank.name:ROOMIE TECHNOLOGIES LTD}")
+    private String bankAccountName;
 
     private static final Font FONT_TITLE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24, BaseColor.DARK_GRAY);
     private static final Font FONT_HEADER = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK);
@@ -45,7 +56,7 @@ public class BillPdfGeneratorService {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     /**
-     * Generate PDF invoice for a bill
+     * Generate PDF invoice with REAL MoMo payment QR code
      */
     public byte[] generateInvoicePdf(
             Bill bill,
@@ -53,7 +64,7 @@ public class BillPdfGeneratorService {
             PropertyResponse property
     ) throws DocumentException, IOException {
 
-        log.info("Generating PDF invoice for bill: {}", bill.getId());
+        log.info("🎯 Generating PDF invoice with REAL MoMo QR code for bill: {}", bill.getId());
 
         Document document = new Document(PageSize.A4, 36, 36, 54, 54);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -61,7 +72,6 @@ public class BillPdfGeneratorService {
         try {
             PdfWriter writer = PdfWriter.getInstance(document, baos);
 
-            // Add header/footer
             HeaderFooterPageEvent event = new HeaderFooterPageEvent();
             writer.setPageEvent(event);
 
@@ -69,38 +79,32 @@ public class BillPdfGeneratorService {
 
             // 1. Logo & Company Info
             addCompanyHeader(document);
-
             document.add(Chunk.NEWLINE);
 
             // 2. Invoice Title & Number
             addInvoiceTitle(document, bill);
-
             document.add(Chunk.NEWLINE);
 
             // 3. Contract & Property Info
             addContractInfo(document, contract, property);
-
             document.add(Chunk.NEWLINE);
 
             // 4. Billing Period
             addBillingPeriod(document, bill);
-
             document.add(Chunk.NEWLINE);
 
             // 5. Detailed Breakdown Table
             addDetailedBreakdown(document, bill);
-
             document.add(Chunk.NEWLINE);
 
-            // 6. Payment Information
-            addPaymentInfo(document, bill);
-
+            // 6. Payment Information with REAL MoMo QR Code
+            addPaymentInfoWithRealMoMoQR(document, bill);
             document.add(Chunk.NEWLINE);
 
             // 7. Terms & Conditions
             addTermsAndConditions(document);
 
-            log.info("PDF invoice generated successfully for bill: {}", bill.getId());
+            log.info("✅ PDF invoice generated successfully");
 
         } finally {
             document.close();
@@ -116,7 +120,7 @@ public class BillPdfGeneratorService {
         headerTable.setWidthPercentage(100);
         headerTable.setWidths(new float[]{1, 2});
 
-        // Logo Cell (placeholder - you can add actual logo)
+        // Logo Cell
         PdfPCell logoCell = new PdfPCell();
         logoCell.setBorder(Rectangle.NO_BORDER);
         logoCell.setPadding(10);
@@ -151,7 +155,6 @@ public class BillPdfGeneratorService {
 
         document.add(headerTable);
 
-        // Separator line
         LineSeparator line = new LineSeparator();
         line.setLineColor(COLOR_HEADER);
         document.add(line);
@@ -162,7 +165,6 @@ public class BillPdfGeneratorService {
         titleTable.setWidthPercentage(100);
         titleTable.setWidths(new float[]{3, 2});
 
-        // Title Cell
         PdfPCell titleCell = new PdfPCell();
         titleCell.setBorder(Rectangle.NO_BORDER);
 
@@ -173,7 +175,6 @@ public class BillPdfGeneratorService {
 
         titleTable.addCell(titleCell);
 
-        // Invoice Details Cell
         PdfPCell detailsCell = new PdfPCell();
         detailsCell.setBorder(Rectangle.NO_BORDER);
         detailsCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -198,7 +199,6 @@ public class BillPdfGeneratorService {
         infoTable.setWidths(new float[]{1, 1});
         infoTable.setSpacingBefore(10);
 
-        // Property Info
         PdfPCell propertyCell = new PdfPCell();
         propertyCell.setPadding(10);
         propertyCell.setBackgroundColor(new BaseColor(249, 249, 249));
@@ -213,7 +213,6 @@ public class BillPdfGeneratorService {
         propertyCell.addElement(propertyInfo);
         infoTable.addCell(propertyCell);
 
-        // Contract Info
         PdfPCell contractCell = new PdfPCell();
         contractCell.setPadding(10);
         contractCell.setBackgroundColor(new BaseColor(249, 249, 249));
@@ -248,7 +247,6 @@ public class BillPdfGeneratorService {
         table.setWidths(new float[]{3, 2, 1.5f, 2});
         table.setSpacingBefore(15);
 
-        // Header Row
         addTableHeader(table, "Description");
         addTableHeader(table, "Details");
         addTableHeader(table, "Unit Price");
@@ -256,13 +254,11 @@ public class BillPdfGeneratorService {
 
         int rowIndex = 0;
 
-        // Monthly Rent
         if (bill.getMonthlyRent() != null && bill.getMonthlyRent().compareTo(BigDecimal.ZERO) > 0) {
             addTableRow(table, rowIndex++, "Monthly Rent", "1 month", "-",
                     formatCurrency(bill.getMonthlyRent()));
         }
 
-        // Electricity
         if (bill.getElectricityAmount() != null && bill.getElectricityAmount().compareTo(BigDecimal.ZERO) > 0) {
             String elecDetails = String.format("%.0f → %.0f kWh (%.0f kWh used)",
                     bill.getElectricityOld(), bill.getElectricityNew(), bill.getElectricityConsumption());
@@ -271,7 +267,6 @@ public class BillPdfGeneratorService {
                     formatCurrency(bill.getElectricityAmount()));
         }
 
-        // Water
         if (bill.getWaterAmount() != null && bill.getWaterAmount().compareTo(BigDecimal.ZERO) > 0) {
             String waterDetails = String.format("%.0f → %.0f m³ (%.0f m³ used)",
                     bill.getWaterOld(), bill.getWaterNew(), bill.getWaterConsumption());
@@ -280,31 +275,26 @@ public class BillPdfGeneratorService {
                     formatCurrency(bill.getWaterAmount()));
         }
 
-        // Internet
         if (bill.getInternetPrice() != null && bill.getInternetPrice().compareTo(BigDecimal.ZERO) > 0) {
             addTableRow(table, rowIndex++, "Internet", "Monthly service", "-",
                     formatCurrency(bill.getInternetPrice()));
         }
 
-        // Parking
         if (bill.getParkingPrice() != null && bill.getParkingPrice().compareTo(BigDecimal.ZERO) > 0) {
             addTableRow(table, rowIndex++, "Parking", "Monthly fee", "-",
                     formatCurrency(bill.getParkingPrice()));
         }
 
-        // Cleaning
         if (bill.getCleaningPrice() != null && bill.getCleaningPrice().compareTo(BigDecimal.ZERO) > 0) {
             addTableRow(table, rowIndex++, "Cleaning Service", "Monthly service", "-",
                     formatCurrency(bill.getCleaningPrice()));
         }
 
-        // Maintenance
         if (bill.getMaintenancePrice() != null && bill.getMaintenancePrice().compareTo(BigDecimal.ZERO) > 0) {
             addTableRow(table, rowIndex++, "Maintenance", "Monthly fee", "-",
                     formatCurrency(bill.getMaintenancePrice()));
         }
 
-        // Other
         if (bill.getOtherPrice() != null && bill.getOtherPrice().compareTo(BigDecimal.ZERO) > 0) {
             String desc = bill.getOtherDescription() != null ? bill.getOtherDescription() : "Other Fees";
             addTableRow(table, rowIndex++, desc, "-", "-",
@@ -313,7 +303,6 @@ public class BillPdfGeneratorService {
 
         document.add(table);
 
-        // Total Row
         PdfPTable totalTable = new PdfPTable(2);
         totalTable.setWidthPercentage(100);
         totalTable.setWidths(new float[]{3, 1});
@@ -335,34 +324,153 @@ public class BillPdfGeneratorService {
         document.add(totalTable);
     }
 
-    private void addPaymentInfo(Document document, Bill bill) throws DocumentException {
+    /**
+     * Add Payment Information with REAL MoMo Payment QR Code
+     *
+     * Flow:
+     * 1. Call MoMo API để tạo payment transaction
+     * 2. Nhận về qrCodeUrl
+     * 3. Download QR code image từ MoMo
+     * 4. Embed vào PDF
+     */
+
+    private void addPaymentInfoWithRealMoMoQR(Document document, Bill bill) throws DocumentException {
         Paragraph paymentTitle = new Paragraph("PAYMENT INFORMATION", FONT_SUBHEADER);
         paymentTitle.setSpacingBefore(20);
         document.add(paymentTitle);
 
-        PdfPTable paymentTable = new PdfPTable(1);
-        paymentTable.setWidthPercentage(100);
-        paymentTable.setSpacingBefore(10);
+        try {
+            log.info("🔄 Creating MoMo payment transaction for bill: {}", bill.getId());
 
-        PdfPCell paymentCell = new PdfPCell();
-        paymentCell.setPadding(15);
-        paymentCell.setBackgroundColor(new BaseColor(255, 250, 240));
+            // 1. Call MoMo API để tạo payment
+            String orderInfo = String.format("Thanh toan hoa don Roomie %s",
+                    bill.getId().substring(0, 8).toUpperCase());
 
-        Paragraph paymentInfo = new Paragraph();
-        paymentInfo.add(new Chunk("Bank Transfer:\n", FONT_SUBHEADER));
-        paymentInfo.add(new Chunk("Bank: VCB (Vietcombank)\n", FONT_NORMAL));
-        paymentInfo.add(new Chunk("Account Number: 1234567890\n", FONT_NORMAL));
-        paymentInfo.add(new Chunk("Account Name: ROOMIE TECHNOLOGIES LTD\n", FONT_NORMAL));
-        paymentInfo.add(new Chunk("Transfer Content: " + bill.getId().substring(0, 12) + "\n\n", FONT_NORMAL));
+            long amount = bill.getTotalAmount().longValue();
 
-        paymentInfo.add(new Chunk("E-Wallet:\n", FONT_SUBHEADER));
-        paymentInfo.add(new Chunk("Momo: 0901234567\n", FONT_NORMAL));
-        paymentInfo.add(new Chunk("ZaloPay: 0901234567\n", FONT_NORMAL));
+            MoMoPaymentResponse momoResponse = moMoPaymentService.createPaymentQR(
+                    bill.getId(),
+                    amount,
+                    orderInfo
+            );
 
-        paymentCell.addElement(paymentInfo);
-        paymentTable.addCell(paymentCell);
+            log.info("✅ MoMo payment created");
+            log.info("   Order ID: {}", momoResponse.getOrderId());
+            log.info("   Pay URL: {}", momoResponse.getPayUrl());
+            log.info("   QR Code URL: {}", momoResponse.getQrCodeUrl());
 
-        document.add(paymentTable);
+            // 2. Get QR code image - SMART METHOD
+            // Tự động detect: có qrCodeUrl → download, không có → generate
+            byte[] qrImageBytes = moMoPaymentService.getQRCodeImage(momoResponse, 200, 200);
+
+            // 3. Convert to iText Image
+            Image qrCodeImage = Image.getInstance(qrImageBytes);
+            qrCodeImage.scaleAbsolute(150, 150);
+
+            // 4. Create payment info table với QR code
+            PdfPTable paymentTable = new PdfPTable(2);
+            paymentTable.setWidthPercentage(100);
+            paymentTable.setWidths(new float[]{3, 2});
+            paymentTable.setSpacingBefore(10);
+
+            // Left cell - Payment details
+            PdfPCell detailsCell = new PdfPCell();
+            detailsCell.setPadding(15);
+            detailsCell.setBackgroundColor(new BaseColor(255, 250, 240));
+
+            Paragraph paymentInfo = new Paragraph();
+            paymentInfo.add(new Chunk("💳 Quét QR Code để thanh toán\n\n", FONT_SUBHEADER));
+            paymentInfo.add(new Chunk("Phương thức: ", FONT_SUBHEADER));
+            paymentInfo.add(new Chunk("Ví MoMo\n", FONT_NORMAL));
+            paymentInfo.add(new Chunk("Số tiền: ", FONT_SUBHEADER));
+            paymentInfo.add(new Chunk(formatCurrency(bill.getTotalAmount()) + "\n", FONT_NORMAL));
+            paymentInfo.add(new Chunk("Mã đơn hàng: ", FONT_SUBHEADER));
+            paymentInfo.add(new Chunk(momoResponse.getOrderId().substring(0, 12) + "...\n\n", FONT_SMALL));
+
+            // Thêm note về QR code
+            if (momoResponse.getQrCodeUrl() != null) {
+                paymentInfo.add(new Chunk("✨ QR code chính thức từ MoMo\n\n", FONT_SMALL));
+            } else {
+                paymentInfo.add(new Chunk("💡 QR code được tạo từ payment URL\n\n", FONT_SMALL));
+            }
+
+            paymentInfo.add(new Chunk("--- HOẶC ---\n\n", FONT_SMALL));
+
+            paymentInfo.add(new Chunk("Chuyển khoản ngân hàng:\n", FONT_SUBHEADER));
+            paymentInfo.add(new Chunk("Ngân hàng: Vietcombank (VCB)\n", FONT_NORMAL));
+            paymentInfo.add(new Chunk("STK: " + bankAccount + "\n", FONT_NORMAL));
+            paymentInfo.add(new Chunk("Chủ TK: " + bankAccountName + "\n", FONT_NORMAL));
+            paymentInfo.add(new Chunk("Nội dung: " + momoResponse.getOrderId().substring(0, 12) + "\n", FONT_NORMAL));
+
+            detailsCell.addElement(paymentInfo);
+            paymentTable.addCell(detailsCell);
+
+            // Right cell - QR Code
+            PdfPCell qrCell = new PdfPCell();
+            qrCell.setPadding(15);
+            qrCell.setBackgroundColor(BaseColor.WHITE);
+            qrCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            qrCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+            Paragraph qrLabel = new Paragraph("QR Code MoMo\n\n", FONT_SMALL);
+            qrLabel.setAlignment(Element.ALIGN_CENTER);
+            qrCell.addElement(qrLabel);
+
+            qrCodeImage.setAlignment(Element.ALIGN_CENTER);
+            qrCell.addElement(qrCodeImage);
+
+            Paragraph qrNote = new Paragraph("\nMở app MoMo\nvà quét mã", FONT_SMALL);
+            qrNote.setAlignment(Element.ALIGN_CENTER);
+            qrCell.addElement(qrNote);
+
+            paymentTable.addCell(qrCell);
+
+            document.add(paymentTable);
+
+            // Add payment URL for reference
+            Paragraph paymentUrl = new Paragraph();
+            paymentUrl.setSpacingBefore(10);
+            paymentUrl.add(new Chunk("Hoặc thanh toán online tại: ", FONT_SMALL));
+
+            // Truncate long URL for display
+            String displayUrl = momoResponse.getPayUrl();
+            if (displayUrl.length() > 80) {
+                displayUrl = displayUrl.substring(0, 77) + "...";
+            }
+
+            paymentUrl.add(new Chunk(displayUrl,
+                    FontFactory.getFont(FontFactory.HELVETICA, 7, Font.UNDERLINE, BaseColor.BLUE)));
+            document.add(paymentUrl);
+
+
+            log.info("✅ MoMo QR code added to PDF invoice successfully");
+
+        } catch (Exception e) {
+            log.error("❌ Failed to generate MoMo payment QR code", e);
+
+            // Fallback to bank transfer info only
+            PdfPTable fallbackTable = new PdfPTable(1);
+            fallbackTable.setWidthPercentage(100);
+            fallbackTable.setSpacingBefore(10);
+
+            PdfPCell fallbackCell = new PdfPCell();
+            fallbackCell.setPadding(15);
+            fallbackCell.setBackgroundColor(new BaseColor(255, 250, 240));
+
+            Paragraph fallbackInfo = new Paragraph();
+            fallbackInfo.add(new Chunk("⚠️ Không thể tạo QR code MoMo\n\n", FONT_SUBHEADER));
+            fallbackInfo.add(new Chunk("Vui lòng chuyển khoản ngân hàng:\n", FONT_SUBHEADER));
+            fallbackInfo.add(new Chunk("Ngân hàng: Vietcombank (VCB)\n", FONT_NORMAL));
+            fallbackInfo.add(new Chunk("Số tài khoản: " + bankAccount + "\n", FONT_NORMAL));
+            fallbackInfo.add(new Chunk("Chủ tài khoản: " + bankAccountName + "\n", FONT_NORMAL));
+            fallbackInfo.add(new Chunk("Số tiền: " + formatCurrency(bill.getTotalAmount()) + "\n", FONT_NORMAL));
+            fallbackInfo.add(new Chunk("Nội dung: ROOMIE-" + bill.getId().substring(0, 8).toUpperCase() + "\n", FONT_NORMAL));
+
+            fallbackCell.addElement(fallbackInfo);
+            fallbackTable.addCell(fallbackCell);
+
+            document.add(fallbackTable);
+        }
     }
 
     private void addTermsAndConditions(Document document) throws DocumentException {
@@ -371,6 +479,7 @@ public class BillPdfGeneratorService {
         terms.add(new Chunk("Terms & Conditions:\n", FONT_SUBHEADER));
         terms.add(new Chunk("• Payment is due within 5 days of invoice date\n", FONT_SMALL));
         terms.add(new Chunk("• Late payments may incur additional fees\n", FONT_SMALL));
+        terms.add(new Chunk("• QR code is valid for 15 minutes from generation time\n", FONT_SMALL));
         terms.add(new Chunk("• For questions, contact billing@roomie.vn\n", FONT_SMALL));
 
         document.add(terms);
@@ -452,7 +561,6 @@ public class BillPdfGeneratorService {
         public void onEndPage(PdfWriter writer, Document document) {
             PdfContentByte cb = writer.getDirectContent();
 
-            // Footer
             Phrase footer = new Phrase("Page " + writer.getPageNumber() +
                     " | Generated by Roomie Platform | www.roomie.vn", FONT_SMALL);
 

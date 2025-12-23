@@ -249,3 +249,9 @@ export const previewBillPdf = openBillPdfPreview;
 // Legacy compatibility
 export const createBill = createOrUpdateBill;
 export const updateBill = createOrUpdateBill;
+
+// Email
+export const emailInvoice = (billId, recipientEmail) =>
+  BaseService.post(`/billing/${billId}/email`, null, {
+    params: { recipientEmail }
+  });

@@ -190,10 +190,7 @@ const Dashboard = () => {
               ========================================== */}
           {activeRole === "landlord" && (
             <div className="mb-8">
-              <RevenueChartRecharts
-                data={monthlyRevenueData}
-                loading={loading}
-              />
+              <RevenueChartRecharts bills={data.bills} loading={loading} />
             </div>
           )}
 

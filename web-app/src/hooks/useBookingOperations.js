@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  X,
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Clock, CheckCircle, AlertCircle, X } from "lucide-react";
 import {
   getBooking,
   cancelBooking,
@@ -15,6 +11,7 @@ import {
 import { getUserInfo } from "../services/localStorageService";
 
 export const useBookingOperations = () => {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -119,6 +116,11 @@ export const useBookingOperations = () => {
     }
   };
 
+  const handleViewTenantProfile = (tenantId) => {
+    // Navigate to user profile page
+    navigate(`/user/${tenantId}`);
+  };
+
   const getStatusConfig = (status) => {
     const configs = {
       PENDING_APPROVAL: {
@@ -180,6 +182,7 @@ export const useBookingOperations = () => {
       id: booking.id,
       bookingReference: booking.bookingReference || booking.id,
       propertyId: booking.propertyId,
+      tenantId: booking.tenantId,
       leaseStart: formatDate(booking.leaseStart),
       leaseEnd: formatDate(booking.leaseEnd),
       duration: calculateDuration(booking.leaseStart, booking.leaseEnd),
@@ -191,6 +194,10 @@ export const useBookingOperations = () => {
       onCancel: () => handleCancelBooking(booking.id),
       onConfirm:
         viewMode === "OWNER" ? () => handleConfirmBooking(booking.id) : null,
+      onViewTenantProfile:
+        viewMode === "OWNER" && booking.tenantId
+          ? () => handleViewTenantProfile(booking.tenantId)
+          : null,
     };
   };
 
@@ -220,6 +227,7 @@ export const useBookingOperations = () => {
     handleCancelBooking,
     handleConfirmBooking,
     handleViewDetails,
+    handleViewTenantProfile,
     getStatusConfig,
     transformBookingToCard,
     closeModal,

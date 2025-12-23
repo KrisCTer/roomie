@@ -7,9 +7,10 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
+  UserCircle,
 } from "lucide-react";
 
-const BookingCard = ({ booking }) => {
+const BookingCard = ({ booking, isOwner }) => {
   const {
     id,
     bookingReference,
@@ -21,9 +22,11 @@ const BookingCard = ({ booking }) => {
     rentalDeposit,
     status,
     createdAt,
+    tenantId,
     onView,
     onCancel,
     onConfirm,
+    onViewTenantProfile,
   } = booking;
 
   // Get status configuration
@@ -92,7 +95,6 @@ const BookingCard = ({ booking }) => {
               {statusConfig.label}
             </span>
           </div>
-          {/* <p className="text-sm text-gray-600">Property ID: {propertyId}</p> */}
         </div>
         <div className="text-right">
           <div className="text-sm text-gray-500">Created</div>
@@ -154,14 +156,25 @@ const BookingCard = ({ booking }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={onView}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
         >
           <Eye className="w-4 h-4" />
           View Details
         </button>
+
+        {/* View Tenant Profile Button - Only show for owners */}
+        {isOwner && tenantId && onViewTenantProfile && (
+          <button
+            onClick={onViewTenantProfile}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+          >
+            <UserCircle className="w-4 h-4" />
+            Tenant Profile
+          </button>
+        )}
 
         {status === "PENDING_APPROVAL" && onConfirm && (
           <button

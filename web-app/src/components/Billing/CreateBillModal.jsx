@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 // import { useCreateBillForm } from "../../hooks/useCreateBillForm";
 import { formatCurrency } from "../../utils/billHelpers";
-import { useCreateBillForm } from "../../hooks/useCreateBillFormEnhanced";
+import { useCreateBillFormEnhanced as useCreateBillForm } from "../../hooks/useCreateBillFormEnhanced";
 
 const CreateBillModal = ({
   bill,

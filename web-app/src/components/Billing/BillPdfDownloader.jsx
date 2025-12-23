@@ -1,7 +1,9 @@
 // src/components/Billing/BillPdfDownloader.jsx
 import React, { useState } from "react";
+import axios from "axios";
 import { Download, Eye, Loader } from "lucide-react";
 import { CONFIG } from "../../configurations/configuration";
+import { getToken } from "../../services/localStorageService";
 
 /**
  * BillPdfDownloader Component
@@ -11,10 +13,6 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
   const [downloading, setDownloading] = useState(false);
   const [previewing, setPreviewing] = useState(false);
 
-  const getAuthToken = () => {
-    return localStorage.getItem("token") || "";
-  };
-
   /**
    * Download PDF to user's device
    */
@@ -22,45 +20,33 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
     try {
       setDownloading(true);
 
-      const token = getAuthToken();
+      const token = getToken();
       const url = `${CONFIG.API_GATEWAY}/billing/${billId}/pdf`;
 
-      const response = await fetch(url, {
-        method: "GET",
+      const res = await axios.get(url, {
+        responseType: "blob",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to download PDF");
-      }
-
-      // Get filename from Content-Disposition header
-      const contentDisposition = response.headers.get("Content-Disposition");
-      let filename = `bill_${billMonth || billId}.pdf`;
-
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-        }
-      }
-
-      // Create blob and download
-      const blob = await response.blob();
+      const blob = new Blob([res.data], { type: "application/pdf" });
       const downloadUrl = window.URL.createObjectURL(blob);
+
+      const filename = `bill_${billMonth || billId}.pdf`.replaceAll(" ", "_");
+
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
+
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
 
-      console.log("✅ PDF downloaded successfully:", filename);
+      console.log("✅ PDF downloaded:", filename);
     } catch (error) {
-      console.error("Error downloading PDF:", error);
+      console.error("❌ Error downloading PDF:", error);
       alert("❌ Không thể tải PDF! Vui lòng thử lại.");
     } finally {
       setDownloading(false);
@@ -74,33 +60,29 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
     try {
       setPreviewing(true);
 
-      const token = getAuthToken();
+      const token = getToken();
       const url = `${CONFIG.API_GATEWAY}/billing/${billId}/pdf/preview`;
 
-      const response = await fetch(url, {
-        method: "GET",
+      const res = await axios.get(url, {
+        responseType: "blob",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to preview PDF");
-      }
-
-      // Create blob and open in new tab
-      const blob = await response.blob();
+      const blob = new Blob([res.data], { type: "application/pdf" });
       const previewUrl = window.URL.createObjectURL(blob);
-      window.open(previewUrl, "_blank");
 
-      // Clean up after a delay
+      window.open(previewUrl, "_blank", "noopener,noreferrer");
+
+      // Cleanup sau 1s
       setTimeout(() => {
         window.URL.revokeObjectURL(previewUrl);
       }, 1000);
 
       console.log("✅ PDF preview opened");
     } catch (error) {
-      console.error("Error previewing PDF:", error);
+      console.error("❌ Error previewing PDF:", error);
       alert("❌ Không thể xem trước PDF! Vui lòng thử lại.");
     } finally {
       setPreviewing(false);
@@ -113,8 +95,11 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
       <button
         onClick={handlePreview}
         disabled={previewing}
-        className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Preview PDF"
+        className="flex items-center justify-center gap-2 px-4 py-2
+          bg-gray-100 text-gray-700 rounded-lg
+          hover:bg-gray-200 transition
+          font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Xem trước PDF"
       >
         {previewing ? (
           <>
@@ -133,8 +118,11 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
       <button
         onClick={handleDownload}
         disabled={downloading}
-        className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Download PDF"
+        className="flex items-center justify-center gap-2 px-4 py-2
+          bg-blue-600 text-white rounded-lg
+          hover:bg-blue-700 transition
+          font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Tải PDF"
       >
         {downloading ? (
           <>
