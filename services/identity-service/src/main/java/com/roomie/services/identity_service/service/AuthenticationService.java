@@ -185,6 +185,8 @@ public class AuthenticationService {
 
         return stringJoiner.toString();
     }
-
+    public String generateTokenForOAuth2(User user) {
+        return generateToken(user);
+    }
     private record TokenInfo(String token, Date expiryDate) {}
 }

@@ -21,5 +21,6 @@ public class UserCreationRequest {
     String phoneNumber;
     LocalDate dob;
     String location;
+    String authProvider;
     Set<UserRole> roles;
 }

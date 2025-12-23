@@ -1,7 +1,13 @@
+// src/components/Booking/ViewModeToggle.jsx
 import React from "react";
-import { User, Home } from "lucide-react";
+import { Home, User } from "lucide-react";
 
-const ViewModeToggle = ({ viewMode, onViewModeChange }) => {
+const ViewModeToggle = ({
+  viewMode,
+  onViewModeChange,
+  ownerCount,
+  tenantCount,
+}) => {
   return (
     <div className="bg-white rounded-xl shadow-sm mb-6">
       <div className="flex border-b">
@@ -16,7 +22,11 @@ const ViewModeToggle = ({ viewMode, onViewModeChange }) => {
         >
           <div className="flex items-center justify-center gap-2">
             <Home className="w-5 h-5" />
-            <span>Property Bookings (Owner)</span>
+            <span>Property Bookings</span>
+
+            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
+              {ownerCount}
+            </span>
           </div>
 
           {viewMode === "OWNER" && (
@@ -35,7 +45,11 @@ const ViewModeToggle = ({ viewMode, onViewModeChange }) => {
         >
           <div className="flex items-center justify-center gap-2">
             <User className="w-5 h-5" />
-            <span>My Bookings (Tenant)</span>
+            <span>My Bookings</span>
+
+            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
+              {tenantCount}
+            </span>
           </div>
 
           {viewMode === "TENANT" && (

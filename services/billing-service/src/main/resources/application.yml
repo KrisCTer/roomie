@@ -38,7 +38,17 @@ billing:
     max-electricity-consumption: 10000  # kWh
     max-water-consumption: 1000
 
+ocr:
+  tesseract:
+    datapath: /usr/share/tesseract-ocr/4.00/tessdata
+  confidence-threshold: 0.7
+  google-vision:
+    enabled: false
+    project-id: roomie-project
+    credentials-path: /path/to/credentials.json
+
 app:
   services:
     contract: http://localhost:8085/contract
     property: http://localhost:8083/property
+    files: http://localhost:8088/file

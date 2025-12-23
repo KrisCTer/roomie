@@ -22,7 +22,7 @@ export const useBookingOperations = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [viewMode, setViewMode] = useState("TENANT");
+  const [viewMode, setViewMode] = useState("OWNER");
   const [currentUserId, setCurrentUserId] = useState(null);
 
   // Get current user info

@@ -113,7 +113,7 @@ public class PropertyService {
     // ============================================================
     // BASIC GETTERS
     // ============================================================
-    @Cacheable(value = "properties", key = "#id")
+//    @Cacheable(value = "properties", key = "#id")
     public PropertyResponse getById(String id) {
 
         Property property = findPropertyOrThrow(id);

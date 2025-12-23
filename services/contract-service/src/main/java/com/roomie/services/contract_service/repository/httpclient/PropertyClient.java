@@ -15,4 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 public interface PropertyClient {
     @GetMapping(value = "/internal/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<PropertyResponse> getProperty(@PathVariable("id") String id);
+    @PostMapping("/{propertyId}/rented")
+    ApiResponse<String> markAsRented(@PathVariable String propertyId);
+    @PostMapping("/{propertyId}/available")
+    ApiResponse<String> markAsAvailable(@PathVariable String propertyId);
 }

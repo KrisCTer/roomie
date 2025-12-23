@@ -11,8 +11,9 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
-import { useCreateBillForm } from "../../hooks/useCreateBillForm";
+// import { useCreateBillForm } from "../../hooks/useCreateBillForm";
 import { formatCurrency } from "../../utils/billHelpers";
+import { useCreateBillForm } from "../../hooks/useCreateBillFormEnhanced";
 
 const CreateBillModal = ({
   bill,

@@ -8,13 +8,19 @@ import {
   Link,
   IconButton,
   InputAdornment,
+  Divider,
+  Stack,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import GoogleIcon from "@mui/icons-material/Google";
+import FacebookIcon from "@mui/icons-material/Facebook";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login as loginApi } from "../services/auth.service";
 import { useTranslation } from "react-i18next";
+
+const BACKEND_URL = "http://localhost:8080/identity";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,12 +45,19 @@ export default function Login() {
       localStorage.setItem("access_token", res.result.token);
       localStorage.setItem("username", form.username);
 
-      // Không redirect admin nữa — tất cả vào Home
+      // Không redirect admin nữa – tất cả vào Home
       navigate("/home");
-      
     } catch (err) {
       alert(t("auth.loginError"));
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${BACKEND_URL}/oauth2/authorization/google`;
+  };
+
+  const handleFacebookLogin = () => {
+    window.location.href = `${BACKEND_URL}/oauth2/authorization/facebook`;
   };
 
   return (
@@ -157,6 +170,57 @@ export default function Login() {
             >
               {t("auth.login")}
             </Button>
+
+            {/* DIVIDER */}
+            <Divider sx={{ my: 2.5 }}>
+              <Typography variant="body2" color="text.secondary">
+                {t("auth.orLoginWith")}
+              </Typography>
+            </Divider>
+
+            {/* SOCIAL LOGIN BUTTONS */}
+            <Stack direction="row" spacing={2} mb={3}>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<GoogleIcon />}
+                onClick={handleGoogleLogin}
+                sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  height: 48,
+                  borderColor: "#e0e0e0",
+                  color: "#424242",
+                  "&:hover": {
+                    borderColor: "#2563eb",
+                    bgcolor: "#f5f5f5",
+                  },
+                }}
+              >
+                Google
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<FacebookIcon />}
+                onClick={handleFacebookLogin}
+                sx={{
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  height: 48,
+                  borderColor: "#e0e0e0",
+                  color: "#424242",
+                  "&:hover": {
+                    borderColor: "#1877f2",
+                    bgcolor: "#f5f5f5",
+                  },
+                }}
+              >
+                Facebook
+              </Button>
+            </Stack>
 
             {/* REGISTER LINK */}
             <Typography textAlign="center" fontSize={14} mb={1}>

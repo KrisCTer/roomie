@@ -1,9 +1,9 @@
-package com.roomie.services.profile_service.repository.httpclient;
+package com.roomie.services.billing_service.repository.httpclient;
 
-import com.roomie.services.profile_service.configuration.AuthenticationRequestInterceptor;
-import com.roomie.services.profile_service.configuration.FeignMultipartConfig;
-import com.roomie.services.profile_service.dto.response.ApiResponse;
-import com.roomie.services.profile_service.dto.response.FileResponse;
+import com.roomie.services.billing_service.configuration.AuthenticationRequestInterceptor;
+import com.roomie.services.billing_service.configuration.FeignMultipartConfig;
+import com.roomie.services.billing_service.dto.response.ApiResponse;
+import com.roomie.services.billing_service.dto.response.FileResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

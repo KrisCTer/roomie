@@ -1,83 +1,120 @@
+// src/hooks/useCreateBillForm.js
 import { useState, useEffect } from "react";
-import {
-  createBill,
-  updateBill,
-  getBillsByContract,
-} from "../services/billing.service";
+import { createOrUpdateBill, getBillsByContract } from "../services/billing.service";
 import { calculateBillTotal } from "../utils/billHelpers";
 
+/**
+ * Hook for Create/Update Bill Form
+ * 
+ * Updated for new backend API:
+ * - Backend auto-loads utility config if prices not provided
+ * - Backend auto-inherits previous readings if not provided
+ * - Only need to send NEW readings and optional overrides
+ */
 export const useCreateBillForm = (bill, properties, contracts, onSuccess) => {
   const [loading, setLoading] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState(
-    bill
-      ? contracts.find((c) => c.id === bill.contractId)?.propertyId || ""
-      : ""
-  );
-  const [selectedContract, setSelectedContract] = useState(
-    bill?.contractId || ""
-  );
+  const [selectedProperty, setSelectedProperty] = useState("");
+  const [selectedContract, setSelectedContract] = useState("");
   const [previousBill, setPreviousBill] = useState(null);
 
+  // Form data - simplified for new API
   const [formData, setFormData] = useState({
-    billingMonth: bill?.billingMonth || "",
-    monthlyRent: bill?.monthlyRent || "",
-    electricityOld: bill?.electricityOld || "",
-    electricityNew: bill?.electricityNew || "",
-    electricityUnitPrice: bill?.electricityUnitPrice || "3500",
-    waterOld: bill?.waterOld || "",
-    waterNew: bill?.waterNew || "",
-    waterUnitPrice: bill?.waterUnitPrice || "15000",
-    internetPrice: bill?.internetPrice || "200000",
-    parkingPrice: bill?.parkingPrice || "100000",
-    cleaningPrice: bill?.cleaningPrice || "50000",
-    maintenancePrice: bill?.maintenancePrice || "0",
-    otherDescription: bill?.otherDescription || "",
-    otherPrice: bill?.otherPrice || "0",
+    contractId: "",
+    billingMonth: "",
+    monthlyRent: "",
+    
+    // Only NEW readings are required
+    electricityNew: "",
+    waterNew: "",
+    
+    // Optional: Only for FIRST bill or to override
+    electricityOld: "",
+    waterOld: "",
+    
+    // Optional: Backend auto-loads from utility config
+    electricityUnitPrice: "",
+    waterUnitPrice: "",
+    internetPrice: "",
+    parkingPrice: "",
+    cleaningPrice: "",
+    maintenancePrice: "",
+    
+    // Other fees
+    otherPrice: "",
+    otherDescription: "",
   });
 
-  // Filter properties with active contracts
-  const activeProperties = properties.filter((p) =>
+  // Initialize form when editing
+  useEffect(() => {
+    if (bill) {
+      setFormData({
+        contractId: bill.contractId || "",
+        billingMonth: bill.billingMonth?.substring(0, 7) || "",
+        monthlyRent: bill.monthlyRent || "",
+        electricityOld: bill.electricityOld || "",
+        electricityNew: bill.electricityNew || "",
+        electricityUnitPrice: bill.electricityUnitPrice || "",
+        waterOld: bill.waterOld || "",
+        waterNew: bill.waterNew || "",
+        waterUnitPrice: bill.waterUnitPrice || "",
+        internetPrice: bill.internetPrice || "",
+        parkingPrice: bill.parkingPrice || "",
+        cleaningPrice: bill.cleaningPrice || "",
+        maintenancePrice: bill.maintenancePrice || "",
+        otherPrice: bill.otherPrice || "",
+        otherDescription: bill.otherDescription || "",
+      });
+
+      const contract = contracts.find((c) => c.id === bill.contractId);
+      if (contract) {
+        setSelectedProperty(contract.propertyId);
+        setSelectedContract(contract.id);
+      }
+    }
+  }, [bill, contracts]);
+
+  // Filter active properties
+  const activeProperties = properties.filter((property) =>
     contracts.some(
-      (c) =>
-        c.propertyId === p.propertyId &&
-        ["ACTIVE", "PENDING_PAYMENT"].includes(c.status)
+      (contract) =>
+        contract.propertyId === property.propertyId &&
+        (contract.status === "ACTIVE" || contract.status === "PENDING_PAYMENT")
     )
   );
 
-  // Available contracts for selected property
-  const availableContracts = contracts.filter(
-    (c) =>
-      c.propertyId === selectedProperty &&
-      ["ACTIVE", "PENDING_PAYMENT"].includes(c.status)
-  );
+  // Filter contracts for selected property
+  const availableContracts = selectedProperty
+    ? contracts.filter(
+        (c) => c.propertyId === selectedProperty
+        
+      )
+    : [];
 
-  // Load previous bill when contract selected
+  // Load previous bill when contract is selected
   useEffect(() => {
     if (selectedContract && !bill) {
-      loadPreviousBill();
-      const contract = contracts.find((c) => c.id === selectedContract);
-      console.log("Selected contract:", contract);
-    if (contract?.monthlyRent) {
-      setFormData((prev) => ({
-        ...prev,
-        monthlyRent: contract.monthlyRent,
-      }));
-    }
+      loadPreviousBill(selectedContract);
     }
   }, [selectedContract]);
 
-  const loadPreviousBill = async () => {
+  const loadPreviousBill = async (contractId) => {
     try {
-      const res = await getBillsByContract(selectedContract);
+      const res = await getBillsByContract(contractId);
       if (res?.success && res?.result && res.result.length > 0) {
-        const lastBill = res.result[0];
-        setPreviousBill(lastBill);
+        const latest = res.result[0];
+        setPreviousBill(latest);
 
-        // Auto-fill old values from previous bill's new values
+        // Show what will be auto-inherited
         setFormData((prev) => ({
           ...prev,
-          electricityOld: lastBill.electricityNew || "",
-          waterOld: lastBill.waterNew || "",
+          electricityOld: latest.electricityNew || "",
+          waterOld: latest.waterNew || "",
+          electricityUnitPrice: latest.electricityUnitPrice || prev.electricityUnitPrice,
+          waterUnitPrice: latest.waterUnitPrice || prev.waterUnitPrice,
+          internetPrice: latest.internetPrice || prev.internetPrice,
+          parkingPrice: latest.parkingPrice || prev.parkingPrice,
+          cleaningPrice: latest.cleaningPrice || prev.cleaningPrice,
+          maintenancePrice: latest.maintenancePrice || prev.maintenancePrice,
         }));
       }
     } catch (error) {
@@ -88,11 +125,23 @@ export const useCreateBillForm = (bill, properties, contracts, onSuccess) => {
   const handlePropertyChange = (propertyId) => {
     setSelectedProperty(propertyId);
     setSelectedContract("");
+    setPreviousBill(null);
+
+    const property = properties.find((p) => p.propertyId === propertyId);
+    if (property) {
+      setFormData((prev) => ({
+        ...prev,
+        monthlyRent: property.monthlyRent || "",
+      }));
+    }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const calculateTotal = () => {
@@ -102,49 +151,67 @@ export const useCreateBillForm = (bill, properties, contracts, onSuccess) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedProperty) {
-      alert("Vui lòng chọn bất động sản!");
-      return;
-    }
-
-    if (!selectedContract) {
-      alert("Vui lòng chọn hợp đồng!");
-      return;
-    }
-
     try {
       setLoading(true);
 
+      // Prepare payload for NEW API
       const payload = {
         contractId: selectedContract,
         billingMonth: formData.billingMonth,
-        monthlyRent: parseFloat(formData.monthlyRent),
-        electricityOld: parseFloat(formData.electricityOld || 0),
-        electricityNew: parseFloat(formData.electricityNew),
-        electricityUnitPrice: parseFloat(formData.electricityUnitPrice),
-        waterOld: parseFloat(formData.waterOld || 0),
-        waterNew: parseFloat(formData.waterNew),
-        waterUnitPrice: parseFloat(formData.waterUnitPrice),
-        internetPrice: parseFloat(formData.internetPrice || 0),
-        parkingPrice: parseFloat(formData.parkingPrice || 0),
-        cleaningPrice: parseFloat(formData.cleaningPrice || 0),
-        maintenancePrice: parseFloat(formData.maintenancePrice || 0),
-        otherDescription: formData.otherDescription,
-        otherPrice: parseFloat(formData.otherPrice || 0),
+        monthlyRent: parseFloat(formData.monthlyRent) || 0,
+        
+        // Always send NEW readings (required)
+        electricityNew: parseFloat(formData.electricityNew) || 0,
+        waterNew: parseFloat(formData.waterNew) || 0,
       };
 
-      if (bill) {
-        await updateBill(bill.id, payload);
-        alert("✅ Cập nhật hóa đơn thành công!");
-      } else {
-        await createBill(payload);
-        alert("✅ Tạo hóa đơn thành công!");
+      // Only send OLD readings for first bill
+      if (!previousBill && formData.electricityOld) {
+        payload.electricityOld = parseFloat(formData.electricityOld) || 0;
+      }
+      if (!previousBill && formData.waterOld) {
+        payload.waterOld = parseFloat(formData.waterOld) || 0;
       }
 
-      onSuccess();
+      // Optional: Send to override auto-loading
+      if (formData.electricityUnitPrice) {
+        payload.electricityUnitPrice = parseFloat(formData.electricityUnitPrice);
+      }
+      if (formData.waterUnitPrice) {
+        payload.waterUnitPrice = parseFloat(formData.waterUnitPrice);
+      }
+      if (formData.internetPrice) {
+        payload.internetPrice = parseFloat(formData.internetPrice);
+      }
+      if (formData.parkingPrice) {
+        payload.parkingPrice = parseFloat(formData.parkingPrice);
+      }
+      if (formData.cleaningPrice) {
+        payload.cleaningPrice = parseFloat(formData.cleaningPrice);
+      }
+      if (formData.maintenancePrice) {
+        payload.maintenancePrice = parseFloat(formData.maintenancePrice);
+      }
+
+      // Other fees
+      if (formData.otherPrice) {
+        payload.otherPrice = parseFloat(formData.otherPrice);
+        payload.otherDescription = formData.otherDescription;
+      }
+
+      console.log("Submitting bill payload:", payload);
+
+      const res = await createOrUpdateBill(payload);
+
+      if (res?.success) {
+        alert(bill ? "✅ Bill updated successfully!" : "✅ Bill created successfully!");
+        onSuccess();
+      } else {
+        alert("❌ Failed to save bill: " + (res?.message || "Unknown error"));
+      }
     } catch (error) {
       console.error("Error saving bill:", error);
-      alert("❌ " + (error?.response?.data?.message || "Có lỗi xảy ra!"));
+      alert("❌ Error: " + (error?.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }

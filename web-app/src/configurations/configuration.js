@@ -77,6 +77,7 @@ export const API = {
   PROPERTY_BY_PRICE: "/property/by-price",
   PROPERTY_BY_PROVINCE: "/property/by-province",
   PROPERTY_BY_ME: "/property/owner/me",
+  PROPERTY_BY_OWNER: (ownerId) => `/property/owner/${ownerId}`,
   GET_PUBLIC_PROPERTY: `/property/public`,
   PUBLISH_PROPERTY: (propertyId) => `/property/${propertyId}/publish`,
   MARK_AS_RENTER: (propertyId) => `/property/${propertyId}/rented`,
@@ -118,6 +119,7 @@ export const API = {
   TERMINATE_CONTRACT: (id) => `/contract/${id}/terminate`,
 
   // ========= BILLING (Billing Service - Port 8086) =========
+  // Bill Management
   CREATE_BILL: "/billing/",
   GET_BILL: (id) => `/billing/${id}`,
   GET_ALL_BILLS: "/billing/",
@@ -128,6 +130,81 @@ export const API = {
   PAY_BILL: (id) => `/billing/${id}/pay`,
   GET_MY_LANDORD_BILLS: "/billing/landlord/my-bills",
   GET_MY_TENANT_BILLS: "/billing/tenant/my-bills",
+  
+  // Bill PDF & Email
+  BILL_PDF: (id) => `/billing/${id}/pdf`,
+  BILL_PDF_PREVIEW: (id) => `/billing/${id}/pdf/preview`,
+  EMAIL_BILL_INVOICE: (id) => `/billing/${id}/email`,
+  
+  // Bill Statistics
+  LANDLORD_BILLING_STATS: "/billing/landlord/stats",
+  TENANT_BILLING_STATS: "/billing/tenant/stats",
+  
+  // Bill Bulk Operations
+  BULK_GENERATE_BILLS: "/billing/bulk/generate",
+  BULK_SEND_BILLS: "/billing/bulk/send",
+  EXPORT_BILLS: "/billing/export",
+
+  // Meter Reading Management
+  GET_METER_READING: (id) => `/billing/meter-reading/${id}`,
+  GET_METER_READINGS_BY_CONTRACT: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}`,
+  GET_METER_READINGS_BY_PROPERTY: (propertyId) => 
+    `/billing/meter-reading/property/${propertyId}`,
+  GET_LATEST_METER_READING: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}/latest`,
+  
+  // Meter Reading - AI OCR Upload
+  UPLOAD_METER_WITH_AI: (id) => `/billing/meter-reading/${id}/upload-with-ai`,
+  TEST_OCR: "/billing/meter-reading/test-ocr",
+  TEST_VIETNAMESE_OCR: "/billing/meter-reading/test-vietnamese-ocr",
+  
+  // Meter Reading - Manual Upload
+  UPLOAD_ELECTRICITY_PHOTO: (id) => `/billing/meter-reading/${id}/electricity-photo`,
+  UPLOAD_WATER_PHOTO: (id) => `/billing/meter-reading/${id}/water-photo`,
+  
+  // Meter Reading - Manual Entry
+  CREATE_MANUAL_METER_READING: "/billing/meter-reading/manual",
+  UPDATE_METER_READING_VALUES: (id) => `/billing/meter-reading/${id}/values`,
+  DELETE_METER_PHOTO: (id) => `/billing/meter-reading/${id}/photo`,
+  
+  // Meter Reading Statistics
+  GET_CONSUMPTION_STATS: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}/stats`,
+  GET_CONSUMPTION_CHART: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}/chart`,
+  COMPARE_CONSUMPTION: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}/compare`,
+  DETECT_ANOMALIES: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}/anomalies`,
+  EXPORT_METER_READINGS: (contractId) => 
+    `/billing/meter-reading/contract/${contractId}/export`,
+
+  // Utility Configuration Management
+  CREATE_UTILITY: "/billing/utility",
+  GET_UTILITY: (id) => `/billing/utility/${id}`,
+  GET_UTILITY_BY_PROPERTY: (propertyId) => `/billing/utility/property/${propertyId}`,
+  GET_UTILITY_BY_CONTRACT: (contractId) => `/billing/utility/contract/${contractId}`,
+  GET_MY_UTILITIES: "/billing/utility/my-utilities",
+  UPDATE_UTILITY: (id) => `/billing/utility/${id}`,
+  DEACTIVATE_UTILITY: (id) => `/billing/utility/${id}/deactivate`,
+  DELETE_UTILITY: (id) => `/billing/utility/${id}`,
+  
+  // Utility Bulk Operations
+  BULK_CREATE_UTILITIES: "/billing/utility/bulk",
+  BULK_UPDATE_UTILITY_PRICING: "/billing/utility/bulk/update-pricing",
+  
+  // Utility Templates & Market Data
+  GET_UTILITY_TEMPLATES: "/billing/utility/templates",
+  CREATE_UTILITY_FROM_TEMPLATE: "/billing/utility/from-template",
+  GET_MARKET_AVERAGE: "/billing/utility/market-average",
+  
+  // Utility Reporting
+  GET_UTILITY_PRICING_HISTORY: (id) => `/billing/utility/${id}/history`,
+  EXPORT_UTILITIES: "/billing/utility/export",
+  GET_UTILITY_STATS: "/billing/utility/stats",
+  VALIDATE_UTILITY: "/billing/utility/validate",
+  COMPARE_UTILITIES: "/billing/utility/compare",
 
   // ========= PAYMENT (Payment Service - Port 8087) =========
   CREATE_PAYMENT: "/payment/",

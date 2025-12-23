@@ -1,193 +1,131 @@
-import React, { useEffect, useState } from "react";
-import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
-import Header from "../../components/layout/layoutUser/Header.jsx";
-import Footer from "../../components/layout/layoutUser/Footer.jsx";
+// src/pages/User/Dashboard/Dashboard.jsx
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
-import {
-  Home,
-  Clock,
-  DollarSign,
-  CheckCircle,
-  AlertTriangle,
-  FileText,
-} from "lucide-react";
+// Layout
+import Sidebar from "../../components/layout/layoutUser/Sidebar";
+import Header from "../../components/layout/layoutUser/Header";
+import Footer from "../../components/layout/layoutUser/Footer";
 
-import ListingCard from "../../components/layout/layoutUser/ListingCard.jsx";
-import {
-  getPropertiesByOwner,
-  deleteProperty,
-  updateProperty,
-} from "../../services/property.service";
+// Components
+import RoleToggle from "../../components/Dashboard/RoleToggle";
+import QuickActions from "../../components/Dashboard/QuickActions";
+import RecentActivity from "../../components/Dashboard/RecentActivity";
+import LandlordStats from "../../components/Dashboard/LandlordStats";
+import TenantStats from "../../components/Dashboard/TenantStats";
+import RevenueChartRecharts from "../../components/Dashboard/RevenueChartRecharts";
+import PageTitle from "../../components/common/PageTitle.jsx";
+
+// Hooks
+import useDashboardData from "../../hooks/useDashboardData";
+
+// Icons
+import { RefreshCw, TrendingUp, AlertCircle } from "lucide-react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Dashboards");
-  const [loading, setLoading] = useState(false);
+  const [activeRole, setActiveRole] = useState("landlord");
 
-  const [properties, setProperties] = useState([]);
+  const { loading, data, stats, refetch } = useDashboardData(activeRole);
 
-  const [dashboard, setDashboard] = useState({
-    totalProperties: 0,
-    pending: 0,
-    rented: 0,
-    incomeEstimate: 0,
+  // ==========================================
+  // GENERATE MONTHLY REVENUE DATA
+  // ==========================================
+  const monthlyRevenueData = useMemo(() => {
+    if (activeRole !== "landlord") return [];
 
-    totalContracts: 0,
-    activeContracts: 0,
-    pendingContracts: 0,
-    expiredContracts: 0,
-
-    latestListings: [],
-  });
-
-  // ================== LẤY DATA TỪ API (GIỐNG MyProperties) ==================
-  const fetchProperties = async () => {
-    try {
-      setLoading(true);
-
-      const response = await getPropertiesByOwner();
-      console.log("Dashboard - API Response:", response);
-
-      let list = [];
-
-      if (response && response.success && response.result) {
-        list = response.result;
-      } else if (response && response.data) {
-        const data = response.data;
-        if (data.result) {
-          list = data.result;
-        } else if (data.content) {
-          list = data.content;
-        } else if (Array.isArray(data)) {
-          list = data;
-        }
-      } else if (Array.isArray(response)) {
-        list = response;
-      }
-
-      setProperties(list);
-      computeDashboardFromProperties(list);
-    } catch (error) {
-      console.error("Error fetching dashboard properties:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ================== TÍNH TOÁN SỐ LIỆU TỪ DANH SÁCH PROPERTY ==================
-  const computeDashboardFromProperties = (list) => {
-    const getStatus = (p) =>
-      (p.status || p.propertyStatus || p.approvalStatus || "").toUpperCase();
-
-    const total = list.length;
-    const pending = list.filter((p) =>
-      ["DRAFT", "PENDING"].includes(getStatus(p))
-    ).length;
-    const rented = list.filter((p) =>
-      ["SOLD", "RENTED"].includes(getStatus(p))
-    ).length;
-
-    // tạm lấy tổng tiền thuê/tháng của tất cả phòng
-    const incomeEstimate = list.reduce(
-      (sum, p) => sum + (p.monthlyRent || 0),
-      0
+    // Generate data from contracts and properties
+    return generateMonthlyRevenue(
+      data.properties,
+      data.contracts.asLandlord,
+      data.bills
     );
+  }, [activeRole, data.properties, data.contracts, data.bills]);
 
-    const latestListings = list.slice(0, 3);
+  // Handle stat card clicks
+  const handleStatClick = (type) => {
+    const routeMap = {
+      properties: "/my-properties",
+      pending: "/my-properties?status=pending",
+      rented: "/my-properties?status=rented",
+      available: "/my-properties?status=available",
+      contracts: "/my-contracts",
+      "unpaid-bills": "/my-bills?status=unpaid",
+      "paid-bills": "/my-bills?status=paid",
+      "active-bookings": "/my-bookings?status=active",
+      "pending-bookings": "/my-bookings?status=pending",
+      "completed-bookings": "/my-bookings?status=completed",
+    };
 
-    setDashboard((prev) => ({
-      ...prev,
-      totalProperties: total,
-      pending,
-      rented,
-      incomeEstimate,
-      latestListings,
-      totalContracts: prev.totalContracts,
-      activeContracts: prev.activeContracts,
-      pendingContracts: prev.pendingContracts,
-      expiredContracts: prev.expiredContracts,
-    }));
+    if (routeMap[type]) navigate(routeMap[type]);
   };
 
-  // ================== ACTION GIỐNG MyProperties (Edit/Sold/Delete) ==================
-  const handleDelete = async (propertyId) => {
-    if (window.confirm("Are you sure you want to delete this property?")) {
-      try {
-        await deleteProperty(propertyId);
-        await fetchProperties();
-      } catch (error) {
-        console.error("Error deleting property:", error);
-        alert("Failed to delete property");
-      }
-    }
-  };
+  // Generate recent activities
+  const generateRecentActivities = () => {
+    const activities = [];
 
-  const handleSold = async (propertyId) => {
-    if (window.confirm("Mark this property as sold?")) {
-      try {
-        await updateProperty(propertyId, { status: "SOLD" });
-        await fetchProperties();
-        alert("Property marked as sold successfully!");
-      } catch (error) {
-        console.error("Error updating property:", error);
-        alert("Failed to update property status");
-      }
-    }
-  };
-
-  const handleEdit = (propertyId) => {
-    window.location.href = `/add-property?edit=${propertyId}`;
-  };
-
-  // map dữ liệu Property → props cho ListingCard
-  const transformPropertyToListing = (property) => {
-    const formatDate = (dateString) => {
-      if (!dateString) return "N/A";
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+    if (activeRole === "landlord") {
+      data.properties.slice(0, 2).forEach((property) => {
+        activities.push({
+          type: "property",
+          title: property.title,
+          description: `Trạng thái: ${
+            property.status || property.propertyStatus
+          }`,
+          time: formatTime(property.createdAt),
+        });
       });
-    };
 
-    const getStatusText = (status) => {
-      const normalized = (status || "").toUpperCase();
-      const statusMap = {
-        DRAFT: "Draft",
-        PENDING: "Pending",
-        APPROVED: "Approved",
-        ACTIVE: "Approved",
-        AVAILABLE: "Approved",
-        SOLD: "Sold",
-        RENTED: "Sold",
-        REJECT: "Rejected",
-        REJECTED: "Rejected",
-      };
-      return statusMap[normalized];
-    };
+      data.contracts.asLandlord.slice(0, 2).forEach((contract) => {
+        activities.push({
+          type: "contract",
+          title: `Hợp đồng #${contract.contractId?.substring(0, 8)}`,
+          description: `Trạng thái: ${contract.status}`,
+          time: formatTime(contract.createdAt),
+        });
+      });
+    } else {
+      data.bookings.slice(0, 2).forEach((booking) => {
+        activities.push({
+          type: "booking",
+          title: `Đặt thuê #${booking.bookingId?.substring(0, 8)}`,
+          description: `Trạng thái: ${booking.status}`,
+          time: formatTime(booking.createdAt),
+        });
+      });
 
-    return {
-      id: property.propertyId,
-      image:
-        property.mediaList?.[0]?.url ||
-        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400",
-      title: property.title,
-      date: formatDate(property.createdAt),
-      price: `${property.monthlyRent?.toLocaleString()} VND`,
-      status: getStatusText(property.status || property.propertyStatus),
-      onEdit: () => handleEdit(property.propertyId),
-      onSold: () => handleSold(property.propertyId),
-      onDelete: () => handleDelete(property.propertyId),
-      onClick: () => {}, // Dashboard chỉ xem nhanh, không mở modal
-    };
+      data.bills.slice(0, 2).forEach((bill) => {
+        activities.push({
+          type: "payment",
+          title: `Hóa đơn #${bill.billId?.substring(0, 8)}`,
+          description: `${bill.totalAmount?.toLocaleString()}đ - ${
+            bill.status
+          }`,
+          time: formatTime(bill.createdAt),
+        });
+      });
+    }
+
+    return activities.slice(0, 5);
   };
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "Vừa xong";
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
 
-  // ================== UI (GIỮ NGUYÊN BỐ CỤC) ==================
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 60) return `${minutes} phút trước`;
+    if (hours < 24) return `${hours} giờ trước`;
+    return `${days} ngày trước`;
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-900">
       <Sidebar
@@ -203,146 +141,143 @@ const Dashboard = () => {
         }`}
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
+        <PageTitle
+          title="Dashboard"
+          subtitle="Manage your properties and track your revenue."
+        />
         <main className="p-8 w-full">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Dashboard chủ nhà
-          </h1>
-          <p className="text-gray-300 mb-6">
-            Tổng quan về bất động sản, hợp đồng và tình hình cho thuê của bạn.
-          </p>
-
-          {/* Hàng 1: thống kê bất động sản */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            {/* Tổng số bất động sản */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <Home className="w-6 h-6 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">
-                  Tổng số bất động sản
-                </p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.totalProperties}
-                </p>
-              </div>
-            </div>
-
-            {/* Chờ duyệt */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">Chờ duyệt</p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.pending}
-                </p>
-              </div>
-            </div>
-
-            {/* Đang cho thuê */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">Đang cho thuê</p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.rented}
-                </p>
-              </div>
-            </div>
-
-            {/* Thu nhập ước tính / tháng */}
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-purple-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">
-                  Thu nhập ước tính / tháng
-                </p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.incomeEstimate.toLocaleString()} đ
-                </p>
-              </div>
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+            <div className="flex items-center gap-4 mt-4 lg:mt-0">
+              <RoleToggle
+                activeRole={activeRole}
+                onRoleChange={setActiveRole}
+              />
+              <button
+                onClick={refetch}
+                disabled={loading}
+                className="p-3 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition disabled:opacity-50"
+                title="Làm mới dữ liệu"
+              >
+                <RefreshCw
+                  className={`w-5 h-5 text-white ${
+                    loading ? "animate-spin" : ""
+                  }`}
+                />
+              </button>
             </div>
           </div>
 
-          {/* Hàng 2: thống kê hợp đồng (tạm thời = 0, chỉ hiển thị) */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">Tổng số hợp đồng</p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.totalContracts}
-                </p>
-              </div>
+          {/* Loading State */}
+          {loading && (
+            <div className="mb-6 p-4 bg-blue-900/20 border border-blue-700 rounded-xl flex items-center gap-3">
+              <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />
+              <span className="text-blue-400">Đang tải dữ liệu...</span>
             </div>
+          )}
 
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">Hợp đồng hiệu lực</p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.activeContracts}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">Hợp đồng chờ ký</p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.pendingContracts}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-red-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-slate-300 mb-1">Hết hạn / Hủy</p>
-                <p className="text-2xl font-semibold text-white">
-                  {dashboard.expiredContracts}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bất động sản mới nhất */}
-          <div className="bg-slate-800 p-6 rounded-xl shadow-sm mb-6">
-            <h2 className="text-xl font-bold text-white mb-4">
-              Bất động sản mới nhất
-            </h2>
-
-            {loading ? (
-              <p className="text-gray-300">Đang tải dữ liệu...</p>
-            ) : dashboard.latestListings.length === 0 ? (
-              <p className="text-gray-300">Không có dữ liệu</p>
+          {/* Stats Section */}
+          <div className="mb-8">
+            {activeRole === "landlord" ? (
+              <LandlordStats stats={stats} onStatClick={handleStatClick} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {dashboard.latestListings.map((property) => (
-                  <ListingCard
-                    key={property.propertyId}
-                    listing={transformPropertyToListing(property)}
-                  />
-                ))}
-              </div>
+              <TenantStats stats={stats} onStatClick={handleStatClick} />
             )}
           </div>
+
+          {/* ==========================================
+              REVENUE CHART - LANDLORD ONLY
+              ========================================== */}
+          {activeRole === "landlord" && (
+            <div className="mb-8">
+              <RevenueChartRecharts
+                data={monthlyRevenueData}
+                loading={loading}
+              />
+            </div>
+          )}
+
+          {/* Quick Actions & Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <QuickActions role={activeRole} />
+            <RecentActivity
+              activities={generateRecentActivities()}
+              loading={loading}
+            />
+          </div>
+
+          {/* Insights Section */}
+          {activeRole === "landlord" && stats.totalProperties > 0 && (
+            <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-2xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-white mb-2">
+                    Thông tin hữu ích
+                  </h3>
+                  <ul className="space-y-2 text-slate-300">
+                    {stats.pendingProperties > 0 && (
+                      <li className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-yellow-400" />
+                        <span>
+                          Bạn có {stats.pendingProperties} bất động sản đang chờ
+                          duyệt
+                        </span>
+                      </li>
+                    )}
+                    {stats.availableProperties > 0 && (
+                      <li className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-green-400" />
+                        <span>
+                          Bạn có {stats.availableProperties} bất động sản sẵn
+                          sàng cho thuê
+                        </span>
+                      </li>
+                    )}
+                    {stats.unpaidBills > 0 && (
+                      <li className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-400" />
+                        <span>
+                          Bạn có {stats.unpaidBills} hóa đơn chưa được thanh
+                          toán
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeRole === "tenant" && stats.unpaidBills > 0 && (
+            <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-700/30 rounded-2xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-red-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-white mb-2">
+                    Cần chú ý!
+                  </h3>
+                  <p className="text-slate-300">
+                    Bạn có {stats.unpaidBills} hóa đơn chưa thanh toán với tổng
+                    số tiền{" "}
+                    <span className="font-bold text-red-400">
+                      {stats.totalBillAmount.toLocaleString()}đ
+                    </span>
+                  </p>
+                  <button
+                    onClick={() => navigate("/my-bills?status=unpaid")}
+                    className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                  >
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
 
         <Footer />
@@ -350,5 +285,66 @@ const Dashboard = () => {
     </div>
   );
 };
+
+// ==========================================
+// HELPER: GENERATE MONTHLY REVENUE
+// ==========================================
+function generateMonthlyRevenue(properties, contracts, bills) {
+  const months = [
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+    "T8",
+    "T9",
+    "T10",
+    "T11",
+    "T12",
+  ];
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  // Get last 6 months
+  const last6Months = [];
+  for (let i = 5; i >= 0; i--) {
+    const monthIndex = (currentMonth - i + 12) % 12;
+    const year = currentMonth - i < 0 ? currentYear - 1 : currentYear;
+    last6Months.push({ month: months[monthIndex], monthIndex, year });
+  }
+
+  return last6Months.map(({ month, monthIndex, year }) => {
+    // Calculate revenue from active contracts in that month
+    const monthRevenue = contracts
+      .filter((contract) => {
+        if (contract.status !== "ACTIVE" && contract.status !== "COMPLETED")
+          return false;
+        const startDate = new Date(contract.leaseStart);
+        const endDate = new Date(contract.leaseEnd);
+        const checkDate = new Date(year, monthIndex, 15); // Mid-month
+        return checkDate >= startDate && checkDate <= endDate;
+      })
+      .reduce((sum, contract) => sum + (contract.monthlyRent || 0), 0);
+
+    // Calculate expenses from bills in that month
+    const monthExpenses = bills
+      .filter((bill) => {
+        const billDate = new Date(bill.createdAt);
+        return (
+          billDate.getMonth() === monthIndex && billDate.getFullYear() === year
+        );
+      })
+      .reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
+
+    // Convert to millions for display
+    return {
+      month,
+      revenue: monthRevenue / 1000000,
+      expenses: monthExpenses / 1000000,
+    };
+  });
+}
 
 export default Dashboard;

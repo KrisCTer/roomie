@@ -21,6 +21,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+
   data:
     redis:
       host: localhost
@@ -32,7 +33,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: romie.housing.tech@gmail.com
-    password: mznl wclo ddwt jrut
+    password:
     properties:
       mail:
         smtp:
@@ -45,22 +46,33 @@ spring:
       client:
         registration:
           google:
-            client-id: your-google-client-id
-            client-secret: your-google-client-secret
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope:
               - email
               - profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
           facebook:
-            client-id: your-facebook-client-id}
-            client-secret: your-facebook-client-secret
+            client-id: ${FACEBOOK_CLIENT_ID:}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:}
             scope:
               - email
               - public_profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+          facebook:
+            authorization-uri: https://www.facebook.com/v12.0/dialog/oauth
+            token-uri: https://graph.facebook.com/v12.0/oauth/access_token
+            user-info-uri: https://graph.facebook.com/me?fields=id,name,email,picture
+            user-name-attribute: id
 
   kafka:
     bootstrap-servers: localhost:9092
@@ -78,10 +90,10 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:cm9vbWllLWF1dGgtand0LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0yNTYtYml0cy1mb3Itc2VjdXJpdHk=}
-  signerKey: ${JWT_SIGNER_KEY:cm9vbWllLWF1dGgtand0LXNpZ25lci1rZXktYmFzZTY0}
-  valid-duration: 86400000  # 24 hours in milliseconds
-  refreshable-duration: 604800000  # 7 days in milliseconds
+  secret: ${JWT_SECRET:}
+  signerKey: ${JWT_SIGNER_KEY:}
+  valid-duration: 86400  # 24 hours in seconds
+  refreshable-duration: 604800  # 7 days in seconds
 
 # OTP Configuration
 otp:
@@ -124,4 +136,4 @@ app:
   services:
     profile: http://localhost:8082/profile
   oauth2:
-    redirectUri: http://localhost:3000/oauth2/callback/google
+    redirectUri: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/callback}

@@ -44,6 +44,14 @@ const MyBookings = () => {
   // Transform bookings for display
   const transformedBookings = bookings.map(transformBookingToCard);
 
+  const ownerCount = bookings.filter(
+    (b) => b.landlordId === currentUserId
+  ).length;
+
+  const tenantCount = bookings.filter(
+    (b) => b.tenantId === currentUserId
+  ).length;
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -71,6 +79,8 @@ const MyBookings = () => {
             <ViewModeToggle
               viewMode={viewMode}
               onViewModeChange={setViewMode}
+              ownerCount={ownerCount}
+              tenantCount={tenantCount}
             />
 
             {/* Filters */}
