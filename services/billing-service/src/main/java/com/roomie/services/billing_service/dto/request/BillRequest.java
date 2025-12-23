@@ -28,20 +28,20 @@ public class BillRequest {
     Double waterUnitPrice;
 
     // Internet
-    Double internetPrice;
+    BigDecimal  internetPrice;
 
     // Parking
-    Double parkingPrice;
+    BigDecimal  parkingPrice;
 
     // Cleaning
-    Double cleaningPrice;
+    BigDecimal  cleaningPrice;
 
     // Maintenance
-    Double maintenancePrice;
+    BigDecimal  maintenancePrice;
 
     // Other
     String otherDescription;
-    Double otherPrice;
+    BigDecimal  otherPrice;
 
     String notes;
 

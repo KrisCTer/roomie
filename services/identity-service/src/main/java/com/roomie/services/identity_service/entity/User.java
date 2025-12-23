@@ -36,6 +36,10 @@ public class User {
 
     @Column(name = "is_banned",nullable = false)
     Boolean isBanned = false;
+
+    @Column(name="provider")
+    private String authProvider;
+
     @ManyToMany
     Set<Role> roles;
 }

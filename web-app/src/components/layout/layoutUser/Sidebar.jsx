@@ -9,6 +9,7 @@ import {
   Contact,
   BookOpen,
   FileText,
+  Zap,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -26,6 +27,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     { icon: Plus, label: t("Add Property"), path: "/add-property" },
     { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
     { icon: MessageSquare, label: t("Message"), path: "/message" },
+    { icon: Zap, label: t("Utility Config"), path: "/utility-config" },
     { icon: FileText, label: t("My Bills"), path: "/unified-bills" },
     { icon: LogOut, label: t("Logout"), path: "/logout" },
   ];

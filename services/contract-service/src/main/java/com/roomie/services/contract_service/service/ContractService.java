@@ -70,6 +70,7 @@ public class ContractService {
         }
         PropertyResponse property = propertyClient.getProperty(req.getPropertyId()).getResult();
 
+
         Contract c = mapper.toEntity(req);
         c.setTenantSigned(false);
         c.setLandlordSigned(false);
@@ -211,6 +212,7 @@ public class ContractService {
         repo.findByBookingId(evt.getBookingId()).ifPresent(c -> {
             c.setStatus(ContractStatus.ACTIVE);
             c.setUpdatedAt(Instant.now());
+            propertyClient.markAsRented(c.getPropertyId());
             repo.save(c);
             cacheService.put(cacheKey(c.getId()), c, CACHE_TTL);
             kafkaTemplate.send("contract.activated", buildEvent(c));
@@ -239,10 +241,12 @@ public class ContractService {
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
         contract.setStatus(ContractStatus.TERMINATED);
         contract.setUpdatedAt(Instant.now());
+        propertyClient.markAsAvailable(contract.getPropertyId());
         Contract saved = repo.save(contract);
         kafkaTemplate.send("contract.terminated", buildEvent(saved));
         return mapper.toResponse(saved);
     }
+
     @Scheduled(cron = "0 0 2 * * *") // Daily at 2 AM
     public void expireContracts() {
         Instant now = Instant.now();
@@ -262,6 +266,7 @@ public class ContractService {
             kafkaTemplate.send("contract.expired", buildEvent(saved));
         }
     }
+
     public ContractResponse renew(String id, ContractRequest renewalRequest) {
         Contract oldContract = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));

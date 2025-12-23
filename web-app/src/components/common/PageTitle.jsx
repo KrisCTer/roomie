@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ChevronRight, Sparkles, Home } from "lucide-react";
-import "./bubble-animation.css";
+import "../../styles/bubble-animation.css";
 
 const PageTitle = ({ title, subtitle }) => {
   const [isVisible, setIsVisible] = useState(false);

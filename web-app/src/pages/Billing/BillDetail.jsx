@@ -15,9 +15,10 @@ import PageTitle from "../../components/common/PageTitle.jsx";
 import PropertyInfoCard from "../../components/Billing/PropertyInfoCard";
 import BillBreakdown from "../../components/Billing/BillBreakdown";
 import BillDetailInfo from "../../components/Billing/BillDetailInfo";
-import BillActions from "../../components/Billing/BillActions";
+// import BillActions from "../../components/Billing/BillActions";
 import PaymentModal from "../../components/Billing/PaymentModal";
 import StatusBanner from "../../components/Billing/StatusBanner";
+import BillActions from "../../components/Billing/BillActionsEnhanced";
 
 // Import hook
 import { useBillDetail } from "../../hooks/useBillDetail";
@@ -170,6 +171,7 @@ const BillDetail = () => {
                 landlord={landlord}
               />
               <BillActions
+                bill={bill}
                 canPay={canPay}
                 onPayment={() => setShowPaymentModal(true)}
                 onBack={goBack}

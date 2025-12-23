@@ -7,11 +7,14 @@ import com.roomie.services.billing_service.dto.response.ApiResponse;
 import com.roomie.services.billing_service.dto.response.BillResponse;
 import com.roomie.services.billing_service.dto.response.ContractResponse;
 import com.roomie.services.billing_service.entity.Bill;
+import com.roomie.services.billing_service.entity.MeterReading;
+import com.roomie.services.billing_service.entity.Utility;
 import com.roomie.services.billing_service.enums.BillStatus;
 import com.roomie.services.billing_service.exception.AppException;
 import com.roomie.services.billing_service.exception.ErrorCode;
 import com.roomie.services.billing_service.mapper.BillMapper;
 import com.roomie.services.billing_service.repository.BillRepository;
+import com.roomie.services.billing_service.repository.MeterReadingRepository;
 import com.roomie.services.billing_service.repository.httpclient.ContractClient;
 import feign.FeignException;
 import lombok.AccessLevel;
@@ -19,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,25 +35,42 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Enhanced Billing Service V2
+ * Features:
+ * - Auto-loads utility configuration
+ * - Auto-inherits previous meter readings
+ * - Tracks meter reading history
+ * - Distinguishes between new bill and update existing bill
+ */
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-public class BillingService {
+public class EnhancedBillingService {
 
     BillRepository billRepository;
+    MeterReadingRepository meterReadingRepository;
     BillMapper billMapper;
     ContractClient contractClient;
+    UtilityService utilityService;
     BillValidationService validationService;
     BillCalculationService calculationService;
     KafkaTemplate<String, Object> kafkaTemplate;
 
-    // ==================== CREATE ====================
+    // ==================== CREATE WITH AUTO-LOAD ====================
 
+    /**
+     * Smart Bill Creation:
+     * 1. Check if bill exists for the month
+     * 2. Auto-load utility configuration
+     * 3. Auto-inherit previous meter readings
+     * 4. Guide user on what to input
+     */
     @Transactional
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
-    public BillResponse createBill(BillRequest request) {
-        log.info("Creating bill for contract: {}", request.getContractId());
+    public BillResponse createOrUpdateBill(BillRequest request) {
+        log.info("Creating/Updating bill for contract: {}", request.getContractId());
 
         // 1. Fetch and validate contract
         ContractResponse contract = fetchContractSafely(request.getContractId());
@@ -62,30 +80,186 @@ public class BillingService {
                 request.getBillingMonth()
         );
 
-        // 3. Check for duplicate
-        validationService.validateNoDuplicateBill(request.getContractId(), billingMonth);
+        // 3. Check if bill already exists
+        Optional<Bill> existingBill = billRepository.findByContractIdAndBillingMonth(
+                request.getContractId(), billingMonth
+        );
 
-        // 4. Get previous meter readings
-        MeterReadings previousReadings = getPreviousReadings(request, contract.getId());
+        if (existingBill.isPresent()) {
+            // UPDATE EXISTING BILL
+            return updateExistingBill(existingBill.get(), request, contract);
+        } else {
+            // CREATE NEW BILL
+            return createNewBill(request, contract, billingMonth);
+        }
+    }
 
-        // 5. Validate meter readings
+    /**
+     * Create new bill with auto-loaded data
+     */
+    private BillResponse createNewBill(
+            BillRequest request,
+            ContractResponse contract,
+            LocalDate billingMonth
+    ) {
+        log.info("Creating NEW bill for month: {}", billingMonth);
+
+        // 1. Load utility configuration
+        Utility utility = utilityService.getUtilityForBilling(
+                contract.getPropertyId(),
+                contract.getId()
+        );
+
+        // 2. Auto-fill unit prices from utility config
+        if (request.getElectricityUnitPrice() == null) {
+            request.setElectricityUnitPrice(utility.getElectricityUnitPrice());
+        }
+        if (request.getWaterUnitPrice() == null) {
+            request.setWaterUnitPrice(utility.getWaterUnitPrice());
+        }
+        if (request.getInternetPrice() == null) {
+            request.setInternetPrice(utility.getInternetPrice() != null ?
+                    utility.getInternetPrice() : null);
+        }
+        if (request.getParkingPrice() == null) {
+            request.setParkingPrice(utility.getParkingPrice() != null ?
+                    utility.getParkingPrice() : null);
+        }
+        if (request.getCleaningPrice() == null) {
+            request.setCleaningPrice(utility.getCleaningPrice() != null ?
+                    utility.getCleaningPrice() : null);
+        }
+        if (request.getMaintenancePrice() == null) {
+            request.setMaintenancePrice(utility.getMaintenancePrice() != null ?
+                    utility.getMaintenancePrice() : null);
+        }
+
+        // 3. Get previous meter readings (auto-inherit)
+        MeterReadings previousReadings = getPreviousReadingsFromHistory(contract.getId());
+
+        // 4. Validate new meter readings
         validationService.validateMeterReadings(request, previousReadings);
 
-        // 6. Calculate amounts
+        // 5. Calculate amounts
         BillCalculation calculation = calculationService.calculate(request, previousReadings);
 
-        // 7. Calculate due date
+        // 6. Calculate due date
         LocalDate dueDate = calculationService.calculateDueDate(billingMonth);
 
-        // 8. Build and save bill
+        // 7. Build and save bill
         Bill bill = buildBill(request, contract, billingMonth, dueDate,
                 previousReadings, calculation);
 
         Bill saved = billRepository.save(bill);
 
-        log.info("Bill created successfully: {}", saved.getId());
+        // 8. Save meter reading history
+        saveMeterReadingHistory(saved, previousReadings);
+
+        log.info("NEW bill created successfully: {}", saved.getId());
 
         return billMapper.toResponse(saved);
+    }
+
+    /**
+     * Update existing bill - only allow updating meter readings
+     */
+    private BillResponse updateExistingBill(
+            Bill existingBill,
+            BillRequest request,
+            ContractResponse contract
+    ) {
+        log.info("UPDATING existing bill: {}", existingBill.getId());
+
+        // Only allow updating if status is DRAFT
+        if (existingBill.getStatus() != BillStatus.DRAFT) {
+            throw new AppException(ErrorCode.INVALID_BILL_STATUS,
+                    "Can only update bills in DRAFT status");
+        }
+
+        // Get current readings as "previous"
+        MeterReadings currentReadings = MeterReadings.builder()
+                .electricityOld(existingBill.getElectricityOld())
+                .waterOld(existingBill.getWaterOld())
+                .build();
+
+        // Validate new readings
+        validationService.validateMeterReadings(request, currentReadings);
+
+        // Recalculate amounts
+        BillCalculation calculation = calculationService.calculate(request, currentReadings);
+
+        // Update bill fields
+        updateBillFields(existingBill, request, calculation);
+
+        Bill saved = billRepository.save(existingBill);
+
+        // Update meter reading history
+        updateMeterReadingHistory(saved, currentReadings);
+
+        log.info("Bill updated successfully: {}", existingBill.getId());
+
+        return billMapper.toResponse(saved);
+    }
+
+    // ==================== METER READING HELPERS ====================
+
+    /**
+     * Get previous meter readings from history
+     */
+    private MeterReadings getPreviousReadingsFromHistory(String contractId) {
+        Optional<MeterReading> lastReading = meterReadingRepository
+                .findFirstByContractIdOrderByReadingMonthDesc(contractId);
+
+        if (lastReading.isPresent()) {
+            MeterReading reading = lastReading.get();
+            return MeterReadings.builder()
+                    .electricityOld(reading.getElectricityReading())
+                    .waterOld(reading.getWaterReading())
+                    .build();
+        } else {
+            // First bill - readings will be from request
+            return MeterReadings.builder()
+                    .electricityOld(0.0)
+                    .waterOld(0.0)
+                    .build();
+        }
+    }
+
+    /**
+     * Save meter reading to history
+     */
+    private void saveMeterReadingHistory(Bill bill, MeterReadings previousReadings) {
+        MeterReading reading = MeterReading.builder()
+                .propertyId(bill.getPropertyId())
+                .contractId(bill.getContractId())
+                .billId(bill.getId())
+                .readingMonth(bill.getBillingMonth())
+                .readingDate(LocalDate.now())
+                .electricityReading(bill.getElectricityNew())
+                .waterReading(bill.getWaterNew())
+                .recordedBy(getCurrentUserId())
+                .createdAt(Instant.now())
+                .build();
+
+        meterReadingRepository.save(reading);
+        log.debug("Meter reading history saved for bill: {}", bill.getId());
+    }
+
+    /**
+     * Update meter reading history
+     */
+    private void updateMeterReadingHistory(Bill bill, MeterReadings previousReadings) {
+        Optional<MeterReading> existing = meterReadingRepository.findByBillId(bill.getId());
+
+        if (existing.isPresent()) {
+            MeterReading reading = existing.get();
+            reading.setElectricityReading(bill.getElectricityNew());
+            reading.setWaterReading(bill.getWaterNew());
+            reading.setReadingDate(LocalDate.now());
+
+            meterReadingRepository.save(reading);
+            log.debug("Meter reading history updated for bill: {}", bill.getId());
+        }
     }
 
     // ==================== STATE TRANSITIONS ====================
@@ -136,7 +310,6 @@ public class BillingService {
 
     // ==================== QUERIES ====================
 
-//    @Cacheable(value = "bill", key = "#id")
     public BillResponse getBill(String id) {
         log.debug("Fetching bill: {}", id);
         return billMapper.toResponse(getBillEntity(id));
@@ -149,7 +322,7 @@ public class BillingService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "bill_by_contract", key = "#contractId")
+//    @Cacheable(value = "bill_by_contract", key = "#contractId")
     public List<BillResponse> getByContract(String contractId) {
         log.debug("Fetching bills for contract: {}", contractId);
         return billRepository.findByContractId(contractId).stream()
@@ -175,38 +348,6 @@ public class BillingService {
                 .collect(Collectors.toList());
     }
 
-    // ==================== UPDATE ====================
-
-    @Transactional
-    @CachePut(value = "bill", key = "#id")
-    @CacheEvict(value = "bill_by_contract", allEntries = true)
-    public BillResponse updateBill(String id, BillRequest request) {
-        log.info("Updating bill: {}", id);
-
-        Bill bill = getBillEntity(id);
-
-        // Get current meter readings as "previous"
-        MeterReadings currentReadings = MeterReadings.builder()
-                .electricityOld(bill.getElectricityOld())
-                .waterOld(bill.getWaterOld())
-                .build();
-
-        // Validate new readings
-        validationService.validateMeterReadings(request, currentReadings);
-
-        // Recalculate amounts
-        BillCalculation calculation = calculationService.calculate(request, currentReadings);
-
-        // Update bill fields
-        updateBillFields(bill, request, calculation);
-
-        Bill saved = billRepository.save(bill);
-
-        log.info("Bill updated successfully: {}", id);
-
-        return billMapper.toResponse(saved);
-    }
-
     // ==================== DELETE ====================
 
     @Transactional
@@ -214,9 +355,16 @@ public class BillingService {
     public void deleteBill(String id) {
         log.info("Deleting bill: {}", id);
 
-        if (!billRepository.existsById(id)) {
-            throw new AppException(ErrorCode.BILL_NOT_FOUND);
+        Bill bill = getBillEntity(id);
+
+        // Only allow deleting DRAFT bills
+        if (bill.getStatus() != BillStatus.DRAFT) {
+            throw new AppException(ErrorCode.INVALID_BILL_STATUS,
+                    "Can only delete bills in DRAFT status");
         }
+
+        // Delete associated meter reading
+        meterReadingRepository.findByBillId(id).ifPresent(meterReadingRepository::delete);
 
         billRepository.deleteById(id);
 
@@ -279,19 +427,6 @@ public class BillingService {
         }
     }
 
-    private MeterReadings getPreviousReadings(BillRequest request, String contractId) {
-        Optional<Bill> previousBill = billRepository
-                .findFirstByContractIdOrderByCreatedAtDesc(contractId);
-
-        if (previousBill.isPresent()) {
-            return MeterReadings.fromPreviousBill(previousBill.get());
-        } else {
-            // First bill - validate required fields
-            validationService.validateFirstBillReadings(request);
-            return MeterReadings.fromRequest(request);
-        }
-    }
-
     private Bill buildBill(
             BillRequest request,
             ContractResponse contract,
@@ -343,6 +478,9 @@ public class BillingService {
                 .totalAmount(calculation.getTotalAmount())
                 .status(BillStatus.DRAFT)
 
+                // Notes
+                .notes(request.getNotes())
+
                 // Timestamps
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
@@ -382,6 +520,7 @@ public class BillingService {
 
         // Total
         bill.setTotalAmount(calculation.getTotalAmount());
+        bill.setNotes(request.getNotes());
         bill.setUpdatedAt(Instant.now());
     }
 
@@ -398,12 +537,10 @@ public class BillingService {
 
     private void publishBillEvent(String topic, Bill bill) {
         try {
-            // TODO: Create proper event DTOs
             kafkaTemplate.send(topic, bill.getId());
             log.debug("Published event {} for bill {}", topic, bill.getId());
         } catch (Exception e) {
             log.error("Failed to publish event {} for bill {}", topic, bill.getId(), e);
-            // Don't fail the main operation
         }
     }
 }

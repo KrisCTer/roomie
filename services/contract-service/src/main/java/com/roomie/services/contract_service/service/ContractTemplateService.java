@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,6 +30,10 @@ public class ContractTemplateService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter
             .ofPattern("dd/MM/yyyy")
+            .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
+
+    private static final DateTimeFormatter DAY_MONTH_YEAR_FORMATTER = DateTimeFormatter
+            .ofPattern("dd 'tháng' MM 'năm' yyyy")
             .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
 
     private static final NumberFormat CURRENCY_FORMATTER =
@@ -63,7 +68,7 @@ public class ContractTemplateService {
     }
 
     /**
-     * Main builder - tạo HTML với hoặc không có chữ ký
+     * Main builder - tạo HTML theo mẫu hợp đồng chuẩn Việt Nam
      */
     private String buildContractHtml(Contract contract, boolean includeSignatures) {
         // Fetch data from services
@@ -71,57 +76,100 @@ public class ContractTemplateService {
         UserProfileResponse landlord = fetchUserProfile(contract.getLandlordId());
         PropertyResponse property = fetchProperty(contract.getPropertyId());
 
+        // Get current date for contract signing
+        LocalDate today = LocalDate.now();
+        String contractDate = today.format(DAY_MONTH_YEAR_FORMATTER);
+
         // Format dates
         String startDate = contract.getStartDate() != null
                 ? DATE_FORMATTER.format(contract.getStartDate())
-                : "___________";
-        String paymentDate = contract.getStartDate() != null
-                ? DAY_ONLY.format(contract.getStartDate())
-                : "___________";
+                : "___/___/_______";
+
         String endDate = contract.getEndDate() != null
                 ? DATE_FORMATTER.format(contract.getEndDate())
+                : "___/___/_______";
+
+        String paymentDay = contract.getStartDate() != null
+                ? DAY_ONLY.format(contract.getStartDate())
+                : "___";
+
+        // Money formatting
+        String depositAmount = property != null && property.getRentalDeposit() != null
+                ? formatCurrency(property.getRentalDeposit())
                 : "___________";
 
-        String deposit = property != null && property.getRentalDeposit() != null
-                ? CURRENCY_FORMATTER.format(property.getRentalDeposit())
+        String depositInWords = property != null && property.getRentalDeposit() != null
+                ? convertNumberToWords(property.getRentalDeposit())
                 : "___________";
 
         String monthlyRent = property != null && property.getMonthlyRent() != null
-                ? CURRENCY_FORMATTER.format(property.getMonthlyRent())
+                ? formatCurrency(property.getMonthlyRent())
                 : "___________";
 
         // Landlord info
-        String landlordName = landlord != null ? landlord.getLastName() + " " + landlord.getFirstName() : "___________";
-        String landlordId = landlord != null && landlord.getIdCardNumber() != null
-                ? landlord.getIdCardNumber() : "___________";
-        String landlordPhone = landlord != null && landlord.getPhoneNumber() != null
-                ? landlord.getPhoneNumber() : "___________";
+        String landlordName = landlord != null
+                ? (landlord.getLastName() + " " + landlord.getFirstName()).trim()
+                : "___________";
+
+        String landlordBirthYear = landlord != null && landlord.getDob() != null
+                ? String.valueOf(landlord.getDob().getYear())
+                : "___________";
+
+        String landlordIdCard = landlord != null && landlord.getIdCardNumber() != null
+                ? landlord.getIdCardNumber()
+                : "___________";
+
+        String landlordIdIssuePlace = landlord != null && landlord.getCurrentAddress() != null
+                ? landlord.getCurrentAddress()
+                : "___________";
+
+        String landlordIdIssueDate = landlord != null && landlord.getDob() != null
+                ? DATE_FORMATTER.format(landlord.getDob())
+                : "___________";
+
         String landlordAddress = landlord != null && landlord.getPermanentAddress() != null
-                ? landlord.getPermanentAddress() : "___________";
+                ? landlord.getPermanentAddress()
+                : "___________";
 
         // Tenant info
-        String tenantName = tenant != null ? tenant.getLastName() + " " + tenant.getFirstName() : "___________";
-        String tenantId = tenant != null && tenant.getIdCardNumber() != null
-                ? tenant.getIdCardNumber() : "___________";
-        String tenantPhone = tenant != null && tenant.getPhoneNumber() != null
-                ? tenant.getPhoneNumber() : "___________";
+        String tenantName = tenant != null
+                ? (tenant.getLastName() + " " + tenant.getFirstName()).trim()
+                : "___________";
+
+        String tenantBirthYear = tenant != null && tenant.getDob() != null
+                ? String.valueOf(tenant.getDob().getYear())
+                : "___________";
+
+        String tenantIdCard = tenant != null && tenant.getIdCardNumber() != null
+                ? tenant.getIdCardNumber()
+                : "___________";
+
+        String tenantIdIssuePlace = tenant != null && tenant.getCurrentAddress() != null
+                ? tenant.getCurrentAddress()
+                : "___________";
+//can fix tenantIdIssueDate
+        String tenantIdIssueDate = tenant != null && tenant.getDob() != null
+                ? DATE_FORMATTER.format(tenant.getDob())
+                : "___________";
+
         String tenantAddress = tenant != null && tenant.getPermanentAddress() != null
-                ? tenant.getPermanentAddress() : "___________";
+                ? tenant.getPermanentAddress()
+                : "___________";
 
         // Property info
         String propertyAddress = property != null && property.getAddress() != null
-                ? property.getAddress().getFullAddress() : "___________";
-        String propertySize = property != null && property.getSize() != null
-                ? String.format("%.2f", property.getSize()) : "___________";
+                ? property.getAddress().getFullAddress()
+                : "___________";
 
         String propertyType = property != null && property.getPropertyType() != null
-                ? translatePropertyType(property.getPropertyType().toString()) : "___________";
-        String propertyStructure = buildPropertyStructure(property);
+                ? translatePropertyType(property.getPropertyType().toString())
+                : "___________";
 
-        String monthsDuration = calculateMonthsDuration(contract.getStartDate(), contract.getEndDate());
-        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd 'tháng' MM 'năm' yyyy"));
-        String createdDateTime = Instant.now().atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
-                .format(DATETIME_FORMATTER);
+        String propertyPurpose = "để ở"; // Default purpose, can be changed if needed
+
+        // Calculate duration
+        String durationYears = calculateYearsDuration(contract.getStartDate(), contract.getEndDate());
+        String durationYearsInWords = convertYearsToWords(durationYears);
 
         // Build signature section
         String signatureSection = includeSignatures
@@ -133,17 +181,28 @@ public class ContractTemplateService {
                 <html lang="vi">
                 <head>
                     <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Hợp Đồng Thuê Nhà</title>
                     <style>
                         @page {
                             size: A4;
-                            margin: 2cm;
+                            margin: 2cm 2.5cm;
                         }
+                        
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
                         body {
                             font-family: 'Times New Roman', serif;
                             font-size: 13pt;
-                            line-height: 1.6;
+                            line-height: 1.5;
                             color: #000;
+                            text-align: justify;
                         }
+                        
                         .watermark {
                             position: fixed;
                             top: 50%%;
@@ -155,81 +214,146 @@ public class ContractTemplateService {
                             z-index: -1;
                             pointer-events: none;
                         }
+                        
                         .header {
                             text-align: center;
                             margin-bottom: 30px;
                         }
-                        .header h1 {
+                        
+                        .header-top {
+                            text-transform: uppercase;
+                            font-weight: bold;
+                            font-size: 13pt;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .header-subtitle {
+                            font-style: italic;
+                            font-size: 13pt;
+                            margin-bottom: 15px;
+                        }
+                        
+                        .header-divider {
+                            margin: 10px auto;
+                        }
+                        
+                        .contract-title {
                             font-size: 16pt;
                             font-weight: bold;
                             text-transform: uppercase;
-                            margin: 10px 0;
-                        }
-                        .header p {
-                            font-style: italic;
-                            font-size: 12pt;
-                            margin: 5px 0;
-                        }
-                        .section {
                             margin: 20px 0;
-                            text-align: justify;
                         }
-                        .section h2 {
-                            font-size: 14pt;
+                        
+                        .basis {
+                            margin: 20px 0;
+                            line-height: 1.8;
+                        }
+                        
+                        .party-section {
+                            margin: 20px 0;
+                        }
+                        
+                        .party-title {
                             font-weight: bold;
+                            text-transform: uppercase;
+                            margin-bottom: 5px;
+                        }
+                        
+                        .party-detail {
+                            margin-left: 0;
+                            line-height: 1.8;
+                        }
+                        
+                        .article {
+                            margin: 25px 0;
+                        }
+                        
+                        .article-title {
+                            font-weight: bold;
+                            text-align: center;
+                            text-transform: uppercase;
                             margin: 15px 0 10px 0;
                         }
-                        .party {
-                            margin-left: 20px;
-                            margin-bottom: 10px;
+                        
+                        .article-content {
+                            text-indent: 0;
+                            margin: 10px 0;
                         }
+                        
+                        .article-subsection {
+                            margin-left: 0;
+                            margin-top: 10px;
+                        }
+                        
+                        .indent {
+                            margin-left: 30px;
+                        }
+                        
                         .signature-section {
                             margin-top: 50px;
                             display: flex;
                             justify-content: space-between;
                         }
+                        
                         .signature-box {
                             width: 45%%;
                             text-align: center;
                         }
-                        .signature-box p {
-                            margin: 5px 0;
-                        }
+                        
                         .signature-space {
-                            height: 80px;
-                            position: relative;
+                            margin-top: 80px;
                         }
+                        
                         .digital-signature {
                             font-family: 'Brush Script MT', cursive;
-                            font-size: 24pt;
-                            color: #000080;
-                            margin: 10px 0;
+                            font-size: 18pt;
+                            color: #0066cc;
                         }
+                        
                         .signature-badge {
-                            display: inline-block;
                             background: #28a745;
                             color: white;
                             padding: 5px 15px;
-                            border-radius: 20px;
-                            font-size: 10pt;
+                            border-radius: 15px;
+                            display: inline-block;
+                            font-size: 11pt;
+                            margin-top: 10px;
+                        }
+                        
+                        .signature-info {
+                            font-size: 11pt;
+                            color: #666;
                             margin-top: 5px;
                         }
-                        .signature-info {
-                            font-size: 10pt;
-                            color: #666;
-                            font-style: italic;
-                        }
+                        
                         .bold {
                             font-weight: bold;
                         }
-                        .indent {
+                        
+                        .italic {
+                            font-style: italic;
+                        }
+                        
+                        .center {
+                            text-align: center;
+                        }
+                        
+                        .note-section {
+                            margin-top: 30px;
+                            font-size: 12pt;
+                            line-height: 1.6;
+                        }
+                        
+                        .note-title {
+                            font-weight: bold;
+                        }
+                        
+                        ul {
                             margin-left: 30px;
                         }
-                        .footer {
-                            margin-top: 30px;
-                            font-size: 11pt;
-                            font-style: italic;
-                            text-align: center;
+                        
+                        li {
+                            margin: 5px 0;
                         }
                     </style>
                 </head>
@@ -237,168 +361,235 @@ public class ContractTemplateService {
                     %s
                     
                     <div class="header">
-                        <p>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
-                        <p class="bold">Độc lập - Tự do - Hạnh phúc</p>
-                        <p style="margin-top: 20px;">———————————————</p>
-                        <h1>HỢP ĐỒNG THUÊ NHÀ</h1>
-                        <p>Số: %s</p>
+                        <p class="header-top">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                        <p class="header-subtitle">Độc lập - Tự do - Hạnh phúc</p>
+                        <p class="header-divider">---------o0o---------</p>
+                        <h1 class="contract-title">HỢP ĐỒNG THUÊ NHÀ</h1>
                     </div>
-                
-                    <div class="section">
-                        <p>- Căn cứ Bộ luật Dân sự số 91/2015/QH13 được Quốc hội thông qua ngày 24/11/2015;</p>
-                        <p>- Căn cứ Luật Nhà ở số 65/2014/QH13 được Quốc hội thông qua ngày 25/11/2014;</p>
-                        <p>- Căn cứ vào nhu cầu và khả năng của các bên;</p>
-                        <p style="margin-top: 15px;">Hôm nay, ngày %s, tại TP. Hồ Chí Minh, chúng tôi gồm:</p>
+                    
+                    <div class="basis">
+                        <p>- Căn cứ Bộ Luật Dân sự của Quốc Hội nước CHXHCN Việt Nam năm 2015</p>
+                        <p>- Căn cứ nhu cầu và khả năng của các Bên;</p>
                     </div>
-                
-                    <div class="section">
-                        <h2>BÊN CHO THUÊ (Bên A):</h2>
-                        <div class="party">
-                            <p><span class="bold">Họ và tên:</span> %s</p>
-                            <p><span class="bold">Số CMND/CCCD:</span> %s</p>
-                            <p><span class="bold">Hộ khẩu thường trú:</span> %s</p>
-                            <p><span class="bold">Số điện thoại:</span> %s</p>
+                    
+                    <p style="margin: 20px 0;">Hôm nay, ngày <strong>%s</strong>, tại <strong>%s</strong>, chúng tôi gồm:</p>
+                    
+                    <div class="party-section">
+                        <p class="party-title">BÊN CHO THUÊ: (Sau đây gọi tắt là Bên A)</p>
+                        <div class="party-detail">
+                            <p>Ông/Bà: <strong>%s</strong></p>
+                            <p>Sinh năm: <strong>%s</strong></p>
+                            <p>CMND/CCCD/Hộ chiếu số: <strong>%s</strong> do <strong>%s</strong> cấp ngày <strong>%s</strong></p>
+                            <p>Hộ khẩu thường trú tại: <strong>%s</strong></p>
                         </div>
                     </div>
-                
-                    <div class="section">
-                        <h2>BÊN THUÊ (Bên B):</h2>
-                        <div class="party">
-                            <p><span class="bold">Họ và tên:</span> %s</p>
-                            <p><span class="bold">Số CMND/CCCD:</span> %s</p>
-                            <p><span class="bold">Hộ khẩu thường trú:</span> %s</p>
-                            <p><span class="bold">Số điện thoại:</span> %s</p>
+                    
+                    <div class="party-section">
+                        <p class="party-title">BÊN THUÊ: (Sau đây gọi tắt là Bên B)</p>
+                        <div class="party-detail">
+                            <p>Ông/Bà: <strong>%s</strong></p>
+                            <p>Sinh năm: <strong>%s</strong></p>
+                            <p>CMND/CCCD/Hộ chiếu số: <strong>%s</strong> do <strong>%s</strong> cấp ngày <strong>%s</strong></p>
+                            <p>Hộ khẩu thường trú tại: <strong>%s</strong></p>
                         </div>
                     </div>
-                
-                    <div class="section">
-                        <p>Sau khi bàn bạc, hai bên thống nhất ký kết hợp đồng với các điều khoản sau:</p>
+                    
+                    <p style="margin: 20px 0;">Hai Bên tự nguyện cùng nhau lập và ký Hợp đồng này để thực hiện việc cho thuê tài sản theo các thỏa thuận sau đây:</p>
+                    
+                    <!-- ĐIỀU 1 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 1<br/>DIỆN TÍCH CHO THUÊ VÀ MỤC ĐÍCH THUÊ</h2>
+                        <p class="article-content"><strong>1.1</strong> Bên A đồng ý cho Bên B thuê, Bên B đồng ý thuê của Bên A toàn bộ <strong>%s</strong> tại địa chỉ: <strong>%s</strong> theo Giấy chứng nhận quyền sử dụng đất quyền sở hữu nhà ở và tài sản gắn liền với đất mang tên ông/bà <strong>%s</strong>.</p>
+                        <p class="article-content">Diện tích, hiện trạng quyền sử dụng đất và tài sản gắn liền với đất được mô tả cụ thể trong Giấy chứng nhận quyền sử dụng đất quyền sở hữu nhà ở và tài sản gắn liền với đất nêu trên. (Sau đây gọi là "Tài sản" hoặc "Tài sản thuê")</p>
+                        <p class="article-content"><strong>1.2</strong> Mục đích thuê: <strong>%s</strong></p>
                     </div>
-                
-                    <div class="section">
-                        <h2>ĐIỀU 1: ĐỐI TƯỢNG CỦA HỢP ĐỒNG</h2>
-                        <p>Bên A đồng ý cho Bên B thuê nhà ở tại địa chỉ:</p>
+                    
+                    <!-- ĐIỀU 2 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 2<br/>THỜI HẠN THUÊ, GIA HẠN VÀ CHẤM DỨT HỢP ĐỒNG</h2>
+                        <p class="article-content"><strong>2.1</strong> Thời hạn thuê là <strong>%s (%s)</strong> năm, được tính bắt đầu từ ngày <strong>%s</strong> đến ngày <strong>%s</strong>.</p>
+                        <p class="article-content"><strong>2.2</strong> Bên A bàn giao quyền sử dụng đất và quyền sở hữu tài sản gắn liền với đất cho Bên B vào ngày <strong>%s</strong>.</p>
+                        <p class="article-content"><strong>2.3</strong> Hợp đồng này có hiệu lực thi hành kể từ ngày ký</p>
+                        <p class="article-content"><strong>2.4</strong> Hợp đồng sẽ đương nhiên chấm dứt khi xảy ra các trường hợp sau:</p>
+                        <p class="article-content"><strong>2.5</strong> Hết thời hạn thuê hoặc không được gia hạn thuê theo quy định của Hợp đồng;</p>
+                        <p class="article-content"><strong>2.6</strong> Nếu bên B không thanh toán tiền nhà sau 15 ngày đầu của mỗi đợt thanh toán thì bên A có quyền chấm dứt Hợp đồng và bên B không được bồi thường bất cứ một khoản chi phí nào.</p>
+                        <p class="article-content"><strong>2.7</strong> Chấm dứt hợp đồng theo quy định của pháp luật;</p>
+                        <p class="article-content"><strong>2.8</strong> Trường hợp bên A chấm dứt Hợp đồng trước thời hạn, bên A phải:</p>
                         <div class="indent">
-                            <p><span class="bold">Địa chỉ:</span> %s</p>
-                            <p><span class="bold">Mã tài sản:</span> %s</p>
-                            <p><span class="bold">Diện tích:</span> %s m²</p>
-                            <p><span class="bold">Kết cấu:</span> %s</p>
+                            <p>+ Thông báo cho bên B biết trước 1 tháng bằng văn bản.</p>
+                            <p>+ Hoàn trả cho bên B số tiền thuê mà bên B đã trả trước cho khoảng thời gian bên B không sử dụng nhà (nếu có)</p>
+                        </div>
+                        <p class="article-content">Trường hợp bên B chấm dứt Hợp đồng trước thời hạn, bên B phải:</p>
+                        <div class="indent">
+                            <p>+ Thông báo cho bên A biết trước 30 ngày bằng văn bản</p>
+                            <p>+ Thanh toán các chi phí tiện ích tính đến ngày bàn giao nhà</p>
+                            <p>+ Được bên A hoàn trả số tiền nhà đã trả trước mà chưa sử dụng (nếu có)</p>
+                        </div>
+                        <p class="article-content"><strong>2.9</strong> Trường hợp một trong hai bên muốn chấm dứt Hợp đồng trước thời hạn thì Bên A được lấy lại tài sản trước thời hạn.</p>
+                        <p class="article-content"><strong>2.10</strong> Việc một trong hai bên không thực hiện, thực hiện không đầy đủ hay thực hiện chậm các nghĩa vụ của mình theo Hợp đồng này sẽ không bị coi là vi phạm các nghĩa vụ đó hay là đối tượng để khiếu nại các nghĩa vụ đó nếu việc không thực hiện hay chậm trễ đó do thiên tai, động đất, chiến tranh và các trường hợp bất khả kháng theo quy định của pháp luật hiện hành.</p>
+                    </div>
+                    
+                    <!-- ĐIỀU 3 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 3<br/>GIÁ THUÊ, ĐẶT CỌC VÀ PHƯƠNG THỨC THANH TOÁN</h2>
+                        <p class="article-content"><strong>3.1</strong> Giá cho thuê:</p>
+                        <div class="indent">
+                            <p>Số tiền thuê là: <strong>%s/1 tháng</strong></p>
+                        </div>
+                        <p class="article-content">Giá trên đã bao gồm tiền các loại thuế, phí theo quy định của pháp luật.</p>
+                        
+                        <p class="article-content"><strong>3.2</strong> Tiền đặt cọc:</p>
+                        <p class="article-content">Bên B sẽ giao cho Bên A một khoản tiền là <strong>%s</strong> (bằng chữ: <strong>%s</strong>) ngay sau khi ký hợp đồng này. Số tiền này là tiền đặt cọc để đảm bảo thực hiện Hợp đồng cho thuê nhà kể từ ngày hợp đồng có hiệu lực.</p>
+                        <div class="indent">
+                            <p>• Nếu Bên B đơn phương chấm dứt hợp đồng mà không thực hiện nghĩa vụ báo trước tới Bên A thì Bên A sẽ không phải hoàn trả lại Bên B số tiền đặt cọc này.</p>
+                            <p>• Nếu Bên A đơn phương chấm dứt hợp đồng mà không thực hiện nghĩa vụ báo trước tới bên B thì bên A sẽ phải hoàn trả lại Bên B số tiền đặt cọc và phải bồi thường thêm một khoản bằng chính tiền đặt cọc.</p>
+                            <p>• Vào thời điểm kết thúc Thời Hạn Thuê hoặc kể từ ngày Chấm dứt Hợp Đồng, Bên A sẽ hoàn lại cho Bên B số Tiền Đặt Cọc sau khi đã khấu trừ khoản tiền chi phí để khắc phục thiệt hại (nếu có).</p>
+                        </div>
+                        
+                        <p class="article-content"><strong>3.3</strong> Bên B sẽ thanh toán tiền thuê tài sản cho Bên A vào ngày <strong>%s</strong> của mỗi tháng. Mỗi lần thanh toán Bên B sẽ nhận được một giấy biên nhận của Bên A. Việc thanh toán tiền thuê tài sản sẽ do các bên tự thực hiện.</p>
+                        
+                        <p class="article-content"><strong>3.4</strong> Phương thức thanh toán bằng tiền mặt hoặc chuyển khoản ngân hàng.</p>
+                    </div>
+                    
+                    <!-- ĐIỀU 4 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 4<br/>PHÍ DỊCH VỤ</h2>
+                        <p class="article-content"><strong>4.1</strong> Bên A sẽ không phải trả bất kỳ phí dịch vụ hay khoản thuế nào liên quan trong quá trình kinh doanh của Bên B.</p>
+                        <p class="article-content"><strong>4.2</strong> Bên B trực tiếp thanh toán các chi phí sử dụng điện năng, nước, điện thoại, fax, internet và các dịch vụ khác theo khối lượng tiêu thụ hàng tháng với các nhà cung cấp và giá theo quy định của Nhà Nước.</p>
+                        <p class="article-content"><strong>4.3</strong> Các khoản thuế, chi phí, lệ phí tách biệt riêng không bao gồm tiền thuê. Bên B chịu mọi chi phí, thuế liên quan đến việc kinh doanh trong quá trình thuê tài sản.</p>
+                    </div>
+                    
+                    <!-- ĐIỀU 5 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 5<br/>QUYỀN VÀ NGHĨA VỤ CỦA BÊN A</h2>
+                        <p class="article-content"><strong>5.1 Nghĩa vụ của Bên A:</strong></p>
+                        <div class="indent">
+                            <p>- Bàn giao tài sản cho bên thuê trong tình trạng vệ sinh sạch sẽ theo đúng thỏa thuận trong hợp đồng;</p>
+                            <p>- Bảo đảm cho Bên thuê sử dụng ổn định tài sản trong thời hạn thuê;</p>
+                            <p>- Tạo điều kiện để cho Bên B hoạt động kinh doanh được thuận lợi như: Điện, nước theo quy định của pháp luật; Có trách nhiệm đăng ký sổ tạm trú cho bên B tại công an địa phương. Trước khi sổ tạm trú hết hạn, bên A phải có trách nhiệm gia hạn sổ tạm trú cho bên B khi bên B cung cấp đầy đủ các giấy tờ tùy thân.</p>
+                        </div>
+                        
+                        <p class="article-content"><strong>5.2 Quyền của Bên A:</strong></p>
+                        <div class="indent">
+                            <p>- Nhận đủ tiền thuê tài sản theo đúng kỳ hạn đã thỏa thuận;</p>
+                            <p>- Cải tạo, sửa chữa, nâng cấp tài sản thuê khi được Bên B đồng ý;</p>
                         </div>
                     </div>
-                
-                    <div class="section">
-                        <h2>ĐIỀU 2: THỜI HẠN THUÊ</h2>
-                        <p>Thời hạn thuê là: <span class="bold">%s</span> tháng</p>
-                        <p>Bắt đầu từ ngày: <span class="bold">%s</span></p>
-                        <p>Kết thúc vào ngày: <span class="bold">%s</span></p>
+                    
+                    <!-- ĐIỀU 6 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 6<br/>QUYỀN VÀ NGHĨA VỤ CỦA BÊN B</h2>
+                        <p class="article-content"><strong>6.1 Nghĩa vụ của Bên B:</strong></p>
+                        <div class="indent">
+                            <p>- Sử dụng tài sản đúng mục đích đã thỏa thuận;</p>
+                            <p>- Trả đủ tiền thuê tài sản đúng kỳ hạn đã thỏa thuận;</p>
+                            <p>- Giữ gìn, sửa chữa những hư hỏng do mình gây ra;</p>
+                            <p>- Tôn trọng quy tắc sinh hoạt công cộng;</p>
+                            <p>- Trả tài sản cho bên A theo đúng thỏa thuận;</p>
+                            <p>- Phải tự bảo quản tài sản của mình, bảo vệ tài sản chung, giữ gìn vệ sinh chung, an ninh trật tự chung, có trách nhiệm trong công tác phòng cháy chữa cháy;</p>
+                            <p>- Không được tự ý thay đổi, sửa chữa hiện trạng ban đầu của tài sản thuê nếu không được sự đồng ý của Bên A;</p>
+                            <p>- Nếu gây ra những hư hỏng do lỗi chủ quan của Bên B thì Bên B phải chịu trách nhiệm bồi thường thiệt hại theo giá thị trường;</p>
+                            <p>- Không được sử dụng tài sản thuê để kinh doanh trái phép, tàng trữ và sử dụng các mặt hàng cấm mà pháp luật quy định.</p>
+                        </div>
+                        
+                        <p class="article-content"><strong>6.2 Quyền của Bên B:</strong></p>
+                        <div class="indent">
+                            <p>- Nhận tài sản thuê theo đúng thỏa thuận.</p>
+                        </div>
                     </div>
-                
-                    <div class="section">
-                        <h2>ĐIỀU 3: GIÁ THUÊ VÀ PHƯƠNG THỨC THANH TOÁN</h2>
-                        <p><span class="bold">3.1.</span> Giá thuê nhà: <span class="bold">%s/tháng</span></p>
-                        <p class="indent">(Bằng chữ: %s)</p>
-                        <p><span class="bold">3.2.</span> Phương thức thanh toán: Bên B thanh toán cho Bên A bằng tiền mặt/chuyển khoản vào ngày <span class="bold">%s/tháng</span> hàng tháng.</p>
-                        <p><span class="bold">3.3.</span> Tiền đặt cọc: <span class="bold">%s</span>, sẽ được hoàn trả khi hết hạn hợp đồng nếu Bên B không vi phạm các điều khoản.</p>
+                    
+                    <!-- ĐIỀU 7 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 7<br/>GIẢI QUYẾT TRANH CHẤP</h2>
+                        <p class="article-content">Trong quá trình thực hiện Hợp đồng này, nếu phát sinh tranh chấp, các bên cùng nhau thương lượng giải quyết trên nguyên tắc tôn trọng quyền lợi của nhau; trong trường hợp không thương lượng được thì một trong hai bên có quyền khởi kiện để yêu cầu toà án có thẩm quyền giải quyết theo quy định của pháp luật.</p>
                     </div>
-                
-                    <div class="section">
-                        <h2>ĐIỀU 4: TRÁCH NHIỆM CỦA BÊN CHO THUÊ</h2>
-                        <p><span class="bold">4.1.</span> Giao nhà và trang thiết bị (nếu có) cho Bên B đúng thời hạn đã thỏa thuận.</p>
-                        <p><span class="bold">4.2.</span> Bảo đảm quyền sử dụng của Bên B trong suốt thời gian thuê.</p>
-                        <p><span class="bold">4.3.</span> Bảo trì, sửa chữa các hư hỏng về kết cấu của nhà.</p>
+                    
+                    <!-- ĐIỀU 8 -->
+                    <div class="article">
+                        <h2 class="article-title">ĐIỀU 8<br/>CÁC ĐIỀU KHOẢN CHUNG</h2>
+                        <p class="article-content"><strong>8.1</strong> Hợp đồng này thay thế cho toàn bộ các thỏa thuận miệng, hoặc bằng văn bản trước đó được ký kết giữa hai Bên liên quan đến nội dung Hợp đồng.</p>
+                        <p class="article-content"><strong>8.2</strong> Mọi sửa đổi hoặc bổ sung Hợp đồng này phải được lập thành văn bản và được ký bởi đại diện của các Bên tham gia Hợp đồng.</p>
+                        <p class="article-content"><strong>8.3</strong> Hiệu lực của từng điều khoản của Hợp đồng mang tính độc lập. Việc một vài điều khoản vô hiệu không làm ảnh hưởng đến hiệu lực của các điều khoản còn lại của Hợp đồng trừ trường hợp pháp luật có quy định khác.</p>
                     </div>
-                
-                    <div class="section">
-                        <h2>ĐIỀU 5: TRÁCH NHIỆM CỦA BÊN THUÊ</h2>
-                        <p><span class="bold">5.1.</span> Sử dụng nhà đúng mục đích, giữ gìn nhà và trang thiết bị như tài sản của mình.</p>
-                        <p><span class="bold">5.2.</span> Thanh toán đầy đủ và đúng hạn tiền thuê nhà.</p>
-                        <p><span class="bold">5.3.</span> Thanh toán các chi phí điện, nước, internet và các dịch vụ khác phát sinh.</p>
-                        <p><span class="bold">5.4.</span> Không được tự ý sửa chữa, cải tạo nhà khi chưa có sự đồng ý của Bên A.</p>
-                        <p><span class="bold">5.5.</span> Trả nhà cho Bên A khi hết hạn hợp đồng.</p>
-                    </div>
-                
-                    <div class="section">
-                        <h2>ĐIỀU 6: ĐIỀU KHOẢN CHUNG</h2>
-                        <p><span class="bold">6.1.</span> Hai bên cam kết thực hiện đúng các điều khoản đã thỏa thuận.</p>
-                        <p><span class="bold">6.2.</span> Trong quá trình thực hiện, nếu có vướng mắc, hai bên cùng bàn bạc giải quyết trên tinh thần hợp tác.</p>
-                        <p><span class="bold">6.3.</span> Hợp đồng có hiệu lực kể từ ngày ký.</p>
-                        <p><span class="bold">6.4.</span> Hợp đồng được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.</p>
-                    </div>
-                
+                    
                     %s
-                
-                    <div class="footer">
-                        <p>Hợp đồng được tạo tự động bởi hệ thống Roomie</p>
-                        <p>Mã hợp đồng: %s | Ngày tạo: %s</p>
+                    
+                    <div class="note-section">
+                        <p class="note-title">Chú thích:</p>
+                        <ul>
+                            <li>Ghi theo Giấy chứng nhận quyền sử dụng đất</li>
+                            <li>Ghi rõ mục đích thuê: để ở, để kinh doanh...</li>
+                            <li>Giá thuê đã bao gồm hoặc chưa bao gồm các khoản sau đó</li>
+                            <li>Ghi rõ phương thức thanh toán: chuyển khoản hoặc tiền mặt</li>
+                        </ul>
                     </div>
                 </body>
                 </html>
                 """.formatted(
-                // Watermark for preview
-                includeSignatures ? "" : "<div class=\"watermark\">BẢN XEM TRƯỚC</div>",
-                // Header
-                contract.getId() != null ? contract.getId() : "DRAFT",
-                currentDate,
-                // Bên A - Landlord
-                landlordName,
-                landlordId,
-                landlordAddress,
-                landlordPhone,
-                // Bên B - Tenant
-                tenantName,
-                tenantId,
-                tenantAddress,
-                tenantPhone,
-                // Property
+                // Watermark
+                includeSignatures ? "" : "<div class='watermark'>BẢN PREVIEW</div>",
+                // Contract signing date and location
+                contractDate,
                 propertyAddress,
-                contract.getPropertyId() != null ? contract.getPropertyId() : "___________",
-                propertySize,
-                propertyStructure,
+                // Landlord info
+                landlordName,
+                landlordBirthYear,
+                landlordIdCard,
+                landlordIdIssuePlace,
+                landlordIdIssueDate,
+                landlordAddress,
+                // Tenant info
+                tenantName,
+                tenantBirthYear,
+                tenantIdCard,
+                tenantIdIssuePlace,
+                tenantIdIssueDate,
+                tenantAddress,
+                // Property details
+                propertyType,
+                propertyAddress,
+                landlordName,
+                propertyPurpose,
                 // Duration
-                monthsDuration,
+                durationYears,
+                durationYearsInWords,
                 startDate,
                 endDate,
+                startDate,
                 // Payment
                 monthlyRent,
-                convertNumberToWords(property != null ? property.getRentalDeposit() : null),
-                paymentDate,
-                deposit,
+                depositAmount,
+                depositInWords,
+                paymentDay,
                 // Signature section
-                signatureSection,
-                // Footer
-                contract.getId() != null ? contract.getId() : "DRAFT",
-                createdDateTime
+                signatureSection
         );
     }
 
     /**
-     * Build signature section for PREVIEW (no actual signatures)
+     * Build signature section for preview (no signatures)
      */
     private String buildPreviewSignatureSection(String landlordName, String tenantName) {
         return """
-    <div class="signature-section">
-        <div class="signature-box">
-            <p class="bold">ĐẠI DIỆN BÊN CHO THUÊ</p>
-            <p style="font-style: italic; font-size: 11pt;">(Ký, ghi rõ họ tên)</p>
-            <div class="signature-space">
-                <p style="color: #999; margin-top: 30px;">Chưa ký</p>
-            </div>
-            <p>%s</p>
-        </div>
-        <div class="signature-box">
-            <p class="bold">ĐẠI DIỆN BÊN THUÊ</p>
-            <p style="font-style: italic; font-size: 11pt;">(Ký, ghi rõ họ tên)</p>
-            <div class="signature-space">
-                <p style="color: #999; margin-top: 30px;">Chưa ký</p>
-            </div>
-            <p>%s</p>
-        </div>
-    </div>
-        """.formatted(landlordName, tenantName);
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p class="bold">BÊN CHO THUÊ TÀI SẢN (Bên A)</p>
+                        <p class="italic">(Ký/ điểm chỉ, ghi rõ họ tên)</p>
+                        <div class="signature-space"></div>
+                        <p>%s</p>
+                    </div>
+                    <div class="signature-box">
+                        <p class="bold">BÊN THUÊ TÀI SẢN (Bên B)</p>
+                        <p class="italic">(Ký/ điểm chỉ, ghi rõ họ tên)</p>
+                        <div class="signature-space"></div>
+                        <p>%s</p>
+                    </div>
+                </div>
+                """.formatted(landlordName, tenantName);
     }
 
     /**
-     * Build signature section for FINAL (with actual digital signatures)
+     * Build signature section with digital signatures
      */
     private String buildSignatureSection(Contract contract, String landlordName, String tenantName) {
         String landlordSignature = contract.isLandlordSigned()
@@ -440,21 +631,21 @@ public class ContractTemplateService {
                 """;
 
         return """
-    <div class="signature-section">
-        <div class="signature-box">
-            <p class="bold">ĐẠI DIỆN BÊN CHO THUÊ</p>
-            <p style="font-style: italic; font-size: 11pt;">(Ký điện tử)</p>
-            %s
-            <p>%s</p>
-        </div>
-        <div class="signature-box">
-            <p class="bold">ĐẠI DIỆN BÊN THUÊ</p>
-            <p style="font-style: italic; font-size: 11pt;">(Ký điện tử)</p>
-            %s
-            <p>%s</p>
-        </div>
-    </div>
-        """.formatted(landlordSignature, landlordName, tenantSignature, tenantName);
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p class="bold">BÊN CHO THUÊ TÀI SẢN (Bên A)</p>
+                        <p class="italic">(Ký điện tử)</p>
+                        %s
+                        <p>%s</p>
+                    </div>
+                    <div class="signature-box">
+                        <p class="bold">BÊN THUÊ TÀI SẢN (Bên B)</p>
+                        <p class="italic">(Ký điện tử)</p>
+                        %s
+                        <p>%s</p>
+                    </div>
+                </div>
+                """.formatted(landlordSignature, landlordName, tenantSignature, tenantName);
     }
 
     /**
@@ -484,27 +675,27 @@ public class ContractTemplateService {
                 <body>
                     <h1>HỢP ĐỒNG THUÊ NHÀ</h1>
                     <div class="info-row">
-                        <span class="label">Mã hợp đồng:</span> 
+                        <span class="label">Mã hợp đồng:</span>
                         <span class="value">%s</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">Địa chỉ tài sản:</span> 
+                        <span class="label">Địa chỉ tài sản:</span>
                         <span class="value">%s</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">Người thuê:</span> 
+                        <span class="label">Người thuê:</span>
                         <span class="value">%s</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">Thời gian:</span> 
+                        <span class="label">Thời gian:</span>
                         <span class="value">%s đến %s</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">Số tiền cọc:</span> 
+                        <span class="label">Số tiền cọc:</span>
                         <span class="value">%s</span>
                     </div>
                     <div class="info-row">
-                        <span class="label">Số tiền thuê hàng tháng:</span> 
+                        <span class="label">Số tiền thuê hàng tháng:</span>
                         <span class="value">%s</span>
                     </div>
                 </body>
@@ -515,8 +706,8 @@ public class ContractTemplateService {
                 tenantName,
                 contract.getStartDate() != null ? DATE_FORMATTER.format(contract.getStartDate()) : "N/A",
                 contract.getEndDate() != null ? DATE_FORMATTER.format(contract.getEndDate()) : "N/A",
-                property != null && property.getRentalDeposit() != null ? CURRENCY_FORMATTER.format(property.getRentalDeposit()) : "0",
-                property != null && property.getMonthlyRent() != null ? CURRENCY_FORMATTER.format(property.getMonthlyRent()) : "0"
+                property != null && property.getRentalDeposit() != null ? formatCurrency(property.getRentalDeposit()) : "0",
+                property != null && property.getMonthlyRent() != null ? formatCurrency(property.getMonthlyRent()) : "0"
         );
     }
 
@@ -544,23 +735,9 @@ public class ContractTemplateService {
         }
     }
 
-    private String buildPropertyStructure(PropertyResponse property) {
-        if (property == null) return "___________";
-
-        StringBuilder structure = new StringBuilder();
-        if (property.getRooms() != null) {
-            structure.append(property.getRooms()).append(" phòng");
-        }
-        if (property.getBedrooms() != null) {
-            if (structure.length() > 0) structure.append(", ");
-            structure.append(property.getBedrooms()).append(" phòng ngủ");
-        }
-        if (property.getBathrooms() != null) {
-            if (structure.length() > 0) structure.append(", ");
-            structure.append(property.getBathrooms()).append(" phòng tắm");
-        }
-
-        return structure.length() > 0 ? structure.toString() : "___________";
+    private String formatCurrency(BigDecimal amount) {
+        if (amount == null) return "___________";
+        return CURRENCY_FORMATTER.format(amount);
     }
 
     private String translatePropertyType(String type) {
@@ -575,24 +752,95 @@ public class ContractTemplateService {
         };
     }
 
-    private String calculateMonthsDuration(Instant start, Instant end) {
+    private String calculateYearsDuration(Instant start, Instant end) {
         if (start == null || end == null) return "___";
 
         LocalDate startDate = start.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDate();
         LocalDate endDate = end.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDate();
 
         Period period = Period.between(startDate, endDate);
-        long totalMonths = period.getYears() * 12L + period.getMonths();
-
-        if (endDate.getDayOfMonth() < startDate.getDayOfMonth()) {
-            totalMonths += 1;
-        }
-
-        return String.valueOf(totalMonths);
+        return String.valueOf(period.getYears());
     }
 
-    private String convertNumberToWords(java.math.BigDecimal amount) {
+    private String convertYearsToWords(String years) {
+        if (years == null || years.equals("___")) return "___________";
+
+        try {
+            int yearNum = Integer.parseInt(years);
+            String[] units = {"", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"};
+            String[] tens = {"", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi",
+                    "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"};
+
+            if (yearNum < 10) {
+                return units[yearNum];
+            } else if (yearNum < 100) {
+                int ten = yearNum / 10;
+                int unit = yearNum % 10;
+                return tens[ten] + (unit > 0 ? " " + units[unit] : "");
+            }
+            return years;
+        } catch (NumberFormatException e) {
+            return years;
+        }
+    }
+
+    private String convertNumberToWords(BigDecimal amount) {
         if (amount == null) return "___________";
-        return String.format("(%s đồng chẵn)", CURRENCY_FORMATTER.format(amount));
+
+        long amountLong = amount.longValue();
+        String[] units = {"", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"};
+        String[] tens = {"", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi",
+                "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"};
+
+        if (amountLong == 0) return "không đồng";
+
+        StringBuilder words = new StringBuilder();
+
+        if (amountLong >= 1_000_000) {
+            long millions = amountLong / 1_000_000;
+            words.append(convertThreeDigits(millions, units, tens)).append(" triệu ");
+            amountLong %= 1_000_000;
+        }
+
+        if (amountLong >= 1_000) {
+            long thousands = amountLong / 1_000;
+            words.append(convertThreeDigits(thousands, units, tens)).append(" nghìn ");
+            amountLong %= 1_000;
+        }
+
+        if (amountLong > 0) {
+            words.append(convertThreeDigits(amountLong, units, tens));
+        }
+
+        return words.toString().trim() + " đồng";
+    }
+
+    private String convertThreeDigits(long num, String[] units, String[] tens) {
+        if (num == 0) return "";
+
+        StringBuilder result = new StringBuilder();
+
+        int hundred = (int) (num / 100);
+        int remainder = (int) (num % 100);
+
+        if (hundred > 0) {
+            result.append(units[hundred]).append(" trăm ");
+        }
+
+        if (remainder >= 10) {
+            int ten = remainder / 10;
+            int unit = remainder % 10;
+            result.append(tens[ten]);
+            if (unit > 0) {
+                result.append(" ").append(units[unit]);
+            }
+        } else if (remainder > 0) {
+            if (hundred > 0) {
+                result.append("lẻ ");
+            }
+            result.append(units[remainder]);
+        }
+
+        return result.toString().trim();
     }
 }

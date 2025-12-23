@@ -35,16 +35,32 @@ export default function Footer() {
               {t("footer.about")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.introduction")}
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.news")}
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.blog")}
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.careers")}
               </Link>
             </Box>
@@ -56,13 +72,25 @@ export default function Footer() {
               {t("footer.support")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.helpCenter")}
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.faq")}
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 {t("footer.refundPolicy")}
               </Link>
             </Box>
@@ -75,13 +103,25 @@ export default function Footer() {
             </Typography>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Facebook
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Instagram
               </Link>
-              <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+              <Link
+                href="#"
+                underline="hover"
+                sx={{ color: "rgba(255,255,255,0.7)" }}
+              >
                 Twitter
               </Link>
             </Box>
@@ -111,13 +151,25 @@ export default function Footer() {
               mt: { xs: 2, sm: 0 },
             }}
           >
-            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <Link
+              href="#"
+              underline="hover"
+              sx={{ color: "rgba(255,255,255,0.7)" }}
+            >
               {t("footer.terms")}
             </Link>
-            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <Link
+              href="#"
+              underline="hover"
+              sx={{ color: "rgba(255,255,255,0.7)" }}
+            >
               {t("footer.privacy")}
             </Link>
-            <Link href="#" underline="hover" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            <Link
+              href="#"
+              underline="hover"
+              sx={{ color: "rgba(255,255,255,0.7)" }}
+            >
               {t("footer.cookies")}
             </Link>
           </Box>

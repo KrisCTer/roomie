@@ -1,97 +1,205 @@
-import { MapPin, Bed, Bath, Square, Heart } from "lucide-react";
+// src/components/Home/PropertyCard.jsx
 import React from "react";
-import { useTranslation } from "react-i18next";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  Typography,
+  Box,
+  Chip,
+} from "@mui/material";
+import {
+  Bed as BedIcon,
+  Bathtub as BathIcon,
+  SquareFoot as AreaIcon,
+  LocationOn as LocationIcon,
+} from "@mui/icons-material";
 
-const PropertyCard = ({ property }) => {
-  const { t } = useTranslation();
+const PropertyCard = ({ property, onClick }) => {
+  const { image, title, location, price, bedrooms, bathrooms, size, type } =
+    property;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-lg transition-all cursor-pointer">
-      {/* IMAGE */}
-      <div className="relative w-full h-56">
-        <img
-          src={property.imageUrl}
-          alt={property.title}
-          className="w-full h-full object-cover"
+    <Card
+      onClick={onClick}
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 3,
+        overflow: "hidden",
+        cursor: "pointer",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        border: "1px solid",
+        borderColor: "grey.200",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+          "& .property-image": {
+            transform: "scale(1.05)",
+          },
+        },
+      }}
+    >
+      {/* Image */}
+      <Box
+        sx={{
+          position: "relative",
+          paddingTop: "66.67%", // 3:2 aspect ratio
+          overflow: "hidden",
+          bgcolor: "grey.100",
+        }}
+      >
+        <CardMedia
+          component="img"
+          image={image}
+          alt={title}
+          className="property-image"
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transition: "transform 0.3s ease",
+          }}
         />
 
-        {/* Badge */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          {property.isFeatured && (
-            <span className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full">
-              {t("propertyCard.featured")}
-            </span>
-          )}
-          <span className="px-3 py-1 text-xs font-semibold text-white bg-gray-800 rounded-full">
-            {t("propertyCard.forSale")}
-          </span>
-        </div>
+        {/* Type Badge */}
+        {type && (
+          <Chip
+            label={type}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              bgcolor: "white",
+              fontWeight: 600,
+              fontSize: "0.75rem",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            }}
+          />
+        )}
+      </Box>
 
-        {/* Heart Favorite */}
-        <button className="absolute top-3 right-3 bg-white/80 backdrop-blur p-2 rounded-full hover:scale-110 transition">
-          <Heart size={18} className="text-gray-700" />
-        </button>
-
-        {/* Address */}
-        <div className="absolute bottom-3 left-3 text-white text-sm flex items-center gap-1 drop-shadow-lg">
-          <MapPin size={16} />
-          {property.address}
-        </div>
-      </div>
-
-      {/* BODY */}
-      <div className="px-5 py-4">
+      {/* Content */}
+      <CardContent
+        sx={{
+          p: 2.5,
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Title */}
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          {property.title}
-        </h3>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            fontSize: "1rem",
+            mb: 1,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            lineHeight: 1.4,
+            minHeight: "2.8em",
+          }}
+        >
+          {title}
+        </Typography>
 
-        {/* Specs */}
-        <div className="flex justify-between text-gray-600 text-sm mb-4">
-          <div className="flex items-center gap-1">
-            <Bed size={16} /> {t("propertyCard.beds")}:{" "}
-            <span className="font-semibold text-gray-900">
-              {property.bedrooms}
-            </span>
-          </div>
+        {/* Location */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            mb: 2,
+          }}
+        >
+          <LocationIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {location}
+          </Typography>
+        </Box>
 
-          <div className="flex items-center gap-1">
-            <Bath size={16} /> {t("propertyCard.baths")}:{" "}
-            <span className="font-semibold text-gray-900">
-              {property.bathrooms}
-            </span>
-          </div>
+        {/* Property Details */}
+        {(bedrooms || bathrooms || size) && (
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              mb: 2,
+              flexWrap: "wrap",
+            }}
+          >
+            {bedrooms && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <BedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {bedrooms}
+                </Typography>
+              </Box>
+            )}
 
-          <div className="flex items-center gap-1">
-            <Square size={16} /> {t("propertyCard.sqft")}:{" "}
-            <span className="font-semibold text-gray-900">
-              {property.size}
-            </span>
-          </div>
-        </div>
+            {bathrooms && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <BathIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {bathrooms}
+                </Typography>
+              </Box>
+            )}
 
-        {/* Divider */}
-        <div className="border-t my-4"></div>
+            {size && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <AreaIcon sx={{ fontSize: 18, color: "text.secondary" }} />
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {size}m²
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        )}
 
-        {/* Footer (owner + price) */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src={property.ownerAvatar}
-              alt={property.owner}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <span className="text-gray-900 font-medium">
-              {property.owner}
-            </span>
-          </div>
-
-          <div className="text-xl font-semibold text-gray-900">
-            ${property.price.toLocaleString()}
-          </div>
-        </div>
-      </div>
-    </div>
+        {/* Price */}
+        <Box sx={{ mt: "auto" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: "primary.main",
+              fontSize: "1.125rem",
+            }}
+          >
+            {price}
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "0.875rem",
+                fontWeight: 400,
+                color: "text.secondary",
+                ml: 0.5,
+              }}
+            >
+              / tháng
+            </Typography>
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

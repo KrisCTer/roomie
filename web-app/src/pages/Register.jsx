@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Divider,
   TextField,
   Typography,
   Snackbar,
@@ -61,7 +60,14 @@ export default function Register() {
       phoneNumber,
     } = form;
 
-    if (!username || !email || !password || !firstName || !lastName || !phoneNumber) {
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !firstName ||
+      !lastName ||
+      !phoneNumber
+    ) {
       setSnackType("error");
       setSnackMsg(t("auth.fillAll"));
       setShowSnack(true);
@@ -94,9 +100,7 @@ export default function Register() {
     } catch (err) {
       console.error(err);
       setSnackType("error");
-      setSnackMsg(
-        err?.response?.data?.message || t("auth.registerFailed")
-      );
+      setSnackMsg(err?.response?.data?.message || t("auth.registerFailed"));
       setShowSnack(true);
     } finally {
       setLoading(false);
@@ -157,7 +161,6 @@ export default function Register() {
 
           <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={2.2}>
-              {/* Username */}
               <TextField
                 label={t("auth.username")}
                 value={form.username}
@@ -165,7 +168,6 @@ export default function Register() {
                 fullWidth
               />
 
-              {/* First + Last Name */}
               <Stack direction="row" spacing={2}>
                 <TextField
                   label={t("auth.firstName")}
@@ -177,11 +179,10 @@ export default function Register() {
                   label={t("auth.lastName")}
                   value={form.lastName}
                   onChange={(e) => handleChange("lastName", e.target.value)}
-                  fullFull
+                  fullWidth
                 />
               </Stack>
 
-              {/* Phone Number */}
               <TextField
                 label={t("auth.phoneNumber")}
                 value={form.phoneNumber}
@@ -189,7 +190,6 @@ export default function Register() {
                 fullWidth
               />
 
-              {/* Email */}
               <TextField
                 label={t("auth.email")}
                 type="email"
@@ -198,7 +198,6 @@ export default function Register() {
                 fullWidth
               />
 
-              {/* Password */}
               <TextField
                 type={showPassword ? "text" : "password"}
                 label={t("auth.password")}
@@ -207,14 +206,16 @@ export default function Register() {
                 fullWidth
                 InputProps={{
                   endAdornment: (
-                    <Button onClick={() => setShowPassword(!showPassword)} sx={{ minWidth: "40px" }}>
+                    <Button
+                      onClick={() => setShowPassword(!showPassword)}
+                      sx={{ minWidth: "40px" }}
+                    >
                       {showPassword ? <EyeOff /> : <Eye />}
                     </Button>
                   ),
                 }}
               />
 
-              {/* Confirm Password */}
               <TextField
                 type={showConfirmPassword ? "text" : "password"}
                 label={t("auth.confirmPassword")}
@@ -235,7 +236,6 @@ export default function Register() {
                 }}
               />
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 variant="contained"
@@ -251,7 +251,6 @@ export default function Register() {
                 {loading ? t("auth.processing") : t("auth.register")}
               </Button>
 
-              {/* Login Link */}
               <Typography variant="body2" textAlign="center">
                 {t("auth.hasAccount")}{" "}
                 <Typography
@@ -263,24 +262,11 @@ export default function Register() {
                   {t("auth.login")}
                 </Typography>
               </Typography>
-
-              <Divider>{t("auth.orSignupWith")}</Divider>
-
-              {/* Social Buttons */}
-              <Stack direction="row" spacing={2} justifyContent="center">
-                <Button variant="outlined" sx={{ borderRadius: 999, px: 3 }}>
-                  Google
-                </Button>
-                <Button variant="outlined" sx={{ borderRadius: 999, px: 3 }}>
-                  Facebook
-                </Button>
-              </Stack>
             </Stack>
           </Box>
         </CardContent>
       </Card>
 
-      {/* Snackbar */}
       <Snackbar
         open={showSnack}
         autoHideDuration={3000}

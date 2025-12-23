@@ -60,6 +60,14 @@ public class PropertyController {
         return ApiResponse.success(propertyService.getMyProperties(), "Get my property successfully");
     }
 
+    @GetMapping("/owner/{ownerId}")
+    public ApiResponse<List<PropertyResponse>> getPropertiesByOwner(@PathVariable String ownerId) {
+        return ApiResponse.success(
+                propertyService.getPropertiesByOwner(ownerId),
+                "Get properties by owner successfully"
+        );
+    }
+
     @GetMapping("/public")
     public ApiResponse<List<PropertyResponse>> getPublicProperties() {
         return ApiResponse.success(propertyService.getAllPublicProperties(), "Get All public property successfully");
