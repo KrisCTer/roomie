@@ -1,6 +1,6 @@
 import React from "react";
 import { AlertCircle } from "lucide-react";
-import BookingCard from "../../components/layout/layoutUser/BookingCard.jsx";
+import BookingCard from "./BookingCard.jsx";
 
 const BookingsList = ({
   bookings,

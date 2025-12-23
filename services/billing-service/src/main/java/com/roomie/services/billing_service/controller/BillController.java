@@ -9,8 +9,7 @@ import com.roomie.services.billing_service.entity.Bill;
 import com.roomie.services.billing_service.repository.BillRepository;
 import com.roomie.services.billing_service.repository.httpclient.ContractClient;
 import com.roomie.services.billing_service.repository.httpclient.PropertyClient;
-import com.roomie.services.billing_service.service.BillPdfGeneratorService;
-import com.roomie.services.billing_service.service.EnhancedBillingService;
+import com.roomie.services.billing_service.service.*;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Bill Controller - Complete Implementation
@@ -55,6 +55,11 @@ public class BillController {
     BillRepository billRepository;
     ContractClient contractClient;
     PropertyClient propertyClient;
+
+    BillEmailService emailService;
+    BillStatisticsService statisticsService;
+    BillBulkOperationsService bulkOperationsService;
+    BillExportService exportService;
 
     // ==================== CREATE / UPDATE ====================
 
@@ -364,16 +369,10 @@ public class BillController {
         log.info("Emailing invoice for bill: {} to: {}",
                 billId, recipientEmail != null ? recipientEmail : "tenant email");
 
-        // TODO: Implement email service integration
-        // 1. Generate PDF
-        // 2. Get tenant email from contract (if not provided)
-        // 3. Send email with PDF attachment
-        // 4. Update bill with emailedAt timestamp
-
-        log.warn("Email functionality not yet implemented");
+        emailService.sendInvoiceEmail(billId, recipientEmail);
 
         return ResponseEntity.ok(ApiResponse.success(null,
-                "Email functionality coming soon"));
+                "Invoice sent successfully via email"));
     }
 
     // ==================== STATISTICS ====================
@@ -392,15 +391,13 @@ public class BillController {
      * - Payment rate
      */
     @GetMapping("/landlord/stats")
-    public ResponseEntity<ApiResponse<Object>> getLandlordStats() {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getLandlordStats() {
         log.debug("Fetching landlord billing statistics");
 
-        // TODO: Implement statistics aggregation
-        // Query bills grouped by status
-        // Calculate totals and averages
+        Map<String, Object> stats = statisticsService.getLandlordStatistics();
 
-        return ResponseEntity.ok(ApiResponse.success(null,
-                "Statistics feature coming soon"));
+        return ResponseEntity.ok(ApiResponse.success(stats,
+                "Landlord statistics retrieved successfully"));
     }
 
     /**
@@ -417,13 +414,13 @@ public class BillController {
      * - Payment history
      */
     @GetMapping("/tenant/stats")
-    public ResponseEntity<ApiResponse<Object>> getTenantStats() {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getTenantStats() {
         log.debug("Fetching tenant billing statistics");
 
-        // TODO: Implement statistics aggregation
+        Map<String, Object> stats = statisticsService.getTenantStatistics();
 
-        return ResponseEntity.ok(ApiResponse.success(null,
-                "Statistics feature coming soon"));
+        return ResponseEntity.ok(ApiResponse.success(stats,
+                "Tenant statistics retrieved successfully"));
     }
 
     // ==================== BULK OPERATIONS ====================
@@ -439,19 +436,15 @@ public class BillController {
      * Returns: Summary of results (success count, failed count, errors)
      */
     @PostMapping("/bulk/generate")
-    public ResponseEntity<ApiResponse<Object>> bulkGenerate(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> bulkGenerate(
             @RequestBody List<BillRequest> requests) {
 
         log.info("Bulk generating {} bills", requests.size());
 
-        // TODO: Implement bulk generation
-        // - Validate all requests
-        // - Generate bills in batch (consider parallel processing)
-        // - Collect results
-        // - Return summary with success/failure counts
+        Map<String, Object> result = bulkOperationsService.bulkGenerateBills(requests);
 
-        return ResponseEntity.ok(ApiResponse.success(null,
-                "Bulk generation feature coming soon"));
+        return ResponseEntity.ok(ApiResponse.success(result,
+                "Bulk generation completed"));
     }
 
     /**
@@ -462,19 +455,15 @@ public class BillController {
      * Request body: List of bill IDs
      */
     @PostMapping("/bulk/send")
-    public ResponseEntity<ApiResponse<Object>> bulkSend(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> bulkSend(
             @RequestBody List<String> billIds) {
 
         log.info("Bulk sending {} bills", billIds.size());
 
-        // TODO: Implement bulk send
-        // - Validate all bill IDs
-        // - Check status (must be DRAFT)
-        // - Send bills in batch
-        // - Return summary
+        Map<String, Object> result = bulkOperationsService.bulkSendBills(billIds);
 
-        return ResponseEntity.ok(ApiResponse.success(null,
-                "Bulk send feature coming soon"));
+        return ResponseEntity.ok(ApiResponse.success(result,
+                "Bulk send completed"));
     }
 
     /**
@@ -498,11 +487,16 @@ public class BillController {
         log.info("Exporting bills to {}: contractId={}, from={}, to={}",
                 format, contractId, from, to);
 
-        // TODO: Implement export
-        // - Query bills with filters
-        // - Generate Excel/CSV file
-        // - Return as downloadable resource
+        Resource resource = exportService.exportBills(format, contractId, from, to);
 
-        throw new UnsupportedOperationException("Export feature coming soon");
+        String filename = "bills_export." + (format.equals("excel") ? "xlsx" : "csv");
+        String contentType = format.equals("excel")
+                ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                : "text/csv";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 }

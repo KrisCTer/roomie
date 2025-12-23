@@ -1,6 +1,5 @@
 // src/pages/User/Dashboard/components/RevenueChartRecharts.jsx
-// Install: npm install recharts
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -23,60 +22,158 @@ import {
   Calendar,
   BarChart3,
   LineChartIcon,
+  Zap,
 } from "lucide-react";
 
-const RevenueChartRecharts = ({ data, loading }) => {
+const RevenueChartRecharts = ({ bills = [], loading }) => {
   const [timeRange, setTimeRange] = useState("6months");
-  const [chartType, setChartType] = useState("bar"); // bar, line, area, composed
+  const [chartType, setChartType] = useState("bar");
 
-  // Generate data
-  const generateMonthlyData = () => {
-    if (data && data.length > 0) return data;
+  // Process real bills data into monthly aggregated data
+  const chartData = useMemo(() => {
+    if (!bills || bills.length === 0) {
+      return [];
+    }
 
-    const months = [
-      "T1",
-      "T2",
-      "T3",
-      "T4",
-      "T5",
-      "T6",
-      "T7",
-      "T8",
-      "T9",
-      "T10",
-      "T11",
-      "T12",
-    ];
-    const currentMonth = new Date().getMonth();
-    const rangeMonths = timeRange === "6months" ? 6 : 12;
+    // Group bills by month
+    const monthlyData = {};
 
-    return months
-      .slice(Math.max(0, currentMonth - rangeMonths + 1), currentMonth + 1)
-      .map((month, index) => {
-        const revenue = Math.floor(Math.random() * 50000000) + 10000000;
-        const expenses = Math.floor(Math.random() * 15000000) + 5000000;
+    bills.forEach((bill) => {
+      // Skip cancelled bills
+      if (!bill.billingMonth || bill.status === "CANCELLED") return;
+
+      // Extract YYYY-MM format
+      const monthKey = bill.billingMonth.substring(0, 7);
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          rent: 0,
+          utilities: 0,
+          services: 0,
+          totalRevenue: 0,
+          billCount: 0,
+        };
+      }
+
+      // Tiền thuê nhà
+      const rentAmount = bill.monthlyRent || 0;
+      monthlyData[monthKey].rent += rentAmount;
+
+      // Tiền điện nước
+      const electricityAmount =
+        ((bill.electricityNew || 0) - (bill.electricityOld || 0)) *
+        (bill.electricityUnitPrice || 0);
+
+      const waterAmount =
+        ((bill.waterNew || 0) - (bill.waterOld || 0)) *
+        (bill.waterUnitPrice || 0);
+
+      const utilitiesAmount = electricityAmount + waterAmount;
+      monthlyData[monthKey].utilities += utilitiesAmount;
+
+      // Các dịch vụ khác
+      const servicesAmount =
+        (bill.internetPrice || 0) +
+        (bill.parkingPrice || 0) +
+        (bill.cleaningPrice || 0) +
+        (bill.maintenancePrice || 0) +
+        (bill.otherPrice || 0);
+
+      monthlyData[monthKey].services += servicesAmount;
+
+      // Tổng doanh thu
+      const totalAmount = bill.totalAmount || 0;
+      monthlyData[monthKey].totalRevenue += totalAmount;
+      monthlyData[monthKey].billCount += 1;
+    });
+
+    // Convert to array and sort by date
+    let dataArray = Object.keys(monthlyData)
+      .sort()
+      .map((monthKey) => {
+        const [year, month] = monthKey.split("-");
+        const monthNames = [
+          "T1",
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+          "T6",
+          "T7",
+          "T8",
+          "T9",
+          "T10",
+          "T11",
+          "T12",
+        ];
+
         return {
-          month,
-          revenue: revenue / 1000000, // Convert to millions
-          expenses: expenses / 1000000,
-          profit: (revenue - expenses) / 1000000,
+          month: monthNames[parseInt(month) - 1],
+          fullMonth: monthKey,
+          rent: monthlyData[monthKey].rent / 1000000, // Convert to millions
+          utilities: monthlyData[monthKey].utilities / 1000000,
+          services: monthlyData[monthKey].services / 1000000,
+          totalRevenue: monthlyData[monthKey].totalRevenue / 1000000,
+          billCount: monthlyData[monthKey].billCount,
         };
       });
-  };
 
-  const chartData = generateMonthlyData();
+    // Filter based on time range
+    const rangeMonths = timeRange === "6months" ? 6 : 12;
+    if (dataArray.length > rangeMonths) {
+      dataArray = dataArray.slice(-rangeMonths);
+    }
+
+    return dataArray;
+  }, [bills, timeRange]);
 
   // Calculate statistics
-  const totalRevenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
-  const totalExpenses = chartData.reduce((sum, item) => sum + item.expenses, 0);
-  const totalProfit = totalRevenue - totalExpenses;
+  const stats = useMemo(() => {
+    if (chartData.length === 0) {
+      return {
+        totalRevenue: 0,
+        totalRent: 0,
+        totalUtilities: 0,
+        totalServices: 0,
+        latestRevenue: 0,
+        previousRevenue: 0,
+        growthRate: 0,
+      };
+    }
 
-  const latestRevenue = chartData[chartData.length - 1]?.revenue || 0;
-  const previousRevenue = chartData[chartData.length - 2]?.revenue || 0;
-  const growthRate =
-    previousRevenue > 0
-      ? (((latestRevenue - previousRevenue) / previousRevenue) * 100).toFixed(1)
-      : 0;
+    const totalRevenue = chartData.reduce(
+      (sum, item) => sum + item.totalRevenue,
+      0
+    );
+    const totalRent = chartData.reduce((sum, item) => sum + item.rent, 0);
+    const totalUtilities = chartData.reduce(
+      (sum, item) => sum + item.utilities,
+      0
+    );
+    const totalServices = chartData.reduce(
+      (sum, item) => sum + item.services,
+      0
+    );
+
+    const latestRevenue = chartData[chartData.length - 1]?.totalRevenue || 0;
+    const previousRevenue = chartData[chartData.length - 2]?.totalRevenue || 0;
+    const growthRate =
+      previousRevenue > 0
+        ? (((latestRevenue - previousRevenue) / previousRevenue) * 100).toFixed(
+            1
+          )
+        : 0;
+
+    return {
+      totalRevenue,
+      totalRent,
+      totalUtilities,
+      totalServices,
+      latestRevenue,
+      previousRevenue,
+      growthRate,
+    };
+  }, [chartData]);
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }) => {
@@ -84,7 +181,10 @@ const RevenueChartRecharts = ({ data, loading }) => {
       return (
         <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
           <p className="text-sm font-semibold text-white mb-2">
-            {payload[0].payload.month}
+            {payload[0].payload.month} ({payload[0].payload.fullMonth})
+          </p>
+          <p className="text-xs text-slate-400 mb-2">
+            Số hóa đơn: {payload[0].payload.billCount}
           </p>
           {payload.map((entry, index) => (
             <div
@@ -126,8 +226,8 @@ const RevenueChartRecharts = ({ data, loading }) => {
             <Legend />
             <Line
               type="monotone"
-              dataKey="revenue"
-              name="Doanh thu"
+              dataKey="totalRevenue"
+              name="Tổng thu"
               stroke="#10b981"
               strokeWidth={3}
               dot={{ fill: "#10b981", r: 4 }}
@@ -135,16 +235,24 @@ const RevenueChartRecharts = ({ data, loading }) => {
             />
             <Line
               type="monotone"
-              dataKey="expenses"
-              name="Chi phí"
-              stroke="#ef4444"
+              dataKey="rent"
+              name="Tiền thuê"
+              stroke="#3b82f6"
               strokeWidth={3}
-              dot={{ fill: "#ef4444", r: 4 }}
+              dot={{ fill: "#3b82f6", r: 4 }}
             />
             <Line
               type="monotone"
-              dataKey="profit"
-              name="Lợi nhuận"
+              dataKey="utilities"
+              name="Điện nước"
+              stroke="#f59e0b"
+              strokeWidth={3}
+              dot={{ fill: "#f59e0b", r: 4 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="services"
+              name="Dịch vụ"
               stroke="#a855f7"
               strokeWidth={3}
               dot={{ fill: "#a855f7", r: 4 }}
@@ -160,13 +268,13 @@ const RevenueChartRecharts = ({ data, loading }) => {
                 <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
               </linearGradient>
-              <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
+              <linearGradient id="colorRent" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
               </linearGradient>
-              <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#a855f7" stopOpacity={0.1} />
+              <linearGradient id="colorUtilities" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -176,19 +284,30 @@ const RevenueChartRecharts = ({ data, loading }) => {
             <Legend />
             <Area
               type="monotone"
-              dataKey="revenue"
-              name="Doanh thu"
-              stroke="#10b981"
+              dataKey="rent"
+              name="Tiền thuê"
+              stroke="#3b82f6"
               fillOpacity={1}
-              fill="url(#colorRevenue)"
+              fill="url(#colorRent)"
+              stackId="1"
             />
             <Area
               type="monotone"
-              dataKey="expenses"
-              name="Chi phí"
-              stroke="#ef4444"
+              dataKey="utilities"
+              name="Điện nước"
+              stroke="#f59e0b"
               fillOpacity={1}
-              fill="url(#colorExpenses)"
+              fill="url(#colorUtilities)"
+              stackId="1"
+            />
+            <Area
+              type="monotone"
+              dataKey="services"
+              name="Dịch vụ"
+              stroke="#a855f7"
+              fillOpacity={1}
+              fill="url(#colorRevenue)"
+              stackId="1"
             />
           </AreaChart>
         );
@@ -202,24 +321,33 @@ const RevenueChartRecharts = ({ data, loading }) => {
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar
-              dataKey="revenue"
-              name="Doanh thu"
-              fill="#10b981"
+              dataKey="rent"
+              name="Tiền thuê"
+              fill="#3b82f6"
               radius={[8, 8, 0, 0]}
+              stackId="a"
             />
             <Bar
-              dataKey="expenses"
-              name="Chi phí"
-              fill="#ef4444"
+              dataKey="utilities"
+              name="Điện nước"
+              fill="#f59e0b"
               radius={[8, 8, 0, 0]}
+              stackId="a"
+            />
+            <Bar
+              dataKey="services"
+              name="Dịch vụ"
+              fill="#a855f7"
+              radius={[8, 8, 0, 0]}
+              stackId="a"
             />
             <Line
               type="monotone"
-              dataKey="profit"
-              name="Lợi nhuận"
-              stroke="#a855f7"
+              dataKey="totalRevenue"
+              name="Tổng thu"
+              stroke="#10b981"
               strokeWidth={3}
-              dot={{ fill: "#a855f7", r: 5 }}
+              dot={{ fill: "#10b981", r: 5 }}
             />
           </ComposedChart>
         );
@@ -233,20 +361,20 @@ const RevenueChartRecharts = ({ data, loading }) => {
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar
-              dataKey="revenue"
-              name="Doanh thu"
-              fill="#10b981"
+              dataKey="rent"
+              name="Tiền thuê"
+              fill="#3b82f6"
               radius={[8, 8, 0, 0]}
             />
             <Bar
-              dataKey="expenses"
-              name="Chi phí"
-              fill="#ef4444"
+              dataKey="utilities"
+              name="Điện nước"
+              fill="#f59e0b"
               radius={[8, 8, 0, 0]}
             />
             <Bar
-              dataKey="profit"
-              name="Lợi nhuận"
+              dataKey="services"
+              name="Dịch vụ"
               fill="#a855f7"
               radius={[8, 8, 0, 0]}
             />
@@ -271,6 +399,35 @@ const RevenueChartRecharts = ({ data, loading }) => {
     );
   }
 
+  // Show message if no data
+  if (chartData.length === 0) {
+    return (
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-purple-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">Biểu đồ doanh thu</h2>
+            <p className="text-sm text-slate-400">
+              Theo dõi thu nhập hàng tháng
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-20 h-20 rounded-full bg-slate-700/50 flex items-center justify-center mb-4">
+            <BarChart3 className="w-10 h-10 text-slate-500" />
+          </div>
+          <p className="text-slate-400 text-lg mb-2">Chưa có dữ liệu hóa đơn</p>
+          <p className="text-slate-500 text-sm">
+            Tạo hóa đơn đầu tiên để xem biểu đồ doanh thu
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
       {/* Header */}
@@ -282,7 +439,7 @@ const RevenueChartRecharts = ({ data, loading }) => {
           <div>
             <h2 className="text-xl font-bold text-white">Biểu đồ doanh thu</h2>
             <p className="text-sm text-slate-400">
-              Theo dõi thu nhập hàng tháng
+              Theo dõi thu nhập hàng tháng ({chartData.length} tháng)
             </p>
           </div>
         </div>
@@ -377,50 +534,60 @@ const RevenueChartRecharts = ({ data, loading }) => {
             <span className="text-xs text-slate-400">Tổng doanh thu</span>
           </div>
           <p className="text-2xl font-bold text-green-400">
-            {totalRevenue.toFixed(1)}M
+            {stats.totalRevenue.toFixed(1)}M
           </p>
           <p className="text-xs text-slate-500 mt-1">
-            TB: {(totalRevenue / chartData.length).toFixed(1)}M/tháng
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 border border-red-700/30 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingDown className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-slate-400">Tổng chi phí</span>
-          </div>
-          <p className="text-2xl font-bold text-red-400">
-            {totalExpenses.toFixed(1)}M
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            TB: {(totalExpenses / chartData.length).toFixed(1)}M/tháng
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border border-purple-700/30 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-purple-400" />
-            <span className="text-xs text-slate-400">Lợi nhuận ròng</span>
-          </div>
-          <p className="text-2xl font-bold text-purple-400">
-            {totalProfit.toFixed(1)}M
-          </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Margin: {((totalProfit / totalRevenue) * 100).toFixed(1)}%
+            TB:{" "}
+            {chartData.length > 0
+              ? (stats.totalRevenue / chartData.length).toFixed(1)
+              : 0}
+            M/tháng
           </p>
         </div>
 
         <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border border-blue-700/30 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-4 h-4 text-blue-400" />
+            <TrendingUp className="w-4 h-4 text-blue-400" />
+            <span className="text-xs text-slate-400">Tiền thuê nhà</span>
+          </div>
+          <p className="text-2xl font-bold text-blue-400">
+            {stats.totalRent.toFixed(1)}M
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            {stats.totalRevenue > 0
+              ? ((stats.totalRent / stats.totalRevenue) * 100).toFixed(0)
+              : 0}
+            % tổng thu
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-900/20 to-orange-800/20 border border-orange-700/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="w-4 h-4 text-orange-400" />
+            <span className="text-xs text-slate-400">Điện nước</span>
+          </div>
+          <p className="text-2xl font-bold text-orange-400">
+            {stats.totalUtilities.toFixed(1)}M
+          </p>
+          <p className="text-xs text-slate-500 mt-1">
+            {stats.totalRevenue > 0
+              ? ((stats.totalUtilities / stats.totalRevenue) * 100).toFixed(0)
+              : 0}
+            % tổng thu
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border border-purple-700/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar className="w-4 h-4 text-purple-400" />
             <span className="text-xs text-slate-400">Tăng trưởng</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <p className="text-2xl font-bold text-blue-400">
-              {growthRate > 0 ? "+" : ""}
-              {growthRate}%
+            <p className="text-2xl font-bold text-purple-400">
+              {stats.growthRate > 0 ? "+" : ""}
+              {stats.growthRate}%
             </p>
-            {growthRate > 0 ? (
+            {stats.growthRate > 0 ? (
               <TrendingUp className="w-4 h-4 text-green-400" />
             ) : (
               <TrendingDown className="w-4 h-4 text-red-400" />

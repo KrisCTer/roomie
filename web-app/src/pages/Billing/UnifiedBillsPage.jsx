@@ -157,7 +157,7 @@ const UnifiedBillsPage = () => {
                   </h2>
 
                   {/* Bulk Select Toggle (Landlord only) */}
-                  {activeTab === "landlord" && filteredBills.length > 0 && (
+                  {/* {activeTab === "landlord" && filteredBills.length > 0 && (
                     <button
                       onClick={toggleBulkSelect}
                       className={`px-4 py-2 rounded-lg transition font-medium text-sm ${
@@ -168,7 +168,7 @@ const UnifiedBillsPage = () => {
                     >
                       {showBulkSelect ? "✓ Bulk Select ON" : "Bulk Select"}
                     </button>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -187,7 +187,7 @@ const UnifiedBillsPage = () => {
                   )}
 
                   {/* Export Buttons */}
-                  {activeTab === "landlord" && filteredBills.length > 0 && (
+                  {/* {activeTab === "landlord" && filteredBills.length > 0 && (
                     <>
                       <button
                         onClick={() => handleExportBills("excel")}
@@ -206,7 +206,7 @@ const UnifiedBillsPage = () => {
                         CSV
                       </button>
                     </>
-                  )}
+                  )} */}
 
                   {/* Create Bill Button (Landlord only) */}
                   {activeTab === "landlord" && (
