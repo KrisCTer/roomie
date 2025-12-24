@@ -2,59 +2,78 @@ server:
   port: 8090
   servlet:
     context-path: /notification
-## docker-compose.notification-service.yml
-#version: '3.8'
-#
-#services:
-#  notification-service:
-#    build:
-#      context: ./notification-service
-#      dockerfile: Dockerfile
-#    container_name: roomie-notification-service
-#    restart: unless-stopped
-#    ports:
-#      - "8082:8082"
-#    environment:
-#      - SERVER_PORT=8082
-#      - SPRING_APPLICATION_NAME=notification-service
-#      - SPRING_PROFILES_ACTIVE=docker
-#      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-#      # MongoDB Configuration
-#      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_notification?authSource=admin
-#      # Redis Configuration
-#      - SPRING_REDIS_HOST=redis
-#      - SPRING_REDIS_PORT=6379
-#      - SPRING_REDIS_PASSWORD=roomie123
-#      # Kafka Configuration
-#      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-#      - SPRING_KAFKA_CONSUMER_GROUP_ID=notification-service
-#      # Firebase Configuration
-#      - FIREBASE_PROJECT_ID=roomie-project-contractId
-#      - FIREBASE_PRIVATE_KEY=your-firebase-private-key
-#      - FIREBASE_CLIENT_EMAIL=firebase-adminsdk@roomie-project.iam.gserviceaccount.com
-#      # Email Configuration
-#      - SPRING_MAIL_HOST=smtp.sendgrid.net
-#      - SPRING_MAIL_PORT=587
-#      - SPRING_MAIL_USERNAME=apikey
-#      - SPRING_MAIL_PASSWORD=your-sendgrid-api-key
-#      - FROM_EMAIL=noreply@roomie.com
-#      # SMS Configuration
-#      - TWILIO_ACCOUNT_SID=your-twilio-account-sid
-#      - TWILIO_AUTH_TOKEN=your-twilio-auth-token
-#      - TWILIO_PHONE_NUMBER=your-twilio-phone-number
-#    depends_on:
-#      - mongodb
-#      - redis
-#      - kafka
-#      - eureka-server
-#    networks:
-#      - roomie-network
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#
-#networks:
-#  roomie-network:
-#    external: true
+
+spring:
+  application:
+    name: notification-service
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb://admin:roomie123@localhost:27017/roomie_notification?authSource=admin
+      database: roomie_notification
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    listener:
+      ack-mode: MANUAL
+
+  # Mail Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: romie.housing.tech@gmail.com
+    password: mznl wclo ddwt jrut
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          timeout: 5000
+          connectiontimeout: 5000
+          writetimeout: 5000
+
+# Notification Configuration
+notification:
+  email:
+    enabled: true
+    from: noreply@roomie.com
+  websocket:
+    enabled: true
+  cleanup:
+    enabled: true
+    retention-days: 90
+  default-language: vi
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.roomie.services.notification_service: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG

@@ -21,6 +21,7 @@ import UnifiedBillsPage from "../pages/Billing/UnifiedBillsPage";
 import BillDetail from "../pages/Billing/BillDetail";
 import UtilityConfigPage from "../pages/Billing/UtilityConfigPage";
 import UserProfile from "../pages/Main/UserProfile";
+import NotificationCenter from "../pages/NotificationCenter";
 
 import AdminProperties from "../pages/Admin/AdminProperties";
 import AdminUsers from "../pages/Admin/AdminUsers";
@@ -42,6 +43,7 @@ const AppRoutes = () => {
       <Route path="/property/:id" element={<PropertyDetail />} />
       <Route path="/search" element={<PropertySearch />} />
       <Route path="/user/:userId" element={<UserProfile />} />
+      <Route path="/notifications" element={<NotificationCenter />} />
 
       {/* User */}
       <Route path="/profile" element={<Profile />} />
