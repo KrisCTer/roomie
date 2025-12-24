@@ -5,7 +5,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
-
+import { useTranslation } from "react-i18next";
 // Import custom components
 import OTPModal from "../../components/Contracts/signing/OTPModal.jsx";
 import SignModal from "../../components/Contracts/signing/SignModal.jsx";
@@ -28,6 +28,7 @@ const ContractSigning = () => {
   // Layout state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Contracts");
+  const { t } = useTranslation();
 
   // Use custom hook for all signing logic
   const {
@@ -83,7 +84,7 @@ const ContractSigning = () => {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading contract information...</p>
+              <p className="text-gray-600">{t("contract.loading")}</p>
             </div>
           </div>
         </div>
@@ -112,13 +113,13 @@ const ContractSigning = () => {
             <div className="text-center">
               <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                No contract found
+                {t("contract.notFound")}
               </h2>
               <button
                 onClick={() => navigate("/my-contracts")}
                 className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Back to list
+                {t("contract.backToList")}
               </button>
             </div>
           </div>
@@ -156,8 +157,8 @@ const ContractSigning = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="Contract Signing"
-          subtitle="Review and sign your contract"
+          title={t("contract.signingTitle")}
+          subtitle={t("contract.signingSubtitle")}
         />
 
         <main className="p-6">

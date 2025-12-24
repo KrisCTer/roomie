@@ -4,6 +4,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
+import { useTranslation } from "react-i18next";
 
 // Import custom components
 import ContractTabs from "../../components/Contracts/ContractTabs.jsx";
@@ -19,6 +20,7 @@ const MyContracts = () => {
   // Layout state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Contracts");
+  const { t } = useTranslation();
 
   // Use custom hook for contract operations
   const {
@@ -53,8 +55,8 @@ const MyContracts = () => {
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <PageTitle
-          title="My Contracts"
-          subtitle="View and manage your rental contracts"
+          title={t("contract.myContracts")}
+          subtitle={t("contract.myContractsSubtitle")}
         />
 
         {/* Content */}
@@ -76,28 +78,28 @@ const MyContracts = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <StatsCard
                   icon={FileText}
-                  label="Total Contracts"
+                  label={t("contract.stats.total")}
                   value={stats.total}
                   bgColor="bg-blue-100"
                   textColor="text-blue-600"
                 />
                 <StatsCard
                   icon={CheckCircle}
-                  label="Active"
+                  label={t("contract.stats.active")}
                   value={stats.active}
                   bgColor="bg-green-100"
                   textColor="text-green-600"
                 />
                 <StatsCard
                   icon={Clock}
-                  label="Pending"
+                  label={t("contract.stats.pending")}
                   value={stats.pending}
                   bgColor="bg-yellow-100"
                   textColor="text-yellow-600"
                 />
                 <StatsCard
                   icon={AlertCircle}
-                  label="Expired"
+                  label={t("contract.stats.expired")}
                   value={stats.expired}
                   bgColor="bg-gray-100"
                   textColor="text-gray-600"

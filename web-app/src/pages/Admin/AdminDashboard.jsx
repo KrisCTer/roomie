@@ -8,7 +8,7 @@ import Footer from "../../components/layout/layoutUser/Footer";
 
 import { adminGetAllProperties } from "../../services/adminProperty.service";
 import { adminGetUsers } from "../../services/adminUser.service";
-
+import { useTranslation } from "react-i18next";
 /* =========================
    Helpers
 ========================= */
@@ -153,6 +153,7 @@ const AdminDashboard = () => {
 
   const username = useMemo(() => resolveUsername(), []);
   const isAdmin = String(username).toLowerCase() === "admin";
+  const { t } = useTranslation();
 
   const loadAll = async () => {
     try {
@@ -216,7 +217,7 @@ const AdminDashboard = () => {
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white bg-slate-950">
-        Unauthorized
+        {t("admin.unauthorized")}
       </div>
     );
   }
@@ -241,7 +242,7 @@ const AdminDashboard = () => {
           {/* ===== PROPERTIES (CARD LIKE AdminProperties) ===== */}
           <div className="bg-slate-800/40 rounded-2xl p-6 mb-8 border border-slate-700/40">
             <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-2xl font-bold">Properties</h2>
+              <h2 className="text-2xl font-bold">{t("admin.properties")}</h2>
 
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -249,7 +250,7 @@ const AdminDashboard = () => {
                   <input
                     value={searchProperty}
                     onChange={(e) => setSearchProperty(e.target.value)}
-                    placeholder="Search properties..."
+                    placeholder={t("admin.searchProperties")}
                     className="pl-9 pr-3 py-2 rounded-lg bg-slate-900/60 border border-slate-700 text-slate-100 placeholder:text-slate-400 outline-none w-[320px]"
                   />
                 </div>
@@ -263,20 +264,20 @@ const AdminDashboard = () => {
                   <RefreshCw
                     className={loading ? "w-4 h-4 animate-spin" : "w-4 h-4"}
                   />
-                  Refresh
+                  {t("admin.refresh")}
                 </button>
               </div>
             </div>
 
             {loading ? (
-              <div className="text-slate-200">Loading...</div>
+              <div className="text-slate-200">{t("common.loading")}</div>
             ) : filteredProperties.length === 0 ? (
-              <div className="text-slate-200">No properties.</div>
+              <div className="text-slate-200">{t("admin.noProperties")}</div>
             ) : (
               <div className="space-y-4">
                 {filteredProperties.map((p) => {
                   const id = getPropertyId(p);
-                  const title = p?.title ?? "Untitled";
+                  const title = p?.title ?? t("common.noData");
                   const status = getPropertyStatus(p);
                   const img = pickImage(p);
 
@@ -344,7 +345,8 @@ const AdminDashboard = () => {
                           {created ? <span>{fmtDate(created)}</span> : null}
                           {price !== null ? (
                             <span className="text-sky-400 font-semibold">
-                              {fmtMoney(price)} VND
+                              {fmtMoney(price)}{" "}
+                              {t("common.currency", { defaultValue: "VND" })}
                             </span>
                           ) : null}
                           {addr ? (
@@ -360,7 +362,7 @@ const AdminDashboard = () => {
                         <button
                           onClick={() => id && navigate(`/property/${id}`)}
                           className="p-3 rounded-xl border border-slate-600 hover:bg-slate-800"
-                          title="View"
+                          title={t("admin.view")}
                           type="button"
                         >
                           <Eye className="w-5 h-5 text-slate-200" />
@@ -376,32 +378,34 @@ const AdminDashboard = () => {
           {/* ===== USERS (giữ bảng) ===== */}
           <div className="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/40">
             <div className="flex items-center justify-between gap-4 mb-4">
-              <h2 className="text-2xl font-bold">Users</h2>
+              <h2 className="text-2xl font-bold">{t("admin.users")}</h2>
 
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                 <input
                   value={searchUser}
                   onChange={(e) => setSearchUser(e.target.value)}
-                  placeholder="Search users..."
+                  placeholder={t("admin.searchUsers")}
                   className="pl-9 pr-3 py-2 rounded-lg bg-slate-900/60 border border-slate-700 text-slate-100 placeholder:text-slate-400 outline-none w-[280px]"
                 />
               </div>
             </div>
 
             {loading ? (
-              <div className="text-slate-200">Loading...</div>
+              <div className="text-slate-200">{t("common.loading")}</div>
             ) : filteredUsers.length === 0 ? (
-              <div className="text-slate-200">No users.</div>
+              <div className="text-slate-200">{t("admin.noUsers")}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="text-slate-200 bg-slate-900/40">
-                      <th className="py-3 px-3 rounded-l-lg">Username</th>
-                      <th className="py-3 px-3">Email</th>
+                      <th className="py-3 px-3 rounded-l-lg">
+                        {t("auth.username")}
+                      </th>
+                      <th className="py-3 px-3">{t("auth.email")}</th>
                       <th className="py-3 px-3 rounded-r-lg text-right">
-                        Status
+                        {t("common.status")}
                       </th>
                     </tr>
                   </thead>

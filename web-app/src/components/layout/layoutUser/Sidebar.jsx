@@ -1,3 +1,5 @@
+// src/components/layout/layoutUser/Sidebar.jsx
+import React, { useState, useEffect } from "react";
 import {
   Home,
   User,
@@ -14,10 +16,22 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+// Services
+import { getCompleteUserInfo } from "../../../services/localStorageService";
+import { getMyProfile } from "../../../services/user.service";
+
 const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+
+  // ✅ State for current user
+  const [currentUser, setCurrentUser] = useState({
+    username: "",
+    email: "",
+    avatar: "",
+    fullName: "",
+  });
 
   const menuItems = [
     { icon: BarChart3, label: t("Dashboards"), path: "/dashboard" },
@@ -32,33 +46,115 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     { icon: LogOut, label: t("Logout"), path: "/logout" },
   ];
 
-  const handleNavigation = (item) => {
-    // Cập nhật activeMenu
-    setActiveMenu(item.label);
-    // Lấy username từ localStorage
-    const username = localStorage.getItem("username");
+  // ✅ Load user info on mount
+  useEffect(() => {
+    loadCurrentUser();
+  }, []);
 
-    // Nếu admin → override menu
+  const loadCurrentUser = async () => {
+    try {
+      // Method 1: Get from localStorage
+      const userInfo = getCompleteUserInfo();
+
+      if (userInfo) {
+        setCurrentUser({
+          username: userInfo.username || "User",
+          email: userInfo.email || "",
+          avatar: userInfo.avatar || "",
+          fullName:
+            `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() ||
+            userInfo.username,
+        });
+
+        // Method 2: Fetch latest profile from API (optional, for fresh data)
+        try {
+          const profileResponse = await getMyProfile();
+          const profile =
+            profileResponse?.result || profileResponse?.data?.result;
+
+          if (profile) {
+            setCurrentUser({
+              username: profile.username || userInfo.username,
+              email: profile.email || userInfo.email,
+              avatar: profile.avatar || userInfo.avatar,
+              fullName:
+                `${profile.firstName || ""} ${profile.lastName || ""}`.trim() ||
+                profile.username,
+            });
+          }
+        } catch (apiError) {
+          // If API fails, keep localStorage data
+          console.log("Using cached user data from localStorage");
+        }
+      }
+    } catch (error) {
+      console.error("Error loading user info:", error);
+    }
+  };
+
+  const handleNavigation = (item) => {
+    setActiveMenu(item.label);
+
+    // Special handling for Logout
+    if (item.path === "/logout") {
+      handleLogout();
+      return;
+    }
+
+    // Admin route override
+    const username = localStorage.getItem("username");
     if (username === "admin") {
-      // Nếu admin bấm Dashboard → chuyển sang admin dashboard
       if (item.label === t("Dashboards")) {
         navigate("/admin/dashboard");
         return;
       }
-
-      // Nếu admin bấm My Properties → chuyển sang admin properties
       if (item.label === t("My Properties")) {
         navigate("/admin/properties");
         return;
       }
     }
-    // Navigate không reload trang
+
     navigate(item.path);
   };
 
-  // Tự động set activeMenu dựa trên URL hiện tại
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.clear();
+
+    // Navigate to login
+    navigate("/login");
+  };
+
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  // ✅ Get avatar display
+  const getAvatarDisplay = () => {
+    if (currentUser.avatar) {
+      return (
+        <img
+          src={currentUser.avatar}
+          alt={currentUser.username}
+          className="w-10 h-10 rounded-full object-cover"
+          onError={(e) => {
+            e.target.style.display = "none";
+            e.target.nextElementSibling.style.display = "flex";
+          }}
+        />
+      );
+    }
+
+    // Fallback to initial
+    const initial =
+      currentUser.fullName?.[0] || currentUser.username?.[0] || "U";
+    return (
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+        <span className="text-white font-bold text-sm">
+          {initial.toUpperCase()}
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -79,16 +175,21 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
           </div>
         </div>
 
-        {/* Profile */}
+        {/* Profile - ✅ Updated with current user */}
         <div className="mb-8 pb-6 border-b border-gray-700">
           <p className="text-xs text-gray-400 mb-3">Profile</p>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Account</p>
-              <p className="text-xs text-gray-400">themesflat@gmail.com</p>
+            {/* Avatar */}
+            {getAvatarDisplay()}
+
+            {/* User Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">
+                {currentUser.fullName || currentUser.username || "User"}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {currentUser.email || "No email"}
+              </p>
             </div>
           </div>
         </div>
@@ -104,7 +205,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
               }`}
             >
               <item.icon className="w-5 h-5" />
-              {item.label}
+              <span className="text-sm">{item.label}</span>
             </button>
           ))}
         </nav>

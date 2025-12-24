@@ -8,7 +8,7 @@ import StickyHeader from "../../components/layout/layoutHome/StickyHeader";
 import PropertyListView from "../../components/PropertySearch/PropertyListView";
 import PropertyMapView from "../../components/PropertySearch/PropertyMapView";
 import Footer from "../../components/layout/layoutHome/Footer";
-
+import { useTranslation } from "react-i18next";
 // Services
 import { getAllProperties } from "../../services/property.service";
 
@@ -41,7 +41,7 @@ const PropertySearch = () => {
   const [mapBounds, setMapBounds] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [initialZoom, setInitialZoom] = useState(12);
-
+  const { t } = useTranslation();
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -115,7 +115,7 @@ const PropertySearch = () => {
       setAllProperties(fetchedProperties);
     } catch (err) {
       console.error("Failed to load properties:", err);
-      setError("Không thể tải danh sách bất động sản");
+      setError(t("propertySearch.loadError"));
     } finally {
       setLoading(false);
     }
@@ -309,12 +309,14 @@ const PropertySearch = () => {
           <Box>
             <Typography variant="body2" sx={{ color: "grey.600" }}>
               {loading
-                ? "Đang tải..."
-                : `${displayedProperties.length} chỗ ở${
-                    mapBounds ? " trong khu vực này" : ""
+                ? t("propertySearch.loading")
+                : `${displayedProperties.length} ${t("propertySearch.places")}${
+                    mapBounds ? ` ${t("propertySearch.inArea")}` : ""
                   }${
                     totalPages > 1
-                      ? ` · Trang ${currentPage}/${totalPages}`
+                      ? ` · ${t(
+                          "propertySearch.page"
+                        )} ${currentPage}/${totalPages}`
                       : ""
                   }`}
             </Typography>
@@ -323,7 +325,8 @@ const PropertySearch = () => {
                 variant="body2"
                 sx={{ color: "primary.main", fontWeight: 600, mt: 0.5 }}
               >
-                📍 Kết quả tìm kiếm tại: {searchCriteria.location}
+                📍 {t("propertySearch.searchResultAt")}:{" "}
+                {searchCriteria.location}
               </Typography>
             )}
             {/* {mapBounds &&

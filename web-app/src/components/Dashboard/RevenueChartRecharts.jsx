@@ -55,11 +55,11 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
         };
       }
 
-      // Tiền thuê nhà
+      // Rent amount
       const rentAmount = bill.monthlyRent || 0;
       monthlyData[monthKey].rent += rentAmount;
 
-      // Tiền điện nước
+      // Utilities (electricity + water)
       const electricityAmount =
         ((bill.electricityNew || 0) - (bill.electricityOld || 0)) *
         (bill.electricityUnitPrice || 0);
@@ -71,7 +71,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
       const utilitiesAmount = electricityAmount + waterAmount;
       monthlyData[monthKey].utilities += utilitiesAmount;
 
-      // Các dịch vụ khác
+      // Other services
       const servicesAmount =
         (bill.internetPrice || 0) +
         (bill.parkingPrice || 0) +
@@ -81,7 +81,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
 
       monthlyData[monthKey].services += servicesAmount;
 
-      // Tổng doanh thu
+      // Total revenue
       const totalAmount = bill.totalAmount || 0;
       monthlyData[monthKey].totalRevenue += totalAmount;
       monthlyData[monthKey].billCount += 1;
@@ -93,18 +93,18 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
       .map((monthKey) => {
         const [year, month] = monthKey.split("-");
         const monthNames = [
-          "T1",
-          "T2",
-          "T3",
-          "T4",
-          "T5",
-          "T6",
-          "T7",
-          "T8",
-          "T9",
-          "T10",
-          "T11",
-          "T12",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
         ];
 
         return {
@@ -179,12 +179,12 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 shadow-xl">
-          <p className="text-sm font-semibold text-white mb-2">
+        <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-xl">
+          <p className="text-sm font-semibold text-gray-900 mb-2">
             {payload[0].payload.month} ({payload[0].payload.fullMonth})
           </p>
-          <p className="text-xs text-slate-400 mb-2">
-            Số hóa đơn: {payload[0].payload.billCount}
+          <p className="text-xs text-gray-600 mb-2">
+            Bills: {payload[0].payload.billCount}
           </p>
           {payload.map((entry, index) => (
             <div
@@ -219,15 +219,15 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
       case "line":
         return (
           <LineChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-            <XAxis dataKey="month" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Line
               type="monotone"
               dataKey="totalRevenue"
-              name="Tổng thu"
+              name="Total Revenue"
               stroke="#10b981"
               strokeWidth={3}
               dot={{ fill: "#10b981", r: 4 }}
@@ -236,7 +236,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Line
               type="monotone"
               dataKey="rent"
-              name="Tiền thuê"
+              name="Rent"
               stroke="#3b82f6"
               strokeWidth={3}
               dot={{ fill: "#3b82f6", r: 4 }}
@@ -244,7 +244,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Line
               type="monotone"
               dataKey="utilities"
-              name="Điện nước"
+              name="Utilities"
               stroke="#f59e0b"
               strokeWidth={3}
               dot={{ fill: "#f59e0b", r: 4 }}
@@ -252,7 +252,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Line
               type="monotone"
               dataKey="services"
-              name="Dịch vụ"
+              name="Services"
               stroke="#a855f7"
               strokeWidth={3}
               dot={{ fill: "#a855f7", r: 4 }}
@@ -277,15 +277,15 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
                 <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-            <XAxis dataKey="month" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Area
               type="monotone"
               dataKey="rent"
-              name="Tiền thuê"
+              name="Rent"
               stroke="#3b82f6"
               fillOpacity={1}
               fill="url(#colorRent)"
@@ -294,7 +294,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Area
               type="monotone"
               dataKey="utilities"
-              name="Điện nước"
+              name="Utilities"
               stroke="#f59e0b"
               fillOpacity={1}
               fill="url(#colorUtilities)"
@@ -303,7 +303,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Area
               type="monotone"
               dataKey="services"
-              name="Dịch vụ"
+              name="Services"
               stroke="#a855f7"
               fillOpacity={1}
               fill="url(#colorRevenue)"
@@ -315,28 +315,28 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
       case "composed":
         return (
           <ComposedChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-            <XAxis dataKey="month" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar
               dataKey="rent"
-              name="Tiền thuê"
+              name="Rent"
               fill="#3b82f6"
               radius={[8, 8, 0, 0]}
               stackId="a"
             />
             <Bar
               dataKey="utilities"
-              name="Điện nước"
+              name="Utilities"
               fill="#f59e0b"
               radius={[8, 8, 0, 0]}
               stackId="a"
             />
             <Bar
               dataKey="services"
-              name="Dịch vụ"
+              name="Services"
               fill="#a855f7"
               radius={[8, 8, 0, 0]}
               stackId="a"
@@ -344,7 +344,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Line
               type="monotone"
               dataKey="totalRevenue"
-              name="Tổng thu"
+              name="Total Revenue"
               stroke="#10b981"
               strokeWidth={3}
               dot={{ fill: "#10b981", r: 5 }}
@@ -355,26 +355,26 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
       default: // bar
         return (
           <BarChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-            <XAxis dataKey="month" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar
               dataKey="rent"
-              name="Tiền thuê"
+              name="Rent"
               fill="#3b82f6"
               radius={[8, 8, 0, 0]}
             />
             <Bar
               dataKey="utilities"
-              name="Điện nước"
+              name="Utilities"
               fill="#f59e0b"
               radius={[8, 8, 0, 0]}
             />
             <Bar
               dataKey="services"
-              name="Dịch vụ"
+              name="Services"
               fill="#a855f7"
               radius={[8, 8, 0, 0]}
             />
@@ -385,13 +385,13 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
 
   if (loading) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="animate-pulse">
-          <div className="h-6 bg-slate-700 rounded w-48 mb-4" />
-          <div className="h-80 bg-slate-700 rounded mb-4" />
+          <div className="h-6 bg-gray-200 rounded w-48 mb-4" />
+          <div className="h-80 bg-gray-200 rounded mb-4" />
           <div className="grid grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-20 bg-slate-700 rounded" />
+              <div key={i} className="h-20 bg-gray-200 rounded" />
             ))}
           </div>
         </div>
@@ -402,26 +402,24 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
   // Show message if no data
   if (chartData.length === 0) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">Biểu đồ doanh thu</h2>
-            <p className="text-sm text-slate-400">
-              Theo dõi thu nhập hàng tháng
-            </p>
+            <h2 className="text-xl font-bold text-gray-900">Revenue Chart</h2>
+            <p className="text-sm text-gray-600">Track your monthly income</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-20 h-20 rounded-full bg-slate-700/50 flex items-center justify-center mb-4">
-            <BarChart3 className="w-10 h-10 text-slate-500" />
+          <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <BarChart3 className="w-10 h-10 text-gray-400" />
           </div>
-          <p className="text-slate-400 text-lg mb-2">Chưa có dữ liệu hóa đơn</p>
-          <p className="text-slate-500 text-sm">
-            Tạo hóa đơn đầu tiên để xem biểu đồ doanh thu
+          <p className="text-gray-600 text-lg mb-2">No bill data available</p>
+          <p className="text-gray-500 text-sm">
+            Create your first bill to see the revenue chart
           </p>
         </div>
       </div>
@@ -429,30 +427,30 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
   }
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">Biểu đồ doanh thu</h2>
-            <p className="text-sm text-slate-400">
-              Theo dõi thu nhập hàng tháng ({chartData.length} tháng)
+            <h2 className="text-xl font-bold text-gray-900">Revenue Chart</h2>
+            <p className="text-sm text-gray-600">
+              Track your monthly income ({chartData.length} months)
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Chart Type Selector */}
-          <div className="flex items-center gap-1 bg-slate-700/50 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setChartType("bar")}
               className={`p-2 rounded-md transition ${
                 chartType === "bar"
-                  ? "bg-purple-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
               title="Bar Chart"
             >
@@ -462,8 +460,8 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("line")}
               className={`p-2 rounded-md transition ${
                 chartType === "line"
-                  ? "bg-purple-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
               title="Line Chart"
             >
@@ -473,8 +471,8 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("area")}
               className={`p-2 rounded-md transition ${
                 chartType === "area"
-                  ? "bg-purple-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
               title="Area Chart"
             >
@@ -484,8 +482,8 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("composed")}
               className={`p-2 rounded-md transition ${
                 chartType === "composed"
-                  ? "bg-purple-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
               title="Mixed Chart"
             >
@@ -494,26 +492,26 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
           </div>
 
           {/* Time Range Selector */}
-          <div className="flex items-center gap-2 bg-slate-700/50 rounded-lg p-1">
+          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setTimeRange("6months")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeRange === "6months"
-                  ? "bg-purple-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              6 tháng
+              6 months
             </button>
             <button
               onClick={() => setTimeRange("12months")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeRange === "12months"
-                  ? "bg-purple-600 text-white"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              12 tháng
+              12 months
             </button>
           </div>
         </div>
@@ -528,72 +526,72 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-green-900/20 to-green-800/20 border border-green-700/30 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-slate-400">Tổng doanh thu</span>
+            <DollarSign className="w-4 h-4 text-green-600" />
+            <span className="text-xs text-gray-700">Total Revenue</span>
           </div>
-          <p className="text-2xl font-bold text-green-400">
+          <p className="text-2xl font-bold text-green-600">
             {stats.totalRevenue.toFixed(1)}M
           </p>
-          <p className="text-xs text-slate-500 mt-1">
-            TB:{" "}
+          <p className="text-xs text-gray-600 mt-1">
+            Avg:{" "}
             {chartData.length > 0
               ? (stats.totalRevenue / chartData.length).toFixed(1)
               : 0}
-            M/tháng
+            M/month
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border border-blue-700/30 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-slate-400">Tiền thuê nhà</span>
+            <TrendingUp className="w-4 h-4 text-blue-600" />
+            <span className="text-xs text-gray-700">Rent</span>
           </div>
-          <p className="text-2xl font-bold text-blue-400">
+          <p className="text-2xl font-bold text-blue-600">
             {stats.totalRent.toFixed(1)}M
           </p>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-gray-600 mt-1">
             {stats.totalRevenue > 0
               ? ((stats.totalRent / stats.totalRevenue) * 100).toFixed(0)
               : 0}
-            % tổng thu
+            % of total
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-900/20 to-orange-800/20 border border-orange-700/30 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-4 h-4 text-orange-400" />
-            <span className="text-xs text-slate-400">Điện nước</span>
+            <Zap className="w-4 h-4 text-orange-600" />
+            <span className="text-xs text-gray-700">Utilities</span>
           </div>
-          <p className="text-2xl font-bold text-orange-400">
+          <p className="text-2xl font-bold text-orange-600">
             {stats.totalUtilities.toFixed(1)}M
           </p>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-gray-600 mt-1">
             {stats.totalRevenue > 0
               ? ((stats.totalUtilities / stats.totalRevenue) * 100).toFixed(0)
               : 0}
-            % tổng thu
+            % of total
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border border-purple-700/30 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-4 h-4 text-purple-400" />
-            <span className="text-xs text-slate-400">Tăng trưởng</span>
+            <Calendar className="w-4 h-4 text-purple-600" />
+            <span className="text-xs text-gray-700">Growth</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <p className="text-2xl font-bold text-purple-400">
+            <p className="text-2xl font-bold text-purple-600">
               {stats.growthRate > 0 ? "+" : ""}
               {stats.growthRate}%
             </p>
             {stats.growthRate > 0 ? (
-              <TrendingUp className="w-4 h-4 text-green-400" />
+              <TrendingUp className="w-4 h-4 text-green-600" />
             ) : (
-              <TrendingDown className="w-4 h-4 text-red-400" />
+              <TrendingDown className="w-4 h-4 text-red-600" />
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-1">So với tháng trước</p>
+          <p className="text-xs text-gray-600 mt-1">vs. previous month</p>
         </div>
       </div>
     </div>

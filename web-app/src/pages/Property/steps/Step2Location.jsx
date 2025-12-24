@@ -1,6 +1,7 @@
 import React from "react";
 import { MapPin } from "lucide-react";
 import GoogleMapPicker from "../../../components/Property/GoogleMapPicker";
+import { useTranslation } from "react-i18next";
 
 const Step2Location = ({
   propertyData,
@@ -13,9 +14,12 @@ const Step2Location = ({
   error,
   setError,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold mb-6">Location Details</h2>
+      <h2 className="text-xl font-bold mb-6">
+        {t("propertyForm.step2.title")}
+      </h2>
 
       <div className="space-y-6">
         {/* Google Map */}
@@ -32,7 +36,8 @@ const Step2Location = ({
           {/* Province */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Province/City <span className="text-red-500">*</span>
+              {t("propertyForm.step2.province")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <select
               name="province"
@@ -41,7 +46,7 @@ const Step2Location = ({
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
                          focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select Province/City</option>
+              <option value="">{t("propertyForm.step2.selectProvince")}</option>
               {provinces?.map((prov) => (
                 <option key={prov.code} value={prov.name}>
                   {prov.name}
@@ -53,7 +58,8 @@ const Step2Location = ({
           {/* District */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              District <span className="text-red-500">*</span>
+              {t("propertyForm.step2.district")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <select
               name="district"
@@ -63,7 +69,7 @@ const Step2Location = ({
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
                          focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
-              <option value="">Select District</option>
+              <option value="">{t("propertyForm.step2.selectDistrict")}</option>
               {districts?.map((dist) => (
                 <option key={dist.code} value={dist.name}>
                   {dist.name}
@@ -77,7 +83,9 @@ const Step2Location = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Ward */}
           <div>
-            <label className="block text-sm font-medium mb-2">Ward</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step2.ward")}
+            </label>
             <select
               name="ward"
               value={propertyData.ward}
@@ -86,7 +94,7 @@ const Step2Location = ({
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
                          focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
-              <option value="">Select Ward</option>
+              <option value="">{t("propertyForm.step2.selectWard")}</option>
               {wards?.map((ward) => (
                 <option key={ward.code} value={ward.name}>
                   {ward.name}
@@ -97,13 +105,15 @@ const Step2Location = ({
 
           {/* Street */}
           <div>
-            <label className="block text-sm font-medium mb-2">Street</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step2.street")}
+            </label>
             <input
               type="text"
               name="street"
               value={propertyData.street}
               onChange={onInputChange}
-              placeholder="Enter street name"
+              placeholder={t("propertyForm.step2.streetPlaceholder")}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
                          focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -112,13 +122,15 @@ const Step2Location = ({
 
         {/* House Number */}
         <div>
-          <label className="block text-sm font-medium mb-2">House Number</label>
+          <label className="block text-sm font-medium mb-2">
+            {t("propertyForm.step2.houseNumber")}
+          </label>
           <input
             type="text"
             name="houseNumber"
             value={propertyData.houseNumber}
             onChange={onInputChange}
-            placeholder="Enter house number"
+            placeholder={t("propertyForm.step2.houseNumberPlaceholder")}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
                        focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -127,7 +139,8 @@ const Step2Location = ({
         {/* Full Address */}
         <div>
           <label className="block text-sm font-medium mb-2">
-            Full Address <span className="text-red-500">*</span>
+            {t("propertyForm.step2.fullAddress")}{" "}
+            <span className="text-red-500">*</span>
           </label>
 
           <div className="relative">
@@ -137,7 +150,7 @@ const Step2Location = ({
               name="fullAddress"
               value={propertyData.fullAddress}
               onChange={onInputChange}
-              placeholder="Auto-filled from fields above"
+              placeholder={t("propertyForm.step2.fullAddressPlaceholder")}
               rows="2"
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
                          focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
@@ -145,8 +158,7 @@ const Step2Location = ({
           </div>
 
           <p className="text-xs text-gray-500 mt-1">
-            💡 This field is auto-generated when you select province, district &
-            ward.
+            💡 {t("propertyForm.step2.autoNote")}
           </p>
         </div>
       </div>

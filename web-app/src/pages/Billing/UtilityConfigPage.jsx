@@ -6,6 +6,7 @@ import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import UtilityConfigModal from "../../components/Billing/UtilityConfigModal";
+import { useTranslation } from "react-i18next";
 
 import {
   getMyUtilities,
@@ -28,6 +29,7 @@ const UtilityConfigPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadData();
@@ -73,10 +75,10 @@ const UtilityConfigPage = () => {
     try {
       if (selectedConfig) {
         await updateUtilityConfig(selectedConfig.id, formData);
-        alert("✅ Cập nhật cấu hình thành công!");
+        alert(t("utility.updateSuccess"));
       } else {
         await createUtilityConfig(formData);
-        alert("✅ Tạo cấu hình thành công!");
+        alert(t("utility.createSuccess"));
       }
       loadData();
       setShowModal(false);
@@ -87,27 +89,27 @@ const UtilityConfigPage = () => {
   };
 
   const handleDeactivate = async (id) => {
-    if (window.confirm("Vô hiệu hóa cấu hình này?")) {
+    if (window.confirm(t("utility.confirmDeactivate"))) {
       try {
         await deactivateUtilityConfig(id);
-        alert("✅ Đã vô hiệu hóa!");
+        alert(t("utility.deactivateSuccess"));
         loadData();
       } catch (error) {
         console.error("Error deactivating config:", error);
-        alert("❌ Không thể vô hiệu hóa!");
+        alert(t("utility.deactivateFailed"));
       }
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Xóa cấu hình này? (Không thể hoàn tác)")) {
+    if (window.confirm(t("utility.confirmDelete"))) {
       try {
         await deleteUtilityConfig(id);
-        alert("✅ Đã xóa!");
+        alert(t("utility.deleteSuccess"));
         loadData();
       } catch (error) {
         console.error("Error deleting config:", error);
-        alert("❌ Không thể xóa!");
+        alert(t("utility.deleteFailed"));
       }
     }
   };
@@ -131,8 +133,8 @@ const UtilityConfigPage = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="Utility Configuration"
-          subtitle="Manage electricity, water, and service pricing"
+          title={t("utility.utilityConfig")}
+          subtitle={t("utility.utilitySubtitle")}
         />
 
         <main className="p-6">
@@ -144,7 +146,9 @@ const UtilityConfigPage = () => {
                   <Settings className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Total Configs</p>
+                  <p className="text-sm text-gray-500">
+                    {t("utility.totalConfigs")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {configs.length}
                   </p>
@@ -158,7 +162,9 @@ const UtilityConfigPage = () => {
                   <Power className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Active</p>
+                  <p className="text-sm text-gray-500">
+                    {t("utility.activeConfigs")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {configs.filter((c) => c.active).length}
                   </p>
@@ -172,7 +178,9 @@ const UtilityConfigPage = () => {
                   <Settings className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Properties</p>
+                  <p className="text-sm text-gray-500">
+                    {t("utility.properties")}
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {properties.length}
                   </p>
@@ -186,11 +194,11 @@ const UtilityConfigPage = () => {
             {loading ? (
               <div className="text-center py-12">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-gray-600">Loading...</p>
+                <p className="text-gray-600">{t("common.loading")}</p>
               </div>
             ) : properties.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">Chưa có bất động sản nào</p>
+                <p className="text-gray-600">{t("utility.noProperties")}</p>
               </div>
             ) : (
               properties.map((property) => {
@@ -218,7 +226,7 @@ const UtilityConfigPage = () => {
                           className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition font-medium"
                         >
                           <Plus className="w-4 h-4" />
-                          Add Config
+                          {t("utility.addConfig")}
                         </button>
                       </div>
                     </div>
@@ -227,7 +235,7 @@ const UtilityConfigPage = () => {
                     <div className="p-6">
                       {propertyConfigs.length === 0 ? (
                         <p className="text-center text-gray-500 py-8">
-                          Chưa có cấu hình nào. Nhấn "Add Config" để tạo.
+                          {t("utility.noConfigs")}
                         </p>
                       ) : (
                         <div className="overflow-x-auto">
@@ -235,22 +243,22 @@ const UtilityConfigPage = () => {
                             <thead className="bg-gray-50">
                               <tr>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Level
+                                  {t("utility.level")}
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Electricity
+                                  {t("utility.electricity")}
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Water
+                                  {t("utility.water")}
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Internet
+                                  {t("utility.internet")}
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                  Status
+                                  {t("utility.status")}
                                 </th>
                                 <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                  Actions
+                                  {t("utility.actions")}
                                 </th>
                               </tr>
                             </thead>
@@ -269,8 +277,8 @@ const UtilityConfigPage = () => {
                                       }`}
                                     >
                                       {config.contractId
-                                        ? "Contract"
-                                        : "Property"}
+                                        ? t("utility.contractLevel")
+                                        : t("utility.propertyLevel")}
                                     </span>
                                   </td>
                                   <td className="px-4 py-3 text-sm text-gray-900">
@@ -293,7 +301,9 @@ const UtilityConfigPage = () => {
                                           : "bg-gray-100 text-gray-700"
                                       }`}
                                     >
-                                      {config.active ? "Active" : "Inactive"}
+                                      {config.active
+                                        ? t("utility.active")
+                                        : t("utility.inactive")}
                                     </span>
                                   </td>
                                   <td className="px-4 py-3">
@@ -301,7 +311,7 @@ const UtilityConfigPage = () => {
                                       <button
                                         onClick={() => handleEdit(config)}
                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                        title="Edit"
+                                        title={t("utility.edit")}
                                       >
                                         <Edit className="w-4 h-4" />
                                       </button>
@@ -311,7 +321,7 @@ const UtilityConfigPage = () => {
                                             handleDeactivate(config.id)
                                           }
                                           className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition"
-                                          title="Deactivate"
+                                          title={t("utility.deactivate")}
                                         >
                                           <Power className="w-4 h-4" />
                                         </button>
@@ -319,7 +329,7 @@ const UtilityConfigPage = () => {
                                       <button
                                         onClick={() => handleDelete(config.id)}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                                        title="Delete"
+                                        title={t("utility.delete")}
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </button>

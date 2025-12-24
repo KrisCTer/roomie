@@ -5,6 +5,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
+import { useTranslation } from "react-i18next";
 
 // Import custom components
 import BillTabs from "../../components/Billing/BillTabs";
@@ -25,6 +26,7 @@ const UnifiedBillsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Bills");
   const [showBulkSelect, setShowBulkSelect] = useState(false);
+  const { t } = useTranslation();
 
   // Use custom hook for all operations
   const {
@@ -110,8 +112,8 @@ const UnifiedBillsPage = () => {
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <PageTitle
-          title="Bill Management"
-          subtitle="Create, manage, and track rental bills and payments"
+          title={t("bill.billManagement")}
+          subtitle={t("bill.billManagementSubtitle")}
         />
 
         <main className="p-6">
@@ -153,7 +155,7 @@ const UnifiedBillsPage = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <h2 className="text-xl font-bold text-gray-900">
-                    Bills List ({filteredBills.length})
+                    {t("bill.billsList")} ({filteredBills.length})
                   </h2>
 
                   {/* Bulk Select Toggle (Landlord only) */}
@@ -180,7 +182,7 @@ const UnifiedBillsPage = () => {
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
                       >
                         <Send className="w-4 h-4" />
-                        Send {selectedBills.length} Bill(s)
+                        {t("bill.sendCount", { count: selectedBills.length })}
                       </button>
                       <div className="h-6 w-px bg-gray-300"></div>
                     </>
@@ -215,7 +217,7 @@ const UnifiedBillsPage = () => {
                       className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md font-medium"
                     >
                       <Plus className="w-5 h-5" />
-                      Create New Bill
+                      {t("bill.createBill")}
                     </button>
                   )}
                 </div>
@@ -225,8 +227,9 @@ const UnifiedBillsPage = () => {
               {selectedBills.length > 0 && (
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    <strong>{selectedBills.length}</strong> bill(s) selected.
-                    You can send them all at once or perform other bulk actions.
+                    <strong>{selectedBills.length}</strong>{" "}
+                    {t("bill.selectedCount", { count: selectedBills.length })}{" "}
+                    {t("bill.bulkInfo")}
                   </p>
                 </div>
               )}
@@ -285,12 +288,10 @@ const UnifiedBillsPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Confirm Bulk Send
+              {t("bill.confirmBulkSend")}
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to send{" "}
-              <strong>{selectedBills.length}</strong> bill(s) to tenants? This
-              will change their status from DRAFT to PENDING.
+              {t("bill.confirmBulkSendDesc", { count: selectedBills.length })}
             </p>
             <div className="flex gap-3">
               <button
@@ -306,7 +307,7 @@ const UnifiedBillsPage = () => {
                 }}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
               >
-                Send Bills
+                {t("bill.sendBills")}
               </button>
             </div>
           </div>

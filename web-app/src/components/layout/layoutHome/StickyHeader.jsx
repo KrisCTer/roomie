@@ -370,7 +370,7 @@ const StickyHeader = ({
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {searchData.location || "Địa điểm"}
+                      {searchData.location || "Location"}
                     </Typography>
                   </Box>
 
@@ -407,7 +407,7 @@ const StickyHeader = ({
                         ? propertyTypes.find(
                             (p) => p.value === searchData.propertyType
                           )?.label
-                        : "Loại hình"}
+                        : "Type"}
                     </Typography>
                   </Box>
 
@@ -444,7 +444,7 @@ const StickyHeader = ({
                     >
                       {searchData.priceRange[0] === 0 &&
                       searchData.priceRange[1] === 20000000
-                        ? "Giá thuê"
+                        ? "Rental Price"
                         : `${(searchData.priceRange[0] / 1000000).toFixed(
                             0
                           )}-${(searchData.priceRange[1] / 1000000).toFixed(
@@ -481,7 +481,7 @@ const StickyHeader = ({
                             color: filterCount > 0 ? "grey.900" : "grey.500",
                           }}
                         >
-                          Lọc
+                          Filter
                         </Typography>
                       </Box>
                     </>
@@ -535,7 +535,7 @@ const StickyHeader = ({
                     }}
                   >
                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                      Chọn địa điểm
+                      Choose a location
                     </Typography>
                   </Box>
 
@@ -553,7 +553,7 @@ const StickyHeader = ({
                                 textTransform: "uppercase",
                               }}
                             >
-                              Tìm kiếm gần đây
+                              Recent searches
                             </Typography>
                           </Box>
                           {recentSearches.slice(0, 3).map((search, index) => (
@@ -581,7 +581,7 @@ const StickyHeader = ({
                             textTransform: "uppercase",
                           }}
                         >
-                          Địa điểm phổ biến
+                          Popular locations
                         </Typography>
                       </Box>
                       {popularLocations.map((loc, index) => (
@@ -613,7 +613,7 @@ const StickyHeader = ({
                             textTransform: "uppercase",
                           }}
                         >
-                          Chọn tỉnh / thành
+                          Select province/city
                         </Typography>
                       </Box>
                       <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
@@ -643,7 +643,7 @@ const StickyHeader = ({
                           borderColor: "grey.200",
                         }}
                       >
-                        ← Quay lại
+                        ← Back
                       </MenuItem>
                       <Box sx={{ px: 2, py: 1, bgcolor: "grey.50" }}>
                         <Typography
@@ -689,7 +689,7 @@ const StickyHeader = ({
                     }}
                   >
                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                      Loại hình bất động sản
+                      Type of real estate
                     </Typography>
                   </Box>
                   {propertyTypes.map((type) => (
@@ -727,7 +727,7 @@ const StickyHeader = ({
                     variant="subtitle2"
                     sx={{ fontWeight: 700, mb: 2 }}
                   >
-                    Khoảng giá thuê (VND/tháng)
+                    Rental price range (VND/month)
                   </Typography>
 
                   <Slider
@@ -755,7 +755,7 @@ const StickyHeader = ({
                   >
                     <Box>
                       <Typography variant="caption" sx={{ color: "grey.600" }}>
-                        Tối thiểu
+                        Minimum
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {searchData.priceRange[0].toLocaleString("vi-VN")} đ
@@ -763,7 +763,7 @@ const StickyHeader = ({
                     </Box>
                     <Box sx={{ textAlign: "right" }}>
                       <Typography variant="caption" sx={{ color: "grey.600" }}>
-                        Tối đa
+                        Maximum
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {searchData.priceRange[1].toLocaleString("vi-VN")} đ

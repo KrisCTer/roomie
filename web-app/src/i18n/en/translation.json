@@ -21,7 +21,22 @@
     "theme": "Theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "submit": "Submit",
+    "refresh": "Refresh",
+    "filters": "Filters",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "total": "Total",
+    "details": "Details",
+    "noData": "No data available",
+    "processing": "Processing..."
   },
   "header": {
     "becomeHost": "Become a Host",
@@ -54,31 +69,219 @@
     "pending": "Pending",
     "approved": "Approved",
     "viewDetails": "View Details",
-    "bookNow": "Book Now"
+    "bookNow": "Book Now",
+    "addProperty": "Add Property",
+    "myProperties": "My Properties",
+    "propertyType": "Property Type",
+    "amenities": "Amenities",
+    "location": "Location",
+    "media": "Media",
+    "noProperties": "No properties found",
+    "deleteConfirm": "Are you sure you want to delete this property?",
+    "publishConfirm": "Are you sure you want to publish this property?"
+  },
+  "propertyDetail": {
+    "notFoundTitle": "Property not found",
+    "notFoundDesc": "This property may have been removed or does not exist",
+    "back": "Go back",
+
+    "loginToChat": "Please log in to message the owner",
+    "cannotChatSelf": "You cannot message yourself",
+    "chatError": "Unable to start conversation. Please try again later.",
+
+    "loginToBook": "Please log in to make a booking",
+    "selectDates": "Please select lease start and end dates",
+    "invalidDateRange": "End date must be after start date",
+    "minLease": "Minimum lease duration is 1 month (30 days)",
+
+    "bookingSuccessTitle": "Booking successful!",
+    "bookingRef": "Booking reference",
+    "bookingStatus": "Status",
+    "bookingDuration": "Lease duration",
+    "estimatedCost": "Estimated total cost",
+    "waitForApproval": "Please wait for the landlord's confirmation"
+  },
+  "propertyForm": {
+    "step1": {
+      "title": "Basic Information",
+
+      "titleLabel": "Property Title",
+      "titlePlaceholder": "Enter property title",
+
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe your property...",
+
+      "propertyType": "Property Type",
+      "selectType": "Select type",
+
+      "types": {
+        "ROOM": "Room",
+        "DORMITORY": "Dormitory",
+        "APARTMENT": "Apartment",
+        "STUDIO": "Studio",
+        "OFFICETEL": "Officetel",
+        "HOUSE": "House",
+        "VILLA": "Villa",
+        "OTHER": "Other"
+      },
+
+      "size": "Size (m²)",
+
+      "monthlyRent": "Monthly Rent",
+      "rentalDeposit": "Rental Deposit",
+
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "garages": "Garages",
+      "rooms": "Rooms"
+    },
+    "step2": {
+      "title": "Location Details",
+
+      "province": "Province / City",
+      "selectProvince": "Select province / city",
+
+      "district": "District",
+      "selectDistrict": "Select district",
+
+      "ward": "Ward",
+      "selectWard": "Select ward",
+
+      "street": "Street",
+      "streetPlaceholder": "Enter street name",
+
+      "houseNumber": "House Number",
+      "houseNumberPlaceholder": "Enter house number",
+
+      "fullAddress": "Full Address",
+      "fullAddressPlaceholder": "Auto-filled from fields above",
+
+      "autoNote":
+        "This field is auto-generated when you select province, district & ward."
+    },
+    "step3": {
+      "amenitiesTitle": "Amenities",
+      "mediaTitle": "Property Media",
+
+      "sections": {
+        "homeSafety": "Home Safety",
+        "bedroom": "Bedroom",
+        "kitchen": "Kitchen",
+        "others": "Others"
+      },
+
+      "amenities": {
+        "SMOKE_ALARM": "Smoke alarm",
+        "SECURITY_CAMERA": "Security camera",
+        "FIRE_EXTINGUISHER": "Fire extinguisher",
+        "LOCKED_DOOR": "Locked door",
+
+        "BED": "Bed",
+        "WARDROBE": "Wardrobe",
+        "AIR_CONDITIONER": "Air conditioner",
+
+        "REFRIGERATOR": "Refrigerator",
+        "MICROWAVE": "Microwave",
+        "STOVE": "Stove",
+
+        "WIFI": "Wi-Fi",
+        "WASHING_MACHINE": "Washing machine",
+        "PARKING": "Parking"
+      }
+    },
+    "step4": {
+      "title": "Review Your Listing",
+
+      "sections": {
+        "basic": "Basic Information",
+        "location": "Location",
+        "amenities": "Amenities",
+        "media": "Media"
+      },
+
+      "fields": {
+        "title": "Title",
+        "type": "Type",
+        "monthlyRent": "Monthly Rent",
+        "status": "Status",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms"
+      },
+
+      "empty": {
+        "amenities": "No amenities selected",
+        "media": "No images uploaded",
+        "address": "No address provided"
+      },
+
+      "coordinates": "Coordinates",
+
+      "note": {
+        "label": "Note",
+        "create": "Once submitted, your property will be reviewed by our team.",
+        "edit": "Your changes will update the existing property."
+      },
+
+      "moreImages": "+{{count}} more images"
+    }
+  },
+  "propertySearch": {
+    "loading": "Loading...",
+    "loadError": "Unable to load property listings",
+
+    "places": "places",
+    "inArea": "in this area",
+    "page": "Page",
+
+    "searchResultAt": "Search results at",
+    "mapFiltered": "Showing {{shown}} / {{total}} properties (map filtered)"
+  },
+  "userProfile": {
+    "loading": "Loading user information...",
+    "loadError": "Unable to load user information",
+    "notFound": "User not found",
+    "back": "Back",
+
+    "email": "Email",
+    "phone": "Phone number",
+    "gender": "Gender",
+    "dob": "Date of birth",
+    "address": "Address",
+
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "notUpdated": "Not updated",
+
+    "properties": "Properties",
+    "propertiesCount": "{{count}} properties for rent",
+    "noProperties": "No properties yet",
+    "noPropertiesDesc": "This user has not listed any properties"
   },
   "auth": {
-  "login": "Login",
-  "register": "Register",
-  "loginSubtitle": "Welcome back! Please enter your account.",
-  "registerSubtitle": "Create an account to start exploring properties.",
-  "username": "Username",
-  "usernamePlaceholder": "Enter username",
-  "password": "Password",
-  "confirmPassword": "Confirm Password",
-  "email": "Email",
-  "firstName": "First Name",
-  "lastName": "Last Name",
-  "phoneNumber": "Phone Number",
-  "forgotPassword": "Forgot password?",
-  "noAccount": "Don’t have an account?",
-  "hasAccount": "Already have an account?",
-  "registerSuccess": "Register successfully. Please login.",
-  "registerFailed": "Registration failed. Please check your information.",
-  "loginError": "Incorrect username or password.",
-  "fillAll": "Please fill all required fields!",
-  "passwordNotMatch": "Passwords do not match!",
-  "processing": "Processing...",
-  "orSignupWith": "or sign up with"
+    "login": "Login",
+    "register": "Register",
+    "loginSubtitle": "Welcome back! Please enter your account.",
+    "registerSubtitle": "Create an account to start exploring properties.",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phoneNumber": "Phone Number",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "registerSuccess": "Register successfully. Please login.",
+    "registerFailed": "Registration failed. Please check your information.",
+    "loginError": "Incorrect username or password.",
+    "fillAll": "Please fill all required fields!",
+    "passwordNotMatch": "Passwords do not match!",
+    "processing": "Processing...",
+    "orSignupWith": "or sign up with",
+    "viewWithoutLogin": "Continue without login"
   },
   "dashboard": {
     "welcome": "Welcome back",
@@ -89,7 +292,23 @@
     "messages": "Messages",
     "contracts": "Contracts",
     "addProperty": "Add Property",
-    "myProperties": "My Properties"
+    "myProperties": "My Properties",
+    "landlordRole": "Landlord",
+    "tenantRole": "Tenant",
+    "totalProperties": "Total Properties",
+    "pendingProperties": "Pending Properties",
+    "rentedProperties": "Rented Properties",
+    "availableProperties": "Available Properties",
+    "activeContracts": "Active Contracts",
+    "unpaidBills": "Unpaid Bills",
+    "paidBills": "Paid Bills",
+    "activeBookings": "Active Bookings",
+    "pendingBookings": "Pending Bookings",
+    "completedBookings": "Completed Bookings",
+    "quickActions": "Quick Actions",
+    "recentActivity": "Recent Activity",
+    "insights": "Insights",
+    "revenueChart": "Revenue Overview"
   },
   "footer": {
     "about": "About Us",
@@ -114,7 +333,15 @@
     "sendMessage": "Send Message",
     "online": "Online",
     "offline": "Offline",
-    "typeMessage": "Type a message..."
+    "typeMessage": "Type a message...",
+    "selectConversation": "Please select a conversation first",
+    "userNotLoaded": "User information not loaded. Please wait.",
+    "recipientNotFound": "Cannot find recipient. Please try selecting the conversation again",
+
+    "voiceCall": "Voice call",
+    "videoCall": "Video call",
+    "search": "Search",
+    "noConversation": "No conversation selected"
   },
   "chat": {
     "title": "Start a new conversation",
@@ -145,11 +372,310 @@
     "chat": "Chat"
   },
   "home": {
-  "findPerfectPlace": "Find the perfect place for your stay",
-  "exploreThousands": "Explore thousands of apartments, houses and homestays worldwide.",
-  "roomsIn": "Rooms & Stays in",
-  "fromSystemData": "From system data",
-  "unknownAddress": "Unknown address",
-  "other": "Other"
-}
+    "findPerfectPlace": "Find the perfect place for your stay",
+    "exploreThousands": "Explore thousands of apartments, houses and homestays worldwide.",
+    "roomsIn": "Rooms & Stays in",
+    "propertiesIn": "Properties in",
+    "fromSystemData": "From system data",
+    "unknownAddress": "Unknown address",
+    "other": "Other",
+    "noProperties": "No properties available",
+    "untitled": "Untitled",
+    "propertyType": {
+      "APARTMENT": "Apartment",
+      "HOUSE": "House",
+      "ROOM": "Room",
+      "STUDIO": "Studio",
+      "VILLA": "Villa",
+      "DORMITORY": "Dormitory",
+      "OFFICETEL": "Officetel"
+    }
+  },
+  "booking": {
+    "myBookings": "My Bookings",
+    "newBooking": "New Booking",
+    "bookingDetails": "Booking Details",
+    "bookingId": "Booking ID",
+    "bookingDate": "Booking Date",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "totalAmount": "Total Amount",
+    "bookingStatus": "Booking Status",
+    "confirmBooking": "Confirm Booking",
+    "cancelBooking": "Cancel Booking",
+    "viewMode": "View Mode",
+    "asOwner": "As Owner",
+    "asTenant": "As Tenant",
+    "noBookings": "No bookings found",
+    "cancelConfirm": "Are you sure you want to cancel this booking?",
+    "confirmSuccess": "Booking confirmed successfully",
+    "cancelSuccess": "Booking cancelled successfully",
+    "myBookingsSubtitle": "Manage your property bookings and lease agreements"
+  },
+  "contract": {
+    "myContracts": "My Contracts",
+    "contractDetails": "Contract Details",
+    "contractId": "Contract ID",
+    "contractDate": "Contract Date",
+    "leaseStart": "Lease Start",
+    "leaseEnd": "Lease End",
+    "contractStatus": "Contract Status",
+    "signContract": "Sign Contract",
+    "viewContract": "View Contract",
+    "downloadContract": "Download Contract",
+    "landlord": "Landlord",
+    "tenant": "Tenant",
+    "asLandlord": "As Landlord",
+    "asTenant": "As Tenant",
+    "active": "Active",
+    "expired": "Expired",
+    "pending": "Pending",
+    "noContracts": "No contracts found",
+    "signatureRequired": "Signature Required",
+    "allSigned": "All parties signed",
+    "landlordSigned": "Landlord signed",
+    "tenantSigned": "Tenant signed",
+    "signNow": "Sign Now",
+    "requestOTP": "Request OTP",
+    "verifyOTP": "Verify OTP",
+    "enterOTP": "Enter OTP Code",
+    "resendOTP": "Resend OTP",
+    "signSuccess": "Contract signed successfully",
+    "signingTitle": "Contract Signing",
+    "signingSubtitle": "Review and sign your contract",
+
+    "loading": "Loading contract information...",
+    "notFound": "No contract found",
+    "backToList": "Back to list",
+
+    "requestSignature": "Request Signature",
+    "alreadySigned": "Already signed",
+    "waitingOtherParty": "Waiting for the other party",
+
+    "otpTitle": "OTP Verification",
+    "otpDescription": "Enter the OTP sent to your phone",
+    "verifyAndSign": "Verify & Sign",
+    "myContractsSubtitle": "View and manage your rental contracts",
+
+    "stats": {
+      "total": "Total Contracts",
+      "active": "Active",
+      "pending": "Pending",
+      "expired": "Expired"
+  }
+  },
+  "bill": {
+    "myBills": "My Bills",
+    "billDetails": "Bill Details",
+    "billId": "Bill ID",
+    "billDate": "Bill Date",
+    "dueDate": "Due Date",
+    "totalAmount": "Total Amount",
+    "billStatus": "Bill Status",
+    "payBill": "Pay Bill",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "overdue": "Overdue",
+    "noBills": "No bills found",
+    "paymentMethod": "Payment Method",
+    "selectPaymentMethod": "Select Payment Method",
+    "payNow": "Pay Now",
+    "paymentSuccess": "Payment successful",
+    "breakdown": "Bill Breakdown",
+    "baseRent": "Base Rent",
+    "electricity": "Electricity",
+    "water": "Water",
+    "internet": "Internet",
+    "other": "Other",
+    "createBill": "Create Bill",
+    "editBill": "Edit Bill",
+    "sendBill": "Send Bill",
+    "deleteBill": "Delete Bill",
+    "downloadPDF": "Download PDF",
+    "billNotFound": "Bill not found",
+    "backToList": "Back to list",
+    "loadingBill": "Loading bill...",
+    "billSubtitle": "View details and manage your bill",
+    "billManagement": "Bill Management",
+    "billManagementSubtitle": "Create, manage, and track rental bills and payments",
+    "billsList": "Bills List",
+    "sendBills": "Send Bills",
+    "sendCount": "Send {{count}} bill(s)",
+    "selectedCount": "{{count}} bill(s) selected.",
+    "bulkInfo": "You can send them all at once or perform other bulk actions.",
+    "confirmBulkSend": "Confirm Bulk Send",
+    "confirmBulkSendDesc": "Are you sure you want to send {{count}} bill(s) to tenants? This will change their status from DRAFT to PENDING."
+  },
+  "utility": {
+    "utilityConfig": "Utility Configuration",
+    "electricityPrice": "Electricity Price",
+    "waterPrice": "Water Price",
+    "internetPrice": "Internet Price",
+    "servicePrice": "Service Price",
+    "unitPrice": "Unit Price",
+    "perKWh": "per kWh",
+    "perCubicMeter": "per m³",
+    "perMonth": "per month",
+    "addConfig": "Add Configuration",
+    "editConfig": "Edit Configuration",
+    "deleteConfig": "Delete Configuration",
+    "activeConfig": "Active Configuration",
+    "inactiveConfig": "Inactive Configuration",
+    "utilitySubtitle": "Manage electricity, water, and service pricing",
+    "totalConfigs": "Total Configs",
+    "activeConfigs": "Active",
+    "properties": "Properties",
+    "noProperties": "No properties found",
+    "noConfigs": "No configurations yet. Click \"Add Config\" to create.",
+    "level": "Level",
+    "electricity": "Electricity",
+    "water": "Water",
+    "internet": "Internet",
+    "status": "Status",
+    "actions": "Actions",
+    "contractLevel": "Contract",
+    "propertyLevel": "Property",
+    "active": "Active",
+    "inactive": "Inactive",
+    "edit": "Edit",
+    "deactivate": "Deactivate",
+    "delete": "Delete",
+    "confirmDeactivate": "Deactivate this configuration?",
+    "confirmDelete": "Delete this configuration? (Cannot be undone)",
+    "createSuccess": "Configuration created successfully!",
+    "updateSuccess": "Configuration updated successfully!",
+    "deactivateSuccess": "Configuration deactivated!",
+    "deactivateFailed": "Unable to deactivate configuration!",
+    "deleteSuccess": "Configuration deleted!",
+    "deleteFailed": "Unable to delete configuration!"
+  },
+  "admin": {
+    "adminDashboard": "Admin Dashboard",
+    "adminProperties": "Admin Properties",
+    "adminUsers": "Admin Users",
+    "totalUsers": "Total Users",
+    "activeUsers": "Active Users",
+    "suspendedUsers": "Suspended Users",
+    "bannedUsers": "Banned Users",
+    "suspendUser": "Suspend User",
+    "banUser": "Ban User",
+    "userManagement": "User Management",
+    "propertyManagement": "Property Management",
+    "approveProperty": "Approve Property",
+    "rejectProperty": "Reject Property",
+    "pendingApproval": "Pending Approval",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "unauthorized": "Unauthorized",
+    "properties": "Properties",
+    "users": "Users",
+    "searchProperties": "Search properties...",
+    "searchUsers": "Search users...",
+    "refresh": "Refresh",
+    "noProperties": "No properties.",
+    "noUsers": "No users.",
+    "view": "View",
+    "pendingProperties": "Pending Properties",
+    "waitingApproval": "Waiting approval",
+    "inactive": "Inactive",
+    "approve": "Approve",
+    "reject": "Reject",
+    "noPendingProperties": "No pending properties.",
+    "userManagementDesc": "Admin can suspend or ban users.",
+    "total": "Total",
+    "suspend": "Suspend",
+    "ban": "Ban",
+    "confirmSuspend": "Suspend user \"{{name}}\"?",
+    "confirmBan": "Ban user \"{{name}}\"?",
+    "suspendFailed": "Suspend failed. Please check network or console.",
+    "banFailed": "Ban failed. Please check network or console."
+  },
+  "profile": {
+    "myProfile": "My Profile",
+    "editProfile": "Edit Profile",
+    "personalInfo": "Personal Information",
+    "contactInfo": "Contact Information",
+    "accountSettings": "Account Settings",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updateProfile": "Update Profile",
+    "updatePassword": "Update Password",
+    "avatar": "Avatar",
+    "uploadAvatar": "Upload Avatar",
+    "idCard": "ID Card",
+    "uploadIdCard": "Upload ID Card",
+    "scanIdCard": "Scan ID Card",
+    "takePhoto": "Take Photo",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "dateOfBirth": "Date of Birth",
+    "address": "Address",
+    "updateSuccess": "Profile updated successfully",
+    "updateError": "Failed to update profile",
+    "passwordUpdateSuccess": "Password updated successfully",
+    "passwordUpdateError": "Failed to update password",
+    "title": "Profile",
+    "subtitle": "View and update your profile information",
+
+    "avatarProfile": {
+      "upload": "Upload avatar",
+      "scanId": "Scan ID card",
+      "openCamera": "Open camera"
+    },
+
+    "form": {
+      "save": "Save changes",
+      "saving": "Saving...",
+      "success": "Profile updated successfully"
+    },
+
+    "password": {
+      "title": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm password",
+      "update": "Update password",
+      "success": "Password updated successfully"
+    }
+  },
+  "notification": {
+    "notifications": "Notifications",
+    "noNotifications": "No notifications",
+    "markAsRead": "Mark as read",
+    "markAllAsRead": "Mark all as read",
+    "deleteAll": "Delete all",
+    "unreadCount": "Unread",
+    "readCount": "Read",
+    "todayCount": "Today",
+    "thisWeekCount": "This week",
+    "bookingConfirmed": "Booking Confirmed",
+    "contractActivated": "Contract Activated",
+    "paymentCompleted": "Payment Completed",
+    "newMessage": "New Message",
+    "propertyApproved": "Property Approved",
+    "propertyRejected": "Property Rejected"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPhone": "Invalid phone number",
+    "minLength": "Minimum length is {{min}} characters",
+    "maxLength": "Maximum length is {{max}} characters",
+    "passwordMismatch": "Passwords do not match",
+    "invalidDate": "Invalid date",
+    "invalidNumber": "Invalid number",
+    "invalidFormat": "Invalid format"
+  }
 }

@@ -3,7 +3,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
-
+import { useTranslation } from "react-i18next";
 // Import custom components
 import ViewModeToggle from "../../components/Booking/ViewModeToggle.jsx";
 import BookingFilters from "../../components/Booking/BookingFilters.jsx";
@@ -18,7 +18,7 @@ const MyBookings = () => {
   // Layout state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("MyBookings");
-
+  const { t } = useTranslation();
   // Use custom hook for booking operations
   const {
     bookings,
@@ -70,8 +70,8 @@ const MyBookings = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="My Bookings"
-          subtitle="Manage your property bookings and lease agreements"
+          title={t("booking.myBookings")}
+          subtitle={t("booking.myBookingsSubtitle")}
         />
         <main className="p-8 w-full">
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
