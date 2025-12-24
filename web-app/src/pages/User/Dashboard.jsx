@@ -71,9 +71,7 @@ const Dashboard = () => {
         activities.push({
           type: "property",
           title: property.title,
-          description: `Trạng thái: ${
-            property.status || property.propertyStatus
-          }`,
+          description: `Status: ${property.status || property.propertyStatus}`,
           time: formatTime(property.createdAt),
         });
       });
@@ -81,8 +79,8 @@ const Dashboard = () => {
       data.contracts.asLandlord.slice(0, 2).forEach((contract) => {
         activities.push({
           type: "contract",
-          title: `Hợp đồng #${contract.contractId?.substring(0, 8)}`,
-          description: `Trạng thái: ${contract.status}`,
+          title: `Contract #${contract.contractId?.substring(0, 8)}`,
+          description: `Status: ${contract.status}`,
           time: formatTime(contract.createdAt),
         });
       });
@@ -90,8 +88,8 @@ const Dashboard = () => {
       data.bookings.slice(0, 2).forEach((booking) => {
         activities.push({
           type: "booking",
-          title: `Đặt thuê #${booking.bookingId?.substring(0, 8)}`,
-          description: `Trạng thái: ${booking.status}`,
+          title: `Booking #${booking.bookingId?.substring(0, 8)}`,
+          description: `Status: ${booking.status}`,
           time: formatTime(booking.createdAt),
         });
       });
@@ -99,7 +97,7 @@ const Dashboard = () => {
       data.bills.slice(0, 2).forEach((bill) => {
         activities.push({
           type: "payment",
-          title: `Hóa đơn #${bill.billId?.substring(0, 8)}`,
+          title: `Bill #${bill.billId?.substring(0, 8)}`,
           description: `${bill.totalAmount?.toLocaleString()}đ - ${
             bill.status
           }`,
@@ -112,7 +110,7 @@ const Dashboard = () => {
   };
 
   const formatTime = (timestamp) => {
-    if (!timestamp) return "Vừa xong";
+    if (!timestamp) return "Just now";
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now - date;
@@ -121,13 +119,13 @@ const Dashboard = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 60) return `${minutes} phút trước`;
-    if (hours < 24) return `${hours} giờ trước`;
-    return `${days} ngày trước`;
+    if (minutes < 60) return `${minutes} minutes ago`;
+    if (hours < 24) return `${hours} hours ago`;
+    return `${days} days ago`;
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-900">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -156,11 +154,11 @@ const Dashboard = () => {
               <button
                 onClick={refetch}
                 disabled={loading}
-                className="p-3 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition disabled:opacity-50"
-                title="Làm mới dữ liệu"
+                className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
+                title="Refresh data"
               >
                 <RefreshCw
-                  className={`w-5 h-5 text-white ${
+                  className={`w-5 h-5 text-gray-700 ${
                     loading ? "animate-spin" : ""
                   }`}
                 />
@@ -170,9 +168,9 @@ const Dashboard = () => {
 
           {/* Loading State */}
           {loading && (
-            <div className="mb-6 p-4 bg-blue-900/20 border border-blue-700 rounded-xl flex items-center gap-3">
-              <RefreshCw className="w-5 h-5 text-blue-400 animate-spin" />
-              <span className="text-blue-400">Đang tải dữ liệu...</span>
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
+              <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+              <span className="text-blue-700">Loading data...</span>
             </div>
           )}
 
@@ -203,43 +201,40 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* Insights Section */}
+          {/* Insights Section - Landlord */}
           {activeRole === "landlord" && stats.totalProperties > 0 && (
-            <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-2xl p-6">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-blue-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Thông tin hữu ích
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Useful Insights
                   </h3>
-                  <ul className="space-y-2 text-slate-300">
+                  <ul className="space-y-2 text-gray-700">
                     {stats.pendingProperties > 0 && (
                       <li className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-yellow-400" />
+                        <AlertCircle className="w-4 h-4 text-yellow-600" />
                         <span>
-                          Bạn có {stats.pendingProperties} bất động sản đang chờ
-                          duyệt
+                          You have {stats.pendingProperties} properties pending
+                          approval
                         </span>
                       </li>
                     )}
                     {stats.availableProperties > 0 && (
                       <li className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-green-400" />
+                        <TrendingUp className="w-4 h-4 text-green-600" />
                         <span>
-                          Bạn có {stats.availableProperties} bất động sản sẵn
-                          sàng cho thuê
+                          You have {stats.availableProperties} properties
+                          available for rent
                         </span>
                       </li>
                     )}
                     {stats.unpaidBills > 0 && (
                       <li className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-400" />
-                        <span>
-                          Bạn có {stats.unpaidBills} hóa đơn chưa được thanh
-                          toán
-                        </span>
+                        <AlertCircle className="w-4 h-4 text-red-600" />
+                        <span>You have {stats.unpaidBills} unpaid bills</span>
                       </li>
                     )}
                   </ul>
@@ -248,28 +243,29 @@ const Dashboard = () => {
             </div>
           )}
 
+          {/* Alert Section - Tenant */}
           {activeRole === "tenant" && stats.unpaidBills > 0 && (
-            <div className="bg-gradient-to-br from-red-900/20 to-orange-900/20 border border-red-700/30 rounded-2xl p-6">
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-red-400" />
+                <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Cần chú ý!
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    Attention Required!
                   </h3>
-                  <p className="text-slate-300">
-                    Bạn có {stats.unpaidBills} hóa đơn chưa thanh toán với tổng
-                    số tiền{" "}
-                    <span className="font-bold text-red-400">
+                  <p className="text-gray-700">
+                    You have {stats.unpaidBills} unpaid bills with a total
+                    amount of{" "}
+                    <span className="font-bold text-red-600">
                       {stats.totalBillAmount.toLocaleString()}đ
                     </span>
                   </p>
                   <button
                     onClick={() => navigate("/my-bills?status=unpaid")}
-                    className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-sm"
                   >
-                    Xem chi tiết
+                    View Details
                   </button>
                 </div>
               </div>
@@ -288,18 +284,18 @@ const Dashboard = () => {
 // ==========================================
 function generateMonthlyRevenue(properties, contracts, bills) {
   const months = [
-    "T1",
-    "T2",
-    "T3",
-    "T4",
-    "T5",
-    "T6",
-    "T7",
-    "T8",
-    "T9",
-    "T10",
-    "T11",
-    "T12",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();

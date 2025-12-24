@@ -7,6 +7,7 @@ import { AlertCircle } from "lucide-react";
 // Components - Use Home layout
 import StickyHeader from "../../components/layout/layoutHome/StickyHeader";
 import Footer from "../../components/layout/layoutHome/Footer";
+import { useTranslation } from "react-i18next";
 
 // Property Detail Components
 import PropertyHeader from "../../components/PropertyDetail/PropertyHeader";
@@ -28,7 +29,7 @@ import { getUserInfo } from "../../services/localStorageService";
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   // States
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -90,13 +91,13 @@ const PropertyDetail = () => {
     try {
       const currentUser = getUserInfo();
       if (!currentUser) {
-        alert("Vui lòng đăng nhập để nhắn tin với chủ nhà");
+        alert(t("propertyDetail.loginToChat"));
         navigate("/login");
         return;
       }
 
       if (currentUser.userId === property.owner?.ownerId) {
-        alert("Bạn không thể nhắn tin cho chính mình");
+        alert(t("propertyDetail.cannotChatSelf"));
         return;
       }
 
@@ -125,7 +126,7 @@ const PropertyDetail = () => {
       });
     } catch (error) {
       console.error("Error creating conversation:", error);
-      alert("Không thể tạo cuộc trò chuyện. Vui lòng thử lại sau.");
+      alert(t("propertyDetail.chatError"));
     } finally {
       setContactingOwner(false);
     }
@@ -135,13 +136,13 @@ const PropertyDetail = () => {
     try {
       const currentUser = getUserInfo();
       if (!currentUser) {
-        alert("Vui lòng đăng nhập để đặt thuê");
+        alert(t("propertyDetail.loginToBook"));
         navigate("/login");
         return;
       }
 
       if (!leaseStart || !leaseEnd) {
-        alert("Vui lòng chọn ngày bắt đầu và kết thúc thuê");
+        alert(t("propertyDetail.selectDates"));
         return;
       }
 
@@ -149,13 +150,13 @@ const PropertyDetail = () => {
       const endDate = new Date(leaseEnd);
 
       if (startDate >= endDate) {
-        alert("Ngày kết thúc phải sau ngày bắt đầu");
+        alert(t("propertyDetail.invalidDateRange"));
         return;
       }
 
       const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
       if (daysDiff < 30) {
-        alert("Thời gian thuê tối thiểu là 1 tháng (30 ngày)");
+        alert(t("propertyDetail.minLease"));
         return;
       }
 
@@ -174,12 +175,16 @@ const PropertyDetail = () => {
       if (response?.success) {
         const booking = response.result;
         alert(
-          `Đặt thuê thành công!\n\n` +
-            `Mã đặt thuê: ${booking.bookingReference || booking.id}\n` +
-            `Trạng thái: ${booking.status}\n` +
-            `Thời gian thuê: ${leaseDuration} tháng\n` +
-            `Tổng chi phí ước tính: ${estimatedCost.toLocaleString()}đ\n\n` +
-            `Vui lòng chờ chủ nhà xác nhận.`
+          `${t("propertyDetail.bookingSuccessTitle")}\n\n` +
+            `${t("propertyDetail.bookingRef")}: ${
+              booking.bookingReference || booking.id
+            }\n` +
+            `${t("propertyDetail.bookingStatus")}: ${booking.status}\n` +
+            `${t("propertyDetail.bookingDuration")}: ${leaseDuration} tháng\n` +
+            `${t(
+              "propertyDetail.estimatedCost"
+            )}: ${estimatedCost.toLocaleString()}đ\n\n` +
+            t("propertyDetail.waitForApproval")
         );
 
         navigate("/my-bookings", {
@@ -234,16 +239,14 @@ const PropertyDetail = () => {
               <AlertCircle className="w-8 h-8 text-red-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900">
-              Không tìm thấy bất động sản
+              {t("propertyDetail.notFoundTitle")}
             </h2>
-            <p className="text-gray-600">
-              Bất động sản này có thể đã bị xóa hoặc không tồn tại
-            </p>
+            <p className="text-gray-600">{t("propertyDetail.notFoundDesc")}</p>
             <button
               onClick={() => navigate(-1)}
               className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Quay lại
+              {t("propertyDetail.back")}
             </button>
           </div>
         </Container>

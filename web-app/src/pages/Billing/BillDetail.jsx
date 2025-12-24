@@ -10,6 +10,7 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
+import { useTranslation } from "react-i18next";
 
 // Import components
 import PropertyInfoCard from "../../components/Billing/PropertyInfoCard";
@@ -29,6 +30,7 @@ import { getStatusConfig } from "../../utils/billDetailHelpers";
 const BillDetail = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Bills");
+  const { t } = useTranslation();
 
   const statusIconMap = {
     PENDING: Clock,
@@ -71,7 +73,7 @@ const BillDetail = () => {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading bill...</p>
+              <p className="text-gray-600">{t("bill.loadingBill")}</p>
             </div>
           </div>
         </div>
@@ -97,13 +99,13 @@ const BillDetail = () => {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Bill not found
+                {t("bill.billNotFound")}
               </h2>
               <button
                 onClick={goBack}
                 className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                Back to list
+                {t("bill.backToList")}
               </button>
             </div>
           </div>
@@ -134,8 +136,8 @@ const BillDetail = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="Bill Details"
-          subtitle="View details and manage your bill"
+          title={t("bill.billDetails")}
+          subtitle={t("bill.billSubtitle")}
         />
 
         <main className="p-6">

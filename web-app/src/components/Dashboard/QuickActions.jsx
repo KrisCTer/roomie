@@ -1,3 +1,4 @@
+// QuickActions.jsx
 import React from "react";
 import {
   Plus,
@@ -14,25 +15,25 @@ const QuickActions = ({ role }) => {
   const landlordActions = [
     {
       icon: Plus,
-      label: "Đăng tin mới",
+      label: "New Listing",
       color: "blue",
       action: () => navigate("/add-property"),
     },
     {
       icon: Search,
-      label: "Tìm người thuê",
+      label: "Find Tenants",
       color: "green",
       action: () => navigate("/search-tenants"),
     },
     {
       icon: QuickFile,
-      label: "Tạo hợp đồng",
+      label: "Create Contract",
       color: "purple",
       action: () => navigate("/my-properties"),
     },
     {
       icon: MessageCircle,
-      label: "Tin nhắn",
+      label: "Messages",
       color: "yellow",
       action: () => navigate("/message"),
     },
@@ -41,25 +42,25 @@ const QuickActions = ({ role }) => {
   const tenantActions = [
     {
       icon: Search,
-      label: "Tìm nhà",
+      label: "Find Home",
       color: "blue",
       action: () => navigate("/search"),
     },
     {
       icon: QuickFile,
-      label: "Hợp đồng của tôi",
+      label: "My Contracts",
       color: "purple",
       action: () => navigate("/my-contracts"),
     },
     {
       icon: MessageCircle,
-      label: "Tin nhắn",
+      label: "Messages",
       color: "yellow",
       action: () => navigate("/messages"),
     },
     {
       icon: Settings,
-      label: "Cài đặt",
+      label: "Settings",
       color: "gray",
       action: () => navigate("/profile"),
     },
@@ -68,19 +69,18 @@ const QuickActions = ({ role }) => {
   const actions = role === "landlord" ? landlordActions : tenantActions;
 
   const colorClasses = {
-    blue: "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-500/30",
-    green:
-      "bg-green-500/10 text-green-400 hover:bg-green-500/20 border-green-500/30",
+    blue: "bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-200",
+    green: "bg-green-100 text-green-600 hover:bg-green-200 border-green-200",
     purple:
-      "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border-purple-500/30",
+      "bg-purple-100 text-purple-600 hover:bg-purple-200 border-purple-200",
     yellow:
-      "bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border-yellow-500/30",
-    gray: "bg-gray-500/10 text-gray-400 hover:bg-gray-500/20 border-gray-500/30",
+      "bg-yellow-100 text-yellow-600 hover:bg-yellow-200 border-yellow-200",
+    gray: "bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200",
   };
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-      <h2 className="text-xl font-bold text-white mb-4">Thao tác nhanh</h2>
+    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {actions.map((action, index) => (
           <button
@@ -98,4 +98,5 @@ const QuickActions = ({ role }) => {
     </div>
   );
 };
+
 export default QuickActions;

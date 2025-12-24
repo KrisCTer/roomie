@@ -21,7 +21,22 @@
     "theme": "Giao diện",
     "light": "Sáng",
     "dark": "Tối",
-    "system": "Hệ thống"
+    "system": "Hệ thống",
+    "view": "Xem",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước đó",
+    "close": "Đóng",
+    "submit": "Gửi",
+    "refresh": "Làm mới",
+    "filters": "Bộ lọc",
+    "actions": "Hành động",
+    "status": "Trạng thái",
+    "date": "Ngày",
+    "total": "Tổng",
+    "details": "Chi tiết",
+    "noData": "Không có dữ liệu",
+    "processing": "Đang xử lý..."
   },
   "header": {
     "becomeHost": "Trở thành chủ nhà",
@@ -54,31 +69,219 @@
     "pending": "Đang chờ",
     "approved": "Đã duyệt",
     "viewDetails": "Xem chi tiết",
-    "bookNow": "Đặt ngay"
+    "bookNow": "Đặt ngay",
+    "addProperty": "Thêm bất động sản",
+    "myProperties": "BĐS của tôi",
+    "propertyType": "Loại BĐS",
+    "amenities": "Tiện nghi",
+    "location": "Vị trí",
+    "media": "Hình ảnh",
+    "noProperties": "Không tìm thấy bất động sản",
+    "deleteConfirm": "Bạn có chắc muốn xóa bất động sản này?",
+    "publishConfirm": "Bạn có chắc muốn xuất bản bất động sản này?"
+  },
+  "propertyDetail": {
+    "notFoundTitle": "Không tìm thấy bất động sản",
+    "notFoundDesc": "Bất động sản này có thể đã bị xóa hoặc không tồn tại",
+    "back": "Quay lại",
+
+    "loginToChat": "Vui lòng đăng nhập để nhắn tin với chủ nhà",
+    "cannotChatSelf": "Bạn không thể nhắn tin cho chính mình",
+    "chatError": "Không thể tạo cuộc trò chuyện. Vui lòng thử lại sau.",
+
+    "loginToBook": "Vui lòng đăng nhập để đặt thuê",
+    "selectDates": "Vui lòng chọn ngày bắt đầu và kết thúc thuê",
+    "invalidDateRange": "Ngày kết thúc phải sau ngày bắt đầu",
+    "minLease": "Thời gian thuê tối thiểu là 1 tháng (30 ngày)",
+
+    "bookingSuccessTitle": "Đặt thuê thành công!",
+    "bookingRef": "Mã đặt thuê",
+    "bookingStatus": "Trạng thái",
+    "bookingDuration": "Thời gian thuê",
+    "estimatedCost": "Tổng chi phí ước tính",
+    "waitForApproval": "Vui lòng chờ chủ nhà xác nhận"
+  },
+  "propertySearch": {
+    "loading": "Đang tải...",
+    "loadError": "Không thể tải danh sách bất động sản",
+
+    "places": "chỗ ở",
+    "inArea": "trong khu vực này",
+    "page": "Trang",
+
+    "searchResultAt": "Kết quả tìm kiếm tại",
+    "mapFiltered": "Hiển thị {{shown}} / {{total}} bất động sản (lọc theo bản đồ)"
+  },
+  "userProfile": {
+    "loading": "Đang tải thông tin người dùng...",
+    "loadError": "Không thể tải thông tin người dùng",
+    "notFound": "Không tìm thấy người dùng",
+    "back": "Quay lại",
+
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "gender": "Giới tính",
+    "dob": "Ngày sinh",
+    "address": "Địa chỉ",
+
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác",
+    "notUpdated": "Chưa cập nhật",
+
+    "properties": "Bất động sản",
+    "propertiesCount": "{{count}} bất động sản đang cho thuê",
+    "noProperties": "Chưa có bất động sản",
+    "noPropertiesDesc": "Người dùng này chưa đăng bất động sản nào"
+  },
+  "propertyForm": {
+    "step1": {
+      "title": "Thông tin cơ bản",
+
+      "titleLabel": "Tiêu đề bất động sản",
+      "titlePlaceholder": "Nhập tiêu đề bất động sản",
+
+      "descriptionLabel": "Mô tả",
+      "descriptionPlaceholder": "Mô tả chi tiết bất động sản...",
+
+      "propertyType": "Loại hình bất động sản",
+      "selectType": "Chọn loại",
+
+      "types": {
+        "ROOM": "Phòng trọ",
+        "DORMITORY": "Ký túc xá",
+        "APARTMENT": "Căn hộ",
+        "STUDIO": "Studio",
+        "OFFICETEL": "Officetel",
+        "HOUSE": "Nhà nguyên căn",
+        "VILLA": "Biệt thự",
+        "OTHER": "Khác"
+      },
+
+      "size": "Diện tích (m²)",
+
+      "monthlyRent": "Giá thuê hàng tháng",
+      "rentalDeposit": "Tiền đặt cọc",
+
+      "bedrooms": "Phòng ngủ",
+      "bathrooms": "Phòng tắm",
+      "garages": "Chỗ đậu xe",
+      "rooms": "Số phòng"
+    },
+    "step2": {
+      "title": "Thông tin vị trí",
+
+      "province": "Tỉnh / Thành phố",
+      "selectProvince": "Chọn tỉnh / thành phố",
+
+      "district": "Quận / Huyện",
+      "selectDistrict": "Chọn quận / huyện",
+
+      "ward": "Phường / Xã",
+      "selectWard": "Chọn phường / xã",
+
+      "street": "Đường",
+      "streetPlaceholder": "Nhập tên đường",
+
+      "houseNumber": "Số nhà",
+      "houseNumberPlaceholder": "Nhập số nhà",
+
+      "fullAddress": "Địa chỉ đầy đủ",
+      "fullAddressPlaceholder": "Tự động điền từ các trường bên trên",
+
+      "autoNote":
+        "Trường này sẽ được tự động tạo khi bạn chọn tỉnh, quận và phường."
+    },
+    "step3": {
+      "amenitiesTitle": "Tiện ích",
+      "mediaTitle": "Hình ảnh & video bất động sản",
+
+      "sections": {
+        "homeSafety": "An toàn",
+        "bedroom": "Phòng ngủ",
+        "kitchen": "Nhà bếp",
+        "others": "Khác"
+      },
+
+      "amenities": {
+        "SMOKE_ALARM": "Báo khói",
+        "SECURITY_CAMERA": "Camera an ninh",
+        "FIRE_EXTINGUISHER": "Bình chữa cháy",
+        "LOCKED_DOOR": "Khóa cửa an toàn",
+
+        "BED": "Giường",
+        "WARDROBE": "Tủ quần áo",
+        "AIR_CONDITIONER": "Máy lạnh",
+
+        "REFRIGERATOR": "Tủ lạnh",
+        "MICROWAVE": "Lò vi sóng",
+        "STOVE": "Bếp nấu",
+
+        "WIFI": "Wi-Fi",
+        "WASHING_MACHINE": "Máy giặt",
+        "PARKING": "Chỗ để xe"
+      }
+    },
+    "step4": {
+      "title": "Xem lại tin đăng",
+
+      "sections": {
+        "basic": "Thông tin cơ bản",
+        "location": "Vị trí",
+        "amenities": "Tiện ích",
+        "media": "Hình ảnh"
+      },
+
+      "fields": {
+        "title": "Tiêu đề",
+        "type": "Loại BĐS",
+        "monthlyRent": "Giá thuê tháng",
+        "status": "Trạng thái",
+        "bedrooms": "Phòng ngủ",
+        "bathrooms": "Phòng tắm"
+      },
+
+      "empty": {
+        "amenities": "Chưa chọn tiện ích nào",
+        "media": "Chưa tải lên hình ảnh",
+        "address": "Chưa có địa chỉ"
+      },
+
+      "coordinates": "Tọa độ",
+
+      "note": {
+        "label": "Lưu ý",
+        "create": "Sau khi gửi, bất động sản sẽ được đội ngũ kiểm duyệt.",
+        "edit": "Những thay đổi sẽ cập nhật vào bất động sản hiện có."
+      },
+
+      "moreImages": "+{{count}} hình ảnh khác"
+    }
   },
   "auth": {
-  "login": "Đăng nhập",
-  "register": "Đăng ký",
-  "loginSubtitle": "Chào mừng trở lại! Vui lòng nhập tài khoản của bạn.",
-  "registerSubtitle": "Tạo tài khoản để bắt đầu khám phá nơi ở.",
-  "username": "Tài khoản",
-  "usernamePlaceholder": "Nhập tài khoản",
-  "password": "Mật khẩu",
-  "confirmPassword": "Xác nhận mật khẩu",
-  "email": "Email",
-  "firstName": "Tên",
-  "lastName": "Họ",
-  "phoneNumber": "Số điện thoại",
-  "forgotPassword": "Quên mật khẩu?",
-  "noAccount": "Chưa có tài khoản?",
-  "hasAccount": "Đã có tài khoản?",
-  "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
-  "registerFailed": "Đăng ký thất bại. Vui lòng kiểm tra thông tin.",
-  "loginError": "Sai tài khoản hoặc mật khẩu.",
-  "fillAll": "Vui lòng điền đầy đủ thông tin!",
-  "passwordNotMatch": "Mật khẩu không khớp!",
-  "processing": "Đang xử lý...",
-  "orSignupWith": "hoặc đăng ký bằng"
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "loginSubtitle": "Chào mừng trở lại! Vui lòng nhập tài khoản của bạn.",
+    "registerSubtitle": "Tạo tài khoản để bắt đầu khám phá nơi ở.",
+    "username": "Tài khoản",
+    "usernamePlaceholder": "Nhập tài khoản",
+    "password": "Mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "email": "Email",
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "phoneNumber": "Số điện thoại",
+    "forgotPassword": "Quên mật khẩu?",
+    "noAccount": "Chưa có tài khoản?",
+    "hasAccount": "Đã có tài khoản?",
+    "registerSuccess": "Đăng ký thành công. Vui lòng đăng nhập.",
+    "registerFailed": "Đăng ký thất bại. Vui lòng kiểm tra thông tin.",
+    "loginError": "Sai tài khoản hoặc mật khẩu.",
+    "fillAll": "Vui lòng điền đầy đủ thông tin!",
+    "passwordNotMatch": "Mật khẩu không khớp!",
+    "processing": "Đang xử lý...",
+    "orSignupWith": "hoặc đăng ký bằng",
+    "viewWithoutLogin": "Tiếp tục không đăng nhập"
   },
   "dashboard": {
     "welcome": "Chào mừng trở lại",
@@ -89,7 +292,23 @@
     "messages": "Tin nhắn",
     "contracts": "Hợp đồng",
     "addProperty": "Thêm bất động sản",
-    "myProperties": "BĐS của tôi"
+    "myProperties": "BĐS của tôi",
+    "landlordRole": "Chủ nhà",
+    "tenantRole": "Người thuê",
+    "totalProperties": "Tổng BĐS",
+    "pendingProperties": "BĐS chờ duyệt",
+    "rentedProperties": "BĐS đã cho thuê",
+    "availableProperties": "BĐS còn trống",
+    "activeContracts": "Hợp đồng hoạt động",
+    "unpaidBills": "Hóa đơn chưa thanh toán",
+    "paidBills": "Hóa đơn đã thanh toán",
+    "activeBookings": "Đặt thuê hoạt động",
+    "pendingBookings": "Đặt thuê chờ xử lý",
+    "completedBookings": "Đặt thuê hoàn thành",
+    "quickActions": "Hành động nhanh",
+    "recentActivity": "Hoạt động gần đây",
+    "insights": "Thông tin hữu ích",
+    "revenueChart": "Tổng quan doanh thu"
   },
   "footer": {
     "about": "Về chúng tôi",
@@ -114,22 +333,30 @@
     "sendMessage": "Gửi tin nhắn",
     "online": "Đang hoạt động",
     "offline": "Ngoại tuyến",
-    "typeMessage": "Nhập tin nhắn..."
-  },
-  "searchBar": {
-  "locationLabel": "Địa điểm bất kỳ",
-  "locationPlaceholder": "Địa điểm bất kỳ",
-  "priceLabel": "Giá bất kỳ",
-  "pricePlaceholder": "Giá bất kỳ",
-  "acreageLabel": "Diện tích bất kỳ",
-  "acreagePlaceholder": "Diện tích bất kỳ"
-  },
+    "typeMessage": "Nhập tin nhắn...",
+    "selectConversation": "Vui lòng chọn một cuộc trò chuyện trước",
+    "userNotLoaded": "Thông tin người dùng chưa được tải. Vui lòng chờ.",
+    "recipientNotFound": "Không tìm thấy người nhận. Vui lòng chọn lại cuộc trò chuyện",
+
+    "voiceCall": "Gọi thoại",
+    "videoCall": "Gọi video",
+    "search": "Tìm kiếm",
+    "noConversation": "Chưa chọn cuộc trò chuyện"
+    },
   "chat": {
     "title": "Bắt đầu cuộc trò chuyện mới",
     "placeholder": "Nhập để tìm kiếm người dùng...",
     "error": "Không thể tìm kiếm người dùng. Vui lòng thử lại.",
     "noResult": "Không tìm thấy người dùng khớp với \"{{query}}\"",
     "hint": "Hãy tìm một người dùng để bắt đầu trò chuyện"
+  },
+  "searchBar": {
+    "locationLabel": "Địa điểm bất kỳ",
+    "locationPlaceholder": "Địa điểm bất kỳ",
+    "priceLabel": "Giá bất kỳ",
+    "pricePlaceholder": "Giá bất kỳ",
+    "acreageLabel": "Diện tích bất kỳ",
+    "acreagePlaceholder": "Diện tích bất kỳ"
   },
   "propertyCard": {
     "featured": "Nổi bật",
@@ -145,10 +372,309 @@
     "chat": "Trò chuyện"
   },
   "home": {
-  "findPerfectPlace": "Tìm nơi ở hoàn hảo cho bạn",
-  "exploreThousands": "Khám phá hàng ngàn căn hộ, nhà và homestay trên toàn thế giới.",
-  "roomsIn": "Phòng & Nơi lưu trú tại",
-  "unknownAddress": "Địa chỉ không xác định",
-  "other": "Khác"
+    "findPerfectPlace": "Tìm nơi ở hoàn hảo cho bạn",
+    "exploreThousands": "Khám phá hàng ngàn căn hộ, nhà và homestay trên toàn thế giới.",
+    "roomsIn": "Phòng & Nơi lưu trú tại",
+    "propertiesIn": "Bất động sản tại",
+    "unknownAddress": "Địa chỉ không xác định",
+    "other": "Khác",
+    "noProperties": "Chưa có bất động sản nào",
+    "untitled": "Chưa có tiêu đề",
+    "propertyType": {
+      "APARTMENT": "Căn hộ",
+      "HOUSE": "Nhà nguyên căn",
+      "ROOM": "Phòng trọ",
+      "STUDIO": "Studio",
+      "VILLA": "Biệt thự",
+      "DORMITORY": "Ký túc xá",
+      "OFFICETEL": "Officetel"
+    }
+  },
+  "booking": {
+    "myBookings": "Đặt thuê của tôi",
+    "newBooking": "Đặt thuê mới",
+    "bookingDetails": "Chi tiết đặt thuê",
+    "bookingId": "Mã đặt thuê",
+    "bookingDate": "Ngày đặt",
+    "checkIn": "Ngày nhận",
+    "checkOut": "Ngày trả",
+    "totalAmount": "Tổng tiền",
+    "bookingStatus": "Trạng thái đặt thuê",
+    "confirmBooking": "Xác nhận đặt thuê",
+    "cancelBooking": "Hủy đặt thuê",
+    "viewMode": "Chế độ xem",
+    "asOwner": "Với tư cách chủ nhà",
+    "asTenant": "Với tư cách người thuê",
+    "noBookings": "Không tìm thấy đặt thuê",
+    "cancelConfirm": "Bạn có chắc muốn hủy đặt thuê này?",
+    "confirmSuccess": "Xác nhận đặt thuê thành công",
+    "cancelSuccess": "Hủy đặt thuê thành công",
+    "myBookingsSubtitle": "Quản lý các lượt đặt thuê và hợp đồng của bạn"
+  },
+  "contract": {
+    "myContracts": "Hợp đồng của tôi",
+    "contractDetails": "Chi tiết hợp đồng",
+    "contractId": "Mã hợp đồng",
+    "contractDate": "Ngày hợp đồng",
+    "leaseStart": "Bắt đầu thuê",
+    "leaseEnd": "Kết thúc thuê",
+    "contractStatus": "Trạng thái hợp đồng",
+    "signContract": "Ký hợp đồng",
+    "viewContract": "Xem hợp đồng",
+    "downloadContract": "Tải hợp đồng",
+    "landlord": "Chủ nhà",
+    "tenant": "Người thuê",
+    "asLandlord": "Với tư cách chủ nhà",
+    "asTenant": "Với tư cách người thuê",
+    "active": "Hoạt động",
+    "expired": "Đã hết hạn",
+    "pending": "Đang chờ",
+    "noContracts": "Không tìm thấy hợp đồng",
+    "signatureRequired": "Cần ký tên",
+    "allSigned": "Tất cả đã ký",
+    "landlordSigned": "Chủ nhà đã ký",
+    "tenantSigned": "Người thuê đã ký",
+    "signNow": "Ký ngay",
+    "requestOTP": "Yêu cầu OTP",
+    "verifyOTP": "Xác thực OTP",
+    "enterOTP": "Nhập mã OTP",
+    "resendOTP": "Gửi lại OTP",
+    "signSuccess": "Ký hợp đồng thành công",
+    "signingTitle": "Ký hợp đồng",
+    "signingSubtitle": "Xem lại và ký hợp đồng của bạn",
+
+    "loading": "Đang tải thông tin hợp đồng...",
+    "notFound": "Không tìm thấy hợp đồng",
+    "backToList": "Quay lại danh sách",
+
+    "requestSignature": "Yêu cầu ký",
+    "alreadySigned": "Đã ký",
+    "waitingOtherParty": "Đang chờ bên còn lại",
+
+    "otpTitle": "Xác thực OTP",
+    "otpDescription": "Nhập mã OTP đã được gửi tới điện thoại",
+    "verifyAndSign": "Xác nhận & ký",
+    "myContractsSubtitle": "Xem và quản lý các hợp đồng thuê của bạn",
+
+    "stats": {
+      "total": "Tổng hợp đồng",
+      "active": "Đang hoạt động",
+      "pending": "Đang chờ",
+      "expired": "Đã hết hạn"
+    }
+  },
+  "bill": {
+    "myBills": "Hóa đơn của tôi",
+    "billDetails": "Chi tiết hóa đơn",
+    "billId": "Mã hóa đơn",
+    "billDate": "Ngày hóa đơn",
+    "dueDate": "Hạn thanh toán",
+    "totalAmount": "Tổng tiền",
+    "billStatus": "Trạng thái hóa đơn",
+    "payBill": "Thanh toán",
+    "paid": "Đã thanh toán",
+    "unpaid": "Chưa thanh toán",
+    "overdue": "Quá hạn",
+    "noBills": "Không tìm thấy hóa đơn",
+    "paymentMethod": "Phương thức thanh toán",
+    "selectPaymentMethod": "Chọn phương thức thanh toán",
+    "payNow": "Thanh toán ngay",
+    "paymentSuccess": "Thanh toán thành công",
+    "breakdown": "Chi tiết hóa đơn",
+    "baseRent": "Tiền thuê cơ bản",
+    "electricity": "Tiền điện",
+    "water": "Tiền nước",
+    "internet": "Tiền internet",
+    "other": "Khác",
+    "createBill": "Tạo hóa đơn",
+    "editBill": "Sửa hóa đơn",
+    "sendBill": "Gửi hóa đơn",
+    "deleteBill": "Xóa hóa đơn",
+    "downloadPDF": "Tải PDF",
+    "billNotFound": "Không tìm thấy hóa đơn",
+    "backToList": "Quay lại danh sách",
+    "loadingBill": "Đang tải hóa đơn...",
+    "billSubtitle": "Xem chi tiết và quản lý hóa đơn của bạn",
+    "billManagement": "Quản lý hóa đơn",
+    "billManagementSubtitle": "Tạo, quản lý và theo dõi hóa đơn thuê nhà",
+    "billsList": "Danh sách hóa đơn",
+    "sendBills": "Gửi hóa đơn",
+    "sendCount": "Gửi {{count}} hóa đơn",
+    "selectedCount": "Đã chọn {{count}} hóa đơn.",
+    "bulkInfo": "Bạn có thể gửi tất cả cùng lúc hoặc thực hiện các thao tác hàng loạt khác.",
+    "confirmBulkSend": "Xác nhận gửi hàng loạt",
+    "confirmBulkSendDesc": "Bạn có chắc muốn gửi {{count}} hóa đơn cho người thuê? Thao tác này sẽ chuyển trạng thái từ DRAFT sang PENDING."
+  },
+  "utility": {
+    "utilityConfig": "Cấu hình tiện ích",
+    "electricityPrice": "Giá điện",
+    "waterPrice": "Giá nước",
+    "internetPrice": "Giá internet",
+    "servicePrice": "Giá dịch vụ",
+    "unitPrice": "Đơn giá",
+    "perKWh": "mỗi kWh",
+    "perCubicMeter": "mỗi m³",
+    "perMonth": "mỗi tháng",
+    "editConfig": "Sửa cấu hình",
+    "deleteConfig": "Xóa cấu hình",
+    "activeConfig": "Cấu hình đang hoạt động",
+    "inactiveConfig": "Cấu hình không hoạt động",
+    "utilitySubtitle": "Quản lý giá điện, nước và dịch vụ",
+    "totalConfigs": "Tổng cấu hình",
+    "activeConfigs": "Đang hoạt động",
+    "properties": "Bất động sản",
+    "noProperties": "Chưa có bất động sản nào",
+    "addConfig": "Thêm cấu hình",
+    "noConfigs": "Chưa có cấu hình nào. Nhấn \"Thêm cấu hình\" để tạo.",
+    "level": "Cấp áp dụng",
+    "electricity": "Điện",
+    "water": "Nước",
+    "internet": "Internet",
+    "status": "Trạng thái",
+    "actions": "Hành động",
+    "contractLevel": "Theo hợp đồng",
+    "propertyLevel": "Theo BĐS",
+    "active": "Hoạt động",
+    "inactive": "Ngưng hoạt động",
+    "edit": "Chỉnh sửa",
+    "deactivate": "Vô hiệu hóa",
+    "delete": "Xóa",
+    "confirmDeactivate": "Vô hiệu hóa cấu hình này?",
+    "confirmDelete": "Xóa cấu hình này? (Không thể hoàn tác)",
+    "createSuccess": "Tạo cấu hình thành công!",
+    "updateSuccess": "Cập nhật cấu hình thành công!",
+    "deactivateSuccess": "Đã vô hiệu hóa cấu hình!",
+    "deactivateFailed": "Không thể vô hiệu hóa cấu hình!",
+    "deleteSuccess": "Đã xóa cấu hình!",
+    "deleteFailed": "Không thể xóa cấu hình!"
+  },
+  "admin": {
+    "adminDashboard": "Bảng điều khiển Admin",
+    "adminProperties": "Quản lý BĐS",
+    "adminUsers": "Quản lý người dùng",
+    "totalUsers": "Tổng người dùng",
+    "activeUsers": "Người dùng hoạt động",
+    "suspendedUsers": "Người dùng bị tạm khóa",
+    "bannedUsers": "Người dùng bị cấm",
+    "suspendUser": "Tạm khóa",
+    "banUser": "Cấm",
+    "userManagement": "Quản lý người dùng",
+    "propertyManagement": "Quản lý BĐS",
+    "approveProperty": "Duyệt BĐS",
+    "rejectProperty": "Từ chối BĐS",
+    "pendingApproval": "Chờ duyệt",
+    "approved": "Đã duyệt",
+    "rejected": "Đã từ chối",
+    "unauthorized": "Không có quyền truy cập",
+    "properties": "Bất động sản",
+    "users": "Người dùng",
+    "searchProperties": "Tìm kiếm bất động sản...",
+    "searchUsers": "Tìm kiếm người dùng...",
+    "refresh": "Làm mới",
+    "noProperties": "Không có bất động sản.",
+    "noUsers": "Không có người dùng.",
+    "view": "Xem",
+    "pendingProperties": "BĐS chờ duyệt",
+    "waitingApproval": "Chờ duyệt",
+    "inactive": "Chưa kích hoạt",
+    "approve": "Duyệt",
+    "reject": "Từ chối",
+    "noPendingProperties": "Không có bất động sản chờ duyệt.",
+    "userManagementDesc": "Admin có thể tạm khóa hoặc cấm người dùng.",
+    "total": "Tổng",
+    "suspend": "Tạm khóa",
+    "ban": "Cấm",
+    "confirmSuspend": "Tạm khóa người dùng \"{{name}}\"?",
+    "confirmBan": "Cấm người dùng \"{{name}}\"?",
+    "suspendFailed": "Tạm khóa thất bại. Vui lòng kiểm tra mạng hoặc console.",
+    "banFailed": "Cấm người dùng thất bại. Vui lòng kiểm tra mạng hoặc console."
+  },
+  "profile": {
+    "myProfile": "Hồ sơ của tôi",
+    "editProfile": "Chỉnh sửa hồ sơ",
+    "personalInfo": "Thông tin cá nhân",
+    "contactInfo": "Thông tin liên hệ",
+    "accountSettings": "Cài đặt tài khoản",
+    "changePassword": "Đổi mật khẩu",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmNewPassword": "Xác nhận mật khẩu mới",
+    "updateProfile": "Cập nhật hồ sơ",
+    "updatePassword": "Cập nhật mật khẩu",
+    "avatar": "Ảnh đại diện",
+    "uploadAvatar": "Tải ảnh đại diện",
+    "idCard": "CMND/CCCD",
+    "uploadIdCard": "Tải CMND/CCCD",
+    "scanIdCard": "Quét CMND/CCCD",
+    "takePhoto": "Chụp ảnh",
+    "gender": "Giới tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "dateOfBirth": "Ngày sinh",
+    "address": "Địa chỉ",
+    "updateSuccess": "Cập nhật hồ sơ thành công",
+    "updateError": "Cập nhật hồ sơ thất bại",
+    "passwordUpdateSuccess": "Cập nhật mật khẩu thành công",
+    "passwordUpdateError": "Cập nhật mật khẩu thất bại",
+    "title": "Hồ sơ cá nhân",
+    "subtitle": "Xem và cập nhật thông tin cá nhân",
+
+    "avatarProfile": {
+      "upload": "Tải ảnh đại diện",
+      "scanId": "Quét CCCD",
+      "openCamera": "Mở camera"
+    },
+
+    "form": {
+      "save": "Lưu thay đổi",
+      "saving": "Đang lưu...",
+      "success": "Cập nhật hồ sơ thành công"
+    },
+
+    "password": {
+      "title": "Đổi mật khẩu",
+      "current": "Mật khẩu hiện tại",
+      "new": "Mật khẩu mới",
+      "confirm": "Xác nhận mật khẩu",
+      "update": "Cập nhật mật khẩu",
+      "success": "Đổi mật khẩu thành công"
+    }
+  },
+  "notification": {
+    "notifications": "Thông báo",
+    "noNotifications": "Không có thông báo",
+    "markAsRead": "Đánh dấu đã đọc",
+    "markAllAsRead": "Đánh dấu tất cả đã đọc",
+    "deleteAll": "Xóa tất cả",
+    "unreadCount": "Chưa đọc",
+    "readCount": "Đã đọc",
+    "todayCount": "Hôm nay",
+    "thisWeekCount": "Tuần này",
+    "bookingConfirmed": "Đặt thuê đã xác nhận",
+    "contractActivated": "Hợp đồng đã kích hoạt",
+    "paymentCompleted": "Thanh toán hoàn tất",
+    "newMessage": "Tin nhắn mới",
+    "propertyApproved": "BĐS đã được duyệt",
+    "propertyRejected": "BĐS bị từ chối"
+  },
+  "pagination": {
+    "previous": "Trước",
+    "next": "Sau",
+    "page": "Trang",
+    "of": "của",
+    "showing": "Hiển thị",
+    "to": "đến",
+    "results": "kết quả"
+  },
+  "validation": {
+    "required": "Trường này là bắt buộc",
+    "invalidEmail": "Địa chỉ email không hợp lệ",
+    "invalidPhone": "Số điện thoại không hợp lệ",
+    "minLength": "Độ dài tối thiểu là {{min}} ký tự",
+    "maxLength": "Độ dài tối đa là {{max}} ký tự",
+    "passwordMismatch": "Mật khẩu không khớp",
+    "invalidDate": "Ngày không hợp lệ",
+    "invalidNumber": "Số không hợp lệ",
+    "invalidFormat": "Định dạng không hợp lệ"
   }
 }

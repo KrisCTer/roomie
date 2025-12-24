@@ -14,25 +14,25 @@ const TenantStats = ({ stats, onStatClick }) => {
     <div className="space-y-6">
       {/* Booking Stats */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">Đặt thuê của bạn</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Your Bookings</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard
             icon={CheckIcon}
-            label="Đang thuê"
+            label="Currently Renting"
             value={stats.activeBookings}
             color="green"
             onClick={() => onStatClick?.("active-bookings")}
           />
           <StatCard
             icon={ClockIcon}
-            label="Chờ xác nhận"
+            label="Pending Confirmation"
             value={stats.pendingBookings}
             color="yellow"
             onClick={() => onStatClick?.("pending-bookings")}
           />
           <StatCard
             icon={CheckIcon}
-            label="Đã hoàn thành"
+            label="Completed"
             value={stats.completedBookings}
             color="blue"
             onClick={() => onStatClick?.("completed-bookings")}
@@ -42,30 +42,32 @@ const TenantStats = ({ stats, onStatClick }) => {
 
       {/* Contract Stats */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">Hợp đồng thuê</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          Rental Contracts
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard
             icon={FileIcon}
-            label="Tổng hợp đồng"
+            label="Total Contracts"
             value={stats.totalContracts}
             color="blue"
             onClick={() => onStatClick?.("contracts")}
           />
           <StatCard
             icon={CheckIcon}
-            label="Đang hiệu lực"
+            label="Active"
             value={stats.activeContracts}
             color="green"
           />
           <StatCard
             icon={ClockIcon}
-            label="Chờ ký"
+            label="Pending Signature"
             value={stats.pendingContracts}
             color="yellow"
           />
           <StatCard
             icon={Calendar}
-            label="Hết hạn/Hủy"
+            label="Expired/Cancelled"
             value={stats.expiredContracts}
             color="red"
           />
@@ -74,26 +76,26 @@ const TenantStats = ({ stats, onStatClick }) => {
 
       {/* Bill Stats */}
       <div>
-        <h2 className="text-xl font-bold text-white mb-4">
-          Hóa đơn & Thanh toán
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          Bills & Payments
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard
             icon={Dollar}
-            label="Tổng số tiền"
+            label="Total Amount"
             value={`${stats.totalBillAmount.toLocaleString()}đ`}
             color="purple"
           />
           <StatCard
             icon={ClockIcon}
-            label="Chưa thanh toán"
+            label="Unpaid"
             value={stats.unpaidBills}
             color="red"
             onClick={() => onStatClick?.("unpaid-bills")}
           />
           <StatCard
             icon={CheckIcon}
-            label="Đã thanh toán"
+            label="Paid"
             value={stats.paidBills}
             color="green"
             onClick={() => onStatClick?.("paid-bills")}
@@ -103,4 +105,5 @@ const TenantStats = ({ stats, onStatClick }) => {
     </div>
   );
 };
+
 export default TenantStats;

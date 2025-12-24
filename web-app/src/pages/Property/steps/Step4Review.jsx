@@ -1,15 +1,20 @@
 import React from "react";
 import { MapPin } from "lucide-react";
 import InfoRow from "../../../components/Property/InfoRow";
-
+import { useTranslation } from "react-i18next";
 const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold mb-6">Review Your Listing</h2>
+      <h2 className="text-xl font-bold mb-6">
+        {t("propertyForm.step4.title")}
+      </h2>
 
       <div className="space-y-6">
         <div className="border-b pb-4">
-          <h3 className="font-semibold text-lg mb-3">Basic Information</h3>
+          <h3 className="font-semibold text-lg mb-3">
+            {t("propertyForm.step4.sections.basic")}
+          </h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <InfoRow label="Title" value={propertyData.title} />
             <InfoRow label="Type" value={propertyData.propertyType} />
@@ -24,7 +29,9 @@ const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
         </div>
 
         <div className="border-b pb-4">
-          <h3 className="font-semibold text-lg mb-3">Location</h3>
+          <h3 className="font-semibold text-lg mb-3">
+            {t("propertyForm.step4.sections.location")}
+          </h3>
           <p className="text-sm text-gray-700">
             {propertyData.fullAddress || "No address provided"}
           </p>
@@ -42,7 +49,9 @@ const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
         </div>
 
         <div className="border-b pb-4">
-          <h3 className="font-semibold text-lg mb-3">Amenities</h3>
+          <h3 className="font-semibold text-lg mb-3">
+            {t("propertyForm.step4.sections.amenities")}
+          </h3>
           <div className="flex flex-wrap gap-2">
             {[
               ...propertyData.homeSafety,
@@ -71,7 +80,9 @@ const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
         </div>
 
         <div>
-          <h3 className="font-semibold text-lg mb-3">Media</h3>
+          <h3 className="font-semibold text-lg mb-3">
+            {t("propertyForm.step4.sections.media")}
+          </h3>
           {uploadedImages.length > 0 ? (
             <div className="grid grid-cols-4 gap-3">
               {uploadedImages.slice(0, 8).map((image, index) => (

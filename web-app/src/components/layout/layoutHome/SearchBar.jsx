@@ -245,7 +245,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                         textTransform: "uppercase",
                       }}
                     >
-                      Tìm kiếm gần đây
+                      Recent searches
                     </Typography>
                   </Box>
 
@@ -275,7 +275,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                     textTransform: "uppercase",
                   }}
                 >
-                  Địa điểm phổ biến
+                  Popular locations
                 </Typography>
               </Box>
 
@@ -305,7 +305,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                     textTransform: "uppercase",
                   }}
                 >
-                  Chọn tỉnh / thành
+                  Select province/city
                 </Typography>
               </Box>
 
@@ -339,7 +339,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                   borderColor: "grey.200",
                 }}
               >
-                ← Quay lại
+                ← Back
               </MenuItem>
 
               <Box sx={{ px: 2, py: 1, bgcolor: "grey.50" }}>
@@ -410,7 +410,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
               letterSpacing: 0.5,
             }}
           >
-            Địa điểm
+            Location
           </Typography>
           <InputBase
             fullWidth
@@ -460,7 +460,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                           textTransform: "uppercase",
                         }}
                       >
-                        Tìm kiếm gần đây
+                        Recent searches
                       </Typography>
                     </Box>
 
@@ -489,7 +489,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                       textTransform: "uppercase",
                     }}
                   >
-                    Địa điểm phổ biến
+                    Popular locations
                   </Typography>
                 </Box>
 
@@ -520,7 +520,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                       textTransform: "uppercase",
                     }}
                   >
-                    Tất cả tỉnh / thành
+                    All provinces/cities
                   </Typography>
                 </Box>
 
@@ -548,7 +548,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                   }}
                   sx={{ fontWeight: 600 }}
                 >
-                  ← Quay lại
+                  ← Back
                 </MenuItem>
 
                 <Divider />
@@ -645,7 +645,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
               letterSpacing: 0.5,
             }}
           >
-            Giá thuê
+            Rent
           </Typography>
           <Typography
             variant="body2"
@@ -678,7 +678,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
             },
           }}
         >
-          Tìm kiếm
+          Search
         </Button>
       </Box>
 
@@ -697,7 +697,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
         }}
       >
         <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
-          Khoảng giá thuê (VND/tháng)
+          Rental price range (VND/month)
         </Typography>
 
         <Slider
@@ -716,7 +716,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
           <Box>
             <Typography variant="caption" sx={{ color: "grey.600" }}>
-              Tối thiểu
+              Minimum
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
               {searchData.priceRange[0].toLocaleString("vi-VN")} đ
@@ -725,7 +725,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
 
           <Box sx={{ textAlign: "right" }}>
             <Typography variant="caption" sx={{ color: "grey.600" }}>
-              Tối đa
+              Maximum
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
               {searchData.priceRange[1].toLocaleString("vi-VN")} đ

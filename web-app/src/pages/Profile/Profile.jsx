@@ -5,7 +5,7 @@ import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
-
+import { useTranslation } from "react-i18next";
 // Import custom components
 import AvatarAndScanner from "../../components/Profile/AvatarAndScanner.jsx";
 import CameraModal from "../../components/Profile/CameraModal.jsx";
@@ -20,6 +20,7 @@ const Profile = () => {
   // Layout state
   const [activeMenu, setActiveMenu] = useState("Profile");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { t } = useTranslation();
 
   // Use custom hook for profile operations
   const {
@@ -71,8 +72,8 @@ const Profile = () => {
         {/* Header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="Profile"
-          subtitle="View and update your profile information"
+          title={t("profile.title")}
+          subtitle={t("profile.subtitle")}
         />
 
         {/* Content */}

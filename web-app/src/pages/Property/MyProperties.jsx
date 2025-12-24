@@ -12,6 +12,7 @@ import BookingsModal from "../../components/Property/BookingsModal";
 import Pagination from "../../components/Property/Pagination";
 import PublishPropertyModal from "../../components/Property/PublishPropertyModal";
 import AlertMessage from "../../components/common/AlertMessage";
+import { useTranslation } from "react-i18next";
 
 // Import custom hook
 import { usePropertyOperations } from "../../hooks/usePropertyOperations";
@@ -20,7 +21,7 @@ const MyProperties = () => {
   // Layout state
   const [activeMenu, setActiveMenu] = useState("My Property");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+  const { t } = useTranslation();
   // Use custom hook for property operations
   const {
     properties,

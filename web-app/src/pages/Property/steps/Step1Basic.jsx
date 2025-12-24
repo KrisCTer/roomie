@@ -1,35 +1,42 @@
 import React from "react";
 import { Building, DollarSign, Bed, Bath, Car, Maximize } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Step1Basic = ({ propertyData, onInputChange }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold mb-6">Basic Information</h2>
+      <h2 className="text-xl font-bold mb-6">
+        {t("propertyForm.step1.title")}
+      </h2>
 
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium mb-2">
-            Property Title <span className="text-red-500">*</span>
+            {t("propertyForm.step1.titleLabel")}{" "}
+            <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             name="title"
             value={propertyData.title}
             onChange={onInputChange}
-            placeholder="Enter property title"
+            placeholder={t("propertyForm.step1.titlePlaceholder")}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">
-            Description <span className="text-red-500">*</span>
+            {t("propertyForm.step1.descriptionLabel")}{" "}
+            <span className="text-red-500">*</span>
           </label>
           <textarea
             name="description"
             value={propertyData.description}
             onChange={onInputChange}
-            placeholder="Describe your property..."
+            placeholder={t("propertyForm.step1.descriptionPlaceholder")}
             rows="6"
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -38,7 +45,8 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">
-              Property Type <span className="text-red-500">*</span>
+              {t("propertyForm.step1.selectType")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <select
               name="propertyType"
@@ -46,15 +54,28 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
               onChange={onInputChange}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select Type</option>
-              <option value="ROOM">Room</option>
-              <option value="DORMITORY">Dormitory</option>
-              <option value="APARTMENT">Apartment</option>
-              <option value="STUDIO">Studio</option>
-              <option value="OFFICETEL">Officetel</option>
-              <option value="HOUSE">House</option>
-              <option value="VILLA">Villa</option>
-              <option value="OTHER">Other</option>
+              <option value="ROOM">{t("propertyForm.step1.types.ROOM")}</option>
+              <option value="DORMITORY">
+                {t("propertyForm.step1.types.DORMITORY")}
+              </option>
+              <option value="APARTMENT">
+                {t("propertyForm.step1.types.APARTMENT")}
+              </option>
+              <option value="STUDIO">
+                {t("propertyForm.step1.types.STUDIO")}
+              </option>
+              <option value="OFFICETEL">
+                {t("propertyForm.step1.types.OFFICETEL")}
+              </option>
+              <option value="HOUSE">
+                {t("propertyForm.step1.types.HOUSE")}
+              </option>
+              <option value="VILLA">
+                {t("propertyForm.step1.types.VILLA")}
+              </option>
+              <option value="OTHER">
+                {t("propertyForm.step1.types.OTHER")}
+              </option>
             </select>
           </div>
 
@@ -76,7 +97,9 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
           </div> */}
 
           <div>
-            <label className="block text-sm font-medium mb-2">Size (m²)</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step1.size")}
+            </label>
             <div className="relative">
               <Maximize className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -94,7 +117,8 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">
-              Monthly Rent <span className="text-red-500">*</span>
+              {t("propertyForm.step1.monthlyRent")}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <DollarSign className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -111,7 +135,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Rental Deposit
+              {t("propertyForm.step1.rentalDeposit")}
             </label>
             <div className="relative">
               <DollarSign className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -146,7 +170,9 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Bedrooms</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step1.bedrooms")}
+            </label>
             <div className="relative">
               <Bed className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -161,7 +187,9 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Bathrooms</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step1.bathrooms")}
+            </label>
             <div className="relative">
               <Bath className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -176,7 +204,9 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Garages</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step1.garages")}
+            </label>
             <div className="relative">
               <Car className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -191,7 +221,9 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Rooms</label>
+            <label className="block text-sm font-medium mb-2">
+              {t("propertyForm.step1.rooms")}
+            </label>
             <div className="relative">
               <Building className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input

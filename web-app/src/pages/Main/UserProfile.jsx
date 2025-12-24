@@ -16,6 +16,7 @@ import {
 import StickyHeader from "../../components/layout/layoutHome/StickyHeader";
 import PropertySection from "../../components/layout/layoutHome/PropertySection";
 import Footer from "../../components/layout/layoutHome/Footer";
+import { useTranslation } from "react-i18next";
 
 // Services
 import { getUserProfile } from "../../services/user.service";
@@ -25,6 +26,7 @@ import BaseService from "../../services/BaseService";
 const UserProfile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -80,7 +82,7 @@ const UserProfile = () => {
       setProperties(approvedProperties);
     } catch (err) {
       console.error("Error loading user data:", err);
-      setError("Không thể tải thông tin người dùng");
+      setError(t("userProfile.loadError"));
     } finally {
       setLoading(false);
     }
@@ -146,14 +148,14 @@ const UserProfile = () => {
   };
 
   const getGenderDisplay = (gender) => {
-    const genderMap = {
-      MALE: "Nam",
-      FEMALE: "Nữ",
-      OTHER: "Khác",
-      Nam: "Nam",
-      Nữ: "Nữ",
+    const map = {
+      MALE: t("userProfile.male"),
+      FEMALE: t("userProfile.female"),
+      OTHER: t("userProfile.other"),
+      Nam: t("userProfile.male"),
+      Nữ: t("userProfile.female"),
     };
-    return genderMap[gender] || "Chưa cập nhật";
+    return map[gender] || t("userProfile.notUpdated");
   };
 
   if (loading) {
@@ -185,14 +187,14 @@ const UserProfile = () => {
               <User className="w-8 h-8 text-red-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {error || "Không tìm thấy người dùng"}
+              {error || t("userProfile.notFound")}
             </h2>
             <button
               onClick={() => navigate(-1)}
               className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2 mx-auto"
             >
               <ChevronLeft className="w-5 h-5" />
-              Quay lại
+              {t("userProfile.back")}
             </button>
           </div>
         </Container>
@@ -263,7 +265,9 @@ const UserProfile = () => {
                         <Mail className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Email</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {t("userProfile.email")}
+                        </p>
                         <p className="text-sm font-medium text-gray-900">
                           {profile.email}
                         </p>
@@ -279,7 +283,7 @@ const UserProfile = () => {
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">
-                          Số điện thoại
+                          {t("userProfile.phone")}
                         </p>
                         <p className="text-sm font-medium text-gray-900">
                           {profile.phoneNumber}
@@ -295,7 +299,9 @@ const UserProfile = () => {
                         <User className="w-5 h-5 text-purple-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Giới tính</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {t("userProfile.gender")}
+                        </p>
                         <p className="text-sm font-medium text-gray-900">
                           {getGenderDisplay(profile.gender)}
                         </p>
@@ -310,7 +316,9 @@ const UserProfile = () => {
                         <Calendar className="w-5 h-5 text-orange-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Ngày sinh</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {t("userProfile.dob")}
+                        </p>
                         <p className="text-sm font-medium text-gray-900">
                           {formatDate(profile.dob)}
                         </p>
@@ -325,7 +333,9 @@ const UserProfile = () => {
                         <MapPin className="w-5 h-5 text-indigo-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Địa chỉ</p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {t("userProfile.address")}
+                        </p>
                         <p className="text-sm font-medium text-gray-900">
                           {profile.currentAddress || profile.permanentAddress}
                         </p>
@@ -345,10 +355,12 @@ const UserProfile = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Bất động sản
+                  {t("userProfile.properties")}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  {properties.length} bất động sản đang cho thuê
+                  {t("userProfile.propertiesCount", {
+                    count: properties.length,
+                  })}
                 </p>
               </div>
             </div>
@@ -359,10 +371,10 @@ const UserProfile = () => {
                   <Building2 className="w-8 h-8 text-gray-400" />
                 </div>
                 <p className="text-gray-600 text-lg font-medium mb-2">
-                  Chưa có bất động sản
+                  {t("userProfile.noProperties")}
                 </p>
                 <p className="text-gray-500 text-sm">
-                  Người dùng này chưa đăng bất động sản nào
+                  {t("userProfile.noPropertiesDesc")}
                 </p>
               </div>
             ) : (

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
+import { useTranslation } from "react-i18next";
 
 import {
   adminGetAllProperties,
@@ -103,6 +104,7 @@ const AdminProperties = () => {
 
   const username = useMemo(() => resolveUsername(), []);
   const isAdmin = String(username).toLowerCase() === "admin";
+  const { t } = useTranslation();
 
   const loadAll = async () => {
     try {
@@ -123,7 +125,7 @@ const AdminProperties = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
-  // CHỈ HIỆN PENDING 
+  // CHỈ HIỆN PENDING
   const pendingProperties = useMemo(() => {
     return properties.filter((p) => getStatus(p) === "PENDING");
   }, [properties]);
@@ -173,23 +175,23 @@ const AdminProperties = () => {
 
         <main className="p-8 w-full">
           <h1 className="text-3xl font-bold text-white mb-6">
-            Pending Properties
+            {t("admin.pendingProperties")}
           </h1>
 
           <div className="bg-slate-800 rounded-2xl p-6">
             {!isAdmin ? (
-              <p className="text-slate-200">Unauthorized.</p>
+              <p className="text-slate-200">{t("admin.unauthorized")}</p>
             ) : loading ? (
-              <p className="text-slate-200">Loading...</p>
+              <p className="text-slate-200">{t("common.loading")}</p>
             ) : pendingProperties.length === 0 ? (
-              <p className="text-slate-200">No pending properties.</p>
+              <p className="text-slate-200">{t("admin.noPendingProperties")}</p>
             ) : (
               <div className="space-y-4">
                 {pendingProperties.map((p) => {
                   const id = p?.propertyId || p?.id || p?._id;
                   const img = pickImage(p);
 
-                  const title = p?.title ?? "Untitled";
+                  const title = p?.title ?? t("common.noData");
                   const created =
                     p?.createdAt ??
                     p?.createdDate ??
@@ -227,18 +229,19 @@ const AdminProperties = () => {
                           </div>
 
                           <span className="px-3 py-1 text-xs font-semibold rounded-full bg-orange-500 text-white">
-                            Waiting approval
+                            {t("admin.waitingApproval")}
                           </span>
 
                           <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-600 text-white">
-                            Inactive
+                            {t("admin.inactive")}
                           </span>
                         </div>
 
                         <div className="mt-1 text-slate-200 text-sm flex items-center gap-4">
                           <span>{fmtDate(created)}</span>
                           <span className="text-sky-400 font-semibold">
-                            {fmtMoney(price)} VND
+                            {fmtMoney(price)}{" "}
+                            {t("common.currency", { defaultValue: "VND" })}
                           </span>
                         </div>
                       </div>
@@ -249,7 +252,7 @@ const AdminProperties = () => {
                           type="button"
                           onClick={() => handleView(id)}
                           className="h-10 w-10 rounded-xl border border-slate-600 bg-slate-900/40 hover:bg-slate-900 flex items-center justify-center text-slate-200"
-                          title="View"
+                          title={t("common.view")}
                         >
                           <Eye size={18} />
                         </button>
@@ -258,7 +261,7 @@ const AdminProperties = () => {
                           type="button"
                           onClick={() => handleApprove(id)}
                           className="h-10 w-10 rounded-xl border border-emerald-500/60 bg-slate-900/40 hover:bg-slate-900 flex items-center justify-center text-emerald-400"
-                          title="Approve"
+                          title={t("admin.approve")}
                         >
                           <Check size={18} />
                         </button>
@@ -267,7 +270,7 @@ const AdminProperties = () => {
                           type="button"
                           onClick={() => handleReject(id)}
                           className="h-10 w-10 rounded-xl border border-red-500/60 bg-slate-900/40 hover:bg-slate-900 flex items-center justify-center text-red-400"
-                          title="Reject"
+                          title={t("admin.reject")}
                         >
                           <X size={18} />
                         </button>

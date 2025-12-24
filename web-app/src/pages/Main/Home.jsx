@@ -25,7 +25,7 @@ const groupByProvince = (items) => {
   const map = new Map();
   items.forEach((p) => {
     const province =
-      p.province || p.provinceName || p.address?.province || "Khác";
+      p.province || p.provinceName || p.address?.province || "__OTHER__";
     if (!map.has(province)) map.set(province, []);
     map.get(province).push(p);
   });
@@ -36,9 +36,10 @@ const groupByProvince = (items) => {
   }));
 };
 
-const transformToCardData = (property) => {
+const transformToCardData = (property, t) => {
   const price =
     property.monthlyRent ?? property.price ?? property.pricePerMonth ?? 0;
+
   const image =
     property.mediaList?.[0]?.url ||
     property.thumbnail ||
@@ -52,28 +53,20 @@ const transformToCardData = (property) => {
     "";
   const district = property.district || property.address?.district || "";
 
-  // Property type mapping
-  const typeMap = {
-    APARTMENT: "Căn hộ",
-    HOUSE: "Nhà nguyên căn",
-    ROOM: "Phòng trọ",
-    STUDIO: "Studio",
-    VILLA: "Biệt thự",
-    DORMITORY: "Ký túc xá",
-    OFFICETEL: "Officetel",
-  };
-
   return {
     id: property.propertyId || property.id,
-    title: property.title || "Chưa có tiêu đề",
+    title: property.title || t("home.untitled"),
     image,
-    price: `${price.toLocaleString("vi-VN")} đ`,
+    price: `${price.toLocaleString()} ₫`,
     location:
-      [district, province].filter(Boolean).join(", ") || "Chưa cập nhật",
+      [district, province].filter(Boolean).join(", ") ||
+      t("home.unknownAddress"),
     bedrooms: property.bedrooms || property.rooms,
     bathrooms: property.bathrooms,
     size: property.size,
-    type: typeMap[property.propertyType] || null,
+    type: property.propertyType
+      ? t(`home.propertyType.${property.propertyType}`)
+      : null,
   };
 };
 
@@ -166,10 +159,12 @@ const Home = () => {
             sections.map((section) => (
               <PropertySection
                 key={section.province}
-                title={`${
-                  t("home.propertiesIn") || "Phòng & Nơi lưu trú tại"
-                } ${section.province}`}
-                properties={section.items.map(transformToCardData)}
+                title={`${t("home.propertiesIn")} ${
+                  section.province === "__OTHER__"
+                    ? t("home.other")
+                    : section.province
+                }`}
+                properties={section.items.map((p) => transformToCardData(p, t))}
                 onViewAll={() => handleViewAll(section.province)}
                 onCardClick={handlePropertyClick}
               />

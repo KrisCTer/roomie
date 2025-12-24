@@ -4,28 +4,31 @@ import { Home, User } from "lucide-react";
 
 const RoleToggle = ({ activeRole, onRoleChange }) => {
   return (
-    <div className="flex items-center gap-2 bg-slate-800 rounded-xl p-1 border border-slate-700">
+    <div className="flex items-center gap-2 bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
+      {/* Landlord */}
       <button
         onClick={() => onRoleChange("landlord")}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
           activeRole === "landlord"
-            ? "bg-blue-600 text-white shadow-lg"
-            : "text-gray-400 hover:text-white"
+            ? "bg-blue-600 text-white shadow-md"
+            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
         }`}
       >
         <Home className="w-5 h-5" />
-        <span className="font-medium">Chủ nhà</span>
+        <span className="font-medium">Landlord</span>
       </button>
+
+      {/* Tenant */}
       <button
         onClick={() => onRoleChange("tenant")}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
           activeRole === "tenant"
-            ? "bg-green-600 text-white shadow-lg"
-            : "text-gray-400 hover:text-white"
+            ? "bg-green-600 text-white shadow-md"
+            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
         }`}
       >
         <User className="w-5 h-5" />
-        <span className="font-medium">Người thuê</span>
+        <span className="font-medium">Tenant</span>
       </button>
     </div>
   );

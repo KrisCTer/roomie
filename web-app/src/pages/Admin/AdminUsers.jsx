@@ -4,6 +4,7 @@ import { Ban, PauseCircle, RefreshCw, Search } from "lucide-react";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar";
 import Header from "../../components/layout/layoutUser/Header";
 import Footer from "../../components/layout/layoutUser/Footer";
+import { useTranslation } from "react-i18next";
 
 import {
   adminGetUsers,
@@ -46,7 +47,7 @@ const AdminUsers = () => {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [users, setUsers] = useState([]);
   const [q, setQ] = useState("");
-
+  const { t } = useTranslation();
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -82,7 +83,8 @@ const AdminUsers = () => {
   const handleSuspend = async (u) => {
     const id = getUserId(u);
     if (!id) return;
-    if (!window.confirm(`Suspend user "${u?.username ?? id}"?`)) return;
+    if (!window.confirm(t("admin.confirmSuspend", { name: u?.username ?? id })))
+      return;
 
     try {
       setActionLoadingId(id);
@@ -90,7 +92,7 @@ const AdminUsers = () => {
       await loadUsers();
     } catch (e) {
       console.error("Suspend failed:", e);
-      alert("Suspend failed. Check Network/Console.");
+      alert(t("admin.suspendFailed"));
     } finally {
       setActionLoadingId(null);
     }
@@ -99,7 +101,8 @@ const AdminUsers = () => {
   const handleBan = async (u) => {
     const id = getUserId(u);
     if (!id) return;
-    if (!window.confirm(`Ban user "${u?.username ?? id}"?`)) return;
+    if (!window.confirm(t("admin.confirmBan", { name: u?.username ?? id })))
+      return;
 
     try {
       setActionLoadingId(id);
@@ -107,7 +110,7 @@ const AdminUsers = () => {
       await loadUsers();
     } catch (e) {
       console.error("Ban failed:", e);
-      alert("Ban failed. Check Network/Console.");
+      alert(t("admin.banFailed"));
     } finally {
       setActionLoadingId(null);
     }
@@ -142,14 +145,14 @@ const AdminUsers = () => {
               <RefreshCw
                 className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
               />
-              Refresh
+              {t("common.refresh")}
             </button>
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">User Management</h1>
+            <h1 className="text-2xl font-bold">{t("admin.userManagement")}</h1>
             <p className="text-sm text-gray-400">
-              Admin có thể Suspend hoặc Ban người dùng.
+              {t("admin.userManagementDesc")}
             </p>
           </div>
 
@@ -159,12 +162,13 @@ const AdminUsers = () => {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search by username/email/status..."
+                placeholder={t("admin.searchUsers")}
                 className="bg-transparent outline-none text-sm w-full"
               />
             </div>
             <div className="text-sm text-gray-400">
-              Total: <span className="text-white">{filtered.length}</span>
+              {t("admin.total")}:{" "}
+              <span className="text-white">{filtered.length}</span>
             </div>
           </div>
 
@@ -174,10 +178,10 @@ const AdminUsers = () => {
                 <thead className="bg-slate-900/80 border-b border-slate-800">
                   <tr className="text-left">
                     <th className="px-4 py-3">#</th>
-                    <th className="px-4 py-3">Username</th>
-                    <th className="px-4 py-3">Email</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Actions</th>
+                    <th className="px-4 py-3">{t("auth.username")}</th>
+                    <th className="px-4 py-3">{t("auth.email")}</th>
+                    <th className="px-4 py-3">{t("common.status")}</th>
+                    <th className="px-4 py-3">{t("common.actions")}</th>
                   </tr>
                 </thead>
 
@@ -185,7 +189,7 @@ const AdminUsers = () => {
                   {loading && (
                     <tr>
                       <td className="px-4 py-6 text-gray-400" colSpan={5}>
-                        Loading...
+                        {t("common.loading")}
                       </td>
                     </tr>
                   )}
@@ -193,7 +197,7 @@ const AdminUsers = () => {
                   {!loading && filtered.length === 0 && (
                     <tr>
                       <td className="px-4 py-6 text-gray-400" colSpan={5}>
-                        No users found.
+                        {t("admin.noUsers")}
                       </td>
                     </tr>
                   )}
@@ -241,7 +245,7 @@ const AdminUsers = () => {
                                 }`}
                               >
                                 <PauseCircle className="w-4 h-4" />
-                                Suspend
+                                {t("admin.suspend")}
                               </button>
 
                               <button
@@ -255,12 +259,12 @@ const AdminUsers = () => {
                                 }`}
                               >
                                 <Ban className="w-4 h-4" />
-                                Ban
+                                {t("admin.ban")}
                               </button>
 
                               {busy && (
                                 <span className="text-xs text-gray-400">
-                                  Processing...
+                                  {t("common.processing")}
                                 </span>
                               )}
                             </div>

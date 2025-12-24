@@ -4,6 +4,7 @@ import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import CallModal from "../../components/layout/layoutUser/CallModal.jsx";
 import { useCall } from "../../contexts/CallContext.jsx";
+import { useTranslation } from "react-i18next";
 
 // Import custom components
 import ConversationList from "../../components/Message/ConversationList.jsx";
@@ -21,6 +22,7 @@ const Message = () => {
   // Layout state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Message");
+  const { t } = useTranslation();
 
   // Call context
   const { startCall, callState } = useCall();
@@ -54,12 +56,12 @@ const Message = () => {
   // Handle voice call
   const handleVoiceCall = () => {
     if (!selectedConversation) {
-      alert("Please select a conversation first");
+      alert(t("message.selectConversation"));
       return;
     }
 
     if (!currentUser) {
-      alert("User information not loaded. Please wait.");
+      alert(t("message.userNotLoaded"));
       return;
     }
 
@@ -70,9 +72,7 @@ const Message = () => {
     );
 
     if (!remotePeer) {
-      alert(
-        "Cannot find recipient. Please try selecting the conversation again."
-      );
+      alert(t("message.recipientNotFound"));
       return;
     }
 
@@ -87,12 +87,12 @@ const Message = () => {
   // Handle video call
   const handleVideoCall = () => {
     if (!selectedConversation) {
-      alert("Please select a conversation first");
+      alert(t("message.selectConversation"));
       return;
     }
 
     if (!currentUser) {
-      alert("User information not loaded. Please wait.");
+      alert(t("message.userNotLoaded"));
       return;
     }
 
@@ -103,9 +103,7 @@ const Message = () => {
     );
 
     if (!remotePeer) {
-      alert(
-        "Cannot find recipient. Please try selecting the conversation again."
-      );
+      alert(t("message.recipientNotFound"));
       return;
     }
 
