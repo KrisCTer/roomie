@@ -1,6 +1,6 @@
-package com.roomie.services.admin_service.exception;
+package com.roomie.services.ai_service.exception;
 
-import com.roomie.services.admin_service.dto.response.ApiResponse;
+import com.roomie.services.ai_service.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

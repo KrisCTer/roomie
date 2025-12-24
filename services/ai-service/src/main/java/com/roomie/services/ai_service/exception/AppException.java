@@ -1,4 +1,4 @@
-package com.roomie.services.admin_service.exception;
+package com.roomie.services.ai_service.exception;
 
 public class AppException extends RuntimeException {
 

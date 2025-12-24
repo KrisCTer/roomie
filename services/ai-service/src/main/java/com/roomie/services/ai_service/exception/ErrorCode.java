@@ -1,4 +1,4 @@
-package com.roomie.services.admin_service.exception;
+package com.roomie.services.ai_service.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -7,16 +7,16 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
-    USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
-    USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
+    INVALID_KEY(1001, "Invalid key", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
-    INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
-    SUSPEND_FAILED(1009,"Suspend failed: ", HttpStatus.INTERNAL_SERVER_ERROR),
-    BAN_FAILED(1010,"Ban failed: ", HttpStatus.BAD_REQUEST),
+
+    // AI Service specific errors
+    AI_SERVICE_ERROR(5001, "AI service error", HttpStatus.INTERNAL_SERVER_ERROR),
+    CONVERSATION_NOT_FOUND(5002, "Conversation not found", HttpStatus.NOT_FOUND),
+    INVALID_MESSAGE(5003, "Invalid message", HttpStatus.BAD_REQUEST),
+    RATE_LIMIT_EXCEEDED(5004, "Rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS),
+    TOKEN_LIMIT_EXCEEDED(5005, "Token limit exceeded", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

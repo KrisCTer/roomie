@@ -1,4 +1,4 @@
-package com.roomie.services.admin_service.dto.response;
+package com.roomie.services.ai_service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

@@ -1,0 +1,36 @@
+server:
+  port: 8091
+  servlet:
+    context-path: /ai
+
+spring:
+  application:
+    name: ai-service
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb://admin:roomie123@localhost:27017/roomie_ai?authSource=admin
+      database: roomie_ai
+
+# ? Gemini API Configuration
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:AIzaSyBIQhdwnk6U90TZ8Ffq_tjzBOD8k8L7zOA}
+    model: gemini-2.5-flash
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    com.roomie.services.ai_service: DEBUG
+    org.springframework.web: DEBUG

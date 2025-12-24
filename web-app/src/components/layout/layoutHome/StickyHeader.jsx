@@ -36,6 +36,7 @@ import {
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
   FilterList as FilterListIcon,
+  Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -43,9 +44,9 @@ import {
   isAuthenticated,
   removeToken,
 } from "../../../services/localStorageService";
-
-// Import SearchFilters component
 import SearchFilters from "../../PropertySearch/SearchFilters";
+import NotificationDropdown from "../../Notification/NotificationDropdown";
+import { useNotificationContext } from "../../../contexts/NotificationContext";
 
 const StickyHeader = ({
   forceCompact = false,
@@ -79,12 +80,14 @@ const StickyHeader = ({
   const [locationAnchor, setLocationAnchor] = useState(null);
   const [typeAnchor, setTypeAnchor] = useState(null);
   const [priceAnchor, setPriceAnchor] = useState(null);
+  const { unreadCount } = useNotificationContext();
 
   // Location data
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [notificationAnchor, setNotificationAnchor] = useState(null);
 
   const popularLocations = [
     { province: "Hồ Chí Minh", district: "Quận 1" },
@@ -163,6 +166,14 @@ const StickyHeader = ({
   const openMenu = Boolean(anchorEl);
   const handleOpenMenu = (event) => setAnchorEl(event.currentTarget);
   const handleCloseMenu = () => setAnchorEl(null);
+
+  const openNotifications = Boolean(notificationAnchor);
+  const handleOpenNotifications = (event) => {
+    setNotificationAnchor(event.currentTarget);
+  };
+  const handleCloseNotifications = () => {
+    setNotificationAnchor(null);
+  };
 
   const handleLogout = () => {
     removeToken();
@@ -840,7 +851,41 @@ const StickyHeader = ({
                       ? "Admin Dashboard"
                       : t("header.becomeHost") || "Cho thuê nhà"}
                   </Button>
+                  {/* ⭐ NOTIFICATION BELL - Elegant Design */}
+                  <IconButton
+                    onClick={handleOpenNotifications}
+                    sx={{
+                      color: "grey.700",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        bgcolor: "grey.100",
+                        transform: "scale(1.05)",
+                      },
+                    }}
+                  >
+                    <Badge
+                      badgeContent={unreadCount}
+                      color="error"
+                      max={99}
+                      sx={{
+                        "& .MuiBadge-badge": {
+                          fontSize: "0.65rem",
+                          height: 18,
+                          minWidth: 18,
+                          fontWeight: 700,
+                        },
+                      }}
+                    >
+                      <NotificationsIcon sx={{ fontSize: 24 }} />
+                    </Badge>
+                  </IconButton>
 
+                  {/* ⭐ Notification Dropdown */}
+                  <NotificationDropdown
+                    anchorEl={notificationAnchor}
+                    open={openNotifications}
+                    onClose={handleCloseNotifications}
+                  />
                   <Paper
                     elevation={0}
                     sx={{
@@ -911,7 +956,26 @@ const StickyHeader = ({
                         />
                       </MenuItem>
                     )}
-
+                    <MenuItem
+                      onClick={() => {
+                        handleCloseMenu();
+                        navigate("/notifications");
+                      }}
+                    >
+                      <ListItemIcon>
+                        <NotificationsIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={t("header.notifications") || "Thông báo"}
+                      />
+                      {unreadCount > 0 && (
+                        <Badge
+                          badgeContent={unreadCount}
+                          color="error"
+                          sx={{ ml: 1 }}
+                        />
+                      )}
+                    </MenuItem>
                     <MenuItem
                       onClick={() => {
                         handleCloseMenu();

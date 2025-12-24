@@ -1,4 +1,4 @@
-package com.roomie.services.billing_service.configuration;
+package com.roomie.services.notification_service.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

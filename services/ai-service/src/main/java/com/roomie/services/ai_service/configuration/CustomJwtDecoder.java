@@ -1,4 +1,4 @@
-package com.roomie.services.payment_service.configuration;
+package com.roomie.services.ai_service.configuration;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.security.oauth2.jwt.Jwt;

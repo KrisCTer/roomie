@@ -1,4 +1,4 @@
-package com.roomie.services.billing_service.configuration;
+package com.roomie.services.notification_service.configuration;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.security.oauth2.jwt.Jwt;

@@ -1,4 +1,4 @@
-package com.roomie.services.contract_service.exception;
+package com.roomie.services.notification_service.exception;
 
 public class AppException extends RuntimeException {
 
