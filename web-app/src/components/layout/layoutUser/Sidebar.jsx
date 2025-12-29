@@ -1,5 +1,5 @@
 // src/components/layout/layoutUser/Sidebar.jsx
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import {
   Home,
   User,
@@ -12,142 +12,99 @@ import {
   BookOpen,
   FileText,
   Zap,
+  DollarSign,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-// Services
-import { getCompleteUserInfo } from "../../../services/localStorageService";
-import { getMyProfile } from "../../../services/user.service";
+import { useRole } from "../../../contexts/RoleContext";
+import { useUser } from "../../../contexts/UserContext";
 
 const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
 
-  // ✅ State for current user
-  const [currentUser, setCurrentUser] = useState({
-    username: "",
-    email: "",
-    avatar: "",
-    fullName: "",
-  });
+  const { activeRole } = useRole();
+  const { user, loading } = useUser();
 
-  const menuItems = [
-    { icon: BarChart3, label: t("Dashboards"), path: "/dashboard" },
-    { icon: User, label: t("Profile"), path: "/profile" },
+  /* =========================
+   * MENU CONFIG
+   * ========================= */
+  const landlordMenuItems = [
+    { icon: BarChart3, label: t("Dashboard"), path: "/dashboard" },
     { icon: Building, label: t("My Properties"), path: "/my-properties" },
-    { icon: BookOpen, label: t("My Bookings"), path: "/my-bookings" },
     { icon: Plus, label: t("Add Property"), path: "/add-property" },
+    { icon: BookOpen, label: t("Bookings"), path: "/my-bookings" },
     { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
-    { icon: MessageSquare, label: t("Message"), path: "/message" },
+    { icon: FileText, label: t("Bills"), path: "/unified-bills" },
     { icon: Zap, label: t("Utility Config"), path: "/utility-config" },
-    { icon: FileText, label: t("My Bills"), path: "/unified-bills" },
-    { icon: LogOut, label: t("Logout"), path: "/logout" },
+    { icon: MessageSquare, label: t("Messages"), path: "/message" },
+    { icon: User, label: t("Profile"), path: "/profile" },
   ];
 
-  // ✅ Load user info on mount
-  useEffect(() => {
-    loadCurrentUser();
-  }, []);
+  const tenantMenuItems = [
+    { icon: BarChart3, label: t("Dashboard"), path: "/dashboard" },
+    { icon: BookOpen, label: t("My Bookings"), path: "/my-bookings" },
+    { icon: Contact, label: t("My Contracts"), path: "/my-contracts" },
+    { icon: DollarSign, label: t("My Bills"), path: "/unified-bills" },
+    { icon: MessageSquare, label: t("Messages"), path: "/message" },
+    { icon: User, label: t("Profile"), path: "/profile" },
+  ];
 
-  const loadCurrentUser = async () => {
-    try {
-      // Method 1: Get from localStorage
-      const userInfo = getCompleteUserInfo();
+  const menuItems = useMemo(() => {
+    const roleItems =
+      activeRole === "landlord" ? landlordMenuItems : tenantMenuItems;
+    return [...roleItems];
+  }, [activeRole, t]);
 
-      if (userInfo) {
-        setCurrentUser({
-          username: userInfo.username || "User",
-          email: userInfo.email || "",
-          avatar: userInfo.avatar || "",
-          fullName:
-            `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() ||
-            userInfo.username,
-        });
+  /* =========================
+   * USER DISPLAY (FROM CONTEXT)
+   * ========================= */
+  const displayUser = useMemo(() => {
+    if (!user) return null;
 
-        // Method 2: Fetch latest profile from API (optional, for fresh data)
-        try {
-          const profileResponse = await getMyProfile();
-          const profile =
-            profileResponse?.result || profileResponse?.data?.result;
-
-          if (profile) {
-            setCurrentUser({
-              username: profile.username || userInfo.username,
-              email: profile.email || userInfo.email,
-              avatar: profile.avatar || userInfo.avatar,
-              fullName:
-                `${profile.firstName || ""} ${profile.lastName || ""}`.trim() ||
-                profile.username,
-            });
-          }
-        } catch (apiError) {
-          // If API fails, keep localStorage data
-          console.log("Using cached user data from localStorage");
-        }
-      }
-    } catch (error) {
-      console.error("Error loading user info:", error);
-    }
-  };
+    return {
+      username: user.username || "User",
+      email: user.email || "",
+      avatar: user.avatar || "",
+      fullName:
+        `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        user.username,
+    };
+  }, [user]);
 
   const handleNavigation = (item) => {
     setActiveMenu(item.label);
 
-    // Special handling for Logout
     if (item.path === "/logout") {
-      handleLogout();
+      localStorage.clear();
+      navigate("/login");
       return;
-    }
-
-    // Admin route override
-    const username = localStorage.getItem("username");
-    if (username === "admin") {
-      if (item.label === t("Dashboards")) {
-        navigate("/admin/dashboard");
-        return;
-      }
-      if (item.label === t("My Properties")) {
-        navigate("/admin/properties");
-        return;
-      }
     }
 
     navigate(item.path);
   };
 
-  const handleLogout = () => {
-    // Clear localStorage
-    localStorage.clear();
+  const isActive = (path) => location.pathname === path;
 
-    // Navigate to login
-    navigate("/login");
-  };
-
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
-
-  // ✅ Get avatar display
-  const getAvatarDisplay = () => {
-    if (currentUser.avatar) {
+  /* =========================
+   * AVATAR
+   * ========================= */
+  const renderAvatar = () => {
+    if (displayUser?.avatar) {
       return (
         <img
-          src={currentUser.avatar}
-          alt={currentUser.username}
+          src={displayUser.avatar}
+          alt={displayUser.username}
           className="w-10 h-10 rounded-full object-cover"
-          onError={(e) => {
-            e.target.style.display = "none";
-            e.target.nextElementSibling.style.display = "flex";
-          }}
         />
       );
     }
 
-    // Fallback to initial
     const initial =
-      currentUser.fullName?.[0] || currentUser.username?.[0] || "U";
+      displayUser?.fullName?.[0] || displayUser?.username?.[0] || "U";
+
     return (
       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
         <span className="text-white font-bold text-sm">
@@ -157,13 +114,16 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     );
   };
 
+  /* =========================
+   * RENDER
+   * ========================= */
   return (
     <div
       className={`${
         sidebarOpen ? "w-64" : "w-0"
       } bg-slate-900 text-white transition-all duration-300 overflow-hidden fixed left-0 top-0 h-full z-50`}
     >
-      <div className="p-6">
+      <div className="p-6 h-full flex flex-col">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
@@ -175,27 +135,26 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
           </div>
         </div>
 
-        {/* Profile - ✅ Updated with current user */}
+        {/* Profile */}
         <div className="mb-8 pb-6 border-b border-gray-700">
           <p className="text-xs text-gray-400 mb-3">Profile</p>
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            {getAvatarDisplay()}
 
-            {/* User Info */}
+          <div className="flex items-center gap-3">
+            {renderAvatar()}
+
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {currentUser.fullName || currentUser.username || "User"}
+                {displayUser?.fullName || "User"}
               </p>
               <p className="text-xs text-gray-400 truncate">
-                {currentUser.email || "No email"}
+                {displayUser?.email || "No email"}
               </p>
             </div>
           </div>
         </div>
 
         {/* Menu */}
-        <nav className="space-y-1">
+        <nav className="space-y-1 flex-1 overflow-y-auto">
           {menuItems.map((item) => (
             <button
               key={item.label}
@@ -204,11 +163,16 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
                 isActive(item.path) ? "bg-blue-600" : "hover:bg-gray-800"
               }`}
             >
-              <item.icon className="w-5 h-5" />
-              <span className="text-sm">{item.label}</span>
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm truncate">{item.label}</span>
             </button>
           ))}
         </nav>
+
+        {/* Footer */}
+        <div className="pt-4 border-t border-gray-700 mt-4">
+          <p className="text-xs text-gray-400 text-center">© 2025 Roomie</p>
+        </div>
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
+// web-app/src/pages/Booking/MyBookings.jsx
 import React, { useState } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import { useRole } from "../../contexts/RoleContext";
+
 // Import custom components
-import ViewModeToggle from "../../components/Booking/ViewModeToggle.jsx";
 import BookingFilters from "../../components/Booking/BookingFilters.jsx";
 import BookingsList from "../../components/Booking/BookingsList.jsx";
 import BookingsPagination from "../../components/Booking/BookingsPagination.jsx";
@@ -19,7 +21,11 @@ const MyBookings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("MyBookings");
   const { t } = useTranslation();
-  // Use custom hook for booking operations
+
+  // ✅ Get activeRole from Context
+  const { activeRole } = useRole();
+
+  // ✅ Pass activeRole to hook
   const {
     bookings,
     loading,
@@ -33,13 +39,12 @@ const MyBookings = () => {
     setBookingStatus,
     setSearchTerm,
     setCurrentPage,
-    setViewMode,
     handleCancelBooking,
     handleConfirmBooking,
     getStatusConfig,
     transformBookingToCard,
     closeModal,
-  } = useBookingOperations();
+  } = useBookingOperations(activeRole);
 
   // Transform bookings for display
   const transformedBookings = bookings.map(transformBookingToCard);
@@ -68,20 +73,17 @@ const MyBookings = () => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
+        {/* ✅ Header without role props (handled in Header component) */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
         <PageTitle
           title={t("booking.myBookings")}
           subtitle={t("booking.myBookingsSubtitle")}
         />
+
         <main className="p-8 w-full">
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            {/* View Mode Toggle */}
-            <ViewModeToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              ownerCount={ownerCount}
-              tenantCount={tenantCount}
-            />
+            {/* ❌ Remove ViewModeToggle - Role toggle is now in Header */}
 
             {/* Filters */}
             <BookingFilters
@@ -97,7 +99,7 @@ const MyBookings = () => {
                 bookings={transformedBookings}
                 loading={loading}
                 viewMode={viewMode}
-                isOwner={viewMode === "OWNER"}
+                isOwner={activeRole === "landlord"}
                 bookingStatus={bookingStatus}
                 searchTerm={searchTerm}
               />

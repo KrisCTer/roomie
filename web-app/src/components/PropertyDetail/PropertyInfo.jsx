@@ -1,118 +1,212 @@
-import React from "react";
-import { Info, Calendar, Tag, CheckCircle, Home } from "lucide-react";
+// src/components/PropertyDetail/PropertyInfo.jsx
+import React, { useState } from "react";
+import {
+  Info,
+  Calendar,
+  Tag,
+  CheckCircle,
+  Home,
+  MapPin,
+  DoorOpen,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 const PropertyInfo = ({ property }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
   const formatDate = (timestamp) => {
     if (!timestamp) return "-";
     return new Date(timestamp).toLocaleString("vi-VN", {
       year: "numeric",
-      month: "short",
+      month: "long",
       day: "numeric",
     });
   };
 
-  const infoItems = [
-    {
-      icon: <Home className="w-4 h-4" />,
-      label: "Property ID",
-      value: property.propertyId?.slice(0, 8) + "..." || "-",
-      fullValue: property.propertyId,
-    },
-    {
-      icon: <Tag className="w-4 h-4" />,
-      label: "Property Type",
-      value: property.propertyType,
-    },
-    {
-      icon: <CheckCircle className="w-4 h-4" />,
-      label: "Status",
-      value: property.propertyStatus,
-      badge: true,
-    },
-  ];
+  const getPropertyTypeLabel = (type) => {
+    const types = {
+      ROOM: "Phòng trọ",
+      APARTMENT: "Căn hộ",
+      HOUSE: "Nhà nguyên căn",
+      VILLA: "Biệt thự",
+    };
+    return types[type] || type;
+  };
 
-  if (property.propertyLabel && property.propertyLabel !== "NONE") {
-    infoItems.push({
-      icon: <Tag className="w-4 h-4" />,
-      label: "Label",
-      value: property.propertyLabel,
-      badge: true,
-    });
-  }
+  const getStatusLabel = (status) => {
+    const statuses = {
+      AVAILABLE: "Còn trống",
+      RENTED: "Đã cho thuê",
+      PENDING: "Đang chờ",
+    };
+    return statuses[status] || status;
+  };
 
-  if (property.yearBuilt) {
-    infoItems.push({
-      icon: <Calendar className="w-4 h-4" />,
-      label: "Year Built",
-      value: property.yearBuilt,
-    });
-  }
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "AVAILABLE":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "RENTED":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    }
+  };
 
-  if (property.landArea) {
-    infoItems.push({
-      icon: <Home className="w-4 h-4" />,
-      label: "Land Area",
-      value: `${property.landArea} m²`,
-    });
-  }
-
-  if (property.createdAt) {
-    infoItems.push({
-      icon: <Calendar className="w-4 h-4" />,
-      label: "Listed On",
-      value: formatDate(property.createdAt),
-    });
-  }
+  if (!property) return null;
 
   return (
-    <div className="border border-gray-300 rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Info className="w-5 h-5 text-gray-700" />
-        <h3 className="text-lg font-semibold">Property Details</h3>
-      </div>
-
-      <div className="space-y-3">
-        {infoItems.map((item, index) => (
-          <div
-            key={index}
-            className="flex items-start justify-between py-2 border-b border-gray-100 last:border-0"
-            title={item.fullValue}
-          >
-            <div className="flex items-center gap-2 text-gray-600">
-              {item.icon}
-              <span className="text-sm">{item.label}</span>
-            </div>
-            <div className="text-right">
-              {item.badge ? (
-                <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded">
-                  {item.value}
-                </span>
-              ) : (
-                <span className="text-sm font-medium text-gray-900">
-                  {item.value || "-"}
-                </span>
-              )}
-            </div>
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      {/* ===== Header (Clickable) ===== */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
+            <Info className="w-5 h-5 text-blue-600" />
           </div>
-        ))}
-      </div>
+          <h3 className="text-xl font-bold text-gray-900">
+            Thông tin chi tiết
+          </h3>
+        </div>
 
-      {/* Approval Status Badge */}
-      {property.status && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Approval Status</span>
-            <span
-              className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                property.status === "APPROVED"
-                  ? "bg-green-100 text-green-700"
-                  : property.status === "PENDING"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-            >
-              {property.status}
-            </span>
+        {isOpen ? (
+          <ChevronUp className="w-5 h-5 text-gray-500" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-500" />
+        )}
+      </button>
+
+      {/* ===== Content (Collapsible) ===== */}
+      {isOpen && (
+        <div className="px-6 pb-6 border-t border-gray-100">
+          <div className="pt-4 space-y-4">
+            {/* Property Type */}
+            <div className="flex items-center justify-between py-3 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <Home className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700 font-medium">Loại hình</span>
+              </div>
+              <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg border border-blue-200">
+                {getPropertyTypeLabel(property.propertyType)}
+              </span>
+            </div>
+
+            {/* Status */}
+            <div className="flex items-center justify-between py-3 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700 font-medium">Trạng thái</span>
+              </div>
+              <span
+                className={`px-3 py-1 text-sm font-semibold rounded-lg border ${getStatusColor(
+                  property.propertyStatus
+                )}`}
+              >
+                {getStatusLabel(property.propertyStatus)}
+              </span>
+            </div>
+
+            {/* Property Label */}
+            {property.propertyLabel && property.propertyLabel !== "NONE" && (
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <Tag className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-700 font-medium">
+                    Nhãn đặc biệt
+                  </span>
+                </div>
+                <span className="px-3 py-1 bg-rose-50 text-rose-700 text-sm font-semibold rounded-lg border border-rose-200">
+                  {property.propertyLabel}
+                </span>
+              </div>
+            )}
+
+            {/* Rooms */}
+            {property.rooms && (
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <DoorOpen className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-700 font-medium">Số phòng</span>
+                </div>
+                <span className="text-gray-900 font-semibold">
+                  {property.rooms} phòng
+                </span>
+              </div>
+            )}
+
+            {/* Year Built */}
+            {property.yearBuilt && (
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-700 font-medium">
+                    Năm xây dựng
+                  </span>
+                </div>
+                <span className="text-gray-900 font-semibold">
+                  {property.yearBuilt}
+                </span>
+              </div>
+            )}
+
+            {/* Land Area */}
+            {property.landArea && (
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <Home className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-700 font-medium">
+                    Diện tích đất
+                  </span>
+                </div>
+                <span className="text-gray-900 font-semibold">
+                  {property.landArea} m²
+                </span>
+              </div>
+            )}
+
+            {/* Address */}
+            {property.address?.fullAddress && (
+              <div className="flex items-start justify-between py-3 border-b border-gray-100">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
+                  <span className="text-gray-700 font-medium">Địa chỉ</span>
+                </div>
+                <span className="text-gray-900 font-medium text-right max-w-xs">
+                  {property.address.fullAddress}
+                </span>
+              </div>
+            )}
+
+            {/* Created At */}
+            {property.createdAt && (
+              <div className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-700 font-medium">Ngày đăng</span>
+                </div>
+                <span className="text-gray-900 font-semibold">
+                  {formatDate(property.createdAt)}
+                </span>
+              </div>
+            )}
+
+            {/* Property ID */}
+            {property.propertyId && (
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Mã tin</span>
+                  <span
+                    className="text-xs text-gray-600 font-mono"
+                    title={property.propertyId}
+                  >
+                    {property.propertyId.slice(0, 12)}...
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -46,6 +46,8 @@ const BookingDetailModal = ({
   const statusConfig = getStatusConfig(booking.status);
 
   const formatDate = (dateString) => {
+    console.log("📦 booking object:", dateString);
+
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",

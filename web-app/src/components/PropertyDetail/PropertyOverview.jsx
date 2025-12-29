@@ -1,86 +1,94 @@
 import React from "react";
-import { Bed, Bath, Car, Maximize, Home, Calendar } from "lucide-react";
+import { Bed, Bath, Car, Maximize, Home } from "lucide-react";
 
 const PropertyOverview = ({ property }) => {
   const features = [
     {
-      icon: <Bed className="w-5 h-5" />,
-      label: "Bedrooms",
+      icon: <Bed className="w-6 h-6" />,
+      label: "Phòng ngủ",
       value: property.bedrooms || 0,
+      unit: "phòng",
     },
     {
-      icon: <Bath className="w-5 h-5" />,
-      label: "Bathrooms",
+      icon: <Bath className="w-6 h-6" />,
+      label: "Phòng tắm",
       value: property.bathrooms || 0,
+      unit: "phòng",
     },
     {
-      icon: <Car className="w-5 h-5" />,
-      label: "Garages",
+      icon: <Car className="w-6 h-6" />,
+      label: "Chỗ để xe",
       value: property.garages || 0,
+      unit: "chỗ",
     },
     {
-      icon: <Maximize className="w-5 h-5" />,
-      label: "Size",
-      value: `${property.size || 0} m²`,
+      icon: <Maximize className="w-6 h-6" />,
+      label: "Diện tích",
+      value: property.size || 0,
+      unit: "m²",
     },
   ];
 
   return (
-    <div className="pb-8 border-b border-gray-200">
-      {/* Property hosted info */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-2">
-          {property.propertyType} in {property.address?.district || "Location"}
-        </h2>
-        <div className="flex items-center gap-2 text-gray-600">
-          <span>{property.bedrooms || 0} bedrooms</span>
-          <span>·</span>
-          <span>{property.bathrooms || 0} bathrooms</span>
-          <span>·</span>
-          <span>{property.size || 0} m²</span>
-        </div>
-      </div>
-
+    <div className="bg-white">
       {/* Features Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-y border-gray-200">
+      <div className="grid grid-cols-2 gap-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
         {features.map((feature, index) => (
-          <div key={index} className="flex flex-col gap-2">
-            <div className="text-gray-700">{feature.icon}</div>
+          <div key={index} className="flex items-center gap-4 text-left">
+            {/* Icon */}
+            <div className="w-12 h-12 flex items-center justify-center bg-white rounded-lg border border-gray-200 text-gray-700 shrink-0">
+              {feature.icon}
+            </div>
+
+            {/* Text */}
             <div>
-              <div className="font-semibold text-lg text-gray-900">
+              <div className="text-lg font-bold text-gray-900">
                 {feature.value}
               </div>
-              <div className="text-sm text-gray-600">{feature.label}</div>
+              <div className="text-sm text-gray-600">{feature.unit}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Pricing Section */}
-      <div className="mt-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-          <div className="text-sm text-gray-600 mb-1">Monthly rent</div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-gray-900">
-              {property.monthlyRent?.toLocaleString()}đ
-            </span>
-            <span className="text-gray-600">/month</span>
+      <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Monthly Rent */}
+          <div>
+            <div className="text-sm font-medium text-blue-900 mb-2">
+              Giá thuê hàng tháng
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-blue-600">
+                {property.monthlyRent?.toLocaleString()}đ
+              </span>
+              <span className="text-gray-600">/tháng</span>
+            </div>
           </div>
+
+          {/* Deposit */}
           {property.rentalDeposit > 0 && (
-            <div className="text-sm text-gray-600 mt-2">
-              Deposit: {property.rentalDeposit?.toLocaleString()}đ
+            <div>
+              <div className="text-sm font-medium text-blue-900 mb-2">
+                Tiền cọc
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-blue-600">
+                  {property.rentalDeposit?.toLocaleString()}đ
+                </span>
+              </div>
             </div>
           )}
         </div>
 
-        {property.yearBuilt && (
-          <div className="text-right">
-            <div className="text-sm text-gray-600 mb-1">Year built</div>
-            <div className="text-xl font-semibold text-gray-900">
-              {property.yearBuilt}
-            </div>
-          </div>
-        )}
+        {/* Additional Info */}
+        <div className="mt-4 pt-4 border-t border-blue-200">
+          <p className="text-sm text-blue-900">
+            💡 Giá thuê chưa bao gồm tiền điện, nước, internet và các dịch vụ
+            khác
+          </p>
+        </div>
       </div>
     </div>
   );

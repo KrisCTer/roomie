@@ -92,6 +92,13 @@ export const API = {
   PROPERTY_INTERNAL_UPDATE: (id) => `/property/internal/${id}`,
   GET_PROPERTY_BY_OWNER: (ownerId) => `/property/owner/${ownerId}`,
 
+  // ========= FAVORITES (Property Service - Port 8083) =========
+  TOGGLE_FAVORITE: (propertyId) => `/property/favorites/${propertyId}/toggle`,
+  CHECK_FAVORITE: (propertyId) => `/property/favorites/${propertyId}/check`,
+  GET_MY_FAVORITES: "/property/favorites/my-favorites",
+  REMOVE_FAVORITE: (propertyId) => `/property/favorites/${propertyId}`,
+  GET_FAVORITE_COUNT: (propertyId) => `/property/favorites/${propertyId}/count`,
+
   // ========= BOOKING (Booking Service - Port 8084) =========
   CREATE_BOOKING: "/booking/",
   GET_BOOKING: (id) => `/booking/${id}`,

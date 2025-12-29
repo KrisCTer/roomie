@@ -23,4 +23,6 @@ public class BookingResponse {
     BigDecimal rentalDeposit;
     String status;
     String bookingReference;
+    Instant createdAt;
+    Instant updatedAt;
 }

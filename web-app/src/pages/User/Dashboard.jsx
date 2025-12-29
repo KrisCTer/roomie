@@ -1,33 +1,32 @@
-// src/pages/User/Dashboard/Dashboard.jsx
-import React, { useState, useMemo } from "react";
+// web-app/src/pages/User/Dashboard.jsx
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { RefreshCw, TrendingUp, AlertCircle } from "lucide-react";
 
 // Layout
 import Sidebar from "../../components/layout/layoutUser/Sidebar";
 import Header from "../../components/layout/layoutUser/Header";
 import Footer from "../../components/layout/layoutUser/Footer";
+import PageTitle from "../../components/common/PageTitle.jsx";
 
 // Components
-import RoleToggle from "../../components/Dashboard/RoleToggle";
 import QuickActions from "../../components/Dashboard/QuickActions";
 import RecentActivity from "../../components/Dashboard/RecentActivity";
 import LandlordStats from "../../components/Dashboard/LandlordStats";
 import TenantStats from "../../components/Dashboard/TenantStats";
 import RevenueChartRecharts from "../../components/Dashboard/RevenueChartRecharts";
-import PageTitle from "../../components/common/PageTitle.jsx";
 
 // Hooks
 import useDashboardData from "../../hooks/useDashboardData";
-
-// Icons
-import { RefreshCw, TrendingUp, AlertCircle } from "lucide-react";
+import { useRole } from "../../contexts/RoleContext";
+import { useRefresh } from "../../contexts/RefreshContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Dashboards");
-  const [activeRole, setActiveRole] = useState("landlord");
-
+  const { activeRole } = useRole();
+  const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
   const { loading, data, stats, refetch } = useDashboardData(activeRole);
 
   // ==========================================
@@ -43,6 +42,14 @@ const Dashboard = () => {
       data.bills
     );
   }, [activeRole, data.properties, data.contracts, data.bills]);
+
+  useEffect(() => {
+    registerRefreshCallback("dashboard", refetch);
+
+    return () => {
+      unregisterRefreshCallback("dashboard");
+    };
+  }, [registerRefreshCallback, unregisterRefreshCallback, refetch]);
 
   // Handle stat card clicks
   const handleStatClick = (type) => {
@@ -144,28 +151,6 @@ const Dashboard = () => {
           subtitle="Manage your properties and track your revenue."
         />
         <main className="p-8 w-full">
-          {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-            <div className="flex items-center gap-4 mt-4 lg:mt-0">
-              <RoleToggle
-                activeRole={activeRole}
-                onRoleChange={setActiveRole}
-              />
-              <button
-                onClick={refetch}
-                disabled={loading}
-                className="p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition disabled:opacity-50 shadow-sm"
-                title="Refresh data"
-              >
-                <RefreshCw
-                  className={`w-5 h-5 text-gray-700 ${
-                    loading ? "animate-spin" : ""
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-
           {/* Loading State */}
           {loading && (
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">

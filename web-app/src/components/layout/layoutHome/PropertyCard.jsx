@@ -7,17 +7,60 @@ import {
   Typography,
   Box,
   Chip,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
-  Bed as BedIcon,
-  Bathtub as BathIcon,
-  SquareFoot as AreaIcon,
-  LocationOn as LocationIcon,
-} from "@mui/icons-material";
+  Bed,
+  Bath,
+  Maximize,
+  Home,
+  MapPin,
+  Heart,
+  Share2,
+  ArrowRight,
+} from "lucide-react";
+import { useFavorite } from "../../../hooks/useFavorite";
 
 const PropertyCard = ({ property, onClick }) => {
-  const { image, title, location, price, bedrooms, bathrooms, size, type } =
+  const { id, image, title, location, price, bedrooms, bathrooms, size, type } =
     property;
+
+  // Favorite hook
+  const {
+    isFavorited,
+    favoriteCount,
+    isLoading: favoriteLoading,
+    handleToggleFavorite,
+  } = useFavorite(id);
+
+  // Share handler
+  const handleShare = async (e) => {
+    e.stopPropagation(); // Prevent card click
+
+    try {
+      const url = `${window.location.origin}/property/${id}`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: title,
+          text: "Xem phòng trọ này trên Roomie!",
+          url: url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        alert("Đã sao chép liên kết!");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
+  // Favorite handler
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation(); // Prevent card click
+    handleToggleFavorite();
+  };
 
   return (
     <Card
@@ -38,14 +81,21 @@ const PropertyCard = ({ property, onClick }) => {
           "& .property-image": {
             transform: "scale(1.05)",
           },
+          "& .action-buttons": {
+            opacity: 1,
+          },
+          "& .read-more-btn": {
+            bgcolor: "primary.main",
+            color: "white",
+          },
         },
       }}
     >
-      {/* Image */}
+      {/* ================= IMAGE ================= */}
       <Box
         sx={{
           position: "relative",
-          paddingTop: "66.67%", // 3:2 aspect ratio
+          paddingTop: "66.67%",
           overflow: "hidden",
           bgcolor: "grey.100",
         }}
@@ -66,9 +116,10 @@ const PropertyCard = ({ property, onClick }) => {
           }}
         />
 
-        {/* Type Badge */}
+        {/* Property Type */}
         {type && (
           <Chip
+            icon={<Home size={14} />}
             label={type}
             size="small"
             sx={{
@@ -82,9 +133,92 @@ const PropertyCard = ({ property, onClick }) => {
             }}
           />
         )}
+
+        {/* Action Buttons - Top Right */}
+        <Box
+          className="action-buttons"
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            display: "flex",
+            gap: 1,
+            opacity: { xs: 1, md: 0 }, // Always visible on mobile
+            transition: "opacity 0.3s ease",
+          }}
+        >
+          {/* Share Button */}
+          <Tooltip title="Chia sẻ" arrow>
+            <IconButton
+              onClick={handleShare}
+              size="small"
+              sx={{
+                bgcolor: "white",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                "&:hover": {
+                  bgcolor: "grey.100",
+                  transform: "scale(1.1)",
+                },
+                transition: "all 0.2s",
+              }}
+            >
+              <Share2 size={16} className="text-gray-700" />
+            </IconButton>
+          </Tooltip>
+
+          {/* Favorite Button */}
+          <Tooltip title={isFavorited ? "Bỏ lưu" : "Lưu"} arrow>
+            <IconButton
+              onClick={handleFavoriteClick}
+              disabled={favoriteLoading}
+              size="small"
+              sx={{
+                bgcolor: isFavorited ? "rose.50" : "white",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                "&:hover": {
+                  bgcolor: isFavorited ? "rose.100" : "grey.100",
+                  transform: "scale(1.1)",
+                },
+                transition: "all 0.2s",
+              }}
+            >
+              <Heart
+                size={16}
+                className={
+                  isFavorited ? "fill-rose-600 text-rose-600" : "text-gray-700"
+                }
+              />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        {/* Favorite Count Badge */}
+        {favoriteCount > 0 && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 12,
+              right: 12,
+              bgcolor: "rgba(0,0,0,0.75)",
+              backdropFilter: "blur(8px)",
+              color: "white",
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 999,
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+            }}
+          >
+            <Heart size={12} className="fill-rose-500 text-rose-500" />
+            {favoriteCount}
+          </Box>
+        )}
       </Box>
 
-      {/* Content */}
+      {/* ================= CONTENT ================= */}
       <CardContent
         sx={{
           p: 2.5,
@@ -113,15 +247,8 @@ const PropertyCard = ({ property, onClick }) => {
         </Typography>
 
         {/* Location */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            mb: 2,
-          }}
-        >
-          <LocationIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 2 }}>
+          <MapPin size={16} className="text-gray-500" />
           <Typography
             variant="body2"
             sx={{
@@ -135,7 +262,7 @@ const PropertyCard = ({ property, onClick }) => {
           </Typography>
         </Box>
 
-        {/* Property Details */}
+        {/* ================= FEATURES ================= */}
         {(bedrooms || bathrooms || size) && (
           <Box
             sx={{
@@ -145,36 +272,36 @@ const PropertyCard = ({ property, onClick }) => {
               flexWrap: "wrap",
             }}
           >
-            {bedrooms && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <BedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            {bedrooms > 0 && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                <Bed size={18} className="text-gray-500" />
+                <Typography variant="body2" color="text.secondary">
                   {bedrooms}
                 </Typography>
               </Box>
             )}
 
-            {bathrooms && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <BathIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            {bathrooms > 0 && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                <Bath size={18} className="text-gray-500" />
+                <Typography variant="body2" color="text.secondary">
                   {bathrooms}
                 </Typography>
               </Box>
             )}
 
-            {size && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <AreaIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {size}m²
+            {size > 0 && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                <Maximize size={18} className="text-gray-500" />
+                <Typography variant="body2" color="text.secondary">
+                  {size} m²
                 </Typography>
               </Box>
             )}
           </Box>
         )}
 
-        {/* Price */}
+        {/* ================= PRICE ================= */}
         <Box sx={{ mt: "auto" }}>
           <Typography
             variant="h6"
@@ -182,6 +309,7 @@ const PropertyCard = ({ property, onClick }) => {
               fontWeight: 700,
               color: "primary.main",
               fontSize: "1.125rem",
+              mb: 1.5,
             }}
           >
             {price}
@@ -197,6 +325,30 @@ const PropertyCard = ({ property, onClick }) => {
               / tháng
             </Typography>
           </Typography>
+
+          {/* Read More Button */}
+          <Box
+            className="read-more-btn"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              px: 2,
+              py: 1,
+              borderRadius: 2,
+              bgcolor: "grey.100",
+              color: "primary.main",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              transition: "all 0.2s",
+              border: "1px solid",
+              borderColor: "grey.200",
+            }}
+          >
+            <span>Xem chi tiết</span>
+            <ArrowRight size={16} />
+          </Box>
         </Box>
       </CardContent>
     </Card>

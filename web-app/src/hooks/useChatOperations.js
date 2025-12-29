@@ -1,3 +1,4 @@
+// web-app/src/hooks/useChatOperations.js
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -71,19 +72,15 @@ export const useChatOperations = () => {
     }
   }, [location.state]);
 
-  // Load conversations
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  const loadConversations = async () => {
+  //  Load conversations function (useCallback for stable reference)
+  const loadConversations = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getMyConversations();
       const convList =
         response?.result || response?.data?.result || response?.data || [];
 
-      console.log("✅ Loaded conversations:", convList);
+      console.log(" Loaded conversations:", convList);
       setConversations(convList);
 
       // Auto-select pending conversation
@@ -102,10 +99,21 @@ export const useChatOperations = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // No dependencies - stable function
+
+  //  Initial load
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  //  Refresh conversations function (public API)
+  const refreshConversations = useCallback(async () => {
+    console.log("🔄 Refreshing conversations...");
+    await loadConversations();
+  }, [loadConversations]);
 
   // Load messages
-  const loadMessages = async (conversationId) => {
+  const loadMessages = useCallback(async (conversationId) => {
     try {
       setLoading(true);
       const response = await getMessages(conversationId);
@@ -120,176 +128,187 @@ export const useChatOperations = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Select conversation
-  const handleSelectConversation = useCallback((conversation) => {
-    const convId = conversation.conversationId || conversation.id;
+  const handleSelectConversation = useCallback(
+    (conversation) => {
+      const convId = conversation.conversationId || conversation.id;
 
-    setSelectedConversation(conversation);
-    currentConversationRef.current = convId;
-    loadMessages(convId);
+      setSelectedConversation(conversation);
+      currentConversationRef.current = convId;
+      loadMessages(convId);
 
-    // Join socket room
-    if (sendMessage) {
-      sendMessage("join_conversation", { conversationId: convId });
-      console.log("🔔 Joined socket room for conversation:", convId);
-    }
-  }, [sendMessage]);
+      // Join socket room
+      if (sendMessage) {
+        sendMessage("join_conversation", { conversationId: convId });
+        console.log("🔔 Joined socket room for conversation:", convId);
+      }
+    },
+    [sendMessage, loadMessages]
+  );
 
   // Send message
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation) return;
+  const handleSendMessage = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!newMessage.trim() || !selectedConversation) return;
 
-    if (!currentUser) {
-      alert("Vui lòng đăng nhập để gửi tin nhắn");
-      return;
-    }
+      if (!currentUser) {
+        alert("Vui lòng đăng nhập để gửi tin nhắn");
+        return;
+      }
 
-    const convId =
-      selectedConversation.conversationId || selectedConversation.id;
+      const convId =
+        selectedConversation.conversationId || selectedConversation.id;
 
-    // Create optimistic message
-    const tempMessage = {
-      id: `temp-${Date.now()}`,
-      conversationId: convId,
-      message: newMessage.trim(),
-      me: true,
-      sender: {
-        userId: currentUser.userId,
-        username: currentUser.username,
-        firstName: currentUser.firstName,
-        lastName: currentUser.lastName,
-        avatar: currentUser.avatar,
-      },
-      createdDate: new Date().toISOString(),
-      isPending: true,
-    };
-
-    // Add optimistic message immediately
-    setMessages((prev) => [...prev, tempMessage]);
-    setNewMessage("");
-    scrollHelper(messagesEndRef);
-
-    try {
-      setSending(true);
-
-      const payload = {
+      // Create optimistic message
+      const tempMessage = {
+        id: `temp-${Date.now()}`,
         conversationId: convId,
-        message: tempMessage.message,
+        message: newMessage.trim(),
+        me: true,
+        sender: {
+          userId: currentUser.userId,
+          username: currentUser.username,
+          firstName: currentUser.firstName,
+          lastName: currentUser.lastName,
+          avatar: currentUser.avatar,
+        },
+        createdDate: new Date().toISOString(),
+        isPending: true,
       };
 
-      console.log("📤 Sending message:", payload);
-      const response = await createMessage(payload);
-      const sentMessage =
-        response?.result ||
-        response?.data?.result ||
-        response?.data ||
-        response;
+      // Add optimistic message immediately
+      setMessages((prev) => [...prev, tempMessage]);
+      setNewMessage("");
+      scrollHelper(messagesEndRef);
 
-      console.log("✅ Message sent successfully:", sentMessage);
+      try {
+        setSending(true);
 
-      // Replace temp message with real message
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === tempMessage.id ? { ...sentMessage, isPending: false } : msg
-        )
-      );
+        const payload = {
+          conversationId: convId,
+          message: tempMessage.message,
+        };
 
-      // Send property context if first message
-      if (
-        propertyContext &&
-        messages.length === 0 &&
-        !sessionStorage.getItem(`property-context-sent-${convId}`)
-      ) {
-        setTimeout(async () => {
-          const contextMessage = {
-            conversationId: convId,
-            message: `Xin chào! Tôi quan tâm đến bất động sản: "${propertyContext.propertyTitle}"`,
-          };
+        console.log("📤 Sending message:", payload);
+        const response = await createMessage(payload);
+        const sentMessage =
+          response?.result ||
+          response?.data?.result ||
+          response?.data ||
+          response;
 
-          try {
-            await createMessage(contextMessage);
-            sessionStorage.setItem(`property-context-sent-${convId}`, "true");
-          } catch (err) {
-            console.error("Error sending context message:", err);
-          }
-        }, 500);
+        console.log(" Message sent successfully:", sentMessage);
+
+        // Replace temp message with real message
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempMessage.id
+              ? { ...sentMessage, isPending: false }
+              : msg
+          )
+        );
+
+        // Send property context if first message
+        if (
+          propertyContext &&
+          messages.length === 0 &&
+          !sessionStorage.getItem(`property-context-sent-${convId}`)
+        ) {
+          setTimeout(async () => {
+            const contextMessage = {
+              conversationId: convId,
+              message: `Xin chào! Tôi quan tâm đến bất động sản: "${propertyContext.propertyTitle}"`,
+            };
+
+            try {
+              await createMessage(contextMessage);
+              sessionStorage.setItem(`property-context-sent-${convId}`, "true");
+            } catch (err) {
+              console.error("Error sending context message:", err);
+            }
+          }, 500);
+        }
+      } catch (error) {
+        console.error("❌ Error sending message:", error);
+
+        // Remove optimistic message on error
+        setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
+        alert("Không thể gửi tin nhắn. Vui lòng thử lại.");
+      } finally {
+        setSending(false);
       }
-    } catch (error) {
-      console.error("❌ Error sending message:", error);
-
-      // Remove optimistic message on error
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
-      alert("Không thể gửi tin nhắn. Vui lòng thử lại.");
-    } finally {
-      setSending(false);
-    }
-  };
+    },
+    [newMessage, selectedConversation, currentUser, propertyContext, messages]
+  );
 
   // Handle message received (socket)
-  const handleMessageReceived = useCallback((data) => {
-    console.log("📩 WebSocket message received:", data);
+  const handleMessageReceived = useCallback(
+    (data) => {
+      console.log("📩 WebSocket message received:", data);
 
-    const msgConvId = data.conversationId;
-    const currentConvId = currentConversationRef.current;
+      const msgConvId = data.conversationId;
+      const currentConvId = currentConversationRef.current;
 
-    if (!currentConvId || msgConvId !== currentConvId) {
-      console.log("ℹ️ Message for different conversation");
-      return;
-    }
-
-    setMessages((prev) => {
-      const msgId = data.id || data.messageId;
-
-      // Block duplicates
-      if (prev.some((msg) => msg.id === msgId)) {
-        console.log("⚠️ Duplicate message blocked");
-        return prev;
+      if (!currentConvId || msgConvId !== currentConvId) {
+        console.log("ℹ️ Message for different conversation");
+        return;
       }
 
-      // Replace temp message
-      const tempIndex = prev.findIndex(
-        (m) => m.isPending && m.message === data.message
-      );
+      setMessages((prev) => {
+        const msgId = data.id || data.messageId;
 
-      if (tempIndex !== -1) {
-        const updated = [...prev];
-        updated[tempIndex] = { ...data, isPending: false };
-        return updated;
-      }
-
-      // Append normally
-      return [...prev, data];
-    });
-
-    setConversations((prev) => {
-      const convId = data.conversationId;
-      const exists = prev.some((c) => (c.conversationId || c.id) === convId);
-
-      // If conversation doesn't exist, reload
-      if (!exists) {
-        loadConversations();
-        return prev;
-      }
-
-      // Update last message
-      return prev.map((conv) => {
-        if ((conv.conversationId || conv.id) === convId) {
-          return {
-            ...conv,
-            lastMessage: data,
-            lastMessageTime:
-              data.createdDate || data.createdAt || new Date().toISOString(),
-          };
+        // Block duplicates
+        if (prev.some((msg) => msg.id === msgId)) {
+          console.log("⚠️ Duplicate message blocked");
+          return prev;
         }
-        return conv;
-      });
-    });
 
-    scrollHelper(messagesEndRef);
-  }, []);
+        // Replace temp message
+        const tempIndex = prev.findIndex(
+          (m) => m.isPending && m.message === data.message
+        );
+
+        if (tempIndex !== -1) {
+          const updated = [...prev];
+          updated[tempIndex] = { ...data, isPending: false };
+          return updated;
+        }
+
+        // Append normally
+        return [...prev, data];
+      });
+
+      setConversations((prev) => {
+        const convId = data.conversationId;
+        const exists = prev.some((c) => (c.conversationId || c.id) === convId);
+
+        // If conversation doesn't exist, reload
+        if (!exists) {
+          loadConversations();
+          return prev;
+        }
+
+        // Update last message
+        return prev.map((conv) => {
+          if ((conv.conversationId || conv.id) === convId) {
+            return {
+              ...conv,
+              lastMessage: data,
+              lastMessageTime:
+                data.createdDate || data.createdAt || new Date().toISOString(),
+            };
+          }
+          return conv;
+        });
+      });
+
+      scrollHelper(messagesEndRef);
+    },
+    [loadConversations]
+  );
 
   // Handle message sent (socket)
   const handleMessageSent = useCallback((data) => {
@@ -336,7 +355,7 @@ export const useChatOperations = () => {
   }, [registerMessageCallbacks, handleMessageReceived, handleMessageSent]);
 
   // Search users
-  const handleSearchUsers = async () => {
+  const handleSearchUsers = useCallback(async () => {
     if (!searchTerm.trim()) return;
 
     try {
@@ -350,42 +369,45 @@ export const useChatOperations = () => {
     } finally {
       setSearching(false);
     }
-  };
+  }, [searchTerm]);
 
   // Create conversation
-  const handleCreateConversation = async (userId) => {
-    try {
-      const payload = {
-        type: "DIRECT",
-        participantIds: [userId],
-      };
+  const handleCreateConversation = useCallback(
+    async (userId) => {
+      try {
+        const payload = {
+          type: "DIRECT",
+          participantIds: [userId],
+        };
 
-      const response = await createConversation(payload);
-      const newConv =
-        response?.result ||
-        response?.data?.result ||
-        response?.data ||
-        response;
+        const response = await createConversation(payload);
+        const newConv =
+          response?.result ||
+          response?.data?.result ||
+          response?.data ||
+          response;
 
-      setConversations((prev) => [newConv, ...prev]);
-      setSelectedConversation(newConv);
-      setShowSearchModal(false);
-      setSearchTerm("");
-      setSearchResults([]);
+        setConversations((prev) => [newConv, ...prev]);
+        setSelectedConversation(newConv);
+        setShowSearchModal(false);
+        setSearchTerm("");
+        setSearchResults([]);
 
-      const convId = newConv.conversationId || newConv.id;
-      loadMessages(convId);
-    } catch (error) {
-      console.error("Error creating conversation:", error);
-      alert("Không thể tạo cuộc trò chuyện. Vui lòng thử lại.");
-    }
-  };
+        const convId = newConv.conversationId || newConv.id;
+        loadMessages(convId);
+      } catch (error) {
+        console.error("Error creating conversation:", error);
+        alert("Không thể tạo cuộc trò chuyện. Vui lòng thử lại.");
+      }
+    },
+    [loadMessages]
+  );
 
   // Remove property context
-  const handleRemovePropertyContext = () => {
+  const handleRemovePropertyContext = useCallback(() => {
     setPropertyContext(null);
     navigate("/messages", { replace: true });
-  };
+  }, [navigate]);
 
   return {
     // State
@@ -415,5 +437,9 @@ export const useChatOperations = () => {
     handleSearchUsers,
     handleCreateConversation,
     handleRemovePropertyContext,
+
+    //  Refresh
+    refreshConversations,
+    loadConversations,
   };
 };

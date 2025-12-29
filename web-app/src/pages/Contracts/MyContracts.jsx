@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+// web-app/src/pages/Contracts/MyContracts.jsx
+import React, { useState, useEffect } from "react";
 import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import { useRole } from "../../contexts/RoleContext";
+import { useRefresh } from "../../contexts/RefreshContext";
 
 // Import custom components
-import ContractTabs from "../../components/Contracts/ContractTabs.jsx";
 import StatsCard from "../../components/Contracts/StatsCard.jsx";
 import ContractsList from "../../components/Contracts/ContractsList.jsx";
 import LoadingState from "../../components/Contracts/LoadingState.jsx";
@@ -22,7 +24,11 @@ const MyContracts = () => {
   const [activeMenu, setActiveMenu] = useState("Contracts");
   const { t } = useTranslation();
 
-  // Use custom hook for contract operations
+  // Contexts
+  const { activeRole } = useRole();
+  const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
+
+  // Contract operations
   const {
     activeTab,
     contracts,
@@ -32,9 +38,20 @@ const MyContracts = () => {
     loading,
     stats,
     currentUserId,
+    toast,
     handleContractClick,
-    handleTabChange,
-  } = useContractOperations();
+    setToast,
+    refetch, // ✅ Now available!
+  } = useContractOperations(activeRole);
+
+  // ✅ Register refresh callback
+  useEffect(() => {
+    registerRefreshCallback("my-contracts", refetch);
+
+    return () => {
+      unregisterRefreshCallback("my-contracts");
+    };
+  }, [registerRefreshCallback, unregisterRefreshCallback, refetch]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -52,6 +69,7 @@ const MyContracts = () => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
+        {/* Header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <PageTitle
@@ -59,16 +77,36 @@ const MyContracts = () => {
           subtitle={t("contract.myContractsSubtitle")}
         />
 
+        {/* Toast Notification */}
+        {toast && (
+          <div className="fixed top-20 right-6 z-50 animate-slide-in">
+            <div
+              className={`px-6 py-4 rounded-lg shadow-lg ${
+                toast.type === "success"
+                  ? "bg-green-500 text-white"
+                  : "bg-red-500 text-white"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {toast.type === "success" ? (
+                  <CheckCircle className="w-5 h-5" />
+                ) : (
+                  <AlertCircle className="w-5 h-5" />
+                )}
+                <p className="font-medium">{toast.message}</p>
+                <button
+                  onClick={() => setToast(null)}
+                  className="ml-4 hover:opacity-75"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Content */}
         <div className="p-6">
-          {/* Tabs */}
-          <ContractTabs
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            landlordCount={contracts.asLandlord.length}
-            tenantCount={contracts.asTenant.length}
-          />
-
           {/* Loading State */}
           {loading ? (
             <LoadingState />

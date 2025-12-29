@@ -17,7 +17,8 @@ const Step3Amenities = ({
   const renderAmenitySection = (title, category, options) => (
     <div>
       <h3 className="font-semibold mb-3">
-        {t(`propertyForm.step3.sections.${title}`)}
+        {/* {t(`propertyForm.step3.sections.${title}`)} */}
+        {title}
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {options.map((item) => (
@@ -29,7 +30,8 @@ const Step3Amenities = ({
               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
             />
             <span className="text-sm">
-              {t(`propertyForm.step3.amenities.${item}`)}
+              {/* {t(`propertyForm.step3.amenities.${item}`)} */}
+              {item}
             </span>
           </label>
         ))}

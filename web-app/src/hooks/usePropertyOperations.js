@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// web-app/src/hooks/usePropertyOperations.js
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getPropertiesByOwner,
@@ -12,8 +13,8 @@ export const usePropertyOperations = () => {
   const navigate = useNavigate();
 
   // ================== CORE DATA ==================
-  const [allProperties, setAllProperties] = useState([]); // data gốc
-  const [properties, setProperties] = useState([]);       // data hiển thị
+  const [allProperties, setAllProperties] = useState([]);
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // ================== FILTER ==================
@@ -39,29 +40,45 @@ export const usePropertyOperations = () => {
   const [publishingProperty, setPublishingProperty] = useState(null);
 
   // =================================================
-  // FETCH DATA (CHỈ 1 LẦN)
+  // ✅ FETCH DATA FUNCTION (useCallback để stable reference)
   // =================================================
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        setLoading(true);
-        const response = await getPropertiesByOwner();
-        if (response?.success) {
-          setAllProperties(response.result || []);
-        }
-      } catch (error) {
-        console.error("Error fetching properties:", error);
+  const fetchProperties = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getPropertiesByOwner();
+      if (response?.success) {
+        setAllProperties(response.result || []);
+      } else {
         setAlert({
           type: "error",
           message: "Failed to fetch properties",
         });
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetch();
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      setAlert({
+        type: "error",
+        message: "Failed to fetch properties",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // =================================================
+  // ✅ REFETCH FUNCTION (public API)
+  // =================================================
+  const refetch = useCallback(async () => {
+    console.log("🔄 Refetching properties...");
+    await fetchProperties();
+  }, [fetchProperties]);
+
+  // =================================================
+  // INITIAL FETCH
+  // =================================================
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   // =================================================
   // FILTER LOCAL (KHÔNG LOADING)
@@ -69,21 +86,27 @@ export const usePropertyOperations = () => {
   useEffect(() => {
     let filtered = [...allProperties];
 
+    // Filter by post status (DRAFT, PENDING, APPROVED, etc.)
     if (postStatus) {
       filtered = filtered.filter(
-        (p) => p.status === postStatus
+        (p) => (p.status || "").toUpperCase() === postStatus.toUpperCase()
       );
     }
 
+    // Filter by property status (AVAILABLE, RENTED, etc.)
     if (propertyStatus) {
       filtered = filtered.filter(
-        (p) => p.propertyStatus === propertyStatus
+        (p) => (p.propertyStatus || "").toUpperCase() === propertyStatus.toUpperCase()
       );
     }
 
+    // Filter by search term
     if (searchTerm) {
+      const term = searchTerm.toLowerCase().trim();
       filtered = filtered.filter((p) =>
-        p.title?.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.title || "").toLowerCase().includes(term) ||
+        (p.description || "").toLowerCase().includes(term) ||
+        (p.address?.fullAddress || "").toLowerCase().includes(term)
       );
     }
 
@@ -114,18 +137,22 @@ export const usePropertyOperations = () => {
   // =================================================
   // CRUD HANDLERS
   // =================================================
-  const handleEdit = (propertyId) => {
+  const handleEdit = useCallback((propertyId) => {
     navigate(`/add-property?edit=${propertyId}`);
-  };
+  }, [navigate]);
 
-  const handleDelete = async (propertyId) => {
+  const handleDelete = useCallback(async (propertyId) => {
     if (!window.confirm("Are you sure you want to delete this property?")) return;
 
     try {
+      setLoading(true);
       await deleteProperty(propertyId);
+      
+      // Update local state immediately
       setAllProperties((prev) =>
         prev.filter((p) => p.propertyId !== propertyId)
       );
+      
       setAlert({
         type: "success",
         message: "Property deleted successfully",
@@ -134,15 +161,17 @@ export const usePropertyOperations = () => {
       console.error(error);
       setAlert({
         type: "error",
-        message: "Failed to delete property",
+        message: error?.response?.data?.message || "Failed to delete property",
       });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   // =================================================
   // BOOKINGS
   // =================================================
-  const handleViewBookings = async (property) => {
+  const handleViewBookings = useCallback(async (property) => {
     try {
       setLoadingBookings(true);
       setShowBookingsModal(true);
@@ -150,7 +179,7 @@ export const usePropertyOperations = () => {
 
       const response = await getPropertyBookings(property.propertyId);
       if (response?.success) {
-        const activeBookings = response.result.filter(
+        const activeBookings = (response.result || []).filter(
           (b) => b.status === "ACTIVE" && !b.hasContract
         );
 
@@ -166,12 +195,16 @@ export const usePropertyOperations = () => {
     } catch (error) {
       console.error(error);
       setPropertyBookings([]);
+      setAlert({
+        type: "error",
+        message: "Failed to load bookings",
+      });
     } finally {
       setLoadingBookings(false);
     }
-  };
+  }, []);
 
-  const handleCreateContract = async (booking) => {
+  const handleCreateContract = useCallback(async (booking) => {
     if (!booking) return;
 
     if (!window.confirm("Create contract for this booking?")) return;
@@ -189,8 +222,16 @@ export const usePropertyOperations = () => {
 
       const response = await createContract(payload);
       if (response?.success) {
+        setAlert({
+          type: "success",
+          message: "Contract created successfully",
+        });
         setShowBookingsModal(false);
-        navigate("/my-contracts");
+        
+        // Navigate after a short delay to show success message
+        setTimeout(() => {
+          navigate("/my-contracts");
+        }, 1000);
       } else {
         setAlert({
           type: "error",
@@ -201,22 +242,22 @@ export const usePropertyOperations = () => {
       console.error(error);
       setAlert({
         type: "error",
-        message: "Create contract failed",
+        message: error?.response?.data?.message || "Create contract failed",
       });
     } finally {
       setCreatingContract(false);
     }
-  };
+  }, [navigate]);
 
   // =================================================
   // PUBLISH PROPERTY
   // =================================================
-  const requestPublishProperty = (property) => {
+  const requestPublishProperty = useCallback((property) => {
     setPublishingProperty(property);
     setShowPublishModal(true);
-  };
+  }, []);
 
-  const confirmPublishProperty = async () => {
+  const confirmPublishProperty = useCallback(async () => {
     if (!publishingProperty) return;
 
     try {
@@ -229,7 +270,7 @@ export const usePropertyOperations = () => {
           message: "Property sent for approval successfully",
         });
 
-        // update local data
+        // Update local data
         setAllProperties((prev) =>
           prev.map((p) =>
             p.propertyId === publishingProperty.propertyId
@@ -247,66 +288,82 @@ export const usePropertyOperations = () => {
       console.error(error);
       setAlert({
         type: "error",
-        message: "Publish failed",
+        message: error?.response?.data?.message || "Publish failed",
       });
     } finally {
       setLoading(false);
       setShowPublishModal(false);
       setPublishingProperty(null);
     }
-  };
+  }, [publishingProperty]);
 
   // =================================================
   // CLOSE MODALS
   // =================================================
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowBookingsModal(false);
     setSelectedProperty(null);
     setPropertyBookings([]);
-  };
+  }, []);
+
+  // =================================================
+  // CLEAR FILTERS
+  // =================================================
+  const clearFilters = useCallback(() => {
+    setPostStatus("");
+    setPropertyStatus("");
+    setSearchTerm("");
+    setCurrentPage(1);
+  }, []);
 
   // =================================================
   // EXPORT
   // =================================================
   return {
-    // data
+    // ✅ Data
     properties,
+    allProperties,
     loading,
     totalPages,
     currentPage,
 
-    // filters
+    // ✅ Filters
     postStatus,
     propertyStatus,
     searchTerm,
-
     setPostStatus,
     setPropertyStatus,
     setSearchTerm,
     setCurrentPage,
+    clearFilters,
 
-    // bookings
+    // ✅ Bookings
     showBookingsModal,
     selectedProperty,
     propertyBookings,
     loadingBookings,
     creatingContract,
 
-    // publish
+    // ✅ Publish
     showPublishModal,
     publishingProperty,
     requestPublishProperty,
     confirmPublishProperty,
+    setShowPublishModal,
 
-    // alerts
+    // ✅ Alerts
     alert,
     setAlert,
 
-    // handlers
+    // ✅ Handlers
     handleEdit,
     handleDelete,
     handleViewBookings,
     handleCreateContract,
     handleCloseModal,
+
+    // ✅ Refetch (KEY ADDITION!)
+    refetch,
+    fetchProperties,
   };
 };

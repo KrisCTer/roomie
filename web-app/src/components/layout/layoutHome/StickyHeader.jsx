@@ -16,27 +16,22 @@ import {
   ListItemIcon,
   ListItemText,
   Slider,
-  Switch,
-  IconButton,
   Badge,
+  Stack,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
   Search as SearchIcon,
-  Person as PersonIcon,
   LocationOn as LocationIcon,
   Home as PropertyIcon,
   AttachMoney as PriceIcon,
   TrendingUp as TrendingIcon,
   History as HistoryIcon,
-  Language as LanguageIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
-  Dashboard as DashboardIcon,
-  AccountCircle as AccountCircleIcon,
-  Logout as LogoutIcon,
   FilterList as FilterListIcon,
+  AccountCircle as AccountCircleIcon,
+  Home as HomeIcon,
   Notifications as NotificationsIcon,
+  FavoriteBorder as FavoriteBorderIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -45,8 +40,18 @@ import {
   removeToken,
 } from "../../../services/localStorageService";
 import SearchFilters from "../../PropertySearch/SearchFilters";
-import NotificationDropdown from "../../Notification/NotificationDropdown";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
+import { getMyFavorites } from "../../../services/favorite.service";
+import {
+  Moon,
+  Sun,
+  LogOut,
+  UserCircle,
+  Globe,
+  Heart,
+  Bell,
+} from "lucide-react";
+import { useUser } from "../../../contexts/UserContext";
 
 const StickyHeader = ({
   forceCompact = false,
@@ -58,7 +63,7 @@ const StickyHeader = ({
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const loggedIn = isAuthenticated();
-
+  const { user } = useUser();
   const [scrolled, setScrolled] = useState(forceCompact);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
@@ -87,7 +92,9 @@ const StickyHeader = ({
   const [districts, setDistricts] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [notificationAnchor, setNotificationAnchor] = useState(null);
+
+  // Favorites count
+  const [favoritesCount, setFavoritesCount] = useState(0);
 
   const popularLocations = [
     { province: "Hồ Chí Minh", district: "Quận 1" },
@@ -101,18 +108,30 @@ const StickyHeader = ({
     { value: "", label: "Tất cả loại hình" },
     { value: "ROOM", label: "Phòng trọ" },
     { value: "DORMITORY", label: "Ký túc xá" },
-    { value: "APARTMENT", label: "Căn hộ chung cư" },
-    { value: "STUDIO", label: "Căn hộ Studio" },
+    { value: "APARTMENT", label: "Căn hộ" },
+    { value: "STUDIO", label: "Studio" },
     { value: "OFFICETEL", label: "Officetel" },
     { value: "HOUSE", label: "Nhà nguyên căn" },
     { value: "VILLA", label: "Biệt thự" },
-    { value: "OTHER", label: "Loại khác" },
+    { value: "OTHER", label: "Khác" },
   ];
 
   const languages = [
     { code: "en", label: "English", flag: "🇬🇧" },
     { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
   ];
+
+  const displayUser = React.useMemo(() => {
+    if (!user) return null;
+
+    return {
+      username: user.username || "User",
+      avatar: user.avatar || "",
+      fullName:
+        `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        user.username,
+    };
+  }, [user]);
 
   // Load provinces and recent searches
   useEffect(() => {
@@ -129,9 +148,26 @@ const StickyHeader = ({
     }
   }, []);
 
+  // Load favorites count when logged in
+  useEffect(() => {
+    const loadFavoritesCount = async () => {
+      if (!loggedIn) return;
+
+      try {
+        const response = await getMyFavorites();
+        if (response?.success) {
+          setFavoritesCount(response.result?.length || 0);
+        }
+      } catch (error) {
+        console.error("Error loading favorites count:", error);
+      }
+    };
+
+    loadFavoritesCount();
+  }, [loggedIn]);
+
   // Detect scroll
   useEffect(() => {
-    // If forceCompact is true, always show compact mode
     if (forceCompact) {
       setScrolled(true);
       return;
@@ -160,20 +196,13 @@ const StickyHeader = ({
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
     localStorage.setItem("language", langCode);
+    handleCloseMenu();
   };
 
   // User menu
   const openMenu = Boolean(anchorEl);
   const handleOpenMenu = (event) => setAnchorEl(event.currentTarget);
   const handleCloseMenu = () => setAnchorEl(null);
-
-  const openNotifications = Boolean(notificationAnchor);
-  const handleOpenNotifications = (event) => {
-    setNotificationAnchor(event.currentTarget);
-  };
-  const handleCloseNotifications = () => {
-    setNotificationAnchor(null);
-  };
 
   const handleLogout = () => {
     removeToken();
@@ -212,7 +241,6 @@ const StickyHeader = ({
 
   // Search handlers
   const handleSearch = () => {
-    // Save to recent searches
     if (searchData.location) {
       const newRecent = [
         { location: searchData.location, timestamp: Date.now() },
@@ -222,12 +250,10 @@ const StickyHeader = ({
       localStorage.setItem("recentSearches", JSON.stringify(newRecent));
     }
 
-    // Close all menus
     setLocationAnchor(null);
     setTypeAnchor(null);
     setPriceAnchor(null);
 
-    // Navigate to search page
     const params = new URLSearchParams();
     if (searchData.location) params.set("location", searchData.location);
     if (searchData.propertyType) params.set("type", searchData.propertyType);
@@ -304,8 +330,7 @@ const StickyHeader = ({
                 variant="h5"
                 sx={{
                   fontWeight: 800,
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background: "#667eea",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   fontSize: scrolled ? "1.5rem" : "1.75rem",
@@ -370,7 +395,7 @@ const StickyHeader = ({
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {searchData.location || "Location"}
+                      {searchData.location || "Địa điểm"}
                     </Typography>
                   </Box>
 
@@ -407,7 +432,7 @@ const StickyHeader = ({
                         ? propertyTypes.find(
                             (p) => p.value === searchData.propertyType
                           )?.label
-                        : "Type"}
+                        : "Loại hình"}
                     </Typography>
                   </Box>
 
@@ -444,7 +469,7 @@ const StickyHeader = ({
                     >
                       {searchData.priceRange[0] === 0 &&
                       searchData.priceRange[1] === 20000000
-                        ? "Rental Price"
+                        ? "Giá thuê"
                         : `${(searchData.priceRange[0] / 1000000).toFixed(
                             0
                           )}-${(searchData.priceRange[1] / 1000000).toFixed(
@@ -481,7 +506,7 @@ const StickyHeader = ({
                             color: filterCount > 0 ? "grey.900" : "grey.500",
                           }}
                         >
-                          Filter
+                          Lọc
                         </Typography>
                       </Box>
                     </>
@@ -535,7 +560,7 @@ const StickyHeader = ({
                     }}
                   >
                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                      Choose a location
+                      Chọn địa điểm
                     </Typography>
                   </Box>
 
@@ -553,7 +578,7 @@ const StickyHeader = ({
                                 textTransform: "uppercase",
                               }}
                             >
-                              Recent searches
+                              Tìm kiếm gần đây
                             </Typography>
                           </Box>
                           {recentSearches.slice(0, 3).map((search, index) => (
@@ -581,7 +606,7 @@ const StickyHeader = ({
                             textTransform: "uppercase",
                           }}
                         >
-                          Popular locations
+                          Địa điểm phổ biến
                         </Typography>
                       </Box>
                       {popularLocations.map((loc, index) => (
@@ -613,7 +638,7 @@ const StickyHeader = ({
                             textTransform: "uppercase",
                           }}
                         >
-                          Select province/city
+                          Chọn tỉnh/thành phố
                         </Typography>
                       </Box>
                       <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
@@ -643,7 +668,7 @@ const StickyHeader = ({
                           borderColor: "grey.200",
                         }}
                       >
-                        ← Back
+                        ← Quay lại
                       </MenuItem>
                       <Box sx={{ px: 2, py: 1, bgcolor: "grey.50" }}>
                         <Typography
@@ -689,7 +714,7 @@ const StickyHeader = ({
                     }}
                   >
                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                      Type of real estate
+                      Loại hình bất động sản
                     </Typography>
                   </Box>
                   {propertyTypes.map((type) => (
@@ -727,7 +752,7 @@ const StickyHeader = ({
                     variant="subtitle2"
                     sx={{ fontWeight: 700, mb: 2 }}
                   >
-                    Rental price range (VND/month)
+                    Mức giá thuê (VND/tháng)
                   </Typography>
 
                   <Slider
@@ -755,7 +780,7 @@ const StickyHeader = ({
                   >
                     <Box>
                       <Typography variant="caption" sx={{ color: "grey.600" }}>
-                        Minimum
+                        Tối thiểu
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {searchData.priceRange[0].toLocaleString("vi-VN")} đ
@@ -763,7 +788,7 @@ const StickyHeader = ({
                     </Box>
                     <Box sx={{ textAlign: "right" }}>
                       <Typography variant="caption" sx={{ color: "grey.600" }}>
-                        Maximum
+                        Tối đa
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {searchData.priceRange[1].toLocaleString("vi-VN")} đ
@@ -787,10 +812,11 @@ const StickyHeader = ({
               </Box>
             </Fade>
 
-            {/* Right Side */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* Right Side - Ultra Simplified */}
+            <Stack direction="row" spacing={1} alignItems="center">
               {!loggedIn ? (
                 <>
+                  {/* Become a Host Button - Only for non-logged in users */}
                   <Button
                     onClick={() => navigate("/dashboard")}
                     sx={{
@@ -798,15 +824,18 @@ const StickyHeader = ({
                       textTransform: "none",
                       fontWeight: 600,
                       color: "grey.800",
-                      px: 2,
+                      px: 3,
+                      py: 1,
+                      borderRadius: 999,
                       "&:hover": {
                         bgcolor: "grey.100",
                       },
                     }}
                   >
-                    {t("header.becomeHost") || "Cho thuê nhà"}
+                    Cho thuê nhà
                   </Button>
 
+                  {/* Login Button */}
                   <Paper
                     elevation={0}
                     sx={{
@@ -828,64 +857,13 @@ const StickyHeader = ({
                   >
                     <MenuIcon sx={{ fontSize: 20, color: "grey.700" }} />
                     <Avatar sx={{ width: 32, height: 32, bgcolor: "grey.600" }}>
-                      <PersonIcon sx={{ fontSize: 20 }} />
+                      <AccountCircleIcon sx={{ fontSize: 20 }} />
                     </Avatar>
                   </Paper>
                 </>
               ) : (
                 <>
-                  <Button
-                    onClick={handleDashboardClick}
-                    sx={{
-                      display: { xs: "none", md: "inline-flex" },
-                      textTransform: "none",
-                      fontWeight: 600,
-                      color: "grey.800",
-                      px: 2,
-                      "&:hover": {
-                        bgcolor: "grey.100",
-                      },
-                    }}
-                  >
-                    {isAdmin
-                      ? "Admin Dashboard"
-                      : t("header.becomeHost") || "Cho thuê nhà"}
-                  </Button>
-                  {/* ⭐ NOTIFICATION BELL - Elegant Design */}
-                  <IconButton
-                    onClick={handleOpenNotifications}
-                    sx={{
-                      color: "grey.700",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        bgcolor: "grey.100",
-                        transform: "scale(1.05)",
-                      },
-                    }}
-                  >
-                    <Badge
-                      badgeContent={unreadCount}
-                      color="error"
-                      max={99}
-                      sx={{
-                        "& .MuiBadge-badge": {
-                          fontSize: "0.65rem",
-                          height: 18,
-                          minWidth: 18,
-                          fontWeight: 700,
-                        },
-                      }}
-                    >
-                      <NotificationsIcon sx={{ fontSize: 24 }} />
-                    </Badge>
-                  </IconButton>
-
-                  {/* ⭐ Notification Dropdown */}
-                  <NotificationDropdown
-                    anchorEl={notificationAnchor}
-                    open={openNotifications}
-                    onClose={handleCloseNotifications}
-                  />
+                  {/* User Menu Button - ONLY ONE ELEMENT */}
                   <Paper
                     elevation={0}
                     sx={{
@@ -906,20 +884,38 @@ const StickyHeader = ({
                     onClick={handleOpenMenu}
                   >
                     <MenuIcon sx={{ fontSize: 20, color: "grey.700" }} />
-                    <Avatar
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        bgcolor: "primary.main",
-                        fontSize: "0.875rem",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {username ? username[0].toUpperCase() : "U"}
-                    </Avatar>
+                    {displayUser?.avatar ? (
+                      <Avatar
+                        src={displayUser.avatar}
+                        alt={displayUser.username}
+                        sx={{ width: 32, height: 32 }}
+                        imgProps={{
+                          onError: (e) => {
+                            e.target.onerror = null;
+                            e.target.src = "";
+                          },
+                        }}
+                      />
+                    ) : (
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          bgcolor: "primary.main",
+                          fontSize: "0.875rem",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {(
+                          displayUser?.fullName?.[0] ||
+                          displayUser?.username?.[0] ||
+                          "U"
+                        ).toUpperCase()}
+                      </Avatar>
+                    )}
                   </Paper>
 
-                  {/* Enhanced User Menu with Settings */}
+                  {/* User Menu - Contains Everything */}
                   <Menu
                     anchorEl={anchorEl}
                     open={openMenu}
@@ -940,22 +936,76 @@ const StickyHeader = ({
                     transformOrigin={{ horizontal: "right", vertical: "top" }}
                     anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                   >
-                    {/* User Profile Section */}
-                    {!isAdmin && (
-                      <MenuItem
-                        onClick={() => {
-                          handleCloseMenu();
-                          navigate("/profile");
+                    {/* Section: Main Actions */}
+                    <Box sx={{ px: 2, py: 1, bgcolor: "grey.50" }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 700,
+                          color: "grey.600",
+                          textTransform: "uppercase",
                         }}
                       >
-                        <ListItemIcon>
-                          <AccountCircleIcon fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={t("header.myProfile") || "Hồ sơ"}
+                        Quản lý
+                      </Typography>
+                    </Box>
+
+                    {/* Dashboard */}
+                    <MenuItem
+                      onClick={() => {
+                        handleCloseMenu();
+                        handleDashboardClick();
+                      }}
+                    >
+                      <ListItemIcon>
+                        <UserCircle size={18} className="text-blue-600" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          isAdmin ? "Admin Dashboard" : "Quản lý cho thuê"
+                        }
+                        secondary={
+                          isAdmin
+                            ? "Quản trị hệ thống"
+                            : "Đăng tin, quản lý property"
+                        }
+                        sx={{
+                          "& .MuiListItemText-secondary": {
+                            fontSize: "0.75rem",
+                          },
+                        }}
+                      />
+                    </MenuItem>
+
+                    {/* Favorites */}
+                    <MenuItem
+                      onClick={() => {
+                        handleCloseMenu();
+                        navigate("/my-favorites");
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Heart size={18} className="text-rose-500" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Yêu thích"
+                        secondary={`${favoritesCount} property đã lưu`}
+                        sx={{
+                          "& .MuiListItemText-secondary": {
+                            fontSize: "0.75rem",
+                          },
+                        }}
+                      />
+                      {favoritesCount > 0 && (
+                        <Badge
+                          badgeContent={favoritesCount}
+                          color="error"
+                          sx={{ ml: 1 }}
                         />
-                      </MenuItem>
-                    )}
+                      )}
+                    </MenuItem>
+
+                    {/* Notifications */}
                     <MenuItem
                       onClick={() => {
                         handleCloseMenu();
@@ -963,10 +1013,16 @@ const StickyHeader = ({
                       }}
                     >
                       <ListItemIcon>
-                        <NotificationsIcon fontSize="small" />
+                        <Bell size={18} className="text-blue-600" />
                       </ListItemIcon>
                       <ListItemText
-                        primary={t("header.notifications") || "Thông báo"}
+                        primary="Thông báo"
+                        secondary="Cập nhật và tin nhắn"
+                        sx={{
+                          "& .MuiListItemText-secondary": {
+                            fontSize: "0.75rem",
+                          },
+                        }}
                       />
                       {unreadCount > 0 && (
                         <Badge
@@ -975,23 +1031,6 @@ const StickyHeader = ({
                           sx={{ ml: 1 }}
                         />
                       )}
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleCloseMenu();
-                        handleDashboardClick();
-                      }}
-                    >
-                      <ListItemIcon>
-                        <DashboardIcon fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          isAdmin
-                            ? "Admin Dashboard"
-                            : t("header.hostDashboard") || "Quản lý nhà"
-                        }
-                      />
                     </MenuItem>
 
                     <Divider sx={{ my: 1 }} />
@@ -1006,9 +1045,10 @@ const StickyHeader = ({
                           textTransform: "uppercase",
                         }}
                       >
-                        Ngôn ngữ / Language
+                        Cài đặt
                       </Typography>
                     </Box>
+
                     {languages.map((lang) => (
                       <MenuItem
                         key={lang.code}
@@ -1022,9 +1062,7 @@ const StickyHeader = ({
                         }}
                       >
                         <ListItemIcon>
-                          <Typography fontSize="1.25rem">
-                            {lang.flag}
-                          </Typography>
+                          <Globe size={18} />
                         </ListItemIcon>
                         <ListItemText
                           primary={lang.label}
@@ -1035,6 +1073,11 @@ const StickyHeader = ({
                             },
                           }}
                         />
+                        {currentLanguage === lang.code && (
+                          <Typography fontSize="1.25rem" sx={{ ml: 1 }}>
+                            {lang.flag}
+                          </Typography>
+                        )}
                       </MenuItem>
                     ))}
 
@@ -1044,19 +1087,13 @@ const StickyHeader = ({
                     <MenuItem onClick={handleThemeToggle}>
                       <ListItemIcon>
                         {darkMode ? (
-                          <LightModeIcon fontSize="small" />
+                          <Sun size={18} className="text-yellow-500" />
                         ) : (
-                          <DarkModeIcon fontSize="small" />
+                          <Moon size={18} className="text-indigo-600" />
                         )}
                       </ListItemIcon>
                       <ListItemText
                         primary={darkMode ? "Chế độ sáng" : "Chế độ tối"}
-                      />
-                      <Switch
-                        checked={darkMode}
-                        size="small"
-                        sx={{ ml: 1 }}
-                        onClick={(e) => e.stopPropagation()}
                       />
                     </MenuItem>
 
@@ -1070,24 +1107,22 @@ const StickyHeader = ({
                       }}
                     >
                       <ListItemIcon>
-                        <LogoutIcon
-                          fontSize="small"
-                          sx={{ color: "error.main" }}
-                        />
+                        <LogOut size={18} className="text-red-600" />
                       </ListItemIcon>
                       <ListItemText
-                        primary={t("common.logout") || "Đăng xuất"}
+                        primary="Đăng xuất"
+                        sx={{ color: "error.main" }}
                       />
                     </MenuItem>
                   </Menu>
                 </>
               )}
-            </Box>
+            </Stack>
           </Toolbar>
         </Container>
       </AppBar>
 
-      {/* Filter Drawer - Only shown on PropertySearch page */}
+      {/* Filter Drawer */}
       {showFilters && filters && onFilterChange && (
         <SearchFilters
           filters={filters}

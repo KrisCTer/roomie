@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+// web-app/src/pages/Message/Message.jsx
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
-import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import CallModal from "../../components/layout/layoutUser/CallModal.jsx";
 import { useCall } from "../../contexts/CallContext.jsx";
 import { useTranslation } from "react-i18next";
+import { useRefresh } from "../../contexts/RefreshContext";
 
 // Import custom components
 import ConversationList from "../../components/Message/ConversationList.jsx";
@@ -26,6 +27,9 @@ const Message = () => {
 
   // Call context
   const { startCall, callState } = useCall();
+
+  //  Refresh context
+  const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
 
   // Use custom hook for all chat operations
   const {
@@ -51,7 +55,21 @@ const Message = () => {
     handleSearchUsers,
     handleCreateConversation,
     handleRemovePropertyContext,
+    refreshConversations,
   } = useChatOperations();
+
+  //  Register refresh callback
+  useEffect(() => {
+    registerRefreshCallback("messages", refreshConversations);
+
+    return () => {
+      unregisterRefreshCallback("messages");
+    };
+  }, [
+    registerRefreshCallback,
+    unregisterRefreshCallback,
+    refreshConversations,
+  ]);
 
   // Handle voice call
   const handleVoiceCall = () => {
@@ -65,7 +83,6 @@ const Message = () => {
       return;
     }
 
-    // Use helper to find remote peer
     const remotePeer = findRemotePeer(
       selectedConversation.participants,
       currentUser.userId || currentUser.id || currentUser.sub
@@ -96,7 +113,6 @@ const Message = () => {
       return;
     }
 
-    // Use helper to find remote peer
     const remotePeer = findRemotePeer(
       selectedConversation.participants,
       currentUser.userId || currentUser.id || currentUser.sub
@@ -117,14 +133,12 @@ const Message = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
         sidebarOpen={sidebarOpen}
       />
 
-      {/* Main Content */}
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
@@ -134,7 +148,6 @@ const Message = () => {
 
         <main className="flex-1">
           <div className="h-[calc(100vh-73px)] flex">
-            {/* Conversations List */}
             <ConversationList
               conversations={conversations}
               selectedConversation={selectedConversation}
@@ -148,7 +161,6 @@ const Message = () => {
               formatTime={formatTime}
             />
 
-            {/* Chat Area */}
             <div className="flex-1 flex flex-col bg-white">
               <ChatArea
                 selectedConversation={selectedConversation}
@@ -167,15 +179,11 @@ const Message = () => {
               />
             </div>
 
-            {/* Call Modal */}
             <CallModal />
           </div>
         </main>
-
-        {/* <Footer /> */}
       </div>
 
-      {/* Search Modal */}
       {showSearchModal && (
         <SearchModal
           searchTerm={searchTerm}
@@ -187,7 +195,6 @@ const Message = () => {
           onClose={() => {
             setShowSearchModal(false);
             setSearchTerm("");
-            // setSearchResults([]);
           }}
         />
       )}

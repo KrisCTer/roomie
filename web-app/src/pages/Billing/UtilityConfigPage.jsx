@@ -1,5 +1,5 @@
-// src/pages/Billing/UtilityConfigPage.jsx
-import React, { useState, useEffect } from "react";
+// web-app/src/pages/Billing/UtilityConfigPage.jsx
+import React, { useState, useEffect, useCallback } from "react";
 import { Settings, Plus, Edit, Trash2, Power } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
@@ -7,6 +7,7 @@ import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import UtilityConfigModal from "../../components/Billing/UtilityConfigModal";
 import { useTranslation } from "react-i18next";
+import { useRefresh } from "../../contexts/RefreshContext";
 
 import {
   getMyUtilities,
@@ -31,11 +32,11 @@ const UtilityConfigPage = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // ✅ Refresh context
+  const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
 
-  const loadData = async () => {
+  // ✅ Load data function (useCallback for stable reference)
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -56,7 +57,21 @@ const UtilityConfigPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // ✅ Initial load
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // ✅ Register refresh callback
+  useEffect(() => {
+    registerRefreshCallback("utility-config", loadData);
+
+    return () => {
+      unregisterRefreshCallback("utility-config");
+    };
+  }, [registerRefreshCallback, unregisterRefreshCallback, loadData]);
 
   const handleCreate = (property) => {
     setSelectedConfig(null);
@@ -203,7 +218,6 @@ const UtilityConfigPage = () => {
             ) : (
               properties.map((property) => {
                 const propertyConfigs = getPropertyConfigs(property.propertyId);
-                const activeConfig = propertyConfigs.find((c) => c.active);
 
                 return (
                   <div
