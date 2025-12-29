@@ -1,10 +1,10 @@
-// src/pages/PropertyDetail/PropertyDetail.jsx
+// src/pages/Main/PropertyDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, Container } from "@mui/material";
 import { AlertCircle } from "lucide-react";
 
-// Components - Use Home layout
+// Components
 import StickyHeader from "../../components/layout/layoutHome/StickyHeader";
 import Footer from "../../components/layout/layoutHome/Footer";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import PropertyHeader from "../../components/PropertyDetail/PropertyHeader";
 import ImageGallery from "../../components/PropertyDetail/ImageGallery";
 import PropertyOverview from "../../components/PropertyDetail/PropertyOverview";
+import PropertyInfo from "../../components/PropertyDetail/PropertyInfo";
 import PropertyDescription from "../../components/PropertyDetail/PropertyDescription";
 import PropertyAmenities from "../../components/PropertyDetail/PropertyAmenities";
 import PropertyLocation from "../../components/PropertyDetail/PropertyLocation";
@@ -25,11 +26,13 @@ import { getPropertyById } from "../../services/property.service";
 import { createConversation } from "../../services/chat.service";
 import { createBooking } from "../../services/booking.service";
 import { getUserInfo } from "../../services/localStorageService";
+import { useFavorite } from "../../hooks/useFavorite";
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
   // States
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +45,12 @@ const PropertyDetail = () => {
   const [leaseEnd, setLeaseEnd] = useState("");
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [leaseDuration, setLeaseDuration] = useState(0);
+  const {
+    isFavorited,
+    favoriteCount,
+    isLoading: favoriteLoading,
+    handleToggleFavorite,
+  } = useFavorite(id);
 
   useEffect(() => {
     if (!id) return;
@@ -115,7 +124,7 @@ const PropertyDetail = () => {
         response?.data ||
         response;
 
-      navigate("/messages", {
+      navigate("/message", {
         state: {
           conversationId: conversation.conversationId,
           propertyId: property.propertyId,
@@ -259,33 +268,34 @@ const PropertyDetail = () => {
 
   return (
     <Box sx={{ bgcolor: "#FAFAFA", minHeight: "100vh" }}>
-      {/* Sticky Header - Same as Home */}
       <StickyHeader />
 
-      {/* Main Content */}
       <Box sx={{ bgcolor: "#FFFFFF", py: { xs: 4, md: 6 } }}>
         <Container maxWidth="xl">
-          {/* Property Header */}
+          {/* Property Header - Pass favorite data */}
           <PropertyHeader
             property={property}
-            isFavorite={isFavorite}
-            onToggleFavorite={() => setIsFavorite(!isFavorite)}
+            isFavorite={isFavorited}
+            favoriteCount={favoriteCount}
+            onToggleFavorite={handleToggleFavorite}
+            favoriteLoading={favoriteLoading}
           />
 
           {/* Image Gallery */}
           <ImageGallery images={images} title={property.title} />
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             {/* Left Column - Property Details */}
             <div className="lg:col-span-2 space-y-8">
               <PropertyOverview property={property} />
+              <PropertyInfo property={property} />
               <PropertyDescription description={property.description} />
               <PropertyAmenities amenities={property.amenities} />
               <PropertyLocation address={property.address} />
             </div>
 
-            {/* Right Column - Sticky Booking Card */}
+            {/* Right Column - Sticky Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
                 <BookingCard
@@ -304,8 +314,10 @@ const PropertyDetail = () => {
                   owner={property.owner}
                   contactingOwner={contactingOwner}
                   onContactOwner={handleContactOwner}
-                  isFavorite={isFavorite}
-                  onToggleFavorite={() => setIsFavorite(!isFavorite)}
+                  isFavorite={isFavorited}
+                  favoriteCount={favoriteCount}
+                  onToggleFavorite={handleToggleFavorite}
+                  favoriteLoading={favoriteLoading}
                 />
               </div>
             </div>
@@ -313,7 +325,6 @@ const PropertyDetail = () => {
         </Container>
       </Box>
 
-      {/* Footer - Same as Home */}
       <Footer />
     </Box>
   );

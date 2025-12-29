@@ -42,6 +42,9 @@ public class PropertyResponse {
     OwnerResponse owner;
     ApprovalStatus status;
 
+    Long favoriteCount;
+    Boolean isFavorited;
+
     Instant createdAt;
     Instant updatedAt;
 }

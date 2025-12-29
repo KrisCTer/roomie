@@ -50,33 +50,6 @@ const LandlordStats = ({ stats, onStatClick }) => {
         </div>
       </div>
 
-      {/* Revenue Stats */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Revenue</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard
-            icon={DollarSign}
-            label="Monthly Income"
-            value={`${stats.monthlyIncome.toLocaleString()}đ`}
-            color="purple"
-          />
-          <StatCard
-            icon={FileText}
-            label="Unpaid Bills"
-            value={stats.unpaidBills}
-            color="red"
-            onClick={() => onStatClick?.("unpaid-bills")}
-          />
-          <StatCard
-            icon={CheckCircle}
-            label="Paid Bills"
-            value={stats.paidBills}
-            color="green"
-            onClick={() => onStatClick?.("paid-bills")}
-          />
-        </div>
-      </div>
-
       {/* Contract Stats */}
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-4">Contracts</h2>
@@ -105,6 +78,33 @@ const LandlordStats = ({ stats, onStatClick }) => {
             label="Expired/Cancelled"
             value={stats.expiredContracts}
             color="red"
+          />
+        </div>
+      </div>
+
+      {/* Revenue Stats */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Revenue</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <StatCard
+            icon={DollarSign}
+            label="Monthly Income"
+            value={`${stats.monthlyIncome.toLocaleString()}đ`}
+            color="purple"
+          />
+          <StatCard
+            icon={FileText}
+            label="Unpaid Bills"
+            value={stats.unpaidBills}
+            color="red"
+            onClick={() => onStatClick?.("unpaid-bills")}
+          />
+          <StatCard
+            icon={CheckCircle}
+            label="Paid Bills"
+            value={stats.paidBills}
+            color="green"
+            onClick={() => onStatClick?.("paid-bills")}
           />
         </div>
       </div>

@@ -170,6 +170,7 @@ public class UserProfileService {
 
 
     // 4. LẤY THÔNG TIN PROFILE
+//    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getMyProfile() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         return getByUserId(userId);

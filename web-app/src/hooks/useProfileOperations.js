@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// web-app/src/hooks/useProfileOperations.js
+import { useState, useEffect, useCallback } from "react";
 import {
   getMyProfile,
   updateMyProfile,
@@ -33,13 +34,10 @@ export const useProfileOperations = () => {
     confirmPassword: "",
   });
 
-  // Load profile on mount
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  //  Load profile function (useCallback for stable reference)
+  const loadProfile = useCallback(async () => {
     try {
+      setLoading(true);
       const res = await getMyProfile();
       console.log("PROFILE RESPONSE =", res);
 
@@ -65,25 +63,36 @@ export const useProfileOperations = () => {
         permanentAddress: p.permanentAddress || "",
         currentAddress: p.currentAddress || "",
       });
-
-      setLoading(false);
     } catch (err) {
-    console.error("Upload avatar failed:", err);
-    setError("Không thể upload avatar. Vui lòng thử lại.");
-  }
-  };
+      console.error("Load profile failed:", err);
+      setError("Không thể tải thông tin profile. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleInputChange = (e) => {
+  //  Refetch profile function (public API)
+  const refetchProfile = useCallback(async () => {
+    console.log("🔄 Refetching profile...");
+    await loadProfile();
+  }, [loadProfile]);
+
+  //  Initial load on mount
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = useCallback((e) => {
     const { name, value } = e.target;
     setPasswords((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleSubmitProfile = async () => {
+  const handleSubmitProfile = useCallback(async () => {
     try {
       const payload = {
         username: formData.username,
@@ -100,14 +109,14 @@ export const useProfileOperations = () => {
 
       await updateMyProfile(payload);
       setSuccess("Cập nhật thông tin thành công!");
-      loadProfile();
+      await loadProfile();
     } catch (e) {
       console.error(e);
       setError("Không thể cập nhật thông tin.");
     }
-  };
+  }, [formData, loadProfile]);
 
-  const handleAvatarUpload = async (e) => {
+  const handleAvatarUpload = useCallback(async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -126,66 +135,67 @@ export const useProfileOperations = () => {
       setProfile((prev) => ({ ...prev, avatar: updatedUrl }));
 
       await loadProfile();
+      setSuccess(" Upload avatar thành công!");
     } catch (err) {
       console.error("Upload avatar failed:", err);
+      setError("Không thể upload avatar. Vui lòng thử lại.");
     }
-  };
+  }, [loadProfile]);
 
-  const handleIdCardUpload = async (file) => {
-  if (!file) return;
+  const handleIdCardUpload = useCallback(async (file) => {
+    if (!file) return;
 
-  try {
-    const res = await updateIdCard(file);
+    try {
+      const res = await updateIdCard(file);
 
-    console.log("ID CARD UPLOAD RESPONSE =", res);
+      console.log("ID CARD UPLOAD RESPONSE =", res);
 
-    // Chuẩn hóa đọc response
-    const result = res?.data?.result || res?.result;
+      // Chuẩn hóa đọc response
+      const result = res?.data?.result || res?.result;
 
-    if (!result) {
-      throw new Error("Phản hồi không hợp lệ từ server.");
+      if (!result) {
+        throw new Error("Phản hồi không hợp lệ từ server.");
+      }
+
+      // Cập nhật formData từ QR
+      setFormData((prev) => ({
+        ...prev,
+        username: result.username ?? prev.username,
+        firstName: result.firstName ?? prev.firstName,
+        lastName: result.lastName ?? prev.lastName,
+        idCardNumber: result.idCardNumber ?? prev.idCardNumber,
+        dob: result.dob ? result.dob.substring(0, 10) : prev.dob,
+        gender:
+          result.gender === "MALE"
+            ? "Nam"
+            : result.gender === "FEMALE"
+            ? "Nữ"
+            : prev.gender,
+        permanentAddress: result.permanentAddress ?? prev.permanentAddress,
+        currentAddress: result.currentAddress ?? prev.currentAddress,
+        email: result.email ?? prev.email,
+        phoneNumber: result.phoneNumber ?? prev.phoneNumber,
+      }));
+
+      setSuccess(" Quét CCCD thành công! Thông tin đã được tự động điền.");
+    } catch (err) {
+      console.error("❌ Upload ID Card Error:", err);
+
+      const errorMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Không thể xử lý ảnh CCCD. Vui lòng thử lại.";
+
+      setError("❌ " + errorMsg);
     }
+  }, []);
 
-    // Cập nhật formData từ QR
-    setFormData((prev) => ({
-      ...prev,
-      username: result.username ?? prev.username,
-      firstName: result.firstName ?? prev.firstName,
-      lastName: result.lastName ?? prev.lastName,
-      idCardNumber: result.idCardNumber ?? prev.idCardNumber,
-      dob: result.dob ? result.dob.substring(0, 10) : prev.dob,
-      gender:
-        result.gender === "MALE"
-          ? "Nam"
-          : result.gender === "FEMALE"
-          ? "Nữ"
-          : prev.gender,
-      permanentAddress: result.permanentAddress ?? prev.permanentAddress,
-      currentAddress: result.currentAddress ?? prev.currentAddress,
-      email: result.email ?? prev.email,
-      phoneNumber: result.phoneNumber ?? prev.phoneNumber,
-    }));
-
-    setSuccess("✅ Quét CCCD thành công! Thông tin đã được tự động điền.");
-  } catch (err) {
-    console.error("❌ Upload ID Card Error:", err);
-
-    const errorMsg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Không thể xử lý ảnh CCCD. Vui lòng thử lại.";
-
-    setError("❌ " + errorMsg);
-  }
-};
-
-
-  const handleIdCardFileSelect = async (e) => {
+  const handleIdCardFileSelect = useCallback(async (e) => {
     const file = e.target.files?.[0];
     await handleIdCardUpload(file);
-  };
+  }, [handleIdCardUpload]);
 
-  const handlePasswordUpdate = async () => {
+  const handlePasswordUpdate = useCallback(async () => {
     if (passwords.newPassword !== passwords.confirmPassword) {
       setError("Mật khẩu mới không trùng khớp!");
       return;
@@ -207,19 +217,19 @@ export const useProfileOperations = () => {
       console.error(e);
       setError("Không thể đổi mật khẩu.");
     }
-  };
+  }, [passwords]);
 
-  const handleOpenCamera = () => {
+  const handleOpenCamera = useCallback(() => {
     setShowCamera(true);
-  };
+  }, []);
 
-  const handleCloseCamera = () => {
+  const handleCloseCamera = useCallback(() => {
     setShowCamera(false);
-  };
+  }, []);
 
-  const handleCameraCapture = async (file) => {
+  const handleCameraCapture = useCallback(async (file) => {
     await handleIdCardUpload(file);
-  };
+  }, [handleIdCardUpload]);
 
   return {
     // State
@@ -228,7 +238,6 @@ export const useProfileOperations = () => {
     formData,
     passwords,
     showCamera,
-
     error,
     success,
     setError,
@@ -244,5 +253,9 @@ export const useProfileOperations = () => {
     handleOpenCamera,
     handleCloseCamera,
     handleCameraCapture,
+
+    //  Refetch
+    refetchProfile,
+    loadProfile,
   };
 };

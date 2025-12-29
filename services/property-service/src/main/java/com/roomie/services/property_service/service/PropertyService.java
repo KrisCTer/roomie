@@ -39,21 +39,22 @@ public class PropertyService {
     PropertySearchRepository searchRepository;
     PropertyMapper mapper;
     ProfileClient profileClient;
+    FavoriteService favoriteService;
+    PropertyLabelService propertyLabelService;
 
     // ============================================================
     // CREATE PROPERTY
     // ============================================================
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
-
         Property entity = mapper.toEntity(request);
         String userId = getCurrentUserId();
-
         Owner owner = fetchOwnerProfile(userId);
 
         entity.setOwner(owner);
         entity.setStatus(ApprovalStatus.DRAFT);
         entity.setPropertyStatus(PropertyStatus.INACTIVE);
+        entity.setPropertyLabel(PropertyLabel.NONE);
         entity.setCreatedAt(Instant.now());
         entity.setUpdatedAt(Instant.now());
 
@@ -115,9 +116,23 @@ public class PropertyService {
     // ============================================================
 //    @Cacheable(value = "properties", key = "#id")
     public PropertyResponse getById(String id) {
-
         Property property = findPropertyOrThrow(id);
-        return mapper.toResponse(property);
+        PropertyResponse response = mapper.toResponse(property);
+
+        // Add favorite count and status if user is authenticated
+        try {
+            String userId = getCurrentUserId();
+            if (userId != null) {
+                // This info can be added to response or handled in frontend
+                long favoriteCount = favoriteService.getFavoriteCount(id);
+                boolean isFavorited = favoriteService.isFavorited(id);
+                // You can add these to PropertyResponse if needed
+            }
+        } catch (Exception e) {
+            // User not authenticated, skip favorite info
+        }
+
+        return response;
     }
 
     public List<PropertyResponse> findAll(int page, int size) {
@@ -228,7 +243,8 @@ public class PropertyService {
 
         property.setStatus(ApprovalStatus.ACTIVE);
         property.setPropertyStatus(PropertyStatus.AVAILABLE);
-        property.setPropertyLabel(PropertyLabel.NEW);
+        PropertyLabel calculatedLabel = propertyLabelService.calculateLabel(property);
+        property.setPropertyLabel(calculatedLabel);
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 

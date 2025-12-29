@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// web-app/src/pages/Property/AddProperty.jsx
+import React, { useState, useEffect, useCallback } from "react";
 import { Building, CheckCircle, AlertCircle } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
@@ -11,6 +12,9 @@ import {
   getPropertyById,
 } from "../../services/property.service.js";
 import { uploadFile } from "../../services/file.service.js";
+
+// Import contexts
+import { useRefresh } from "../../contexts/RefreshContext";
 
 // Import steps
 import Step1Basic from "./steps/Step1Basic.jsx";
@@ -42,6 +46,9 @@ const AddProperty = () => {
 
   // Map State
   const [mapsLoaded, setMapsLoaded] = useState(false);
+
+  // Refresh context
+  const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
 
   // Form Data
   const [propertyData, setPropertyData] = useState({
@@ -75,6 +82,7 @@ const AddProperty = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
 
+  // Load provinces
   useEffect(() => {
     fetch("https://provinces.open-api.vn/api/?depth=3")
       .then((res) => res.json())
@@ -151,14 +159,7 @@ const AddProperty = () => {
   useEffect(() => {
     if (propertyData.province) {
       const selected = provinces.find((p) => p.name === propertyData.province);
-
       setDistricts(selected ? selected.districts : []);
-
-      setPropertyData((prev) => ({
-        ...prev,
-        district: propertyData.district,
-        ward: propertyData.ward,
-      }));
     }
   }, [propertyData.province, provinces]);
 
@@ -168,33 +169,17 @@ const AddProperty = () => {
       const selectedDistrict = districts.find(
         (d) => d.name === propertyData.district
       );
-
       setWards(selectedDistrict ? selectedDistrict.wards : []);
-
-      setPropertyData((prev) => ({
-        ...prev,
-        ward: propertyData.ward,
-      }));
     }
   }, [propertyData.district, districts]);
 
-  // Check if edit mode and load property data
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const editId = urlParams.get("edit");
-
-    if (editId) {
-      setIsEditMode(true);
-      setPropertyId(editId);
-      loadPropertyData(editId);
-    }
-  }, []);
-
-  const loadPropertyData = async (id) => {
+  // ✅ Load property data function (useCallback for stable reference)
+  const loadPropertyData = useCallback(async (id) => {
     try {
       setLoading(true);
-      const response = await getPropertyById(id);
+      setError(null);
 
+      const response = await getPropertyById(id);
       const property =
         response?.result ||
         response?.data?.result ||
@@ -238,15 +223,60 @@ const AddProperty = () => {
               fileId: media.fileId,
             }))
           );
+        } else {
+          setUploadedImages([]);
         }
       }
     } catch (err) {
       console.error("Failed to load property:", err);
-      setError("Failed to load property data. Please try again.");
+      setError(
+        err?.response?.data?.message ||
+          "Failed to load property data. Please try again."
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // ✅ Refetch function (public API)
+  const refetch = useCallback(async () => {
+    if (isEditMode && propertyId) {
+      console.log("🔄 Refetching property data...");
+      await loadPropertyData(propertyId);
+    } else {
+      console.log("⚠️ Not in edit mode, skipping refresh");
+    }
+  }, [isEditMode, propertyId, loadPropertyData]);
+
+  // Check if edit mode and load property data
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get("edit");
+
+    if (editId) {
+      setIsEditMode(true);
+      setPropertyId(editId);
+      loadPropertyData(editId);
+    }
+  }, [loadPropertyData]);
+
+  // ✅ Register refresh callback
+  useEffect(() => {
+    // Only register refresh in edit mode
+    if (isEditMode && propertyId) {
+      registerRefreshCallback("add-property", refetch);
+
+      return () => {
+        unregisterRefreshCallback("add-property");
+      };
+    }
+  }, [
+    isEditMode,
+    propertyId,
+    registerRefreshCallback,
+    unregisterRefreshCallback,
+    refetch,
+  ]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -494,18 +524,28 @@ const AddProperty = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="Property Form"
-          subtitle="Create or update a new property listing"
+          title={isEditMode ? "Edit Property" : "Add New Property"}
+          subtitle={
+            isEditMode
+              ? "Update your property listing"
+              : "Create a new property listing"
+          }
         />
         <div className="p-8 w-full">
           {/* Error Message */}
           {error && (
             <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-red-800">Error</h3>
                 <p className="text-sm text-red-700">{error}</p>
               </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-600"
+              >
+                ✕
+              </button>
             </div>
           )}
 
@@ -636,7 +676,7 @@ const AddProperty = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-6">
             <button
               onClick={handlePrevious}
               disabled={currentStep === 1}

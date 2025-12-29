@@ -1,14 +1,16 @@
-import React, { useState } from "react";
-import { Plus, Send, Download, FileSpreadsheet } from "lucide-react";
+// web-app/src/pages/Billing/UnifiedBillsPage.jsx
+import React, { useState, useEffect } from "react";
+import { Plus, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import { useRole } from "../../contexts/RoleContext";
+import { useRefresh } from "../../contexts/RefreshContext";
 
 // Import custom components
-import BillTabs from "../../components/Billing/BillTabs";
 import LandlordStats from "../../components/Billing/LandlordStats";
 import TenantStats from "../../components/Billing/TenantStats";
 import BillFilters from "../../components/Billing/BillFilters";
@@ -25,8 +27,11 @@ const UnifiedBillsPage = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Bills");
-  const [showBulkSelect, setShowBulkSelect] = useState(false);
   const { t } = useTranslation();
+
+  // Contexts
+  const { activeRole } = useRole();
+  const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
 
   // Use custom hook for all operations
   const {
@@ -45,7 +50,6 @@ const UnifiedBillsPage = () => {
     searchTerm,
     stats,
     selectedBills,
-    setActiveTab,
     setFilterStatus,
     setFilterProperty,
     setFilterContract,
@@ -57,13 +61,22 @@ const UnifiedBillsPage = () => {
     handleDeleteBill,
     handleDownloadBillPdf,
     handleBulkSend,
-    handleExportBills,
     handleToggleSelectBill,
     handleSelectAllBills,
     handleCloseModal,
     handleModalSuccess,
     getFilteredBills,
-  } = useBillOperations();
+    refetch, // ✅ From hook
+  } = useBillOperations(activeRole);
+
+  // ✅ Register refresh callback
+  useEffect(() => {
+    registerRefreshCallback("bills", refetch);
+
+    return () => {
+      unregisterRefreshCallback("bills");
+    };
+  }, [registerRefreshCallback, unregisterRefreshCallback, refetch]);
 
   // Get current data based on tab
   const currentContracts =
@@ -88,14 +101,6 @@ const UnifiedBillsPage = () => {
     setSearchTerm("");
   };
 
-  const toggleBulkSelect = () => {
-    setShowBulkSelect(!showBulkSelect);
-    if (showBulkSelect) {
-      // Clear selections when disabling bulk select
-      handleSelectAllBills([]);
-    }
-  };
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar
@@ -117,16 +122,8 @@ const UnifiedBillsPage = () => {
         />
 
         <main className="p-6">
-          {/* Tabs */}
-          <BillTabs
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            landlordCount={stats.landlord.total}
-            tenantCount={stats.tenant.total}
-          />
-
           {/* Stats */}
-          {activeTab === "landlord" ? (
+          {activeRole === "landlord" ? (
             <LandlordStats stats={stats.landlord} />
           ) : (
             <TenantStats stats={stats.tenant} />
@@ -157,20 +154,6 @@ const UnifiedBillsPage = () => {
                   <h2 className="text-xl font-bold text-gray-900">
                     {t("bill.billsList")} ({filteredBills.length})
                   </h2>
-
-                  {/* Bulk Select Toggle (Landlord only) */}
-                  {/* {activeTab === "landlord" && filteredBills.length > 0 && (
-                    <button
-                      onClick={toggleBulkSelect}
-                      className={`px-4 py-2 rounded-lg transition font-medium text-sm ${
-                        showBulkSelect
-                          ? "bg-blue-100 text-blue-700 border-2 border-blue-300"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {showBulkSelect ? "✓ Bulk Select ON" : "Bulk Select"}
-                    </button>
-                  )} */}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -187,28 +170,6 @@ const UnifiedBillsPage = () => {
                       <div className="h-6 w-px bg-gray-300"></div>
                     </>
                   )}
-
-                  {/* Export Buttons */}
-                  {/* {activeTab === "landlord" && filteredBills.length > 0 && (
-                    <>
-                      <button
-                        onClick={() => handleExportBills("excel")}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition font-medium"
-                        title="Export to Excel"
-                      >
-                        <FileSpreadsheet className="w-4 h-4" />
-                        Excel
-                      </button>
-                      <button
-                        onClick={() => handleExportBills("csv")}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium"
-                        title="Export to CSV"
-                      >
-                        <Download className="w-4 h-4" />
-                        CSV
-                      </button>
-                    </>
-                  )} */}
 
                   {/* Create Bill Button (Landlord only) */}
                   {activeTab === "landlord" && (
@@ -247,7 +208,7 @@ const UnifiedBillsPage = () => {
                 contracts={currentContracts}
                 tenants={tenants}
                 selectedBills={selectedBills}
-                showBulkSelect={showBulkSelect}
+                showBulkSelect={false}
                 onToggleSelect={handleToggleSelectBill}
                 onSelectAll={handleSelectAllBills}
                 onView={handleViewBill}

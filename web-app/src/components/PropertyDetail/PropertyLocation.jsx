@@ -1,13 +1,15 @@
+// src/components/PropertyDetail/PropertyLocation.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
 
 const PropertyLocation = ({ address }) => {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
 
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // ✅ Hooks LUÔN được gọi
+  // Load Google Maps
   useEffect(() => {
     if (!address?.location) return;
 
@@ -19,10 +21,8 @@ const PropertyLocation = ({ address }) => {
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`;
     script.async = true;
-    console.log("MAP KEY:", process.env.REACT_APP_GOOGLE_MAPS_KEY);
 
     script.onload = () => {
-      console.log("✅ Google Maps loaded");
       setMapsLoaded(true);
     };
 
@@ -35,8 +35,10 @@ const PropertyLocation = ({ address }) => {
     };
   }, [address?.location]);
 
+  // Initialize map when expanded
   useEffect(() => {
-    if (!mapsLoaded || !mapRef.current || !address?.location) return;
+    if (!mapsLoaded || !mapRef.current || !address?.location || !isExpanded)
+      return;
 
     const [lat, lng] = address.location
       .split(",")
@@ -135,48 +137,70 @@ const PropertyLocation = ({ address }) => {
         markerRef.current.setMap(null);
       }
     };
-  }, [mapsLoaded, address?.location]);
+  }, [mapsLoaded, address?.location, isExpanded]);
 
-  // ❗ Render fallback TẠI JSX, KHÔNG return sớm
   if (!address) return null;
 
   return (
-    <div className="pb-8 border-b border-gray-200">
-      <h2 className="text-2xl font-semibold mb-6">Where you'll be</h2>
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      {/* Header - Always visible */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded-lg">
+            <MapPin className="w-5 h-5 text-red-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900">Where you'll be</h3>
+        </div>
+        {isExpanded ? (
+          <ChevronUp className="w-5 h-5 text-gray-500" />
+        ) : (
+          <ChevronDown className="w-5 h-5 text-gray-500" />
+        )}
+      </button>
 
-      {address.fullAddress && (
-        <div className="flex items-start gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
-          <MapPin className="w-5 h-5 text-gray-700 mt-0.5" />
-          <div>
-            <div className="text-sm text-gray-600">Full Address</div>
-            <div className="font-medium text-gray-900">
-              {address.fullAddress}
+      {/* Content - Expandable */}
+      {isExpanded && (
+        <div className="px-6 pb-6 pt-2 border-t border-gray-100">
+          {address.fullAddress && (
+            <div className="flex items-start gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
+              <MapPin className="w-5 h-5 text-gray-700 mt-0.5" />
+              <div>
+                <div className="text-sm text-gray-600">Địa chỉ đầy đủ</div>
+                <div className="font-medium text-gray-900">
+                  {address.fullAddress}
+                </div>
+              </div>
             </div>
+          )}
+
+          <div className="relative rounded-xl overflow-hidden h-96 bg-gray-100">
+            {address.location ? (
+              <>
+                <div ref={mapRef} className="w-full h-full" />
+
+                {!mapsLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <p className="text-gray-600 font-medium">Loading map…</p>
+                  </div>
+                )}
+
+                <div className="absolute bottom-4 left-4 bg-white px-4 py-2 rounded-lg shadow-md">
+                  <p className="text-xs text-gray-600">
+                    Vị trí hiển thị tương đối
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-gray-600">No location data</p>
+              </div>
+            )}
           </div>
         </div>
       )}
-
-      <div className="relative rounded-xl overflow-hidden h-96 bg-gray-100">
-        {address.location ? (
-          <>
-            <div ref={mapRef} className="w-full h-full" />
-
-            {!mapsLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-gray-600 font-medium">Loading map…</p>
-              </div>
-            )}
-
-            <div className="absolute bottom-4 left-4 bg-white px-4 py-2 rounded-lg shadow-md">
-              <p className="text-xs text-gray-600">Vị trí hiển thị tương đối</p>
-            </div>
-          </>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-gray-600">No location data</p>
-          </div>
-        )}
-      </div>
     </div>
   );
 };

@@ -15,7 +15,19 @@ import {
   IconButton,
   Chip,
 } from "@mui/material";
-import { Delete, Notifications, MarkEmailRead } from "@mui/icons-material";
+import {
+  Bell,
+  Trash2,
+  MailCheck,
+  CheckCircle,
+  XCircle,
+  FileText,
+  PenLine,
+  CreditCard,
+  AlertTriangle,
+  MessageCircle,
+  Home,
+} from "lucide-react";
 import { useNotificationContext } from "../../contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -26,6 +38,46 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
   const { notifications, markAsRead, markAllAsRead, deleteNotification } =
     useNotificationContext();
 
+  /* ================= ICON MAP ================= */
+  const getNotificationIcon = (type) => {
+    const iconProps = { size: 18 };
+
+    switch (type) {
+      case "BOOKING_CONFIRMED":
+        return <CheckCircle {...iconProps} />;
+      case "BOOKING_CANCELLED":
+        return <XCircle {...iconProps} />;
+      case "CONTRACT_ACTIVATED":
+        return <FileText {...iconProps} />;
+      case "CONTRACT_SIGNED":
+        return <PenLine {...iconProps} />;
+      case "PAYMENT_COMPLETED":
+        return <CreditCard {...iconProps} />;
+      case "PAYMENT_FAILED":
+        return <AlertTriangle {...iconProps} />;
+      case "NEW_MESSAGE":
+        return <MessageCircle {...iconProps} />;
+      case "PROPERTY_APPROVED":
+        return <Home {...iconProps} />;
+      default:
+        return <Bell {...iconProps} />;
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case "URGENT":
+        return "error";
+      case "HIGH":
+        return "warning";
+      case "NORMAL":
+        return "info";
+      default:
+        return "default";
+    }
+  };
+
+  /* ================= HANDLERS ================= */
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
       await markAsRead(notification.id);
@@ -45,30 +97,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
     onClose();
   };
 
-  const getNotificationIcon = (type) => {
-    const iconMap = {
-      BOOKING_CONFIRMED: "✅",
-      BOOKING_CANCELLED: "❌",
-      CONTRACT_ACTIVATED: "📝",
-      CONTRACT_SIGNED: "✍️",
-      PAYMENT_COMPLETED: "💰",
-      PAYMENT_FAILED: "❗",
-      NEW_MESSAGE: "💬",
-      PROPERTY_APPROVED: "🏠",
-    };
-    return iconMap[type] || "🔔";
-  };
-
-  const getPriorityColor = (priority) => {
-    const colorMap = {
-      URGENT: "error",
-      HIGH: "warning",
-      NORMAL: "info",
-      LOW: "default",
-    };
-    return colorMap[priority] || "default";
-  };
-
+  /* ================= RENDER ================= */
   return (
     <Menu
       anchorEl={anchorEl}
@@ -86,7 +115,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
       transformOrigin={{ horizontal: "right", vertical: "top" }}
       anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
     >
-      {/* Header */}
+      {/* ===== HEADER ===== */}
       <Box
         sx={{
           p: 2,
@@ -100,7 +129,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
         </Typography>
         <Button
           size="small"
-          startIcon={<MarkEmailRead />}
+          startIcon={<MailCheck size={18} />}
           onClick={handleMarkAllRead}
           sx={{ textTransform: "none" }}
         >
@@ -110,13 +139,11 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
 
       <Divider />
 
-      {/* Notifications List */}
+      {/* ===== LIST ===== */}
       <Box sx={{ maxHeight: 400, overflow: "auto" }}>
         {notifications.length === 0 ? (
           <Box sx={{ p: 4, textAlign: "center" }}>
-            <Notifications
-              sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
-            />
+            <Bell size={56} className="text-gray-400 mb-2" />
             <Typography color="text.secondary">
               Không có thông báo mới
             </Typography>
@@ -126,9 +153,9 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
             {notifications.slice(0, 10).map((notification) => (
               <ListItem
                 key={notification.id}
-                button
                 onClick={() => handleNotificationClick(notification)}
                 sx={{
+                  cursor: "pointer",
                   bgcolor: notification.isRead ? "transparent" : "action.hover",
                   "&:hover": {
                     bgcolor: "action.selected",
@@ -137,12 +164,20 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                   borderColor: "divider",
                 }}
               >
+                {/* ICON */}
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: "primary.main" }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: "primary.main",
+                      width: 36,
+                      height: 36,
+                    }}
+                  >
                     {getNotificationIcon(notification.type)}
                   </Avatar>
                 </ListItemAvatar>
 
+                {/* CONTENT */}
                 <ListItemText
                   primary={
                     <Box
@@ -169,9 +204,8 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                           e.stopPropagation();
                           deleteNotification(notification.id);
                         }}
-                        sx={{ ml: 1 }}
                       >
-                        <Delete fontSize="small" />
+                        <Trash2 size={16} />
                       </IconButton>
                     </Box>
                   }
@@ -190,6 +224,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                       >
                         {notification.shortMessage || notification.message}
                       </Typography>
+
                       <Box
                         sx={{
                           display: "flex",
@@ -207,14 +242,19 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                             }
                           )}
                         </Typography>
+
                         {notification.priority !== "NORMAL" && (
                           <Chip
                             label={notification.priority}
                             size="small"
                             color={getPriorityColor(notification.priority)}
-                            sx={{ height: 20, fontSize: "0.65rem" }}
+                            sx={{
+                              height: 20,
+                              fontSize: "0.65rem",
+                            }}
                           />
                         )}
+
                         {!notification.isRead && (
                           <Box
                             sx={{
@@ -237,7 +277,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
 
       <Divider />
 
-      {/* Footer */}
+      {/* ===== FOOTER ===== */}
       <Box sx={{ p: 1 }}>
         <Button
           fullWidth

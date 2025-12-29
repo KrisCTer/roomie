@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// web-app/src/hooks/useBillOperations.js
+import { useState, useEffect, useCallback } from "react";
 import {
   getMyLandlordBills,
   getMyTenantBills,
@@ -14,10 +15,7 @@ import { getMyContracts } from "../services/contract.service";
 import { getPropertiesByOwner } from "../services/property.service";
 import { getUserProfile } from "../services/user.service";
 
-export const useBillOperations = () => {
-  // Tab state
-  const [activeTab, setActiveTab] = useState("landlord");
-
+export const useBillOperations = (activeRole) => {
   // Data states
   const [billsData, setBillsData] = useState({
     asLandlord: [],
@@ -64,26 +62,8 @@ export const useBillOperations = () => {
     },
   });
 
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // Calculate stats when bills change
-  useEffect(() => {
-    calculateStats();
-  }, [billsData]);
-
-  // Reset selections when tab changes
-  useEffect(() => {
-    setSelectedBills([]);
-    setFilterStatus("");
-    setFilterProperty("");
-    setFilterContract("");
-    setSearchTerm("");
-  }, [activeTab]);
-
-  const loadData = async () => {
+  //  Load data function (useCallback for stable reference)
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -159,6 +139,10 @@ export const useBillOperations = () => {
 
         if (landlordStatsRes?.success && tenantStatsRes?.success) {
           // Backend stats available - use them
+          setStats({
+            landlord: landlordStatsRes.result || stats.landlord,
+            tenant: tenantStatsRes.result || stats.tenant,
+          });
           console.log("📊 Loaded stats from backend");
         }
       } catch (error) {
@@ -169,9 +153,10 @@ export const useBillOperations = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // No dependencies - stable function
 
-  const calculateStats = () => {
+  //  Calculate stats function (useCallback)
+  const calculateStats = useCallback(() => {
     // Landlord stats
     const landlordBills = billsData.asLandlord;
     const landlordStats = {
@@ -202,19 +187,44 @@ export const useBillOperations = () => {
       landlord: landlordStats,
       tenant: tenantStats,
     });
-  };
+  }, [billsData]);
 
-  const handleCreateBill = () => {
+  //  Refetch function (public API)
+  const refetch = useCallback(async () => {
+    console.log("🔄 Refetching bills...");
+    await loadData();
+  }, [loadData]);
+
+  //  Load data on mount
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  //  Recalculate stats when bills data changes or activeRole changes
+  useEffect(() => {
+    calculateStats();
+  }, [calculateStats]);
+
+  //  Reset selections when activeRole changes
+  useEffect(() => {
+    setSelectedBills([]);
+    setFilterStatus("");
+    setFilterProperty("");
+    setFilterContract("");
+    setSearchTerm("");
+  }, [activeRole]);
+
+  const handleCreateBill = useCallback(() => {
     setSelectedBill(null);
     setShowCreateModal(true);
-  };
+  }, []);
 
-  const handleEditBill = (bill) => {
+  const handleEditBill = useCallback((bill) => {
     setSelectedBill(bill);
     setShowCreateModal(true);
-  };
+  }, []);
 
-  const handleSendBill = async (billId) => {
+  const handleSendBill = useCallback(async (billId) => {
     if (!window.confirm("Gửi hóa đơn này cho người thuê?")) {
       return;
     }
@@ -222,31 +232,31 @@ export const useBillOperations = () => {
     try {
       const res = await sendBill(billId);
       if (res?.success) {
-        alert("✅ Đã gửi hóa đơn thành công!");
-        loadData();
+        alert(" Đã gửi hóa đơn thành công!");
+        await loadData();
       }
     } catch (error) {
       console.error("Error sending bill:", error);
       alert("❌ Không thể gửi hóa đơn! " + (error?.response?.data?.message || ""));
     }
-  };
+  }, [loadData]);
 
-  const handleDeleteBill = async (billId) => {
+  const handleDeleteBill = useCallback(async (billId) => {
     if (!window.confirm("Xóa hóa đơn này? Chỉ có thể xóa hóa đơn ở trạng thái DRAFT.")) {
       return;
     }
 
     try {
       await deleteBill(billId);
-      alert("✅ Đã xóa hóa đơn!");
-      loadData();
+      alert(" Đã xóa hóa đơn!");
+      await loadData();
     } catch (error) {
       console.error("Error deleting bill:", error);
       alert("❌ Không thể xóa hóa đơn! " + (error?.response?.data?.message || ""));
     }
-  };
+  }, [loadData]);
 
-  const handleDownloadBillPdf = async (billId) => {
+  const handleDownloadBillPdf = useCallback(async (billId) => {
     try {
       const response = await downloadBillPdf(billId);
       
@@ -269,14 +279,14 @@ export const useBillOperations = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log("✅ PDF downloaded successfully");
+      console.log(" PDF downloaded successfully");
     } catch (error) {
       console.error("Error downloading PDF:", error);
       alert("❌ Không thể tải xuống PDF!");
     }
-  };
+  }, [billsData]);
 
-  const handleBulkSend = async () => {
+  const handleBulkSend = useCallback(async () => {
     if (selectedBills.length === 0) {
       alert("Vui lòng chọn ít nhất 1 hóa đơn!");
       return;
@@ -289,18 +299,18 @@ export const useBillOperations = () => {
     try {
       const res = await bulkSendBills(selectedBills);
       if (res?.success) {
-        alert(`✅ Đã gửi ${selectedBills.length} hóa đơn thành công!`);
+        alert(` Đã gửi ${selectedBills.length} hóa đơn thành công!`);
         setSelectedBills([]);
         setShowBulkSendModal(false);
-        loadData();
+        await loadData();
       }
     } catch (error) {
       console.error("Error bulk sending bills:", error);
       alert("❌ Không thể gửi hóa đơn! " + (error?.response?.data?.message || ""));
     }
-  };
+  }, [selectedBills, loadData]);
 
-  const handleExportBills = async (format = 'excel') => {
+  const handleExportBills = useCallback(async (format = 'excel') => {
     try {
       const filters = {
         status: filterStatus || undefined,
@@ -329,14 +339,14 @@ export const useBillOperations = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log(`✅ Bills exported to ${format.toUpperCase()}`);
+      console.log(` Bills exported to ${format.toUpperCase()}`);
     } catch (error) {
       console.error("Error exporting bills:", error);
       alert("❌ Không thể xuất dữ liệu!");
     }
-  };
+  }, [filterStatus, filterProperty, filterContract]);
 
-  const handleToggleSelectBill = (billId) => {
+  const handleToggleSelectBill = useCallback((billId) => {
     setSelectedBills(prev => {
       if (prev.includes(billId)) {
         return prev.filter(id => id !== billId);
@@ -344,9 +354,9 @@ export const useBillOperations = () => {
         return [...prev, billId];
       }
     });
-  };
+  }, []);
 
-  const handleSelectAllBills = (bills) => {
+  const handleSelectAllBills = useCallback((bills) => {
     const draftBills = bills.filter(b => b.status === "DRAFT");
     const draftIds = draftBills.map(b => b.id);
     
@@ -357,24 +367,24 @@ export const useBillOperations = () => {
       // Select all DRAFT bills
       setSelectedBills(draftIds);
     }
-  };
+  }, [selectedBills]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowCreateModal(false);
     setSelectedBill(null);
-  };
+  }, []);
 
-  const handleModalSuccess = () => {
+  const handleModalSuccess = useCallback(async () => {
     setShowCreateModal(false);
     setSelectedBill(null);
-    loadData();
-  };
+    await loadData();
+  }, [loadData]);
 
   /**
-   * Get filtered bills based on current filters
+   *  Get filtered bills based on activeRole and current filters
    */
-  const getFilteredBills = () => {
-    const bills = activeTab === "landlord" 
+  const getFilteredBills = useCallback(() => {
+    const bills = activeRole === "landlord" 
       ? billsData.asLandlord 
       : billsData.asTenant;
 
@@ -385,7 +395,7 @@ export const useBillOperations = () => {
       }
 
       // Property filter (landlord only)
-      if (filterProperty && activeTab === "landlord") {
+      if (filterProperty && activeRole === "landlord") {
         const contract = contracts.asLandlord.find(c => c.id === bill.contractId);
         if (!contract || contract.propertyId !== filterProperty) {
           return false;
@@ -411,7 +421,7 @@ export const useBillOperations = () => {
 
       return true;
     });
-  };
+  }, [activeRole, billsData, filterStatus, filterProperty, filterContract, searchTerm, contracts]);
 
   const formatDateForFilename = (date) => {
     if (!date) return "unknown";
@@ -420,8 +430,8 @@ export const useBillOperations = () => {
   };
 
   return {
-    // State
-    activeTab,
+    // State (activeTab mapped from activeRole for backward compatibility)
+    activeTab: activeRole,
     billsData,
     properties,
     contracts,
@@ -438,7 +448,6 @@ export const useBillOperations = () => {
     selectedBills,
 
     // Setters
-    setActiveTab,
     setFilterStatus,
     setFilterProperty,
     setFilterContract,
@@ -461,5 +470,8 @@ export const useBillOperations = () => {
 
     // Helper
     getFilteredBills,
+
+    //  Refetch
+    refetch,
   };
 };

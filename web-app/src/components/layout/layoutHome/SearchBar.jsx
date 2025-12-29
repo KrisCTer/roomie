@@ -78,15 +78,15 @@ const SearchBar = ({ compact = false, onSearch }) => {
   }, []);
 
   const propertyTypes = [
-    { value: "", label: "Tất cả loại hình" },
-    { value: "ROOM", label: "Phòng trọ" },
-    { value: "DORMITORY", label: "Ký túc xá" },
-    { value: "APARTMENT", label: "Căn hộ chung cư" },
-    { value: "STUDIO", label: "Căn hộ Studio" },
+    { value: "", label: "All property types" },
+    { value: "ROOM", label: "Room" },
+    { value: "DORMITORY", label: "Dormitory" },
+    { value: "APARTMENT", label: "Apartment" },
+    { value: "STUDIO", label: "Studio Apartment" },
     { value: "OFFICETEL", label: "Officetel" },
-    { value: "HOUSE", label: "Nhà nguyên căn" },
-    { value: "VILLA", label: "Biệt thự" },
-    { value: "OTHER", label: "Loại khác" },
+    { value: "HOUSE", label: "Whole House" },
+    { value: "VILLA", label: "Villa" },
+    { value: "OTHER", label: "Other" },
   ];
 
   const handleSearch = () => {
@@ -593,7 +593,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
               letterSpacing: 0.5,
             }}
           >
-            Loại hình
+            Type
           </Typography>
           <Select
             fullWidth
