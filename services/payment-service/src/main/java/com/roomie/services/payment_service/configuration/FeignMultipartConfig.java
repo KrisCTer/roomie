@@ -1,4 +1,4 @@
-package com.roomie.services.contract_service.configuration;
+package com.roomie.services.billing_service.configuration;
 
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
@@ -6,9 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class FeignConfiguration {
+public class FeignMultipartConfig {
+
     @Bean
-    public Encoder multipartFormEncoder() {
+    public Encoder feignFormEncoder() {
         return new SpringFormEncoder();
     }
 }
