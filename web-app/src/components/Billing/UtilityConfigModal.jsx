@@ -96,7 +96,9 @@ const UtilityConfigModal = ({
     }
   };
 
-  const configLevel = formData.contractId ? "Contract-level" : "Property-level";
+  const configLevel = formData.contractId
+    ? "Cấp độ hợp đồng"
+    : "Cấp độ bất động sản";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -110,7 +112,9 @@ const UtilityConfigModal = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">
-                  {config ? "Update Utility Config" : "Create Utility Config"}
+                  {config
+                    ? "Cập nhật cấu hình tiện ích"
+                    : "Tạo cấu hình tiện ích"}
                 </h2>
                 <p className="text-purple-100 text-sm">{configLevel}</p>
               </div>
@@ -141,7 +145,7 @@ const UtilityConfigModal = ({
                     {property.address?.fullAddress}
                   </p>
                   <p className="text-sm font-semibold text-blue-600 mt-2">
-                    💰 Rent: {formatCurrency(property.monthlyRent)}/month
+                    💰 Giá thuê: {formatCurrency(property.monthlyRent)}/tháng
                   </p>
                 </div>
               </div>
@@ -154,13 +158,13 @@ const UtilityConfigModal = ({
               <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
                 <Zap className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-lg">Electricity</h3>
+              <h3 className="font-bold text-gray-900 text-lg">Điện</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Unit Price (VND/kWh) <span className="text-red-500">*</span>
+                  Đơn giá (VND/kWh) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -174,13 +178,13 @@ const UtilityConfigModal = ({
                   placeholder="3500"
                 />
                 <p className="text-xs text-gray-600 mt-1">
-                  Current: {formatCurrency(formData.electricityUnitPrice)}
+                  Hiện tại: {formatCurrency(formData.electricityUnitPrice)}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Meter Number (Optional)
+                  Số công tơ (Tùy chọn)
                 </label>
                 <input
                   type="text"
@@ -200,13 +204,13 @@ const UtilityConfigModal = ({
               <div className="w-10 h-10 bg-blue-400 rounded-lg flex items-center justify-center">
                 <Droplet className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-lg">Water</h3>
+              <h3 className="font-bold text-gray-900 text-lg">Nước</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Unit Price (VND/m³) <span className="text-red-500">*</span>
+                  Đơn giá (VND/m³) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -220,13 +224,13 @@ const UtilityConfigModal = ({
                   placeholder="15000"
                 />
                 <p className="text-xs text-gray-600 mt-1">
-                  Current: {formatCurrency(formData.waterUnitPrice)}
+                  Hiện tại: {formatCurrency(formData.waterUnitPrice)}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Meter Number (Optional)
+                  Số công tơ (Tùy chọn)
                 </label>
                 <input
                   type="text"
@@ -243,7 +247,7 @@ const UtilityConfigModal = ({
           {/* Fixed Services */}
           <div className="bg-gray-50 rounded-xl p-5 border-2 border-gray-200">
             <h3 className="font-bold text-gray-900 text-lg mb-4">
-              Fixed Services (Monthly)
+              Dịch vụ cố định (Hàng tháng)
             </h3>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -272,7 +276,7 @@ const UtilityConfigModal = ({
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Car className="w-4 h-4 text-green-600" />
-                  Parking
+                  Bãi đỗ xe
                 </label>
                 <input
                   type="number"
@@ -292,7 +296,7 @@ const UtilityConfigModal = ({
               {/* Cleaning */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Cleaning
+                  Dọn dẹp
                 </label>
                 <input
                   type="number"
@@ -313,7 +317,7 @@ const UtilityConfigModal = ({
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <Wrench className="w-4 h-4 text-orange-600" />
-                  Maintenance
+                  Bảo trì
                 </label>
                 <input
                   type="number"
@@ -335,9 +339,9 @@ const UtilityConfigModal = ({
           {/* Info Banner */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm text-blue-800">
-              <strong>💡 Note:</strong> These prices will be automatically
-              applied when creating new bills. You can still override them
-              manually when needed.
+              <strong>💡 Lưu ý:</strong> Những mức giá này sẽ được áp dụng tự
+              động khi tạo hóa đơn mới. Bạn vẫn có thể ghi đè chúng thủ công khi
+              cần thiết.
             </p>
           </div>
 
@@ -348,7 +352,7 @@ const UtilityConfigModal = ({
               onClick={onClose}
               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-semibold"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
@@ -363,7 +367,7 @@ const UtilityConfigModal = ({
               ) : (
                 <>
                   <Save className="w-5 h-5" />
-                  {config ? "Update Config" : "Create Config"}
+                  {config ? "Cập nhật cấu hình" : "Tạo cấu hình"}
                 </>
               )}
             </button>

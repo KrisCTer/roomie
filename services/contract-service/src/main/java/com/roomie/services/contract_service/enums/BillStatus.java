@@ -1,4 +1,4 @@
-package com.roomie.services.billing_service.enums;
+package com.roomie.services.contract_service.enums;
 
 public enum BillStatus {
     DRAFT,      // Nháp (chưa gửi)

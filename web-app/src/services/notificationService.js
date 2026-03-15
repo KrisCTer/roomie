@@ -1,6 +1,8 @@
 // src/services/notificationService.js
 import axios from 'axios';
+import { getToken } from './localStorageService';
 
+// Connect directly to notification service since CORS is configured there
 const API_BASE_URL = 'http://localhost:8090/notification';
 
 class NotificationService {
@@ -14,12 +16,23 @@ class NotificationService {
 
     // Add auth token to requests
     this.axiosInstance.interceptors.request.use((config) => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     });
+
+    // Add response interceptor for error handling
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          console.error('Notification service: Unauthorized - Token may be invalid');
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   /**

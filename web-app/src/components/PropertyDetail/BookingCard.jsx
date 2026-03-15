@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Calendar, CheckCircle, AlertCircle, CreditCard } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle,
+  AlertCircle,
+  CreditCard,
+  Info,
+} from "lucide-react";
 
 const BookingCard = ({
   property,
@@ -177,16 +183,18 @@ const BookingCard = ({
 
       {/* Info Notes */}
       <div className="mt-4 space-y-2">
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+          <Info className="w-4 h-4 text-amber-700 shrink-0" />
           <p className="text-xs text-amber-900">
-            💡 Bạn chưa bị tính phí cho đến khi chủ nhà xác nhận đặt phòng.
+            Bạn chưa bị tính phí cho đến khi chủ nhà xác nhận đặt phòng.
           </p>
         </div>
 
         {leaseStart && leaseEnd && leaseDuration > 0 && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="  p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-blue-700 shrink-0" />
             <p className="text-xs text-blue-900">
-              📅 Thời gian thuê:{" "}
+              Thời gian thuê:{" "}
               <span className="font-semibold">{leaseDuration} tháng</span>
             </p>
           </div>

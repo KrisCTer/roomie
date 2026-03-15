@@ -1,4 +1,4 @@
-package com.roomie.services.booking_service.dto.event;
+package com.roomie.services.billing_service.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

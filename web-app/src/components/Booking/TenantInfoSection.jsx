@@ -45,12 +45,12 @@ const TenantInfoSection = ({ tenantId }) => {
     <div className="bg-white rounded-lg p-4 border border-gray-200">
       <div className="flex items-center gap-2 mb-3">
         <User className="w-5 h-5 text-green-600" />
-        <h3 className="font-bold text-gray-900">Tenant Information</h3>
+        <h3 className="font-bold text-gray-900">Thông tin người thuê nhà</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-600 whitespace-nowrap">Full Name:</span>
+          <span className="text-gray-600 whitespace-nowrap">Họ và tên:</span>
           <span className="font-semibold text-gray-900">
             {tenant.firstName} {tenant.lastName}
           </span>
@@ -66,7 +66,9 @@ const TenantInfoSection = ({ tenantId }) => {
 
         <div className="flex items-center gap-2 text-sm">
           <Phone className="w-4 h-4 text-gray-500" />
-          <span className="text-gray-600 whitespace-nowrap">Phone Number:</span>
+          <span className="text-gray-600 whitespace-nowrap">
+            Số điện thoại:
+          </span>
           <span className="flex items-center gap-1 font-medium text-gray-900">
             {tenant.phoneNumber || "N/A"}
           </span>

@@ -199,38 +199,6 @@ enum NotificationChannel {
 - CDN integration
 - File versioning
 
-#### Search Service
-**Database**: Elasticsearch
-**Responsibilities**:
-- Full-text search
-- Geo-spatial search
-- Filter và faceted search
-- Search analytics
-- Auto-suggestions
-
-**Search Index**:
-```json
-{
-  "properties": {
-    "id": {"type": "keyword"},
-    "title": {"type": "text", "analyzer": "vietnamese"},
-    "location": {"type": "geo_point"},
-    "price": {"type": "float"},
-    "amenities": {"type": "keyword"},
-    "availability": {"type": "boolean"}
-  }
-}
-```
-
-#### Analytics Service
-**Database**: ClickHouse + MongoDB
-**Responsibilities**:
-- User behavior tracking
-- Business metrics calculation
-- Report generation
-- Data visualization APIs
-- Performance monitoring
-
 ### 5. Infrastructure Services
 
 #### Profile Service
@@ -241,24 +209,6 @@ enum NotificationChannel {
 - Avatar và document storage
 - Profile verification
 - Privacy settings
-
-#### Review Service
-**Database**: MySQL + MongoDB
-**Responsibilities**:
-- Rating và review system
-- Review moderation
-- Sentiment analysis
-- Review aggregation
-- Fake review detection
-
-#### Maintenance Service
-**Database**: MySQL
-**Responsibilities**:
-- Maintenance request management
-- Technician assignment
-- Work order tracking
-- Maintenance history
-- Cost tracking
 
 ## 🗄️ Database Architecture
 
@@ -345,7 +295,6 @@ Topics:
   booking-events:       # Booking lifecycle events
   payment-events:       # Payment processing events
   notification-events:  # Notification triggers
-  analytics-events:     # User behavior tracking
 ```
 
 ### Event Flow Example: Booking Process
@@ -359,8 +308,6 @@ Topics:
 4. payment-service publishes 'PaymentRequested'
    ↓
 5. notification-service listens → sends confirmation email
-   ↓
-6. analytics-service listens → tracks booking metrics
 ```
 
 ## 🔐 Security Architecture
@@ -444,7 +391,7 @@ Write Side (Command):
 BookingService → MySQL → Event Store
 
 Read Side (Query):
-Event Store → View Updater → MongoDB → Search Service
+Event Store → View Updater → MongoDB
 ```
 
 ## 🛠️ Development Guidelines
@@ -460,7 +407,7 @@ Event Store → View Updater → MongoDB → Search Service
 ```yaml
 Backend:
   - Java 17 + Spring Boot 3
-  - Spring Cloud (Gateway, Eureka, Config)
+  - Spring Cloud (Gateway, Eureka)
   - Apache Kafka
   - Docker & Docker Compose
 
@@ -469,7 +416,6 @@ Databases:
   - MongoDB 6.0
   - Redis 7.0
   - Neo4j 5.0
-  - Elasticsearch 8.0
 
 Monitoring:
   - Prometheus + Grafana
@@ -486,7 +432,6 @@ Monitoring:
    
 2. Discovery & Configuration:
    - Eureka Server
-   - Config Server
    
 3. Gateway & Security:
    - API Gateway  
@@ -498,7 +443,6 @@ Monitoring:
    - File Service
    
 5. Dependent Services:
-   - Search Service (depends on Property)
    - Booking Service (depends on Property, Profile)
    - Payment Service (depends on Booking)
    - Contract Service (depends on Booking)
@@ -507,40 +451,6 @@ Monitoring:
 6. Support Services:
    - Chat Service
    - Notification Service
-   - Review Service
-   - Maintenance Service
-   - Analytics Service
-```
-
-## 🔧 Configuration Management
-
-### Spring Cloud Config
-```yaml
-# application.yml
-spring:
-  cloud:
-    config:
-      server:
-        git:
-          uri: https://github.com/roomie/config-repo
-          search-paths: '{application}'
-          clone-on-start: true
-```
-
-### Environment-specific Configs
-```
-config-repo/
-├── application.yml                 # Common config
-├── application-dev.yml            # Development
-├── application-staging.yml        # Staging  
-├── application-prod.yml           # Production
-├── auth-service/
-│   ├── auth-service.yml
-│   ├── auth-service-dev.yml
-│   └── auth-service-prod.yml
-└── property-service/
-    ├── property-service.yml
-    └── property-service-prod.yml
 ```
 
 ## 🚀 Deployment Strategies
@@ -627,18 +537,6 @@ CREATE INDEX idx_properties_city_price ON properties(city, price);
 CREATE INDEX idx_bookings_user_date ON bookings(user_id, check_in_date);
 CREATE INDEX idx_messages_chat_timestamp ON messages(chat_id, created_at DESC);
 
--- Partitioning (Analytics data)
-CREATE TABLE analytics_events (
-    id BIGINT NOT NULL,
-    event_type VARCHAR(50),
-    user_id BIGINT,
-    event_data JSON,
-    created_at TIMESTAMP
-) PARTITION BY RANGE (UNIX_TIMESTAMP(created_at)) (
-    PARTITION p202401 VALUES LESS THAN (UNIX_TIMESTAMP('2024-02-01')),
-    PARTITION p202402 VALUES LESS THAN (UNIX_TIMESTAMP('2024-03-01')),
-    PARTITION p202403 VALUES LESS THAN (UNIX_TIMESTAMP('2024-04-01'))
-);
 ```
 
 ### Caching Strategies

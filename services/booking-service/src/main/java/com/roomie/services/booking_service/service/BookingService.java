@@ -1,6 +1,8 @@
 package com.roomie.services.booking_service.service;
 
 import com.roomie.services.booking_service.dto.event.BookingCreatedEvent;
+import com.roomie.services.booking_service.dto.event.BookingEvent;
+import com.roomie.services.booking_service.dto.event.NotificationEvent;
 import com.roomie.services.booking_service.dto.request.BookingRequest;
 import com.roomie.services.booking_service.dto.response.BookingResponse;
 import com.roomie.services.booking_service.dto.response.property.PropertyResponse;
@@ -12,6 +14,7 @@ import com.roomie.services.booking_service.exception.AppException;
 import com.roomie.services.booking_service.exception.ErrorCode;
 import com.roomie.services.booking_service.mapper.BookingMapper;
 import com.roomie.services.booking_service.repository.LeaseLongTermRepository;
+import com.roomie.services.booking_service.repository.httpclient.ProfileClient;
 import com.roomie.services.booking_service.repository.httpclient.PropertyClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -32,11 +36,12 @@ import java.util.Optional;
 @Slf4j
 public class BookingService {
     LeaseLongTermRepository ltRepo;
-    BookingMapper bookingMapper; // change to @Component if needed
+    BookingMapper bookingMapper;
     RedisLockService lockService;
     RedisCacheService cacheService;
-    KafkaTemplate<String, BookingCreatedEvent> kafkaTemplate;
     PropertyClient propertyClient;
+    ProfileClient profileClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     long LOCK_TTL_SECONDS = 15 * 60;
     long CACHE_TTL_SECONDS = 5 * 60;
@@ -65,10 +70,13 @@ public class BookingService {
             lease.setStatus(LeaseStatus.PENDING_APPROVAL);
             lease.setCreatedAt(Instant.now());
             lease.setUpdatedAt(Instant.now());
-            ltRepo.save(lease);
-            cacheService.put(cacheKey(lease.getId()), lease, CACHE_TTL_SECONDS);
 
-            kafkaTemplate.send("lease.created", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent(), lease.getRentalDeposit()));
+            LeaseLongTerm saved = ltRepo.save(lease);
+            cacheService.put(cacheKey(saved.getId()), saved, CACHE_TTL_SECONDS);
+
+            BookingEvent event = buildBookingEvent(saved, property);
+            kafkaTemplate.send("booking.created", event);
+            log.info("Published booking.created event for bookingId={}", saved.getId());
 
             return bookingMapper.leaseToResponse(lease);
         } finally {
@@ -140,20 +148,60 @@ public class BookingService {
 
         lease.setStatus(LeaseStatus.ACTIVE);
         lease.setUpdatedAt(Instant.now());
-        ltRepo.save(lease);
-        cacheService.put(cacheKey(id), lease, CACHE_TTL_SECONDS);
-        kafkaTemplate.send("lease.confirmed", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent(), lease.getRentalDeposit()));
+        LeaseLongTerm saved = ltRepo.save(lease);
+        cacheService.put(cacheKey(id), saved, CACHE_TTL_SECONDS);
+        BookingEvent event = buildBookingEvent(saved, property);
+        kafkaTemplate.send("booking.confirmed", event);
+        log.info("Published booking.confirmed event for bookingId={}", saved.getId());
         return bookingMapper.leaseToResponse(lease);
     }
 
+    public BookingResponse reject(String id, String reason) {
+        LeaseLongTerm lease = ltRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        if (lease.getStatus() != LeaseStatus.PENDING_APPROVAL)
+            throw new AppException(ErrorCode.LONG_TERM_INVALID_STATUS);
+
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
+
+        if (!property.getOwner().getOwnerId().equals(currentUserId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        lease.setStatus(LeaseStatus.REJECTED);
+        lease.setUpdatedAt(Instant.now());
+        LeaseLongTerm saved = ltRepo.save(lease);
+        cacheService.evict(cacheKey(id));
+
+        BookingEvent event = buildBookingEvent(saved, property);
+        kafkaTemplate.send("booking.rejected", event);
+        log.info("Published booking.rejected event for bookingId={}", saved.getId());
+
+        return bookingMapper.leaseToResponse(saved);
+    }
+
     public BookingResponse cancel(String id) {
-        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        LeaseLongTerm lease = ltRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
+
+        String cancelledBy = currentUserId.equals(lease.getTenantId()) ? "TENANT" : "LANDLORD";
+
         lease.setStatus(LeaseStatus.TERMINATED);
         lease.setUpdatedAt(Instant.now());
-        ltRepo.save(lease);
+        LeaseLongTerm saved = ltRepo.save(lease);
         cacheService.evict(cacheKey(id));
-        kafkaTemplate.send("lease.cancelled", new BookingCreatedEvent(lease.getId(), lease.getTenantId(), lease.getPropertyId(), lease.getMonthlyRent(), lease.getRentalDeposit()));
-        return bookingMapper.leaseToResponse(lease);
+
+        BookingEvent event = buildBookingEvent(saved, property);
+        event.setStatus(lease.getStatus().name() + "_BY_" + cancelledBy);
+        kafkaTemplate.send("booking.cancelled", event);
+        log.info("Published booking.cancelled event for bookingId={}", saved.getId());
+
+        return bookingMapper.leaseToResponse(saved);
     }
 
     public BookingResponse pause(String id, String reason) {
@@ -173,19 +221,19 @@ public class BookingService {
     }
 
     public BookingResponse terminate(String id, String reason) {
-        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        LeaseLongTerm lease = ltRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
         lease.setStatus(LeaseStatus.TERMINATED);
         lease.setUpdatedAt(Instant.now());
-
         LeaseLongTerm saved = ltRepo.save(lease);
 
-        // Mark property as AVAILABLE again
+        PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
         propertyClient.markAsAvailable(lease.getPropertyId());
 
-        // Publish event
-//        kafkaTemplate.send("lease.terminated",
-//                new LeaseTerminatedEvent(saved.getId(), saved.getPropertyId())
-//        );
+        BookingEvent event = buildBookingEvent(saved, property);
+        kafkaTemplate.send("booking.terminated", event);
+        log.info("Published booking.terminated event for bookingId={}", saved.getId());
 
         return bookingMapper.leaseToResponse(saved);
     }
@@ -208,7 +256,6 @@ public class BookingService {
     @Scheduled(cron = "0 0 1 * * *") // Daily at 1 AM
     public void expireLeases() {
         Instant now = Instant.now();
-
         List<LeaseLongTerm> expiring = ltRepo.findByStatusAndLeaseEndBefore(
                 LeaseStatus.ACTIVE,
                 now
@@ -217,16 +264,18 @@ public class BookingService {
         for (LeaseLongTerm lease : expiring) {
             lease.setStatus(LeaseStatus.EXPIRED);
             lease.setUpdatedAt(now);
-
             LeaseLongTerm saved = ltRepo.save(lease);
 
-            // Mark property as AVAILABLE
-            propertyClient.markAsAvailable(lease.getPropertyId());
+            try {
+                PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
+                propertyClient.markAsAvailable(lease.getPropertyId());
 
-            // Notify parties
-//            kafkaTemplate.send("lease.expired",
-//                    new LeaseExpiredEvent(saved.getId(), saved.getPropertyId())
-//            );
+                BookingEvent event = buildBookingEvent(saved, property);
+                kafkaTemplate.send("booking.expired", event);
+                log.info("Published booking.expired event for bookingId={}", saved.getId());
+            } catch (Exception e) {
+                log.error("Failed to process expired lease: {}", lease.getId(), e);
+            }
         }
     }
 
@@ -258,5 +307,43 @@ public class BookingService {
                 }
             }
         });
+    }
+    private BookingEvent buildBookingEvent(LeaseLongTerm lease, PropertyResponse property) {
+        String tenantName = "Unknown Tenant";
+        String landlordName = "Unknown Landlord";
+
+        try {
+            var tenantProfile = profileClient.getProfile(lease.getTenantId());
+            if (tenantProfile != null && tenantProfile.getResult() != null) {
+                tenantName = tenantProfile.getResult().getFirstName();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch tenant profile for event", e);
+        }
+
+        try {
+            var landlordProfile = profileClient.getProfile(lease.getLandLordId());
+            if (landlordProfile != null && landlordProfile.getResult() != null) {
+                landlordName = landlordProfile.getResult().getFirstName();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch landlord profile for event", e);
+        }
+
+        return BookingEvent.builder()
+                .bookingId(lease.getId())
+                .propertyId(lease.getPropertyId())
+                .propertyTitle(property != null ? property.getTitle() : "Unknown Property")
+                .tenantId(lease.getTenantId())
+                .tenantName(tenantName)
+                .landlordId(lease.getLandLordId())
+                .landlordName(landlordName)
+                .checkInDate(lease.getLeaseStart())
+                .checkOutDate(lease.getLeaseEnd())
+                .totalPrice(lease.getMonthlyRent())
+                .monthlyRent(lease.getMonthlyRent())
+                .rentalDeposit(lease.getRentalDeposit())
+                .status(lease.getStatus().name())
+                .build();
     }
 }

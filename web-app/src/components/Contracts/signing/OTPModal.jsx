@@ -33,9 +33,7 @@ const OTPModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-gray-900">
-            🔐 OTP Verification
-          </h3>
+          <h3 className="text-xl font-bold text-gray-900">🔐 Xác minh OTP</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -54,11 +52,11 @@ const OTPModal = ({
           // REQUEST OTP
           <div className="text-center">
             <h4 className="text-lg font-semibold text-gray-900 mb-2">
-              Send Verification Code
+              Gửi mã xác minh
             </h4>
             <p className="text-gray-600 mb-6">
-              We will send a 6-digit OTP code to your email to verify your
-              electronic signature.
+              Chúng tôi sẽ gửi mã OTP gồm 6 chữ số đến email của bạn để xác minh
+              chữ ký điện tử.
             </p>
 
             {otpSuccess && (
@@ -89,7 +87,7 @@ const OTPModal = ({
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>Send OTP</span>
+                  <span>Gửi mã OTP</span>
                 </>
               )}
             </button>
@@ -98,15 +96,15 @@ const OTPModal = ({
           // VERIFY OTP
           <div>
             <h4 className="text-lg font-semibold text-gray-900 mb-2 text-center">
-              Enter Verification Code
+              Nhập mã xác minh
             </h4>
             <p className="text-gray-600 mb-6 text-center text-sm">
-              The OTP has been sent to your email. Please check your inbox.
+              Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.
             </p>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                OTP Code (6 digits)
+                Mã OTP (6 chữ số)
               </label>
               <input
                 type="text"
@@ -133,7 +131,7 @@ const OTPModal = ({
                 autoComplete="off"
               />
               <p className="text-xs text-gray-500 mt-1 text-center">
-                Press Enter to verify
+                Nhấn Enter để xác minh
               </p>
             </div>
 
@@ -141,7 +139,7 @@ const OTPModal = ({
               <div className="mb-4 flex items-center justify-center gap-2 text-sm bg-orange-50 py-2 px-4 rounded-lg border border-orange-200">
                 <Clock className="w-4 h-4 text-orange-500" />
                 <span className="text-gray-700">
-                  Code expires in:{" "}
+                  Mã hết hạn sau:{" "}
                   <span className="font-mono font-bold text-orange-600">
                     {formatCountdown(countdown)}
                   </span>
@@ -153,7 +151,7 @@ const OTPModal = ({
               <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
                 <p className="text-sm text-yellow-700 text-center flex items-center justify-center gap-2">
                   <AlertCircle className="w-4 h-4" />
-                  The OTP has expired. Please request a new code.
+                  Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.
                 </p>
               </div>
             )}
@@ -190,7 +188,7 @@ const OTPModal = ({
                 ) : (
                   <>
                     <Lock className="w-5 h-5" />
-                    <span>Verify and Sign</span>
+                    <span>Xác minh và Ký</span>
                   </>
                 )}
               </button>
@@ -204,16 +202,16 @@ const OTPModal = ({
                   className={`w-4 h-4 ${sendingOTP ? "animate-spin" : ""}`}
                 />
                 {sendingOTP
-                  ? "Sending..."
+                  ? "Đang gửi..."
                   : canResend
-                  ? "Resend OTP"
-                  : `Resend in ${formatCountdown(countdown)}`}
+                  ? "Gửi lại mã OTP"
+                  : `Gửi lại sau ${formatCountdown(countdown)}`}
               </button>
             </div>
 
             <div className="mt-4 text-center">
               <p className="text-xs text-gray-500">
-                Didn’t receive the email? Please check your spam folder.
+                Không nhận được email? Vui lòng kiểm tra thư mục spam.
               </p>
             </div>
           </div>

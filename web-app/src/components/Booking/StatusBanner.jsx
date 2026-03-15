@@ -4,17 +4,17 @@ const StatusBanner = ({ status, statusConfig, isOwner }) => {
   const getStatusMessage = () => {
     if (status === "PENDING_APPROVAL") {
       return isOwner
-        ? "Please review and confirm this booking"
-        : "Waiting for owner's confirmation";
+        ? "Vui lòng xem xét và xác nhận đặt chỗ này"
+        : "Đang chờ xác nhận của chủ sở hữu";
     }
     if (status === "ACTIVE") {
-      return "Your lease is currently active";
+      return "Hợp đồng thuê của bạn hiện đang có hiệu lực.";
     }
     if (status === "TERMINATED") {
-      return "This booking has been terminated";
+      return "Đặt chỗ này đã bị chấm dứt";
     }
     if (status === "EXPIRED") {
-      return "This lease has expired";
+      return "Hợp đồng thuê này đã hết hạn";
     }
     return "";
   };

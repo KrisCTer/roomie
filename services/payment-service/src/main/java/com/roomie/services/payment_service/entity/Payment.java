@@ -17,6 +17,7 @@ public class Payment {
     @MongoId
     String id;
 
+    String userId;
     String bookingId;       // liên kết booking
     String contractId;      // cho deposit hoặc bill
     String billId;
@@ -27,6 +28,7 @@ public class Payment {
     String transactionId;   // ID do payment gateway tạo ra
     String description;
     String paymentUrl;
+    Instant paidAt;
     Instant createdAt;
     Instant updatedAt;
 }

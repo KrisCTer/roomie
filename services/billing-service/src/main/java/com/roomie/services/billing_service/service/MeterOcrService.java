@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class MeterOcrService {
 
-    @Value("${ocr.tesseract.datapath:/usr/share/tesseract-ocr/4.00/tessdata}")
+    @Value("C:/Program Files/Tesseract-OCR/tessdata")
     private String tesseractDataPath;
 
     @Value("${ocr.confidence-threshold:0.7}")
@@ -58,11 +58,13 @@ public class MeterOcrService {
                 throw new IOException("Failed to load image");
             }
 
-            // 2. Preprocess image
-            BufferedImage processedImage = preprocessImage(originalImage);
+//            // 2. Preprocess image
+//            BufferedImage processedImage = preprocessImage(originalImage);
+//
+//            // 3. Extract text using Tesseract
+//            String extractedText = extractTextWithTesseract(processedImage);
+            String extractedText = extractTextWithTesseract(originalImage);
 
-            // 3. Extract text using Tesseract
-            String extractedText = extractTextWithTesseract(processedImage);
             log.debug("Extracted text: {}", extractedText);
 
             // 4. Parse meter reading
@@ -191,7 +193,7 @@ public class MeterOcrService {
             // Configure Tesseract
             tesseract.setDatapath(tesseractDataPath);
             tesseract.setLanguage("eng"); // English for numbers
-            tesseract.setPageSegMode(7); // Single text line
+            tesseract.setPageSegMode(6); // Single text line
             tesseract.setOcrEngineMode(1); // Neural nets LSTM engine
 
             // Configure for digit recognition

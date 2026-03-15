@@ -39,7 +39,6 @@ export const useProfileOperations = () => {
     try {
       setLoading(true);
       const res = await getMyProfile();
-      console.log("PROFILE RESPONSE =", res);
 
       const p = res?.result;
 
@@ -51,6 +50,7 @@ export const useProfileOperations = () => {
       setProfile(p);
 
       setFormData({
+        id:  p.userId,
         avatarUrl: p.avatar || "",
         username: p.username || "",
         email: p.email || "",
@@ -73,7 +73,6 @@ export const useProfileOperations = () => {
 
   //  Refetch profile function (public API)
   const refetchProfile = useCallback(async () => {
-    console.log("🔄 Refetching profile...");
     await loadProfile();
   }, [loadProfile]);
 
@@ -122,7 +121,6 @@ export const useProfileOperations = () => {
 
     try {
       const res = await uploadAvatar(file);
-      console.log("UPLOAD AVATAR RESPONSE", res);
 
       const newAvatarUrl = res?.result?.avatar;
       const updatedUrl = `${newAvatarUrl}?v=${Date.now()}`;
@@ -148,7 +146,6 @@ export const useProfileOperations = () => {
     try {
       const res = await updateIdCard(file);
 
-      console.log("ID CARD UPLOAD RESPONSE =", res);
 
       // Chuẩn hóa đọc response
       const result = res?.data?.result || res?.result;

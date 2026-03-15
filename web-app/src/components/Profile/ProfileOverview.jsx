@@ -32,65 +32,65 @@ const ProfileOverview = ({ formData, onEditClick }) => {
 
   const infoSections = [
     {
-      title: "Personal Information",
+      title: "Thông tin cá nhân",
       icon: <User className="w-5 h-5" />,
       items: [
         {
-          label: "First Name",
-          value: formData.firstName || "Not provided",
+          label: "Tên",
+          value: formData.firstName || "Không xác định",
           icon: <User size={18} />,
         },
         {
-          label: "Last Name",
-          value: formData.lastName || "Not provided",
+          label: "Họ",
+          value: formData.lastName || "Không xác định",
           icon: <User size={18} />,
         },
         {
-          label: "Gender",
-          value: formData.gender || "Not specified",
+          label: "Giới tính",
+          value: formData.gender || "Không xác định",
           icon: <User size={18} />,
         },
         {
-          label: "Date of Birth",
+          label: "Ngày sinh",
           value: formatDate(formData.dob),
           icon: <Calendar size={18} />,
         },
       ],
     },
     {
-      title: "Contact Information",
+      title: "Thông tin liên hệ",
       icon: <Mail className="w-5 h-5" />,
       items: [
         {
           label: "Email",
-          value: formData.email || "Not provided",
+          value: formData.email || "Không xác định",
           icon: <Mail size={18} />,
         },
         {
-          label: "Phone Number",
-          value: formData.phoneNumber || "Not provided",
+          label: "Số điện thoại",
+          value: formData.phoneNumber || "Không xác định",
           icon: <Phone size={18} />,
         },
         {
-          label: "Address",
-          value: formData.currentAddress || "Not provided",
+          label: "Địa chỉ",
+          value: formData.currentAddress || "Không xác định",
           icon: <MapPin size={18} />,
         },
       ],
     },
     {
-      title: "Identity Information",
+      title: "Thông tin CMND/CCCD",
       icon: <Shield className="w-5 h-5" />,
       items: [
         {
-          label: "ID Card Number",
-          value: formData.idCardNumber || "Not verified",
+          label: "Số CMND/CCCD",
+          value: formData.idCardNumber || "Chưa xác minh",
           icon: <CreditCard size={18} />,
           verified: !!formData.idCardNumber,
         },
         {
-          label: "Place of Origin",
-          value: formData.permanentAddress || "Not provided",
+          label: "Nơi sinh",
+          value: formData.permanentAddress || "Không xác định",
           icon: <MapPin size={18} />,
         },
       ],
@@ -163,19 +163,19 @@ const ProfileOverview = ({ formData, onEditClick }) => {
             <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400 opacity-50" />
           </div>
           <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
-            Profile Completion
+            Hoàn thành hồ sơ
           </p>
         </div>
 
         <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-6 border border-green-200 dark:border-green-800">
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {formData.idCardNumber ? "Yes" : "No"}
+              {formData.idCardNumber ? "Hoàn thành" : "Chưa xác minh"}
             </span>
             <CreditCard className="w-8 h-8 text-green-600 dark:text-green-400 opacity-50" />
           </div>
           <p className="text-sm font-medium text-green-900 dark:text-green-300">
-            Identity Verified
+            Xác minh danh tính
           </p>
         </div>
 
@@ -190,7 +190,7 @@ const ProfileOverview = ({ formData, onEditClick }) => {
             <Calendar className="w-8 h-8 text-purple-600 dark:text-purple-400 opacity-50" />
           </div>
           <p className="text-sm font-medium text-purple-900 dark:text-purple-300">
-            Member Since
+            Thành viên từ
           </p>
         </div>
       </div>

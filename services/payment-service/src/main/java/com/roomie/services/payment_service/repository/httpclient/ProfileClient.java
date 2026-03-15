@@ -1,9 +1,9 @@
-package com.roomie.services.contract_service.repository.httpclient;
+package com.roomie.services.payment_service.repository.httpclient;
 
-import com.roomie.services.contract_service.configuration.AuthenticationRequestInterceptor;
-import com.roomie.services.contract_service.configuration.FeignMultipartConfig;
-import com.roomie.services.contract_service.dto.response.ApiResponse;
-import com.roomie.services.contract_service.dto.response.profile.UserProfileResponse;
+import com.roomie.services.payment_service.configuration.AuthenticationRequestInterceptor;
+import com.roomie.services.payment_service.configuration.FeignMultipartConfig;
+import com.roomie.services.payment_service.dto.response.ApiResponse;
+import com.roomie.services.payment_service.dto.response.profile.UserProfileResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;

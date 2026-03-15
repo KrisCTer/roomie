@@ -28,7 +28,6 @@ export const useContractOperations = (activeRole) => {
 
       // Fetch all contracts
       const res = await getMyContracts();
-      console.log(" My Contracts Response:", res);
 
       if (res?.result) {
         const allContracts = res.result;
@@ -52,18 +51,14 @@ export const useContractOperations = (activeRole) => {
           }
         );
 
-        console.log(" Property IDs to fetch:", Array.from(propertyIds));
-        console.log(" User IDs to fetch:", Array.from(userIds));
 
         // Fetch property data in parallel
         const propertyPromises = Array.from(propertyIds).map(async (id) => {
           try {
             const propRes = await getPropertyById(id);
             if (propRes?.success && propRes?.result) {
-              console.log(` Property ${id} fetched:`, propRes.result);
               return [id, propRes.result];
             } else if (propRes?.result) {
-              console.log(` Property ${id} fetched:`, propRes.result);
               return [id, propRes.result];
             }
           } catch (error) {
@@ -77,7 +72,6 @@ export const useContractOperations = (activeRole) => {
           propertyResults.filter(([_, data]) => data)
         );
         
-        console.log(" Property Cache:", propertyMap);
         setPropertyCache(propertyMap);
 
         // Fetch user profiles in parallel
@@ -85,7 +79,6 @@ export const useContractOperations = (activeRole) => {
           try {
             const userRes = await getUserProfile(id);
             if (userRes?.result) {
-              console.log(` User profile ${id} fetched:`, userRes.result);
               return [id, userRes.result];
             }
           } catch (error) {
@@ -99,7 +92,6 @@ export const useContractOperations = (activeRole) => {
           userResults.filter(([_, data]) => data)
         );
         
-        console.log(" User Cache:", userMap);
         setUserCache(userMap);
 
         setToast({
@@ -135,7 +127,6 @@ export const useContractOperations = (activeRole) => {
 
   //  Refetch function (public API)
   const refetch = useCallback(async () => {
-    console.log("🔄 Refetching contracts...");
     await fetchContracts();
   }, [fetchContracts]);
 
@@ -161,7 +152,6 @@ export const useContractOperations = (activeRole) => {
 
   const handleTabChange = useCallback((tab) => {
     // This is kept for compatibility but controlled by Context
-    console.log("Tab change requested:", tab);
   }, []);
 
   return {

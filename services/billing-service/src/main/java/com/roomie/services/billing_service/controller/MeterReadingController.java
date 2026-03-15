@@ -151,7 +151,8 @@ public class MeterReadingController {
      * Expected accuracy: 95%+ for good quality photos
      */
     @PostMapping(value = "/{id}/upload-with-ai",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<MeterReading>> uploadWithAi(
             @PathVariable String id,
             @RequestParam("file") MultipartFile file,

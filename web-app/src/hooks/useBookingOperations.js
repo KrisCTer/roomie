@@ -42,7 +42,6 @@ export const useBookingOperations = () => {
       const response =
         viewMode === "OWNER" ? await getOwnerBookings() : await getMyBookings();
 
-      console.log("Bookings API Response:", response);
 
       if (response && response.success && response.result) {
         let bookingsData = response.result;

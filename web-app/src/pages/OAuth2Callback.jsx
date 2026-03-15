@@ -8,7 +8,6 @@ export default function OAuth2Callback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(">>> OAuth2Callback mounted");
     const token = searchParams.get("token");
     const email = searchParams.get("email");
     const error = searchParams.get("error");

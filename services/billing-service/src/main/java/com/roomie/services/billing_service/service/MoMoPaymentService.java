@@ -152,7 +152,7 @@ public class MoMoPaymentService {
                     .build();
 
         } catch (Exception e) {
-            log.error("❌ MoMo payment creation failed", e);
+            log.error("MoMo payment creation failed", e);
             throw new RuntimeException("Failed to create MoMo payment: " + e.getMessage(), e);
         }
     }

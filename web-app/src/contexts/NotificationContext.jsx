@@ -6,9 +6,6 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-// ⭐ Thay đổi import này theo auth context hiện có của bạn
-// Ví dụ: import { useUser } from "./UserContext";
-// hoặc: import { useAuthentication } from "./AuthenticationContext";
 import { getToken, getCompleteUserInfo } from "../services/localStorageService";
 import notificationService from "../services/notificationService";
 import websocketService from "../services/websocketService";
@@ -26,17 +23,15 @@ export const useNotificationContext = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
-  // ⭐ Lấy user info từ localStorage thay vì auth context
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [toastQueue, setToastQueue] = useState([]);
   const [wsConnected, setWsConnected] = useState(false);
 
-  // ⭐ Load user từ localStorage
+  // Load user from localStorage
   useEffect(() => {
     const storedToken = getToken();
     const completeUser = getCompleteUserInfo();
@@ -65,7 +60,6 @@ export const NotificationProvider = ({ children }) => {
       try {
         await websocketService.connect(user.id, token);
         setWsConnected(true);
-        console.log("✅ Notification WebSocket connected");
 
         // Setup listeners
         websocketService.onNotification(handleNewNotification);
@@ -93,13 +87,32 @@ export const NotificationProvider = ({ children }) => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const [notificationsResponse, unreadCountResponse] = await Promise.all([
-          notificationService.getNotifications({ page: 0, size: 20 }),
-          notificationService.getUnreadCount(),
-        ]);
 
-        setNotifications(notificationsResponse.result.content);
-        setUnreadCount(unreadCountResponse);
+        const [notificationsResponse, unreadCountResponse] =
+          await Promise.allSettled([
+            notificationService.getNotifications({ page: 0, size: 20 }),
+            notificationService.getUnreadCount(),
+          ]);
+
+        // Handle notifications response
+        if (notificationsResponse.status === "fulfilled") {
+          setNotifications(notificationsResponse.value.result.content || []);
+        } else {
+          console.error(
+            "Error fetching notifications:",
+            notificationsResponse.reason
+          );
+        }
+
+        // Handle unread count response
+        if (unreadCountResponse.status === "fulfilled") {
+          setUnreadCount(unreadCountResponse.value);
+        } else {
+          console.error(
+            "Error fetching unread count:",
+            unreadCountResponse.reason
+          );
+        }
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
@@ -150,9 +163,13 @@ export const NotificationProvider = ({ children }) => {
    * Play notification sound
    */
   const playNotificationSound = useCallback(() => {
-    const audio = new Audio("/sounds/notification.mp3");
-    audio.volume = 0.5;
-    audio.play().catch(() => {});
+    try {
+      const audio = new Audio("/sounds/notification.mp3");
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
   }, []);
 
   /**
@@ -160,20 +177,24 @@ export const NotificationProvider = ({ children }) => {
    */
   const showBrowserNotification = useCallback((notification) => {
     if ("Notification" in window && Notification.permission === "granted") {
-      const browserNotification = new Notification(notification.title, {
-        body: notification.shortMessage || notification.message,
-        icon: notification.iconUrl || "/logo.png",
-        tag: notification.id,
-        requireInteraction: notification.priority === "URGENT",
-      });
+      try {
+        const browserNotification = new Notification(notification.title, {
+          body: notification.shortMessage || notification.message,
+          icon: notification.iconUrl || "/logo.png",
+          tag: notification.id,
+          requireInteraction: notification.priority === "URGENT",
+        });
 
-      browserNotification.onclick = () => {
-        window.focus();
-        if (notification.actionUrl) {
-          window.location.href = notification.actionUrl;
-        }
-        browserNotification.close();
-      };
+        browserNotification.onclick = () => {
+          window.focus();
+          if (notification.actionUrl) {
+            window.location.href = notification.actionUrl;
+          }
+          browserNotification.close();
+        };
+      } catch (error) {
+        console.error("Error showing browser notification:", error);
+      }
     }
   }, []);
 
@@ -257,13 +278,19 @@ export const NotificationProvider = ({ children }) => {
   const refresh = useCallback(async () => {
     try {
       setLoading(true);
-      const [notificationsResponse, unreadCountResponse] = await Promise.all([
-        notificationService.getNotifications({ page: 0, size: 20 }),
-        notificationService.getUnreadCount(),
-      ]);
+      const [notificationsResponse, unreadCountResponse] =
+        await Promise.allSettled([
+          notificationService.getNotifications({ page: 0, size: 20 }),
+          notificationService.getUnreadCount(),
+        ]);
 
-      setNotifications(notificationsResponse.result.content);
-      setUnreadCount(unreadCountResponse);
+      if (notificationsResponse.status === "fulfilled") {
+        setNotifications(notificationsResponse.value.result.content || []);
+      }
+
+      if (unreadCountResponse.status === "fulfilled") {
+        setUnreadCount(unreadCountResponse.value);
+      }
     } catch (error) {
       console.error("Error refreshing notifications:", error);
     } finally {

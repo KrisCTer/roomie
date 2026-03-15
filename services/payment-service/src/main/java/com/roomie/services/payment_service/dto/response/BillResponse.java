@@ -1,6 +1,6 @@
-package com.roomie.services.billing_service.dto.response;
+package com.roomie.services.payment_service.dto.response;
 
-import com.roomie.services.billing_service.enums.BillStatus;
+import com.roomie.services.payment_service.enums.BillStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

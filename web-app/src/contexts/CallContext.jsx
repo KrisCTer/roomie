@@ -53,9 +53,7 @@ export const CallProvider = ({ children }) => {
       return;
     }
 
-    console.log("✔ Loaded user from JWT + Profile:", user);
     setCurrentUser(user);
-    console.log("🔥 Current User (CallContext):", user);
   }, []);
 
   // ========== INITIALIZE CALL LISTENERS ==========
@@ -83,7 +81,6 @@ export const CallProvider = ({ children }) => {
 
   // ========== END CALL ==========
   const endCall = useCallback(() => {
-    console.log("🔴 Ending call");
 
     if (socket && isConnected && callState.remotePeer?.userId) {
       socket.emit("end-call", {
@@ -117,12 +114,10 @@ export const CallProvider = ({ children }) => {
       conversationId: null,
     });
 
-    console.log("✅ Call ended");
   }, [callState, localStream, socket, isConnected]);
 
   // ========== REJECT CALL ==========
   const rejectCall = useCallback(() => {
-    console.log("❌ Rejecting call");
 
     const { remotePeer } = callState;
 
@@ -151,7 +146,6 @@ export const CallProvider = ({ children }) => {
           return alert("User not ready yet. Please wait 1-2 seconds.");
         }
 
-        console.log("📞 Starting call:", {
           from: currentUser.userId,
           to: remotePeer.userId,
           conversationId,
@@ -211,7 +205,6 @@ export const CallProvider = ({ children }) => {
         };
 
         peerConnection.ontrack = (event) => {
-          console.log("📥 Received remote track");
           setRemoteStream(event.streams[0]);
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
@@ -238,10 +231,8 @@ export const CallProvider = ({ children }) => {
           },
         };
 
-        console.log("📤 Sending call-user:", callData);
         socket.emit("call-user", callData);
 
-        console.log("✅ Call initiated");
       } catch (error) {
         console.error("❌ Error starting call:", error);
         alert(`Cannot start call: ${error.message}`);
@@ -253,7 +244,6 @@ export const CallProvider = ({ children }) => {
 
   // ========== HANDLE INCOMING CALL ==========
   const handleIncomingCall = useCallback((data) => {
-    console.log("📞 Incoming call:", data);
 
     setCallState({
       isInCall: false,
@@ -268,7 +258,6 @@ export const CallProvider = ({ children }) => {
   // ========== ACCEPT CALL ==========
   const acceptCall = useCallback(async () => {
     try {
-      console.log("✅ Accepting call");
 
       if (!socket || !isConnected) {
         throw new Error("Socket not connected");
@@ -309,7 +298,6 @@ export const CallProvider = ({ children }) => {
       };
 
       peerConnection.ontrack = (event) => {
-        console.log("📥 Received remote track");
         setRemoteStream(event.streams[0]);
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = event.streams[0];
@@ -339,7 +327,6 @@ export const CallProvider = ({ children }) => {
         isRinging: false,
       }));
 
-      console.log("✅ Call accepted");
     } catch (error) {
       console.error("❌ Error accepting call:", error);
       alert(`Cannot accept call: ${error.message}`);
@@ -349,19 +336,16 @@ export const CallProvider = ({ children }) => {
 
   // ========== HANDLE CALL ACCEPTED ==========
   const handleCallAccepted = useCallback((data) => {
-    console.log("✅ Call accepted by remote peer");
   }, []);
 
   // ========== HANDLE CALL REJECTED ==========
   const handleCallRejected = useCallback(() => {
-    console.log("❌ Call rejected by remote peer");
     alert("Call was rejected");
     endCall();
   }, [endCall]);
 
   // ========== HANDLE CALL ENDED ==========
   const handleCallEnded = useCallback(() => {
-    console.log("🔴 Call ended by remote peer");
     endCall();
   }, [endCall]);
 
@@ -379,7 +363,6 @@ export const CallProvider = ({ children }) => {
       }
 
       await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      console.log("✅ ICE candidate added");
     } catch (error) {
       console.error("❌ Error adding ICE candidate:", error);
     }
@@ -387,18 +370,15 @@ export const CallProvider = ({ children }) => {
 
   // ========== HANDLE OFFER (FOR CALLEE) ==========
   const handleOffer = useCallback(async (data) => {
-    console.log("📥 Received offer");
   }, []);
 
   // ========== HANDLE ANSWER (FOR CALLER) ==========
   const handleAnswer = useCallback(async (data) => {
     try {
-      console.log("📥 Received answer");
       if (peerConnectionRef.current) {
         await peerConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(data.answer)
         );
-        console.log("✅ Remote description set");
       }
     } catch (error) {
       console.error("❌ Error setting remote description:", error);

@@ -32,7 +32,7 @@ const RecentActivity = ({ activities = [], loading }) => {
     return (
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          Recent Activity
+          Hoạt động gần đây
         </h2>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -56,11 +56,11 @@ const RecentActivity = ({ activities = [], loading }) => {
     return (
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
-          Recent Activity
+          Hoạt động gần đây
         </h2>
         <div className="text-center py-8">
           <ActivityClock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No recent activity</p>
+          <p className="text-gray-500">Không có hoạt động gần đây</p>
         </div>
       </div>
     );
@@ -68,7 +68,9 @@ const RecentActivity = ({ activities = [], loading }) => {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4">
+        Hoạt động gần đây
+      </h2>
       <div className="space-y-3">
         {activities.map((activity, index) => {
           const color = getActivityColor(activity.type);

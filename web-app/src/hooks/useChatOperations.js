@@ -48,7 +48,6 @@ export const useChatOperations = () => {
     const convId =
       selectedConversation?.conversationId || selectedConversation?.id;
     currentConversationRef.current = convId;
-    console.log("📌 Current conversation ref updated:", convId);
   }, [selectedConversation]);
 
   // Handle navigation from property detail
@@ -80,7 +79,6 @@ export const useChatOperations = () => {
       const convList =
         response?.result || response?.data?.result || response?.data || [];
 
-      console.log(" Loaded conversations:", convList);
       setConversations(convList);
 
       // Auto-select pending conversation
@@ -108,7 +106,6 @@ export const useChatOperations = () => {
 
   //  Refresh conversations function (public API)
   const refreshConversations = useCallback(async () => {
-    console.log("🔄 Refreshing conversations...");
     await loadConversations();
   }, [loadConversations]);
 
@@ -120,7 +117,6 @@ export const useChatOperations = () => {
       const msgList =
         response?.result || response?.data?.result || response?.data || [];
 
-      console.log("📨 Loaded messages:", msgList.length);
       setMessages(msgList);
       scrollHelper(messagesEndRef);
     } catch (error) {
@@ -142,7 +138,6 @@ export const useChatOperations = () => {
       // Join socket room
       if (sendMessage) {
         sendMessage("join_conversation", { conversationId: convId });
-        console.log("🔔 Joined socket room for conversation:", convId);
       }
     },
     [sendMessage, loadMessages]
@@ -192,7 +187,6 @@ export const useChatOperations = () => {
           message: tempMessage.message,
         };
 
-        console.log("📤 Sending message:", payload);
         const response = await createMessage(payload);
         const sentMessage =
           response?.result ||
@@ -200,7 +194,6 @@ export const useChatOperations = () => {
           response?.data ||
           response;
 
-        console.log(" Message sent successfully:", sentMessage);
 
         // Replace temp message with real message
         setMessages((prev) =>
@@ -247,13 +240,11 @@ export const useChatOperations = () => {
   // Handle message received (socket)
   const handleMessageReceived = useCallback(
     (data) => {
-      console.log("📩 WebSocket message received:", data);
 
       const msgConvId = data.conversationId;
       const currentConvId = currentConversationRef.current;
 
       if (!currentConvId || msgConvId !== currentConvId) {
-        console.log("ℹ️ Message for different conversation");
         return;
       }
 
@@ -262,7 +253,6 @@ export const useChatOperations = () => {
 
         // Block duplicates
         if (prev.some((msg) => msg.id === msgId)) {
-          console.log("⚠️ Duplicate message blocked");
           return prev;
         }
 
@@ -312,7 +302,6 @@ export const useChatOperations = () => {
 
   // Handle message sent (socket)
   const handleMessageSent = useCallback((data) => {
-    console.log("📤 Message sent event:", data);
 
     const msgConvId = data.conversationId;
     const currentConvId = currentConversationRef.current;
@@ -346,7 +335,6 @@ export const useChatOperations = () => {
       return;
     }
 
-    console.log("🔌 Registering socket callbacks");
 
     registerMessageCallbacks({
       onMessageReceived: handleMessageReceived,

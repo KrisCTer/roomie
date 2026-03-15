@@ -60,7 +60,6 @@ const CameraModal = ({ show, onClose, onCapture }) => {
     const qr = jsQR(imageData.data, canvas.width, canvas.height);
 
     if (qr) {
-      console.log("QR detected:", qr.data);
       autoCapture();
     }
   };

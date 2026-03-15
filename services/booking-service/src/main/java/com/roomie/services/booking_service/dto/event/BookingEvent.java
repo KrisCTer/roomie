@@ -1,4 +1,4 @@
-package com.roomie.services.notification_service.dto.event;
+package com.roomie.services.booking_service.dto.event;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,5 +22,7 @@ public class BookingEvent {
     Instant checkInDate;
     Instant checkOutDate;
     BigDecimal totalPrice;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
     String status;
 }

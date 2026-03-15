@@ -59,7 +59,7 @@ public class BillCalculation {
 
         // Rent
         BigDecimal monthlyRentAmount = safeBigDecimal(request.getMonthlyRent());
-        BigDecimal rentalDepositAmount = safeBigDecimal(request.getRentalDeposit());
+//        BigDecimal rentalDepositAmount = safeBigDecimal(request.getRentalDeposit());
 
         // Total
         BigDecimal totalAmount = electricityAmount
@@ -69,8 +69,8 @@ public class BillCalculation {
                 .add(cleaningAmount)
                 .add(maintenanceAmount)
                 .add(otherAmount)
-                .add(monthlyRentAmount)
-                .add(rentalDepositAmount);
+                .add(monthlyRentAmount);
+//                .add(rentalDepositAmount);
 
         return BillCalculation.builder()
                 .electricityConsumption(electricityConsumption)
@@ -83,7 +83,7 @@ public class BillCalculation {
                 .maintenanceAmount(maintenanceAmount)
                 .otherAmount(otherAmount)
                 .monthlyRentAmount(monthlyRentAmount)
-                .rentalDepositAmount(rentalDepositAmount)
+//                .rentalDepositAmount(rentalDepositAmount)
                 .totalAmount(totalAmount)
                 .build();
     }

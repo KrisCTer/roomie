@@ -64,7 +64,7 @@ const PropertySection = ({
               },
             }}
           >
-            View all
+            Xem tất cả
           </Button>
         )}
       </Box>

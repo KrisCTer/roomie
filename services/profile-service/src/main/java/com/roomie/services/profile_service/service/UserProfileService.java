@@ -178,7 +178,6 @@ public class UserProfileService {
 
 //    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getByUserId(String userId) {
-        System.out.println("Load DB because cache miss");
         return userProfileRepository.findByUserId(userId)
                 .map(userProfileMapper::toUserProfileResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));

@@ -10,8 +10,8 @@ import {
   createProperty,
   updateProperty,
   getPropertyById,
-} from "../../services/property.service.js";
-import { uploadFile } from "../../services/file.service.js";
+} from "../../services/propertyService.js";
+import { uploadFile } from "../../services/fileService.js";
 
 // Import contexts
 import { useRefresh } from "../../contexts/RefreshContext";
@@ -115,7 +115,6 @@ const AddProperty = () => {
       script.defer = true;
 
       script.addEventListener("load", () => {
-        console.log("✅ Google Maps API loaded successfully");
         setMapsLoaded(true);
       });
 
@@ -241,10 +240,8 @@ const AddProperty = () => {
   // ✅ Refetch function (public API)
   const refetch = useCallback(async () => {
     if (isEditMode && propertyId) {
-      console.log("🔄 Refetching property data...");
       await loadPropertyData(propertyId);
     } else {
-      console.log("⚠️ Not in edit mode, skipping refresh");
     }
   }, [isEditMode, propertyId, loadPropertyData]);
 
@@ -319,7 +316,6 @@ const AddProperty = () => {
             return null;
           }
 
-          console.log("Uploading file:", file.name);
           const response = await uploadFile(file);
           const fileData = response?.result || response?.data || response;
 
@@ -440,15 +436,12 @@ const AddProperty = () => {
         })),
       };
 
-      console.log("Submitting payload:", payload);
 
       let response;
       if (isEditMode && propertyId) {
         response = await updateProperty(propertyId, payload);
-        console.log("Property updated successfully:", response);
       } else {
         response = await createProperty(payload);
-        console.log("Property created successfully:", response);
       }
 
       setSuccess(true);
@@ -524,11 +517,13 @@ const AddProperty = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title={isEditMode ? "Edit Property" : "Add New Property"}
+          title={
+            isEditMode ? "Chỉnh sửa bất động sản" : "Thêm bất động sản mới"
+          }
           subtitle={
             isEditMode
-              ? "Update your property listing"
-              : "Create a new property listing"
+              ? "Cập nhật thông tin bất động sản của bạn"
+              : "Tạo danh sách bất động sản mới"
           }
         />
         <div className="p-8 w-full">
@@ -598,7 +593,7 @@ const AddProperty = () => {
                     : "text-gray-500"
                 }
               >
-                Basic Info
+                Thông tin cơ bản
               </span>
               <span
                 className={
@@ -607,7 +602,7 @@ const AddProperty = () => {
                     : "text-gray-500"
                 }
               >
-                Location
+                Vị trí
               </span>
               <span
                 className={
@@ -616,7 +611,7 @@ const AddProperty = () => {
                     : "text-gray-500"
                 }
               >
-                Details & Media
+                Chi tiết & Media
               </span>
               <span
                 className={
@@ -625,7 +620,7 @@ const AddProperty = () => {
                     : "text-gray-500"
                 }
               >
-                Review
+                Đánh giá & Hoàn tất
               </span>
             </div>
           </div>
@@ -686,7 +681,7 @@ const AddProperty = () => {
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
-              Previous
+              Trước
             </button>
 
             {currentStep < 4 ? (
@@ -694,7 +689,7 @@ const AddProperty = () => {
                 onClick={handleNext}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                Next Step
+                Tiếp theo
               </button>
             ) : (
               <button
@@ -710,7 +705,7 @@ const AddProperty = () => {
                 ) : (
                   <>
                     <Building className="w-5 h-5" />
-                    {isEditMode ? "Update Property" : "Submit Property"}
+                    {isEditMode ? "Cập nhật bất động sản" : "Gửi bất động sản"}
                   </>
                 )}
               </button>

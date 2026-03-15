@@ -8,4 +8,8 @@ import java.util.List;
 
 @Repository
 public interface PaymentRepository extends MongoRepository<Payment, String> {
+    List<Payment> findByUserId(String userId);
+    List<Payment> findByContractId(String contractId);
+    List<Payment> findByBookingId(String bookingId);
+    List<Payment> findByBillId(String billId);
 }

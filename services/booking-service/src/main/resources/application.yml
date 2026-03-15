@@ -9,11 +9,11 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://admin:roomie123@localhost:27017/roomie_booking?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_booking?authSource=admin
     redis:
       host: localhost
       port: 6379
-      password: roomie123
+      password: ${REDIS_PASSWORD}
       timeout: 5000ms
 
   eureka:
@@ -28,6 +28,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -46,4 +48,5 @@ spring:
 app:
   services:
     properties: http://localhost:8083/property
+    profile: http://localhost:8082/profile
 

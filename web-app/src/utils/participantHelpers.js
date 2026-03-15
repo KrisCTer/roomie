@@ -27,16 +27,12 @@ export const findRemotePeer = (participants, currentUserId) => {
     return null;
   }
 
-  console.log("🔍 Finding remote peer:");
-  console.log("   My ID:", currentUserId);
-  console.log("   Total participants:", participants.length);
 
   // Find participant that is NOT me
   const remotePeer = participants.find((p) => {
     const participantId = getParticipantId(p);
     const isNotMe = participantId && participantId !== currentUserId;
     
-    console.log(`   Checking: ${participantId} -> ${isNotMe ? '✅ Remote peer' : '❌ That\'s me'}`);
     
     return isNotMe;
   });
@@ -46,7 +42,6 @@ export const findRemotePeer = (participants, currentUserId) => {
     console.error("   Current user ID:", currentUserId);
     console.error("   All participants:", participants);
   } else {
-    console.log("✅ Found remote peer:", remotePeer);
   }
 
   return remotePeer || null;

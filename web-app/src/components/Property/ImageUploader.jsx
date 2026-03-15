@@ -10,7 +10,7 @@ const ImageUploader = ({
   return (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium mb-3">Upload Images</label>
+        <label className="block text-sm font-medium mb-3">Thêm hình ảnh</label>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors">
           <input
             type="file"
@@ -43,7 +43,7 @@ const ImageUploader = ({
       {uploadedImages.length > 0 && (
         <div>
           <p className="text-sm font-medium mb-3">
-            Uploaded Images ({uploadedImages.length})
+            Hình ảnh đã tải lên ({uploadedImages.length})
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {uploadedImages.map((image, index) => (

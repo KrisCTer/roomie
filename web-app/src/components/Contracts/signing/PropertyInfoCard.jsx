@@ -15,7 +15,7 @@ const PropertyInfoCard = ({ property }) => {
       {/* Header */}
       <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         <Home className="w-6 h-6 text-blue-600" />
-        Property Information
+        Thông tin bất động sản
       </h2>
 
       <div className="flex gap-4">
@@ -32,7 +32,7 @@ const PropertyInfoCard = ({ property }) => {
         <div className="flex-1 space-y-3 text-sm">
           {/* Name */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-600 whitespace-nowrap">Name:</span>
+            <span className="text-gray-600 whitespace-nowrap">Tên:</span>
             <span className="font-semibold text-gray-900 truncate">
               {property.title}
             </span>
@@ -41,7 +41,7 @@ const PropertyInfoCard = ({ property }) => {
           {/* Address */}
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
-            <span className="text-gray-600 whitespace-nowrap">Address:</span>
+            <span className="text-gray-600 whitespace-nowrap">Địa chỉ:</span>
             <span className="flex items-start gap-1 font-medium text-gray-900">
               <span className="break-words">
                 {property.address?.fullAddress ||
@@ -56,12 +56,12 @@ const PropertyInfoCard = ({ property }) => {
           <div className="flex flex-wrap gap-4 text-gray-600">
             <span className="flex items-center gap-1">
               <BedDouble className="w-4 h-4 text-blue-500" />
-              {property.bedrooms ?? 0} bedrooms
+              {property.bedrooms ?? 0} giường
             </span>
 
             <span className="flex items-center gap-1">
               <Bath className="w-4 h-4 text-purple-500" />
-              {property.bathrooms ?? 0} bathrooms
+              {property.bathrooms ?? 0} phòng tắm
             </span>
 
             <span className="flex items-center gap-1">
@@ -73,11 +73,11 @@ const PropertyInfoCard = ({ property }) => {
           {/* Monthly Rent */}
           <div className="flex items-center gap-2">
             <span className="text-gray-600 whitespace-nowrap">
-              Monthly Rent:
+              Tiền thuê hàng tháng:
             </span>
             <span className="font-bold text-purple-600 text-lg">
               {new Intl.NumberFormat("vi-VN").format(property.monthlyRent || 0)}{" "}
-              ₫ / month
+              ₫ / tháng
             </span>
           </div>
         </div>

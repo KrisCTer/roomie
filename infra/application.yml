@@ -18,14 +18,14 @@ services:
       # MySQL Configuration
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/roomie_contract
       - SPRING_DATASOURCE_USERNAME=roomie
-      - SPRING_DATASOURCE_PASSWORD=roomie123
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       # MongoDB Configuration (for contract documents)
-      - SPRING_DATA_MONGODB_URI=mongodb://admin:roomie123@mongodb:27017/roomie_contract?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:${MONGO_PASSWORD}@mongodb:27017/roomie_contract?authSource=admin
       # Redis Configuration
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
-      - SPRING_REDIS_PASSWORD=roomie123
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD}
       # Kafka Configuration
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_KAFKA_CONSUMER_GROUP_ID=contract-service

@@ -1,4 +1,4 @@
-package com.roomie.services.billing_service.configuration;
+package com.roomie.services.payment_service.configuration;
 
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;

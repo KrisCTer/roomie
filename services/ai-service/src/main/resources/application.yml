@@ -10,13 +10,13 @@ spring:
   # MongoDB Configuration
   data:
     mongodb:
-      uri: mongodb://admin:roomie123@localhost:27017/roomie_ai?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_ai?authSource=admin
       database: roomie_ai
 
 # ? Gemini API Configuration
 gemini:
   api:
-    key: ${GEMINI_API_KEY:AIzaSyBIQhdwnk6U90TZ8Ffq_tjzBOD8k8L7zOA}
+    key: ${GEMINI_API_KEY:AIzaSyCv-rofNGsLWKKY8WfuJNyzgnDXmExdhxA}
     model: gemini-2.5-flash
 
 # Actuator Configuration

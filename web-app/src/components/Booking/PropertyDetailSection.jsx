@@ -45,7 +45,7 @@ const PropertyDetailSection = ({ propertyId }) => {
     <div className="bg-white rounded-lg p-4 border border-gray-200">
       <div className="flex items-center gap-2 mb-3">
         <Home className="w-5 h-5 text-purple-600" />
-        <h3 className="font-bold text-gray-900">Property Information</h3>
+        <h3 className="font-bold text-gray-900">Thông tin bất động sản</h3>
       </div>
 
       <div className="flex gap-4">
@@ -61,14 +61,14 @@ const PropertyDetailSection = ({ propertyId }) => {
         {/* Details */}
         <div className="flex-1 space-y-2 text-sm">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-600 whitespace-nowrap">Name:</span>
+            <span className="text-gray-600 whitespace-nowrap">Tên:</span>
             <span className="font-semibold text-gray-900 truncate">
               {property.title}
             </span>
           </div>
 
           <div className="flex items-start gap-2 text-sm">
-            <span className="text-gray-600 whitespace-nowrap">Address:</span>
+            <span className="text-gray-600 whitespace-nowrap">Địa chỉ:</span>
 
             <span className="flex items-start gap-1 font-medium text-gray-900">
               <MapPin className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
@@ -84,12 +84,12 @@ const PropertyDetailSection = ({ propertyId }) => {
           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
             <span className="flex items-center gap-1">
               <BedDouble className="w-4 h-4 text-blue-500" />
-              {property.bedrooms ?? 0} beds
+              {property.bedrooms ?? 0} giường
             </span>
 
             <span className="flex items-center gap-1">
               <Bath className="w-4 h-4 text-purple-500" />
-              {property.bathrooms ?? 0} baths
+              {property.bathrooms ?? 0} phòng tắm
             </span>
 
             <span className="flex items-center gap-1">
@@ -99,12 +99,12 @@ const PropertyDetailSection = ({ propertyId }) => {
           </div>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-600 whitespace-nowrap">
-              Monthly Rent:
+              Tiền thuê hàng tháng:
             </span>
 
             <span className="font-bold text-purple-600 text-lg">
               {new Intl.NumberFormat("vi-VN").format(property.monthlyRent)} đ /
-              month
+              tháng
             </span>
           </div>
         </div>

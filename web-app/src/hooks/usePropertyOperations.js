@@ -69,7 +69,6 @@ export const usePropertyOperations = () => {
   // ✅ REFETCH FUNCTION (public API)
   // =================================================
   const refetch = useCallback(async () => {
-    console.log("🔄 Refetching properties...");
     await fetchProperties();
   }, [fetchProperties]);
 
@@ -207,7 +206,7 @@ export const usePropertyOperations = () => {
   const handleCreateContract = useCallback(async (booking) => {
     if (!booking) return;
 
-    if (!window.confirm("Create contract for this booking?")) return;
+    if (!window.confirm("Tạo hợp đồng cho đặt phòng này?")) return;
 
     try {
       setCreatingContract(true);

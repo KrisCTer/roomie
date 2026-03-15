@@ -15,7 +15,9 @@ const PropertyInfoSection = ({ property, loading, propertyId }) => {
   if (!property) {
     return (
       <div className="mb-6 pb-6 border-b">
-        <div className="text-sm text-gray-500">Property ID: {propertyId}</div>
+        <div className="text-sm text-gray-500">
+          Mã số bất động sản: {propertyId}
+        </div>
       </div>
     );
   }
@@ -24,7 +26,7 @@ const PropertyInfoSection = ({ property, loading, propertyId }) => {
     <div className="mb-6 pb-6 border-b">
       <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
         <MapPin className="w-5 h-5 text-blue-600" />
-        Property Information
+        Thông tin bất động sản
       </h3>
       <div className="bg-gray-50 rounded-lg p-4">
         <div className="flex gap-4">
@@ -42,8 +44,8 @@ const PropertyInfoSection = ({ property, loading, propertyId }) => {
                 `${property.address?.district}, ${property.address?.province}`}
             </p>
             <div className="flex gap-4 text-sm text-gray-600">
-              <span>{property.bedrooms} beds</span>
-              <span>{property.bathrooms} baths</span>
+              <span>{property.bedrooms} giường</span>
+              <span>{property.bathrooms} phòng tắm</span>
               <span>{property.size} m²</span>
             </div>
           </div>

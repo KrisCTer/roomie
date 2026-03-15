@@ -1,5 +1,6 @@
 // src/components/chat/ChatBox.jsx
 import React, { useState, useEffect, useRef } from "react";
+import Draggable from "react-draggable";
 import {
   Box,
   Paper,
@@ -40,6 +41,7 @@ const ChatBox = () => {
   const [showConversations, setShowConversations] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const dragRef = useRef(null);
 
   // Load conversations
   useEffect(() => {
@@ -67,7 +69,6 @@ const ChatBox = () => {
   const loadConversations = async () => {
     try {
       const response = await aiService.getConversations();
-      console.log("✅ Conversations loaded:", response);
       setConversations(response.content || []);
     } catch (error) {
       console.error("❌ Error loading conversations:", error);
@@ -81,7 +82,6 @@ const ChatBox = () => {
   const loadMessages = async (conversationId) => {
     try {
       const messages = await aiService.getMessages(conversationId);
-      console.log("✅ Messages loaded:", messages);
       setMessages(messages || []);
     } catch (error) {
       console.error("❌ Error loading messages:", error);
@@ -103,12 +103,10 @@ const ChatBox = () => {
     setLoading(true);
 
     try {
-      console.log("📤 Sending message:", currentInput);
       const response = await aiService.chat(
         currentInput,
         currentConversationId
       );
-      console.log("✅ AI response:", response);
 
       const aiMessage = {
         role: "assistant",
@@ -182,18 +180,30 @@ const ChatBox = () => {
   return (
     <>
       {/* Floating Chat Button */}
-      <Fab
-        color="primary"
-        sx={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          zIndex: 1000,
+      <Draggable
+        nodeRef={dragRef}
+        bounds="body"
+        defaultPosition={{
+          x: window.innerWidth - 100,
+          y: window.innerHeight - 200,
         }}
-        onClick={() => setOpen(!open)}
       >
-        {open ? <CloseIcon /> : <ChatIcon />}
-      </Fab>
+        <div
+          ref={dragRef}
+          style={{
+            position: "fixed",
+            zIndex: 1300,
+          }}
+        >
+          <Fab
+            color="primary"
+            onClick={() => setOpen(!open)}
+            sx={{ width: 56, height: 56 }}
+          >
+            {open ? <CloseIcon /> : <ChatIcon />}
+          </Fab>
+        </div>
+      </Draggable>
 
       {/* Chat Drawer */}
       <Drawer
@@ -212,7 +222,7 @@ const ChatBox = () => {
           <Toolbar>
             <BotIcon sx={{ mr: 1 }} />
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Roomie AI Assistant
+              Trợ lý Roomie
             </Typography>
             <IconButton
               color="inherit"

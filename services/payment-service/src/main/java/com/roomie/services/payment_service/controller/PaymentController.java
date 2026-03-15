@@ -29,7 +29,6 @@ public class PaymentController {
     PaymentService paymentService;
     PaymentRepository paymentRepository;
 
-    // Tạo payment → trả URL thanh toán
     @PostMapping
     public ApiResponse<Payment> createPayment(@RequestBody PaymentRequest req) {
         Payment response = paymentService.createPayment(req);
@@ -48,58 +47,115 @@ public class PaymentController {
 
     // VNPay callback
     @GetMapping("/webhook/vnpay")
-    public ApiResponse<PaymentResponse> vnPayCallback(
+    public void vnPayCallback(
             @RequestParam String transactionId,
-            @RequestParam String status
-    ) {
-        return ApiResponse.success(paymentService.handleVnPayCallback(transactionId, status), "Payment callback successful");
+            @RequestParam String status,
+            HttpServletResponse response
+    ) throws IOException {
+        log.info("VNPay callback received - transactionId: {}, status: {}", transactionId, status);
+
+        PaymentResponse payment = paymentService.handleVnPayCallback(transactionId, status);
+
+        // Redirect based on status
+        String billId = payment.getBillId();
+        String contractId = payment.getContractId();
+        String bookingId = payment.getBookingId();
+
+        String redirectUrl = "http://localhost:3000";
+
+        if (billId != null) {
+            redirectUrl += "/bill-detail/" + billId;
+        } else if (contractId != null) {
+            redirectUrl += "/contracts/" + contractId;
+        } else if (bookingId != null) {
+            redirectUrl += "/bookings/" + bookingId;
+        }
+
+        redirectUrl += "?payment=" + ("COMPLETED".equals(status) ? "success" : "failed");
+
+        response.sendRedirect(redirectUrl);
     }
 
-    // MoMo callback
+    // MoMo return URL (redirect user)
+//    @GetMapping("/momo/return")
+//    public void momoReturn(
+//            @RequestParam Map<String, String> params,
+//            HttpServletResponse response
+//    ) throws IOException {
+//        log.info("MoMo return received - params: {}", params);
+//
+//        String orderId = params.get("orderId");
+//        String resultCode = params.get("resultCode");
+//
+//        Payment payment = paymentRepository.findById(orderId)
+//                .orElseThrow(() -> new RuntimeException("Payment not found"));
+//
+//        String redirectUrl = "http://localhost:3000";
+//
+//        if (payment.getBillId() != null) {
+//            redirectUrl += "/bill-detail/" + payment.getBillId();
+//        } else if (payment.getContractId() != null) {
+//            redirectUrl += "/contracts/" + payment.getContractId();
+//        } else if (payment.getBookingId() != null) {
+//            redirectUrl += "/bookings/" + payment.getBookingId();
+//        }
+//
+//        redirectUrl += "?payment=" + ("0".equals(resultCode) ? "success" : "failed");
+//
+//        response.sendRedirect(redirectUrl);
+//    }
+
     @GetMapping("/momo/return")
     public void momoReturn(
             @RequestParam Map<String, String> params,
             HttpServletResponse response
     ) throws IOException {
 
+        log.info("🔥 MoMo RETURN received: {}", params);
+
         String orderId = params.get("orderId");
         String resultCode = params.get("resultCode");
-        Payment payment = paymentRepository.findById(orderId).orElseThrow();
-        String billId = payment.getBillId();
+        String transId = params.get("transId");
 
+        // ⚠️ SANDBOX FIX: xử lý luôn payment tại đây
         if ("0".equals(resultCode)) {
-            response.sendRedirect(
-                    "http://localhost:3000/bill-detail/" + billId + "?payment=success"
-            );
-        } else {
-            response.sendRedirect(
-                    "http://localhost:3000/bill-detail/" + orderId + "?payment=failed"
+            paymentService.handleMoMoCallback(
+                    orderId,
+                    0,
+                    transId
             );
         }
+
+        String redirectUrl =
+                "http://localhost:3000/payment-result"
+                        + "?status=" + ("0".equals(resultCode) ? "success" : "failed")
+                        + "&paymentId=" + orderId;
+
+        response.sendRedirect(redirectUrl);
     }
 
-
+    // MoMo webhook (IPN - Instant Payment Notification)
     @PostMapping("/webhook/momo")
-    public ResponseEntity<?> momoWebhook(
-            @RequestBody Map<String, Object> body
-    ) {
-        String orderId = (String) body.get("orderId");
-        Integer resultCode = (Integer) body.get("resultCode");
-        String transId = String.valueOf(body.get("transId"));
+    public ResponseEntity<?> momoWebhook(@RequestBody Map<String, Object> body) {
+        log.info("MoMo webhook received - body: {}", body);
 
-        Payment payment = paymentRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        try {
+            String orderId = (String) body.get("orderId");
+            Integer resultCode = (Integer) body.get("resultCode");
+            String transId = String.valueOf(body.get("transId"));
 
-        if (resultCode == 0) {
-            payment.setStatus("COMPLETED");
-            payment.setTransactionId(transId);
-        } else {
-            payment.setStatus("FAILED");
+            paymentService.handleMoMoCallback(orderId, resultCode, transId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Webhook processed successfully",
+                    "resultCode", 0
+            ));
+        } catch (Exception e) {
+            log.error("Error processing MoMo webhook", e);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Webhook processing failed",
+                    "resultCode", -1
+            ));
         }
-
-        payment.setUpdatedAt(Instant.now());
-        paymentRepository.save(payment);
-
-        return ResponseEntity.ok().build();
     }
 }

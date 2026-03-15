@@ -74,7 +74,7 @@ public class VietnameseMeterOcrService {
             // 6. Select best result
             MeterReadingResult best = selectBestResult(results);
 
-            log.info("✅ Best reading: value={}, confidence={}",
+            log.info("Best reading: value={}, confidence={}",
                     best.getValue(), best.getConfidence());
 
             return best;

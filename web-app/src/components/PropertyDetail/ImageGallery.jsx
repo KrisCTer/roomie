@@ -126,7 +126,7 @@ const ImageGallery = ({ images = [], title }) => {
                       <span className="text-white font-bold text-2xl">
                         +{displayImages.length - 5}
                       </span>
-                      <p className="text-white text-sm mt-1">more photos</p>
+                      <p className="text-white text-sm mt-1">ảnh khác</p>
                     </div>
                   </div>
                 )}
@@ -141,7 +141,7 @@ const ImageGallery = ({ images = [], title }) => {
             className="mt-6 px-6 py-3 border-2 border-gray-900 rounded-xl text-sm font-bold hover:bg-gray-900 hover:text-white transition-all duration-300 flex items-center gap-2 group"
           >
             <Maximize2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            <span>View all {displayImages.length} photos</span>
+            <span>Xem tất cả {displayImages.length} ảnh</span>
           </button>
         )}
       </div>

@@ -108,6 +108,22 @@ public class BillController {
         return ResponseEntity.ok(ApiResponse.success(response, message));
     }
 
+    @PostMapping("/internal/bills")
+    public ResponseEntity<ApiResponse<BillResponse>> createOrUpdateInternal(
+            @Valid @RequestBody BillRequest request) {
+
+        log.info("Creating/Updating bill for contract: {}, month: {}",
+                request.getContractId(), request.getBillingMonth());
+
+        BillResponse response = billingService.createOrUpdateBill(request);
+
+        String message = "DRAFT".equals(response.getStatus().toString())
+                ? "Bill created successfully. Status: DRAFT"
+                : "Bill processed successfully";
+
+        return ResponseEntity.ok(ApiResponse.success(response, message));
+    }
+
     // ==================== READ ====================
 
     /**

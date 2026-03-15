@@ -1,10 +1,9 @@
-package com.roomie.services.billing_service.dto.request;
+package com.roomie.services.contract_service.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Data
 @Builder

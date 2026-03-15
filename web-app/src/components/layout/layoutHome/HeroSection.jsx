@@ -16,9 +16,12 @@ const HeroSection = () => {
   const { t } = useTranslation();
 
   const features = [
-    { icon: <Verified sx={{ fontSize: 16 }} />, label: "Verified Properties" },
-    { icon: <TrendingUp sx={{ fontSize: 16 }} />, label: "Best Prices" },
-    { icon: <HomeIcon sx={{ fontSize: 16 }} />, label: "10K+ Listings" },
+    {
+      icon: <Verified sx={{ fontSize: 16 }} />,
+      label: "Các bất động sản đã được xác minh",
+    },
+    { icon: <TrendingUp sx={{ fontSize: 16 }} />, label: "Giá tốt nhất" },
+    { icon: <HomeIcon sx={{ fontSize: 16 }} />, label: "Hơn 10.000 danh sách" },
   ];
 
   return (

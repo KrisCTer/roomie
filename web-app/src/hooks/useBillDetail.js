@@ -124,7 +124,6 @@ export const useBillDetail = () => {
           selectedPaymentMethod === "MOMO"
         ) {
           const redirectUrl = payment.paymentUrl || payment.payUrl;
-          console.log("Redirecting to payment URL:", redirectUrl);
           if (redirectUrl) {
             window.location.href = redirectUrl;
           } else {
@@ -171,7 +170,6 @@ export const useBillDetail = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log("✅ PDF downloaded successfully");
     } catch (error) {
       console.error("Error downloading PDF:", error);
       alert("❌ Không thể tải xuống hóa đơn PDF!");
@@ -200,7 +198,6 @@ export const useBillDetail = () => {
         window.URL.revokeObjectURL(url);
       }, 100);
       
-      console.log("✅ PDF preview opened");
     } catch (error) {
       console.error("Error previewing PDF:", error);
       alert("❌ Không thể xem trước hóa đơn PDF!");

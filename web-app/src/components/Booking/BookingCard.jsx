@@ -97,7 +97,7 @@ const BookingCard = ({ booking, isOwner }) => {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm text-gray-500">Created</div>
+          <div className="text-sm text-gray-500">Ngày tạo</div>
           <div className="text-sm font-medium text-gray-900">{createdAt}</div>
         </div>
       </div>
@@ -107,7 +107,7 @@ const BookingCard = ({ booking, isOwner }) => {
         <div className="flex items-start gap-2">
           <Calendar className="w-4 h-4 text-blue-600 mt-1" />
           <div>
-            <div className="text-xs text-gray-500">Start Date</div>
+            <div className="text-xs text-gray-500">Ngày bắt đầu</div>
             <div className="text-sm font-medium text-gray-900">
               {leaseStart}
             </div>
@@ -116,14 +116,14 @@ const BookingCard = ({ booking, isOwner }) => {
         <div className="flex items-start gap-2">
           <Calendar className="w-4 h-4 text-blue-600 mt-1" />
           <div>
-            <div className="text-xs text-gray-500">End Date</div>
+            <div className="text-xs text-gray-500">Ngày kết thúc</div>
             <div className="text-sm font-medium text-gray-900">{leaseEnd}</div>
           </div>
         </div>
         <div className="flex items-start gap-2">
           <Clock className="w-4 h-4 text-blue-600 mt-1" />
           <div>
-            <div className="text-xs text-gray-500">Duration</div>
+            <div className="text-xs text-gray-500">Thời gian</div>
             <div className="text-sm font-medium text-gray-900">{duration}</div>
           </div>
         </div>
@@ -135,7 +135,7 @@ const BookingCard = ({ booking, isOwner }) => {
           <div className="flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-green-600" />
             <div>
-              <div className="text-xs text-gray-500">Monthly Rent</div>
+              <div className="text-xs text-gray-500">Tiền thuê hàng tháng</div>
               <div className="text-sm font-semibold text-gray-900">
                 {monthlyRent?.toLocaleString()} VND
               </div>
@@ -145,7 +145,7 @@ const BookingCard = ({ booking, isOwner }) => {
             <div className="flex items-center gap-2">
               <DollarSign className="w-4 h-4 text-blue-600" />
               <div>
-                <div className="text-xs text-gray-500">Deposit</div>
+                <div className="text-xs text-gray-500">Tiền đặt cọc</div>
                 <div className="text-sm font-semibold text-gray-900">
                   {rentalDeposit?.toLocaleString()} VND
                 </div>
@@ -172,7 +172,7 @@ const BookingCard = ({ booking, isOwner }) => {
             className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
           >
             <UserCircle className="w-4 h-4" />
-            Tenant Profile
+            Hồ sơ người thuê
           </button>
         )}
 
@@ -182,7 +182,7 @@ const BookingCard = ({ booking, isOwner }) => {
             className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
           >
             <CheckCircle className="w-4 h-4" />
-            Confirm
+            Xác nhận
           </button>
         )}
 
@@ -192,7 +192,7 @@ const BookingCard = ({ booking, isOwner }) => {
             className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
           >
             <X className="w-4 h-4" />
-            {status === "ACTIVE" ? "Terminate" : "Cancel"}
+            {status === "ACTIVE" ? "Kết thúc" : "Hủy bỏ"}
           </button>
         )}
       </div>

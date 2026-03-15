@@ -1,128 +1,109 @@
-// src/contexts/SocketContext.jsx
+// contexts/SocketContext.jsx
 import React, {
   createContext,
   useContext,
   useEffect,
-  useRef,
   useState,
+  useCallback,
+  useRef,
 } from "react";
-import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
-import { getToken, getCompleteUserInfo } from "../services/localStorageService";
+
+// Ã¢Â­Â MUST USE DEFAULT IMPORT FOR socket.io-client v2.3.0
+import io from "socket.io-client";
+
+import { getToken } from "../services/localStorageService";
 
 const SocketContext = createContext(null);
 
-export const useSocket = () => {
-  const context = useContext(SocketContext);
-  if (!context) throw new Error("useSocket must be used within SocketProvider");
-  return context;
-};
+const SOCKET_URL = "http://localhost:8099";
 
 export const SocketProvider = ({ children }) => {
-  // ⭐ Lấy từ localStorage
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [connected, setConnected] = useState(false);
-  const stompClientRef = useRef(null);
-  const notificationCallbackRef = useRef(null);
-  const messageCallbackRef = useRef(null);
+  const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState(null);
 
-  // ⭐ Load user info
+  const messageCallbacksRef = useRef({
+    onMessageReceived: null,
+    onMessageSent: null,
+  });
+
   useEffect(() => {
-    const storedToken = getToken();
-    const completeUser = getCompleteUserInfo();
-
-    if (storedToken && completeUser) {
-      setToken(storedToken);
-      setUser({
-        id: completeUser.userId,
-        userId: completeUser.userId,
-        username: completeUser.username,
-      });
+    const token = getToken();
+    if (!token) {
+      console.warn("Ã¢Å¡  No token found, skipping socket connection");
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    if (!user?.id || !token) return;
 
-    const socket = new SockJS(
-      "http://localhost:8090/notification/ws/notifications"
-    );
-    const stompClient = Stomp.over(socket);
-    stompClient.debug = () => {};
+    // Ã¢Â­Â Version 2.3.0 Ã¢â‚¬â€ Required for Netty-SocketIO compatibility
+    const socketInstance = io(SOCKET_URL, {
+      query: `token=${token}`,
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    });
 
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    };
+    socketInstance.on("connect", () => {
+      setIsConnected(true);
+      setError(null);
+    });
 
-    stompClient.connect(
-      headers,
-      () => {
-        console.log("✅ WebSocket Connected");
-        setConnected(true);
-        stompClientRef.current = stompClient;
+    socketInstance.on("disconnect", (reason) => {
+      setIsConnected(false);
+    });
 
-        // Subscribe to notifications
-        stompClient.subscribe(
-          `/user/${user.id}/queue/notifications`,
-          (message) => {
-            try {
-              const notification = JSON.parse(message.body);
-              if (notificationCallbackRef.current) {
-                notificationCallbackRef.current(notification);
-              }
-            } catch (error) {
-              console.error("Error parsing notification:", error);
-            }
-          }
-        );
+    socketInstance.on("connect_error", (err) => {
+      console.error("Ã¢ÂÅ’ WebSocket connection error:", err.message);
+      setError(err.message);
+      setIsConnected(false);
+    });
+    socketInstance.on("new_message", (data) => {
 
-        // Subscribe to messages (existing chat functionality)
-        stompClient.subscribe(`/user/${user.id}/queue/messages`, (message) => {
-          try {
-            const chatMessage = JSON.parse(message.body);
-            if (messageCallbackRef.current) {
-              messageCallbackRef.current(chatMessage);
-            }
-          } catch (error) {
-            console.error("Error parsing message:", error);
-          }
-        });
-      },
-      (error) => {
-        console.error("❌ WebSocket Error:", error);
-        setConnected(false);
+      if (messageCallbacksRef.current.onMessageReceived) {
+        messageCallbacksRef.current.onMessageReceived(data);
       }
-    );
+    });
+
+    socketInstance.on("message_sent", (data) => {
+
+      if (messageCallbacksRef.current.onMessageSent) {
+        messageCallbacksRef.current.onMessageSent(data);
+      }
+    });
+    setSocket(socketInstance);
 
     return () => {
-      if (stompClient && connected) {
-        stompClient.disconnect();
-        setConnected(false);
-      }
+      socketInstance.disconnect();
     };
-  }, [user?.id, token]);
+  }, []);
 
-  const onNotification = (callback) => {
-    notificationCallbackRef.current = callback;
-  };
+  const registerMessageCallbacks = useCallback((callbacks) => {
+    messageCallbacksRef.current = {
+      onMessageReceived: callbacks.onMessageReceived || null,
+      onMessageSent: callbacks.onMessageSent || null,
+    };
+  }, []);
 
-  const onMessage = (callback) => {
-    messageCallbackRef.current = callback;
-  };
+  const sendMessage = useCallback(
+    (event, data) => {
+      if (!socket || !isConnected) {
+        console.warn("Ã¢Å¡  Socket not connected, cannot send message");
+        return false;
+      }
 
-  const sendMessage = (destination, message) => {
-    if (stompClientRef.current && connected) {
-      stompClientRef.current.send(destination, {}, JSON.stringify(message));
-    }
-  };
+      socket.emit(event, data);
+      return true;
+    },
+    [socket, isConnected]
+  );
 
   const value = {
-    socket: stompClientRef.current,
-    connected,
-    isConnected: connected,
-    onNotification,
-    onMessage,
+    socket,
+    isConnected,
+    error,
+    registerMessageCallbacks,
     sendMessage,
   };
 
@@ -130,3 +111,13 @@ export const SocketProvider = ({ children }) => {
     <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };
+
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error("useSocket must be used within a SocketProvider");
+  }
+  return context;
+};
+
+export default SocketContext;

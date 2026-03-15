@@ -44,7 +44,6 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
 
-      console.log("✅ PDF downloaded:", filename);
     } catch (error) {
       console.error("❌ Error downloading PDF:", error);
       alert("❌ Không thể tải PDF! Vui lòng thử lại.");
@@ -80,7 +79,6 @@ const BillPdfDownloader = ({ billId, billMonth, className = "" }) => {
         window.URL.revokeObjectURL(previewUrl);
       }, 1000);
 
-      console.log("✅ PDF preview opened");
     } catch (error) {
       console.error("❌ Error previewing PDF:", error);
       alert("❌ Không thể xem trước PDF! Vui lòng thử lại.");

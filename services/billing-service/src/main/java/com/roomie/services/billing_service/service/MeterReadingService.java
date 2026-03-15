@@ -86,7 +86,7 @@ public class MeterReadingService {
                     reading.setElectricityPhotoUrl(photoUrl);
                     if (ocrResult.isSuccess() && ocrResult.getValue() != null) {
                         reading.setElectricityReading(ocrResult.getValue());
-                        log.info("✅ Auto-filled electricity reading: {} kWh", ocrResult.getValue());
+                        log.info("Auto-filled electricity reading: {} kWh", ocrResult.getValue());
                     }
                     break;
 
@@ -94,7 +94,7 @@ public class MeterReadingService {
                     reading.setWaterPhotoUrl(photoUrl);
                     if (ocrResult.isSuccess() && ocrResult.getValue() != null) {
                         reading.setWaterReading(ocrResult.getValue());
-                        log.info("✅ Auto-filled water reading: {} m³", ocrResult.getValue());
+                        log.info("Auto-filled water reading: {} m³", ocrResult.getValue());
                     }
                     break;
 
@@ -113,12 +113,12 @@ public class MeterReadingService {
             // 7. Save
             MeterReading updated = meterReadingRepository.save(reading);
 
-            log.info("✅ Meter photo uploaded successfully with Vietnamese OCR");
+            log.info("Meter photo uploaded successfully with Vietnamese OCR");
 
             return updated;
 
         } catch (Exception e) {
-            log.error("❌ Error uploading meter photo with OCR", e);
+            log.error("Error uploading meter photo with OCR", e);
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION,
                     "Failed to upload meter photo: " + e.getMessage());
         }

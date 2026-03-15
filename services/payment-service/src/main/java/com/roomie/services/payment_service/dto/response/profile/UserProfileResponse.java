@@ -1,7 +1,7 @@
-package com.roomie.services.contract_service.dto.response.profile;
+package com.roomie.services.payment_service.dto.response.profile;
 
-import com.roomie.services.contract_service.enums.AccountStatus;
-import com.roomie.services.contract_service.enums.Gender;
+import com.roomie.services.payment_service.enums.AccountStatus;
+import com.roomie.services.payment_service.enums.Gender;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

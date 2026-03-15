@@ -16,6 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            "/momo/return",
+            "/webhook/momo",
+            "/webhook/vnpay"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
