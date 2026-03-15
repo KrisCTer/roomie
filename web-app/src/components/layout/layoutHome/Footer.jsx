@@ -24,8 +24,8 @@ export default function Footer() {
             </Typography>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.6)" }}>
               {/* Bạn có thể thêm key mới, ví dụ footer.description */}
-              Fast, safe and convenient accommodation search and booking
-              platform across Vietnam.
+              Nền tảng tìm kiếm và đặt chỗ lưu trú nhanh chóng, an toàn và tiện
+              lợi trên toàn Việt Nam.
             </Typography>
           </Grid>
 

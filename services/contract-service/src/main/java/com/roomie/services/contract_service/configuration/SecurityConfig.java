@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            "/{id}/payment-completed"
     };
 
     private final CustomJwtDecoder customJwtDecoder;

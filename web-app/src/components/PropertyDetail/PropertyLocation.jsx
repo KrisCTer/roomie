@@ -152,7 +152,7 @@ const PropertyLocation = ({ address }) => {
           <div className="w-10 h-10 flex items-center justify-center bg-red-100 rounded-lg">
             <MapPin className="w-5 h-5 text-red-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Where you'll be</h3>
+          <h3 className="text-xl font-bold text-gray-900">Địa điểm</h3>
         </div>
         {isExpanded ? (
           <ChevronUp className="w-5 h-5 text-gray-500" />

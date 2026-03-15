@@ -16,6 +16,7 @@ import {
   Camera,
   CheckCircle,
   Mail,
+  Eye,
 } from "lucide-react";
 
 // Import custom components
@@ -31,7 +32,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("Profile");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview"); // overview, edit, settings
+  const [activeTab, setActiveTab] = useState("overview");
   const { t } = useTranslation();
 
   const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
@@ -74,17 +75,17 @@ const Profile = () => {
   const tabs = [
     {
       id: "overview",
-      label: "Profile Overview",
+      label: "Tổng quan hồ sơ",
       icon: <User size={18} />,
     },
     {
       id: "edit",
-      label: "Edit Profile",
+      label: "Chỉnh sửa hồ sơ",
       icon: <Edit3 size={18} />,
     },
     {
       id: "settings",
-      label: "Account Settings",
+      label: "Cài đặt tài khoản",
       icon: <Settings size={18} />,
     },
   ];
@@ -187,20 +188,23 @@ const Profile = () => {
                       </span>
                     </p>
 
-                    {/* Quick Actions */}
-                    <div className="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
-                      {!formData.idCardNumber && (
-                        <button
-                          onClick={() => navigate("/identity-verification")}
-                          className="flex items-center gap-2 px-4 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-colors"
-                        >
-                          <Shield size={16} />
-                          <span className="text-sm font-medium">
-                            Verify Identity
-                          </span>
-                        </button>
-                      )}
-                    </div>
+                    {formData?.id && (
+                      <button
+                        onClick={() => navigate(`/user/${formData.id}`)}
+                        className="flex items-center gap-2 px-4 py-2 
+      bg-blue-100 dark:bg-blue-900/30 
+      text-blue-700 dark:text-blue-400 
+      rounded-lg 
+      hover:bg-blue-200 dark:hover:bg-blue-900/50 
+      transition-colors"
+                      >
+                        <Eye size={16} />
+                        <span className="text-sm font-medium">
+                          {/* {t("profile.viewPublicProfile") || "View Profile"} */}
+                          Xem trang cá nhân
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

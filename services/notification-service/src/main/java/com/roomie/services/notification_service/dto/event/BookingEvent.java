@@ -22,5 +22,7 @@ public class BookingEvent {
     Instant checkInDate;
     Instant checkOutDate;
     BigDecimal totalPrice;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
     String status;
 }

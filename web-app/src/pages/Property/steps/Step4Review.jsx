@@ -106,11 +106,11 @@ const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-sm text-gray-700">
-            <strong>Note:</strong> Please review all information carefully
-            before submitting.
+            <strong>Ghi chú:</strong> Vui lòng kiểm tra kỹ tất cả thông tin
+            trước khi gửi.
             {isEditMode
-              ? " Your changes will update the existing property."
-              : " Once submitted, your property will be reviewed by our team."}
+              ? " Các thay đổi của bạn sẽ cập nhật bất động sản hiện có."
+              : " Sau khi gửi, bất động sản của bạn sẽ được đội ngũ của chúng tôi xem xét."}
           </p>
         </div>
       </div>

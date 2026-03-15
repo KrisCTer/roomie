@@ -143,10 +143,8 @@ export const useBillOperations = (activeRole) => {
             landlord: landlordStatsRes.result || stats.landlord,
             tenant: tenantStatsRes.result || stats.tenant,
           });
-          console.log("📊 Loaded stats from backend");
         }
       } catch (error) {
-        console.log("ℹ️ Backend stats not available, using client-side calculation");
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -191,7 +189,6 @@ export const useBillOperations = (activeRole) => {
 
   //  Refetch function (public API)
   const refetch = useCallback(async () => {
-    console.log("🔄 Refetching bills...");
     await loadData();
   }, [loadData]);
 
@@ -279,7 +276,6 @@ export const useBillOperations = (activeRole) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log(" PDF downloaded successfully");
     } catch (error) {
       console.error("Error downloading PDF:", error);
       alert("❌ Không thể tải xuống PDF!");
@@ -339,7 +335,6 @@ export const useBillOperations = (activeRole) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log(` Bills exported to ${format.toUpperCase()}`);
     } catch (error) {
       console.error("Error exporting bills:", error);
       alert("❌ Không thể xuất dữ liệu!");

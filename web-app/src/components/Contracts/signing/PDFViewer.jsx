@@ -8,7 +8,7 @@ const PDFViewer = ({ pdfUrl }) => {
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         <FileText className="w-6 h-6 text-blue-600" />
-        Contract Preview
+        Xem trước hợp đồng
       </h2>
 
       <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
@@ -29,7 +29,7 @@ const PDFViewer = ({ pdfUrl }) => {
           className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
         >
           <Eye className="w-5 h-5" />
-          View Full Screen
+          Xem toàn màn hình
         </a>
 
         <a
@@ -38,7 +38,7 @@ const PDFViewer = ({ pdfUrl }) => {
           className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
         >
           <Download className="w-5 h-5" />
-          Download PDF
+          Tải xuống PDF
         </a>
       </div>
     </div>

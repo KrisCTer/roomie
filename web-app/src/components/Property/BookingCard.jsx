@@ -23,27 +23,27 @@ const BookingCard = ({ booking, onCreateContract, creatingContract }) => {
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-semibold text-gray-900">
-            Booking #{booking.bookingReference || booking.id}
+            Đặt chỗ số #{booking.bookingReference || booking.id}
           </h3>
           <p className="text-sm text-gray-600 mt-1">
-            Tenant ID: {booking.tenantId}
+            Mã người thuê: {booking.tenantId}
           </p>
         </div>
         <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
           <CheckCircle className="w-3 h-3" />
-          Active
+          Đang hoạt động
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-xs text-gray-500">Lease Period</p>
+          <p className="text-xs text-gray-500">Thời gian thuê</p>
           <p className="text-sm font-medium">
             {formatDate(booking.leaseStart)} - {formatDate(booking.leaseEnd)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-500">Monthly Rent</p>
+          <p className="text-xs text-gray-500">Tiền thuê hàng tháng</p>
           <p className="text-sm font-medium text-blue-600">
             {formatCurrency(booking.monthlyRent)}
           </p>
@@ -63,7 +63,7 @@ const BookingCard = ({ booking, onCreateContract, creatingContract }) => {
         ) : (
           <>
             <FileText className="w-4 h-4" />
-            Create Contract
+            Tạo hợp đồng
           </>
         )}
       </button>

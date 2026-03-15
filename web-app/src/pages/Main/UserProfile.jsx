@@ -44,7 +44,6 @@ const UserProfile = () => {
 
       // Load user profile
       const profileResponse = await getUserProfile(userId);
-      console.log("Profile response:", profileResponse);
 
       const profileData =
         profileResponse?.result ||
@@ -56,7 +55,6 @@ const UserProfile = () => {
       const propertiesResponse = await BaseService.get(
         API.GET_PROPERTY_BY_OWNER(userId)
       );
-      console.log("Properties response:", propertiesResponse);
 
       let propertyList = [];
       if (

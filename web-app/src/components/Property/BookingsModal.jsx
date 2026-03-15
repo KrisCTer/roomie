@@ -19,7 +19,7 @@ const BookingsModal = ({
         {/* Header */}
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Active Bookings</h2>
+            <h2 className="text-2xl font-bold">Đặt chỗ đang hoạt động</h2>
             <p className="text-sm text-gray-600 mt-1">
               {selectedProperty?.title}
             </p>
@@ -43,10 +43,10 @@ const BookingsModal = ({
             <div className="text-center py-8">
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-600">
-                No active bookings available for contract creation
+                Hiện không có đặt chỗ nào khả dụng để tạo hợp đồng.
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Bookings must be in ACTIVE status to create contracts
+                Đặt chỗ phải ở trạng thái ĐANG HOẠT ĐỘNG để tạo hợp đồng
               </p>
             </div>
           ) : (

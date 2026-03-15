@@ -76,14 +76,14 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-tertiary text-gray-700 dark:text-dark-primary rounded-lg hover:bg-gray-200 dark:hover:bg-dark-hover transition-colors"
           >
             <X size={16} />
-            <span className="text-sm font-medium">Cancel</span>
+            <span className="text-sm font-medium">Hủy</span>
           </button>
           <button
             type="submit"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Save size={16} />
-            <span className="text-sm font-medium">Save Changes</span>
+            <span className="text-sm font-medium">Lưu thay đổi</span>
           </button>
         </div>
       </div>
@@ -93,12 +93,12 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
         {/* Personal Information */}
         <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary mb-4">
-            Personal Information
+            Thông tin cá nhân
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
-                First Name
+                Tên
               </label>
               <input
                 type="text"
@@ -112,7 +112,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
-                Last Name
+                Họ
               </label>
               <input
                 type="text"
@@ -126,7 +126,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
-                Gender
+                Giới tính
               </label>
               <select
                 name="gender"
@@ -144,7 +144,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
-                Date of Birth
+                Ngày sinh
               </label>
               <div
                 className="relative cursor-pointer"
@@ -174,7 +174,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
         {/* Contact Information */}
         <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary mb-4">
-            Contact Information
+            Thông tin liên hệ
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -193,7 +193,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
-                Phone Number
+                Số điện thoại
               </label>
               <input
                 type="tel"
@@ -207,7 +207,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
-                Address
+                Địa chỉ
               </label>
               <textarea
                 name="currentAddress"

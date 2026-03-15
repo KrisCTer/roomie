@@ -84,35 +84,35 @@ export const vietnamWards = {
 
 // Amenity options
 export const homeSafetyOptions = [
-  "Smoke Detector",
-  "Carbon Monoxide Detector",
-  "Fire Extinguisher",
-  "Security System",
-  "Door Lock",
+  "Máy dò khói",
+  "Máy dò khí CO",
+  "Bình chữa cháy",
+  "Hệ thống an ninh",
+  "Khóa cửa an toàn",
 ];
 
 export const bedroomOptions = [
-  "King Bed",
-  "Queen Bed",
-  "Wardrobe",
-  "Air Conditioning",
-  "Heater",
+  "Giường King Bed",
+  "Giường Queen",
+  "Tủ quần áo",
+  "Điều hòa không khí",
+  "Máy sưởi",
 ];
 
 export const kitchenOptions = [
-  "Refrigerator",
-  "Microwave",
-  "Oven",
-  "Dishwasher",
-  "Coffee Maker",
+  "Tủ lạnh",
+  "Lò vi sóng",
+  "Lò nướng",
+  "Máy rửa bát",
+  "Máy pha cà phê",
 ];
 
 export const otherOptions = [
   "WiFi",
   "TV",
-  "Parking",
-  "Gym",
-  "Swimming Pool",
-  "Garden",
-  "Balcony",
+  "Bãi đỗ xe",
+  "Phòng tập gym",
+  "Hồ bơi",
+  "Vườn",
+  "Ban công",
 ];

@@ -1,6 +1,7 @@
 package com.roomie.services.api_gateway.configuration;
 
 import com.roomie.services.api_gateway.repository.IdentityClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,17 +15,23 @@ import java.util.List;
 
 @Configuration
 public class WebClientConfiguration {
+
+    @Value("${app.identity-service.url:http://localhost:8080/identity}")
+    private String identityServiceUrl;
+
+    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    private String[] allowedOrigins;
     @Bean
     WebClient webClient(){
         return WebClient.builder()
-                .baseUrl("http://localhost:8080/identity")
+                .baseUrl(identityServiceUrl)
                 .build();
     }
 
     @Bean
     CorsWebFilter corsWebFilter(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("*"));
+        corsConfiguration.setAllowedOrigins(java.util.Arrays.asList(allowedOrigins));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setAllowedMethods(List.of("*"));
 

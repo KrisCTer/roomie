@@ -1,165 +1,200 @@
 // src/services/websocketService.js
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import { Client } from '@stomp/stompjs';
 
-class WebSocketService {
+class WebSocketNotificationService {
   constructor() {
-    this.stompClient = null;
+    this.client = null;
     this.connected = false;
-    this.subscribers = new Map();
+    this.subscriptions = {};
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 3000;
   }
 
   /**
-   * Kết nối WebSocket
+   * Connect to notification WebSocket
    */
-  connect(userId, token) {
+  async connect(userId, token) {
+    if (this.connected) {
+      return;
+    }
+
     return new Promise((resolve, reject) => {
       try {
+        // Create SockJS connection
         const socket = new SockJS('http://localhost:8090/notification/ws/notifications');
-        this.stompClient = Stomp.over(socket);
 
-        // Disable debug logs
-        this.stompClient.debug = () => {};
+        // Create STOMP client
+        this.client = new Client({
+          webSocketFactory: () => socket,
+          connectHeaders: {
+            Authorization: `Bearer ${token}`,
+          },
+          debug: (str) => {
+          },
+          reconnectDelay: this.reconnectDelay,
+          heartbeatIncoming: 4000,
+          heartbeatOutgoing: 4000,
+        });
 
-        const headers = {
-          Authorization: `Bearer ${token}`,
+        // On successful connection
+        this.client.onConnect = (frame) => {
+          this.connected = true;
+          this.reconnectAttempts = 0;
+
+          // Subscribe to user-specific notifications
+          this.subscribeToUserNotifications(userId);
+
+          resolve();
         };
 
-        this.stompClient.connect(
-          headers,
-          (frame) => {
-            console.log('WebSocket Connected:', frame);
-            this.connected = true;
-            this.reconnectAttempts = 0;
+        // On error
+        this.client.onStompError = (frame) => {
+          console.error('❌ STOMP Error:', frame);
+          this.connected = false;
+          reject(new Error(frame.headers?.message || 'STOMP connection error'));
+        };
 
-            // Subscribe to user-specific notifications
-            this.subscribeToNotifications(userId);
+        // On disconnect
+        this.client.onDisconnect = () => {
+          this.connected = false;
+        };
 
-            resolve();
-          },
-          (error) => {
-            console.error('WebSocket Connection Error:', error);
-            this.connected = false;
-            this.handleReconnect(userId, token);
-            reject(error);
-          }
-        );
+        // On web socket error
+        this.client.onWebSocketError = (error) => {
+          console.error('❌ WebSocket Error:', error);
+          this.handleReconnect(userId, token);
+        };
+
+        // Activate the client
+        this.client.activate();
       } catch (error) {
-        console.error('WebSocket Setup Error:', error);
+        console.error('❌ Error creating WebSocket connection:', error);
         reject(error);
       }
     });
   }
 
   /**
-   * Subscribe to notifications
+   * Subscribe to user-specific notifications
    */
-  subscribeToNotifications(userId) {
-    if (!this.stompClient || !this.connected) {
-      console.warn('WebSocket not connected');
+  subscribeToUserNotifications(userId) {
+    if (!this.client || !this.connected) {
+      console.error('Cannot subscribe: WebSocket not connected');
       return;
     }
 
-    // Subscribe to user-specific queue
-    const subscription = this.stompClient.subscribe(
+    // Subscribe to user's notification queue
+    const subscription = this.client.subscribe(
       `/user/${userId}/queue/notifications`,
       (message) => {
         try {
           const notification = JSON.parse(message.body);
-          this.notifySubscribers('notification', notification);
+          
+          // Call the notification handler
+          if (this.notificationHandler) {
+            this.notificationHandler(notification);
+          }
         } catch (error) {
           console.error('Error parsing notification:', error);
         }
       }
     );
 
-    this.subscribers.set('notifications', subscription);
+    this.subscriptions.notifications = subscription;
 
     // Subscribe to unread count updates
-    const countSubscription = this.stompClient.subscribe(
+    const countSubscription = this.client.subscribe(
       `/user/${userId}/queue/unread-count`,
       (message) => {
         try {
-          const count = JSON.parse(message.body);
-          this.notifySubscribers('unread-count', count);
+          const count = parseInt(message.body);
+          
+          // Call the unread count handler
+          if (this.unreadCountHandler) {
+            this.unreadCountHandler(count);
+          }
         } catch (error) {
           console.error('Error parsing unread count:', error);
         }
       }
     );
 
-    this.subscribers.set('unread-count', countSubscription);
+    this.subscriptions.unreadCount = countSubscription;
+
   }
 
   /**
    * Handle reconnection
    */
   handleReconnect(userId, token) {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-      
-      console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
-      
-      setTimeout(() => {
-        this.connect(userId, token);
-      }, delay);
-    } else {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
+      return;
     }
+
+    this.reconnectAttempts++;
+
+    setTimeout(() => {
+      this.connect(userId, token).catch(console.error);
+    }, this.reconnectDelay * this.reconnectAttempts);
   }
 
   /**
-   * Register callback for notifications
+   * Set notification handler
    */
-  onNotification(callback) {
-    this.notificationCallback = callback;
+  onNotification(handler) {
+    this.notificationHandler = handler;
   }
 
   /**
-   * Register callback for unread count
+   * Set unread count handler
    */
-  onUnreadCountUpdate(callback) {
-    this.unreadCountCallback = callback;
+  onUnreadCountUpdate(handler) {
+    this.unreadCountHandler = handler;
   }
 
   /**
-   * Notify all subscribers
+   * Send a message (for ping/pong)
    */
-  notifySubscribers(type, data) {
-    if (type === 'notification' && this.notificationCallback) {
-      this.notificationCallback(data);
-    } else if (type === 'unread-count' && this.unreadCountCallback) {
-      this.unreadCountCallback(data);
+  send(destination, body) {
+    if (!this.client || !this.connected) {
+      console.error('Cannot send: WebSocket not connected');
+      return;
     }
+
+    this.client.publish({
+      destination,
+      body: JSON.stringify(body),
+    });
   }
 
   /**
-   * Disconnect WebSocket
+   * Disconnect from WebSocket
    */
   disconnect() {
-    if (this.stompClient && this.connected) {
-      // Unsubscribe all
-      this.subscribers.forEach((subscription) => {
+    if (this.client) {
+      // Unsubscribe from all subscriptions
+      Object.values(this.subscriptions).forEach((subscription) => {
         subscription.unsubscribe();
       });
-      this.subscribers.clear();
+      this.subscriptions = {};
 
-      this.stompClient.disconnect(() => {
-        console.log('WebSocket Disconnected');
-        this.connected = false;
-      });
+      // Deactivate client
+      this.client.deactivate();
+      this.client = null;
+      this.connected = false;
+      
     }
   }
 
   /**
-   * Check connection status
+   * Check if connected
    */
   isConnected() {
     return this.connected;
   }
 }
 
-export default new WebSocketService();
+export default new WebSocketNotificationService();

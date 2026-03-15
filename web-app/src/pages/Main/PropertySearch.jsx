@@ -69,7 +69,6 @@ const PropertySearch = () => {
     const minPrice = parseInt(searchParams.get("minPrice")) || 0;
     const maxPrice = parseInt(searchParams.get("maxPrice")) || 50000000;
 
-    console.log("🔍 URL Search Params:", {
       location,
       type,
       minPrice,
@@ -92,7 +91,6 @@ const PropertySearch = () => {
         PROVINCE_COORDINATES[cityName] || PROVINCE_COORDINATES["Hồ Chí Minh"];
       setMapCenter({ lat: coords.lat, lng: coords.lng });
       setInitialZoom(coords.zoom);
-      console.log("📍 Map Center:", cityName, coords);
     }
   }, [searchParams]);
 
@@ -102,7 +100,6 @@ const PropertySearch = () => {
       setLoading(true);
       setError(null);
 
-      console.log("🔍 Loading all properties...");
       const response = await getAllProperties({ page: 0, size: 200 });
 
       const fetchedProperties =
@@ -111,7 +108,6 @@ const PropertySearch = () => {
         response?.result ||
         [];
 
-      console.log(`📍 Loaded ${fetchedProperties.length} total properties`);
       setAllProperties(fetchedProperties);
     } catch (err) {
       console.error("Failed to load properties:", err);
@@ -139,7 +135,6 @@ const PropertySearch = () => {
         }`.toLowerCase();
         return propertyLocation.includes(searchLocation);
       });
-      console.log(
         `📍 Location filter: "${searchCriteria.location}" → ${filtered.length} results`
       );
     }
@@ -149,7 +144,6 @@ const PropertySearch = () => {
       filtered = filtered.filter(
         (p) => p.propertyType === searchCriteria.propertyType
       );
-      console.log(
         `🏠 Type filter: "${searchCriteria.propertyType}" → ${filtered.length} results`
       );
     }
@@ -161,7 +155,6 @@ const PropertySearch = () => {
           p.monthlyRent >= filters.priceRange[0] &&
           p.monthlyRent <= filters.priceRange[1]
       );
-      console.log(
         `💰 Price filter: ${filters.priceRange[0].toLocaleString()}-${filters.priceRange[1].toLocaleString()} → ${
           filtered.length
         } results`
@@ -173,7 +166,6 @@ const PropertySearch = () => {
       filtered = filtered.filter((p) =>
         filters.propertyTypes.includes(p.propertyType)
       );
-      console.log(
         `🏘️ Types filter: ${filters.propertyTypes.join(", ")} → ${
           filtered.length
         } results`
@@ -186,7 +178,6 @@ const PropertySearch = () => {
         if (filters.bedrooms === 4) return p.bedrooms >= 4;
         return p.bedrooms === filters.bedrooms;
       });
-      console.log(
         `🛏️ Bedrooms filter: ${filters.bedrooms} → ${filtered.length} results`
       );
     }
@@ -197,12 +188,10 @@ const PropertySearch = () => {
         if (filters.bathrooms === 3) return p.bathrooms >= 3;
         return p.bathrooms === filters.bathrooms;
       });
-      console.log(
         `🚿 Bathrooms filter: ${filters.bathrooms} → ${filtered.length} results`
       );
     }
 
-    console.log(`📊 BASE FILTERED: ${filtered.length} properties`);
     setBaseFilteredProperties(filtered);
   }, [allProperties, filters, searchCriteria]);
 
@@ -210,7 +199,6 @@ const PropertySearch = () => {
   useEffect(() => {
     if (!mapBounds) {
       // No bounds set yet, show all base filtered
-      console.log(
         `🗺️ No bounds filter - showing all ${baseFilteredProperties.length} properties`
       );
       setDisplayedProperties(baseFilteredProperties);
@@ -235,7 +223,6 @@ const PropertySearch = () => {
       );
     });
 
-    console.log(
       `🗺️ Map bounds filter: ${boundsFiltered.length} properties in view (from ${baseFilteredProperties.length} base filtered)`
     );
 
@@ -279,7 +266,6 @@ const PropertySearch = () => {
   };
 
   const handleBoundsChange = useCallback((bounds) => {
-    console.log("🗺️ Bounds changed:", bounds);
     setMapBounds(bounds);
   }, []);
 

@@ -88,7 +88,7 @@ public class NotificationEventListener {
                     .type(NotificationType.BOOKING_CONFIRMED)
                     .priority(NotificationPriority.HIGH)
                     .channel(NotificationChannel.ALL)
-                    .title("Đặt phòng được xác nhận! 🎉")
+                    .title("Đặt phòng được xác nhận!")
                     .message(String.format("Chủ nhà đã xác nhận yêu cầu đặt phòng '%s'. Vui lòng hoàn tất thanh toán để bắt đầu hợp đồng.",
                             event.getPropertyTitle()))
                     .shortMessage("Đặt phòng đã được chấp nhận")
@@ -168,6 +168,91 @@ public class NotificationEventListener {
         }
     }
 
+    @KafkaListener(topics = "booking.terminated", groupId = "notification-service")
+    public void onBookingTerminated(String message, Acknowledgment ack) {
+        try {
+            BookingEvent event = parseEvent(message, BookingEvent.class);
+            log.info("Processing booking.terminated event: {}", event.getBookingId());
+
+            notificationService.createNotification(CreateNotificationRequest.builder()
+                    .userId(event.getTenantId())
+                    .type(NotificationType.BOOKING_TERMINATED)
+                    .priority(NotificationPriority.HIGH)
+                    .channel(NotificationChannel.ALL)
+                    .title("Hợp đồng đã chấm dứt")
+                    .message(String.format("Hợp đồng thuê '%s' đã được chấm dứt",
+                            event.getPropertyTitle()))
+                    .shortMessage("Hợp đồng chấm dứt")
+                    .relatedEntityId(event.getBookingId())
+                    .relatedEntityType("BOOKING")
+                    .actionUrl("/bookings/" + event.getBookingId())
+                    .actionText("Xem chi tiết")
+                    .build());
+
+            notificationService.createNotification(CreateNotificationRequest.builder()
+                    .userId(event.getLandlordId())
+                    .type(NotificationType.BOOKING_TERMINATED)
+                    .priority(NotificationPriority.HIGH)
+                    .channel(NotificationChannel.ALL)
+                    .title("Hợp đồng đã chấm dứt")
+                    .message(String.format("Hợp đồng thuê '%s' đã được chấm dứt",
+                            event.getPropertyTitle()))
+                    .shortMessage("Hợp đồng chấm dứt")
+                    .relatedEntityId(event.getBookingId())
+                    .relatedEntityType("BOOKING")
+                    .actionUrl("/bookings/" + event.getBookingId())
+                    .actionText("Xem chi tiết")
+                    .build());
+
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.error("Failed to process booking.terminated event", e);
+        }
+    }
+
+    @KafkaListener(topics = "booking.expired", groupId = "notification-service")
+    public void onBookingExpired(String message, Acknowledgment ack) {
+        try {
+            BookingEvent event = parseEvent(message, BookingEvent.class);
+            log.info("Processing booking.expired event: {}", event.getBookingId());
+
+            // Notify both parties
+            notificationService.createNotification(CreateNotificationRequest.builder()
+                    .userId(event.getTenantId())
+                    .type(NotificationType.BOOKING_EXPIRED)
+                    .priority(NotificationPriority.NORMAL)
+                    .channel(NotificationChannel.ALL)
+                    .title("Hợp đồng đã hết hạn")
+                    .message(String.format("Hợp đồng thuê '%s' đã hết hạn",
+                            event.getPropertyTitle()))
+                    .shortMessage("Hợp đồng hết hạn")
+                    .relatedEntityId(event.getBookingId())
+                    .relatedEntityType("BOOKING")
+                    .actionUrl("/bookings/" + event.getBookingId())
+                    .actionText("Xem chi tiết")
+                    .build());
+
+            notificationService.createNotification(CreateNotificationRequest.builder()
+                    .userId(event.getLandlordId())
+                    .type(NotificationType.BOOKING_EXPIRED)
+                    .priority(NotificationPriority.NORMAL)
+                    .channel(NotificationChannel.ALL)
+                    .title("Hợp đồng đã hết hạn")
+                    .message(String.format("Hợp đồng thuê '%s' đã hết hạn",
+                            event.getPropertyTitle()))
+                    .shortMessage("Hợp đồng hết hạn")
+                    .relatedEntityId(event.getBookingId())
+                    .relatedEntityType("BOOKING")
+                    .actionUrl("/bookings/" + event.getBookingId())
+                    .actionText("Xem chi tiết")
+                    .build());
+
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.error("Failed to process booking.expired event", e);
+        }
+    }
+
     // ==================== CONTRACT EVENTS ====================
 
     @KafkaListener(topics = "contract.created", groupId = "notification-service")
@@ -191,7 +276,7 @@ public class NotificationEventListener {
                         .shortMessage("Hợp đồng mới cần ký")
                         .relatedEntityId(event.getContractId())
                         .relatedEntityType("CONTRACT")
-                        .actionUrl("/contracts/" + event.getContractId())
+                        .actionUrl("/contract-signing/" + event.getContractId())
                         .actionText("Xem và ký")
                         .build());
             }
@@ -215,7 +300,7 @@ public class NotificationEventListener {
                         .type(NotificationType.CONTRACT_SIGNED_BY_TENANT)
                         .priority(NotificationPriority.HIGH)
                         .channel(NotificationChannel.ALL)
-                        .title("Người thuê đã ký hợp đồng ✍️")
+                        .title("Người thuê đã ký hợp đồng")
                         .message(String.format("%s đã ký hợp đồng thuê '%s'. Hợp đồng đang chờ bạn ký.",
                                 event.getTenantName(), event.getPropertyTitle()))
                         .shortMessage("Người thuê đã ký hợp đồng")
@@ -231,7 +316,7 @@ public class NotificationEventListener {
                         .type(NotificationType.CONTRACT_SIGNED_BY_LANDLORD)
                         .priority(NotificationPriority.HIGH)
                         .channel(NotificationChannel.ALL)
-                        .title("Chủ nhà đã ký hợp đồng ✍️")
+                        .title("Chủ nhà đã ký hợp đồng")
                         .message(String.format("Chủ nhà đã ký hợp đồng thuê '%s'. Hợp đồng đang chờ bạn ký.",
                                 event.getPropertyTitle()))
                         .shortMessage("Chủ nhà đã ký hợp đồng")
@@ -259,7 +344,7 @@ public class NotificationEventListener {
                     .type(NotificationType.CONTRACT_PENDING_PAYMENT)
                     .priority(NotificationPriority.URGENT)
                     .channel(NotificationChannel.ALL)
-                    .title("Cần thanh toán để kích hoạt hợp đồng 💰")
+                    .title("Cần thanh toán để kích hoạt hợp đồng")
                     .message(String.format("Cả hai bên đã ký hợp đồng. Vui lòng thanh toán %s VNĐ để kích hoạt hợp đồng.",
                             event.getRentalDeposit()))
                     .shortMessage("Cần thanh toán")
@@ -362,7 +447,7 @@ public class NotificationEventListener {
                     .type(NotificationType.PAYMENT_COMPLETED)
                     .priority(NotificationPriority.HIGH)
                     .channel(NotificationChannel.ALL)
-                    .title("Thanh toán thành công! ✅")
+                    .title("Thanh toán thành công!")
                     .message(String.format("Giao dịch %s VNĐ đã được xử lý thành công. %s",
                             event.getAmount(), event.getDescription()))
                     .shortMessage("Thanh toán thành công")

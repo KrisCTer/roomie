@@ -104,7 +104,7 @@ public class BillPdfGeneratorService {
             // 7. Terms & Conditions
             addTermsAndConditions(document);
 
-            log.info("✅ PDF invoice generated successfully");
+            log.info("PDF invoice generated successfully");
 
         } finally {
             document.close();

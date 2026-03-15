@@ -11,8 +11,6 @@ import {
 import { formatDate, formatDateTime } from "../../utils/billDetailHelpers";
 
 const BillDetailInfo = ({ bill, isOverdue, isPaid, tenant, landlord }) => {
-  console.log("BillDetailInfo tenant:", tenant);
-  console.log("BillDetailInfo landlord:", landlord);
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">

@@ -1,6 +1,7 @@
 package com.roomie.services.contract_service.controller;
 
 import com.roomie.services.contract_service.dto.request.ContractRequest;
+import com.roomie.services.contract_service.dto.request.OTPSignRequest;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
 import com.roomie.services.contract_service.dto.response.OTPResponse;
@@ -99,6 +100,15 @@ public class ContractController {
         );
     }
 
+    @PostMapping("/{id}/sign/tenant/otp")
+    public ResponseEntity<ApiResponse<ContractResponse>> tenantSignWithOTP(
+            @PathVariable String id,
+            @RequestBody OTPSignRequest req) {
+
+        ContractResponse data = service.tenantSignWithOTP(id, req);
+        return ResponseEntity.ok(ApiResponse.success(data, "Tenant signed with OTP"));
+    }
+
     /**
      * Landlord ký hợp đồng
      * - Nếu tenant đã ký -> tạo bản FINAL
@@ -115,6 +125,15 @@ public class ContractController {
         return ResponseEntity.ok(
                 ApiResponse.success(data, "Landlord signed contract successfully")
         );
+    }
+
+    @PostMapping("/{id}/sign/landlord/otp")
+    public ResponseEntity<ApiResponse<ContractResponse>> landlordSignWithOTP(
+            @PathVariable String id,
+            @RequestBody OTPSignRequest req) {
+
+        ContractResponse data = service.landlordSignWithOTP(id, req);
+        return ResponseEntity.ok(ApiResponse.success(data, "Landlord signed with OTP"));
     }
 
     /**
@@ -195,6 +214,17 @@ public class ContractController {
         OTPResponse response = service.requestLandlordOTP(id, landlordId);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "OTP sent to your email successfully")
+        );
+    }
+
+    @PutMapping("/{id}/payment-completed")
+    public ResponseEntity<ApiResponse<ContractResponse>> onPaymentCompleted(@PathVariable String id) {
+        log.info("Marking payment completed for contract contractId={}", id);
+
+        ContractResponse data = service.markPaymentCompleted(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(data, "Contract activated after payment successfully")
         );
     }
 

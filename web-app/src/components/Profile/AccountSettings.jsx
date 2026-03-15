@@ -16,10 +16,11 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary">
-                Change Password
+                Thay đổi mật khẩu
               </h3>
               <p className="text-sm text-gray-600 dark:text-dark-secondary">
-                Update your password regularly to keep your account secure
+                Cập nhật mật khẩu của bạn thường xuyên để giữ an toàn cho tài
+                khoản
               </p>
             </div>
           </div>
@@ -39,7 +40,7 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary">
-                Account Information
+                Thông tin tài khoản
               </h3>
             </div>
           </div>
@@ -48,7 +49,7 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-tertiary rounded-lg">
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-dark-primary">
-                  Username
+                  Tên đăng nhập
                 </p>
                 <p className="text-sm text-gray-600 dark:text-dark-secondary">
                   {formData.username}
@@ -59,10 +60,10 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-tertiary rounded-lg">
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-dark-primary">
-                  Account Status
+                  Trạng thái tài khoản
                 </p>
                 <p className="text-sm text-green-600 dark:text-green-400">
-                  Active
+                  Hoạt động
                 </p>
               </div>
             </div>
@@ -77,10 +78,10 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-red-900 dark:text-red-400">
-                Danger Zone
+                Vùng nguy hiểm
               </h3>
               <p className="text-sm text-red-700 dark:text-red-500">
-                Irreversible actions
+                Hành động không thể hoàn tác
               </p>
             </div>
           </div>
@@ -97,7 +98,7 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
               }
             }}
           >
-            Delete Account
+            Xóa tài khoản
           </button>
         </div>
       </div>

@@ -46,7 +46,6 @@ const BookingDetailModal = ({
   const statusConfig = getStatusConfig(booking.status);
 
   const formatDate = (dateString) => {
-    console.log("📦 booking object:", dateString);
 
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -74,10 +73,10 @@ const BookingDetailModal = ({
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              Booking Details
+              Chi tiết đặt chỗ
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Reference: {booking.bookingReference || booking.id}
+              Tham chiếu: {booking.bookingReference || booking.id}
             </p>
           </div>
           <button
@@ -93,7 +92,7 @@ const BookingDetailModal = ({
           {isOwner && (
             <div className="mb-4 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800 font-medium">
-                You are the property owner for this booking
+                Bạn là chủ sở hữu bất động sản cho đặt chỗ này
               </p>
             </div>
           )}
@@ -140,7 +139,7 @@ const BookingDetailModal = ({
                 className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
               >
                 <CheckCircle className="w-5 h-5" />
-                Confirm Booking
+                Xác nhận đặt chỗ
               </button>
             )}
 
@@ -166,7 +165,7 @@ const BookingDetailModal = ({
               onClick={onClose}
               className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
             >
-              Close
+              Đóng
             </button>
           </div>
         </div>

@@ -127,7 +127,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
       const contract = contracts.find((c) => c.id === selectedContract);
       if (!contract) return;
 
-      console.log("🔍 Loading config for contract:", {
         contractId: contract.id,
         propertyId: contract.propertyId,
       });
@@ -138,7 +137,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
         contract.propertyId
       );
 
-      console.log("📦 Loaded utility config:", config);
 
       if (config) {
         setUtilityConfig(config);
@@ -154,7 +152,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
           maintenancePrice: config.maintenancePrice || prev.maintenancePrice,
         }));
 
-        console.log("✅ Auto-filled prices from utility config");
       } else {
         console.warn("⚠️ No utility config found");
       }
@@ -169,7 +166,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
         );
         const latestBill = bills[0];
 
-        console.log("📊 Previous bill found:", latestBill);
 
         setPreviousBill(latestBill);
 
@@ -184,10 +180,8 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
           waterOld: latestBill.waterNew || 0,
         }));
 
-        console.log("✅ Auto-filled meter readings and next billing month:", nextBillingMonth);
       } else {
         setPreviousBill(null);
-        console.log("ℹ️ No previous bill found (first bill)");
         
         // For first bill, use current month
         if (!bill) {
@@ -206,7 +200,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
    * Handle property change
    */
   const handlePropertyChange = (propertyId) => {
-    console.log("🏠 Property changed:", propertyId);
     setSelectedProperty(propertyId);
     setSelectedContract(""); // Reset contract selection
     setPreviousBill(null);
@@ -250,7 +243,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
 
     const total =
       parseFloat(formData.monthlyRent || 0) +
-      parseFloat(formData.rentalDeposit || 0) +
       electricityAmount +
       waterAmount +
       parseFloat(formData.internetPrice || 0) +
@@ -275,7 +267,6 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
         contractId: selectedContract,
       };
 
-      console.log("📤 Submitting bill:", payload);
 
       const res = await createOrUpdateBill(payload);
 

@@ -2,7 +2,9 @@ package com.roomie.services.contract_service.service;
 
 import com.roomie.services.contract_service.dto.event.ContractEvent;
 import com.roomie.services.contract_service.dto.event.PaymentCompletedEvent;
+import com.roomie.services.contract_service.dto.request.BillRequest;
 import com.roomie.services.contract_service.dto.request.ContractRequest;
+import com.roomie.services.contract_service.dto.request.OTPSignRequest;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
 import com.roomie.services.contract_service.dto.response.OTPResponse;
 import com.roomie.services.contract_service.dto.response.property.PropertyResponse;
@@ -14,6 +16,7 @@ import com.roomie.services.contract_service.exception.ErrorCode;
 import com.roomie.services.contract_service.mapper.ContractMapper;
 import com.roomie.services.contract_service.repository.ContractRepository;
 import com.roomie.services.contract_service.repository.OTPVerificationRepository;
+import com.roomie.services.contract_service.repository.httpclient.BillingClient;
 import com.roomie.services.contract_service.repository.httpclient.ProfileClient;
 import com.roomie.services.contract_service.repository.httpclient.PropertyClient;
 import lombok.AccessLevel;
@@ -27,7 +30,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -47,6 +53,7 @@ public class ContractService {
     RedisCacheService cacheService;
     KafkaTemplate<String, Object> kafkaTemplate;
     PropertyClient propertyClient;
+    BillingClient billingClient;
 
     @Value("${contract.lock-ttl-seconds:30}")
     long LOCK_TTL = 30;
@@ -99,17 +106,43 @@ public class ContractService {
         Contract saved = repo.save(c);
         cacheService.put(cacheKey(saved.getId()), saved, CACHE_TTL);
 
-        ContractEvent ev = new ContractEvent();
-        ev.setBookingId(saved.getBookingId());
-        ev.setTenantId(saved.getTenantId());
-        ev.setLandlordId(saved.getLandlordId());
-        ev.setPropertyId(saved.getPropertyId());
+        createDepositBill(saved);
 
+        ContractEvent ev = buildEvent(saved);
         kafkaTemplate.send("contract.created", ev);
         log.info("Created contract PREVIEW for bookingId={}, contractId={}",
                 saved.getBookingId(), saved.getId());
 
         return mapper.toResponse(saved);
+    }
+
+    private void createDepositBill(Contract contract) {
+        try {
+            // Lấy tháng bắt đầu thuê
+            LocalDate startDate = contract.getStartDate().atZone(ZoneId.systemDefault()).toLocalDate();
+            String billingMonth = startDate.getYear() + "-" +
+                    String.format("%02d", startDate.getMonthValue());
+
+            // Tạo request để tạo bill
+            BillRequest billRequest = BillRequest.builder()
+                    .contractId(contract.getId())
+                    .billingMonth(billingMonth)
+                    .rentalDeposit(contract.getRentalDeposit())
+                    .monthlyRent(BigDecimal.ZERO)
+                    .notes("Tiền cọc hợp đồng - Deposit payment for contract")
+                    .build();
+
+            // Gọi Billing Service để tạo bill
+            billingClient.createBill(billRequest);
+
+            log.info("✅ Auto-created deposit bill for contract: {}, amount: {}",
+                    contract.getId(), contract.getRentalDeposit());
+
+        } catch (Exception e) {
+            log.error("❌ Failed to auto-create deposit bill for contract: {}",
+                    contract.getId(), e);
+            // Không throw exception để không làm gián đoạn việc tạo contract
+        }
     }
 
     public Optional<ContractResponse> getById(String id) {
@@ -156,7 +189,9 @@ public class ContractService {
 
             repo.save(c);
             cacheService.put(cacheKey(id), c, CACHE_TTL);
-            kafkaTemplate.send("contract.signed", buildEvent(c));
+            ContractEvent event = buildEvent(c);
+            event.setSignedBy("TENANT");
+            kafkaTemplate.send("contract.signed", event);
             log.info("Tenant signed contract contractId={}", c.getId());
 
             return mapper.toResponse(c);
@@ -194,7 +229,9 @@ public class ContractService {
 
             repo.save(c);
             cacheService.put(cacheKey(id), c, CACHE_TTL);
-            kafkaTemplate.send("contract.signed", buildEvent(c));
+            ContractEvent event = buildEvent(c);
+            event.setSignedBy("LANDLORD");
+            kafkaTemplate.send("contract.signed", event);
             log.info("Landlord signed contract contractId={}", c.getId());
 
             return mapper.toResponse(c);
@@ -209,15 +246,52 @@ public class ContractService {
     @Transactional
     public void onPaymentCompleted(PaymentCompletedEvent evt) {
         if (evt == null || evt.getBookingId() == null) return;
-        repo.findByBookingId(evt.getBookingId()).ifPresent(c -> {
-            c.setStatus(ContractStatus.ACTIVE);
-            c.setUpdatedAt(Instant.now());
-            propertyClient.markAsRented(c.getPropertyId());
-            repo.save(c);
-            cacheService.put(cacheKey(c.getId()), c, CACHE_TTL);
-            kafkaTemplate.send("contract.activated", buildEvent(c));
-            log.info("Contract activated after payment for contractId={}", c.getId());
+
+        repo.findByBookingId(evt.getBookingId()).ifPresent(contract -> {
+            try {
+                markPaymentCompleted(contract.getId());
+            } catch (Exception e) {
+                log.error("Failed to activate contract for bookingId={}", evt.getBookingId(), e);
+            }
         });
+    }
+
+    @Transactional
+    public ContractResponse markPaymentCompleted(String contractId) {
+        String lockKey = "lock:contract:" + contractId;
+        String token = lockService.tryLock(lockKey, LOCK_TTL);
+        if (token == null) throw new AppException(ErrorCode.RESOURCE_LOCKED);
+
+        try {
+            Contract contract = repo.findById(contractId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+
+            if (contract.getStatus() != ContractStatus.PENDING_PAYMENT) {
+                throw new AppException(ErrorCode.INVALID_CONTRACT_STATUS,
+                        "Contract must be in PENDING_PAYMENT status. Current: " + contract.getStatus());
+            }
+
+            contract.setStatus(ContractStatus.ACTIVE);
+            contract.setUpdatedAt(Instant.now());
+
+            try {
+                propertyClient.markAsRented(contract.getPropertyId());
+            } catch (Exception e) {
+                log.error("Failed to mark property as rented for propertyId={}",
+                        contract.getPropertyId(), e);
+            }
+
+            Contract saved = repo.save(contract);
+            cacheService.put(cacheKey(contractId), saved, CACHE_TTL);
+
+            // Publish event
+            kafkaTemplate.send("contract.activated", buildEvent(saved));
+            log.info("Contract activated after payment for contractId={}", contractId);
+
+            return mapper.toResponse(saved);
+        } finally {
+            lockService.releaseLock(lockKey, token);
+        }
     }
 
     public ContractResponse pause(String id, String reason) {
@@ -333,7 +407,52 @@ public class ContractService {
     }
 
     private ContractEvent buildEvent(Contract c) {
-        return null;
+        PropertyResponse property = null;
+        try {
+            property = propertyClient.getProperty(c.getPropertyId()).getResult();
+        } catch (Exception e) {
+            log.warn("Failed to fetch property details for event", e);
+        }
+
+        // Get tenant and landlord info
+        String tenantName = "Unknown Tenant";
+        String landlordName = "Unknown Landlord";
+
+        try {
+            var tenantProfile = profileClient.getProfile(c.getTenantId());
+            if (tenantProfile != null && tenantProfile.getResult() != null) {
+                tenantName = tenantProfile.getResult().getFirstName();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch tenant profile", e);
+        }
+
+        try {
+            var landlordProfile = profileClient.getProfile(c.getLandlordId());
+            if (landlordProfile != null && landlordProfile.getResult() != null) {
+                landlordName = landlordProfile.getResult().getFirstName();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch landlord profile", e);
+        }
+
+        return ContractEvent.builder()
+                .contractId(c.getId())
+                .bookingId(c.getBookingId())
+                .propertyId(c.getPropertyId())
+                .propertyTitle(property != null ? property.getTitle() : "Unknown Property")
+                .tenantId(c.getTenantId())
+                .tenantName(tenantName)
+                .landlordId(c.getLandlordId())
+                .landlordName(landlordName)
+                .startDate(c.getStartDate())
+                .endDate(c.getEndDate())
+                .monthlyRent(c.getMonthlyRent())
+                .rentalDeposit(c.getRentalDeposit())
+                .status(c.getStatus().name())
+                .tenantSigned(c.isTenantSigned())
+                .landlordSigned(c.isLandlordSigned())
+                .build();
     }
 
     @Transactional
@@ -453,7 +572,7 @@ public class ContractService {
      * Tenant signs contract with OTP verification
      */
     @Transactional
-    public ContractResponse tenantSignWithOTP(String contractId, String otpCode) {
+    public ContractResponse tenantSignWithOTP(String contractId, OTPSignRequest req) {
         String tenantId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // Verify OTP
@@ -465,7 +584,7 @@ public class ContractService {
         ).orElseThrow(() -> new AppException(ErrorCode.INVALID_OTP));
 
         // Check OTP code
-        if (!otp.getOtpCode().equals(otpCode)) {
+        if (!otp.getOtpCode().equals(req.getOtpCode())) {
             throw new AppException(ErrorCode.INVALID_OTP);
         }
 
@@ -481,7 +600,7 @@ public class ContractService {
      * Landlord signs contract with OTP verification
      */
     @Transactional
-    public ContractResponse landlordSignWithOTP(String contractId, String otpCode) {
+    public ContractResponse landlordSignWithOTP(String contractId, OTPSignRequest req) {
         String landlordId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // Verify OTP
@@ -493,7 +612,7 @@ public class ContractService {
         ).orElseThrow(() -> new AppException(ErrorCode.INVALID_OTP));
 
         // Check OTP code
-        if (!otp.getOtpCode().equals(otpCode)) {
+        if (!otp.getOtpCode().equals(req.getOtpCode())) {
             throw new AppException(ErrorCode.INVALID_OTP);
         }
 

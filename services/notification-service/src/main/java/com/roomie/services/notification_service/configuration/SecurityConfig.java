@@ -16,6 +16,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
+            // WebSocket endpoints
+            "/ws/**",
+
+            // Actuator endpoints
+            "/actuator/**",
+
+            // Internal endpoints (if needed)
+            "/internal/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;

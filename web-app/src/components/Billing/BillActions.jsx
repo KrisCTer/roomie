@@ -4,20 +4,28 @@ import {
   downloadBillPdf,
   openBillPdfPreview,
 } from "../../services/billing.service";
+import { useNotificationContext } from "../../contexts/NotificationContext";
 
 const BillActions = ({ bill, canPay, onPayment, onBack }) => {
   const [downloading, setDownloading] = useState(false);
+  const { addToast } = useNotificationContext();
 
   const handleDownloadPdf = async () => {
     try {
       setDownloading(true);
       await downloadBillPdf(bill.id);
-      alert("✅ PDF downloaded successfully!");
+      addToast({
+        title: "Success",
+        message: "PDF downloaded successfully!",
+        priority: "NORMAL",
+      });
     } catch (error) {
       console.error("Error downloading PDF:", error);
-      alert(
-        "❌ Failed to download PDF: " + (error?.message || "Unknown error")
-      );
+      addToast({
+        title: "Download Failed",
+        message: error?.message || "Unknown error occurred",
+        priority: "URGENT",
+      });
     } finally {
       setDownloading(false);
     }
@@ -32,10 +40,18 @@ const BillActions = ({ bill, canPay, onPayment, onBack }) => {
     navigator.clipboard
       .writeText(billUrl)
       .then(() => {
-        alert("✅ Bill link copied to clipboard!");
+        addToast({
+          title: "Link Copied",
+          message: "Bill link copied to clipboard!",
+          priority: "NORMAL",
+        });
       })
       .catch(() => {
-        alert("❌ Failed to copy link");
+        addToast({
+          title: "Copy Failed",
+          message: "Failed to copy link to clipboard",
+          priority: "HIGH",
+        });
       });
   };
 

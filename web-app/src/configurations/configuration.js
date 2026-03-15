@@ -3,6 +3,7 @@ export const CONFIG = {
   API_GATEWAY: "http://localhost:8888/api/v1",
   SOCKET_URL: "http://localhost:8099", // WebSocket server for chat
   WS_ADMIN_LOGS: "ws://localhost:8888/api/v1/admin/ws/admin/logs", // WebSocket for admin logs
+  NOTIFICATION_WS_URL: "http://localhost:8090/notification", // WebSocket for notifications
 };
 
 export const API = {
@@ -114,8 +115,8 @@ export const API = {
   // ========= CONTRACT (Contract Service - Port 8085) =========
   CREATE_CONTRACT: "/contract/",
   GET_CONTRACT: (id) => `/contract/${id}`,
-  TENANT_SIGN_CONTRACT: (id) => `/contract/${id}/sign/tenant`,
-  LANDLORD_SIGN_CONTRACT: (id) => `/contract/${id}/sign/landlord`,
+  TENANT_SIGN_CONTRACT: (id) => `/contract/${id}/sign/tenant/otp`,
+  LANDLORD_SIGN_CONTRACT: (id) => `/contract/${id}/sign/landlord/otp`,
   CONTRACT_PDF: (id) => `/contract/${id}/pdf`,
   CONTRACT_SIGNATURE_STATUS: (id) => `/contract/${id}/signature-status`,
   MY_CONTRACTS: "/contract/my-contracts",
@@ -137,16 +138,16 @@ export const API = {
   PAY_BILL: (id) => `/billing/${id}/pay`,
   GET_MY_LANDORD_BILLS: "/billing/landlord/my-bills",
   GET_MY_TENANT_BILLS: "/billing/tenant/my-bills",
-  
+
   // Bill PDF & Email
   BILL_PDF: (id) => `/billing/${id}/pdf`,
   BILL_PDF_PREVIEW: (id) => `/billing/${id}/pdf/preview`,
   EMAIL_BILL_INVOICE: (id) => `/billing/${id}/email`,
-  
+
   // Bill Statistics
   LANDLORD_BILLING_STATS: "/billing/landlord/stats",
   TENANT_BILLING_STATS: "/billing/tenant/stats",
-  
+
   // Bill Bulk Operations
   BULK_GENERATE_BILLS: "/billing/bulk/generate",
   BULK_SEND_BILLS: "/billing/bulk/send",
@@ -154,37 +155,37 @@ export const API = {
 
   // Meter Reading Management
   GET_METER_READING: (id) => `/billing/meter-reading/${id}`,
-  GET_METER_READINGS_BY_CONTRACT: (contractId) => 
+  GET_METER_READINGS_BY_CONTRACT: (contractId) =>
     `/billing/meter-reading/contract/${contractId}`,
-  GET_METER_READINGS_BY_PROPERTY: (propertyId) => 
+  GET_METER_READINGS_BY_PROPERTY: (propertyId) =>
     `/billing/meter-reading/property/${propertyId}`,
-  GET_LATEST_METER_READING: (contractId) => 
+  GET_LATEST_METER_READING: (contractId) =>
     `/billing/meter-reading/contract/${contractId}/latest`,
-  
+
   // Meter Reading - AI OCR Upload
   UPLOAD_METER_WITH_AI: (id) => `/billing/meter-reading/${id}/upload-with-ai`,
   TEST_OCR: "/billing/meter-reading/test-ocr",
   TEST_VIETNAMESE_OCR: "/billing/meter-reading/test-vietnamese-ocr",
-  
+
   // Meter Reading - Manual Upload
   UPLOAD_ELECTRICITY_PHOTO: (id) => `/billing/meter-reading/${id}/electricity-photo`,
   UPLOAD_WATER_PHOTO: (id) => `/billing/meter-reading/${id}/water-photo`,
-  
+
   // Meter Reading - Manual Entry
   CREATE_MANUAL_METER_READING: "/billing/meter-reading/manual",
   UPDATE_METER_READING_VALUES: (id) => `/billing/meter-reading/${id}/values`,
   DELETE_METER_PHOTO: (id) => `/billing/meter-reading/${id}/photo`,
-  
+
   // Meter Reading Statistics
-  GET_CONSUMPTION_STATS: (contractId) => 
+  GET_CONSUMPTION_STATS: (contractId) =>
     `/billing/meter-reading/contract/${contractId}/stats`,
-  GET_CONSUMPTION_CHART: (contractId) => 
+  GET_CONSUMPTION_CHART: (contractId) =>
     `/billing/meter-reading/contract/${contractId}/chart`,
-  COMPARE_CONSUMPTION: (contractId) => 
+  COMPARE_CONSUMPTION: (contractId) =>
     `/billing/meter-reading/contract/${contractId}/compare`,
-  DETECT_ANOMALIES: (contractId) => 
+  DETECT_ANOMALIES: (contractId) =>
     `/billing/meter-reading/contract/${contractId}/anomalies`,
-  EXPORT_METER_READINGS: (contractId) => 
+  EXPORT_METER_READINGS: (contractId) =>
     `/billing/meter-reading/contract/${contractId}/export`,
 
   // Utility Configuration Management
@@ -196,16 +197,16 @@ export const API = {
   UPDATE_UTILITY: (id) => `/billing/utility/${id}`,
   DEACTIVATE_UTILITY: (id) => `/billing/utility/${id}/deactivate`,
   DELETE_UTILITY: (id) => `/billing/utility/${id}`,
-  
+
   // Utility Bulk Operations
   BULK_CREATE_UTILITIES: "/billing/utility/bulk",
   BULK_UPDATE_UTILITY_PRICING: "/billing/utility/bulk/update-pricing",
-  
+
   // Utility Templates & Market Data
   GET_UTILITY_TEMPLATES: "/billing/utility/templates",
   CREATE_UTILITY_FROM_TEMPLATE: "/billing/utility/from-template",
   GET_MARKET_AVERAGE: "/billing/utility/market-average",
-  
+
   // Utility Reporting
   GET_UTILITY_PRICING_HISTORY: (id) => `/billing/utility/${id}/history`,
   EXPORT_UTILITIES: "/billing/utility/export",
@@ -228,6 +229,18 @@ export const API = {
   // Messages
   CREATE_MESSAGE: "/chat/messages/create",
   GET_MESSAGES: "/chat/messages", // Requires conversationId param
+
+  // ========= NOTIFICATION (Notification Service - Port 8090) =========
+  // Notifications
+  GET_NOTIFICATIONS: "/notification/notifications",
+  GET_NOTIFICATION: (id) => `/notification/notifications/${id}`,
+  GET_UNREAD_COUNT: "/notification/notifications/unread-count",
+  GET_NOTIFICATION_STATS: "/notification/notifications/stats",
+  MARK_NOTIFICATION_READ: (id) => `/notification/notifications/${id}/read`,
+  MARK_MULTIPLE_READ: "/notification/notifications/read-multiple",
+  MARK_ALL_READ: "/notification/notifications/read-all",
+  DELETE_NOTIFICATION: (id) => `/notification/notifications/${id}`,
+  DELETE_ALL_READ: "/notification/notifications/read",
 
   // ========= ADMIN (Admin Service - Port 8081) =========
   // User Management
@@ -266,6 +279,7 @@ export const SERVICE_PORTS = {
   PAYMENT: 8087,
   FILE: 8088,
   CHAT: 8089,
+  NOTIFICATION: 8090,
 };
 
 // HTTP Methods Helper

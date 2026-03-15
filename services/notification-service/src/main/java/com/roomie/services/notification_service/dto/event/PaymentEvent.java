@@ -17,10 +17,12 @@ public class PaymentEvent {
     String userName;
     String bookingId;
     String contractId;
+    String billId;
     BigDecimal amount;
     String currency;
     String paymentMethod;
     String status;
     Instant paidAt;
     String description;
+    String transactionId;
 }

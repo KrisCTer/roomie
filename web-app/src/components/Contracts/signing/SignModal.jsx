@@ -9,7 +9,7 @@ const SignModal = ({ show, onClose, onContinue }) => {
       <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-gray-900">
-            ✍️ Confirm Contract Signing
+            ✍️ Xác nhận việc ký kết hợp đồng
           </h3>
           <button
             onClick={onClose}
@@ -22,9 +22,9 @@ const SignModal = ({ show, onClose, onContinue }) => {
         <div className="mb-6">
           <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-4">
             <p className="text-sm text-blue-800">
-              ⚠️ You are about to electronically sign a rental contract. After
-              signing, you will be legally bound by all terms and conditions
-              stated in this agreement.
+              ⚠️ Bạn sắp ký hợp đồng thuê nhà điện tử. Sau khi ký, bạn sẽ bị
+              ràng buộc về mặt pháp lý bởi tất cả các điều khoản và điều kiện
+              được nêu trong thỏa thuận này.
             </p>
           </div>
 
@@ -32,17 +32,21 @@ const SignModal = ({ show, onClose, onContinue }) => {
             <div className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <span>
-                I have read and fully understood all terms of the contract
+                Tôi đã đọc và hiểu đầy đủ tất cả các điều khoản của hợp đồng.
               </span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span>I agree to all terms and conditions stated above</span>
+              <span>
+                Tôi đồng ý với tất cả các điều khoản và điều kiện được nêu ở
+                trên
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
               <span>
-                I commit to fulfilling my obligations under this contract
+                Tôi cam kết thực hiện đầy đủ các nghĩa vụ của mình theo hợp đồng
+                này
               </span>
             </div>
           </div>
@@ -53,14 +57,14 @@ const SignModal = ({ show, onClose, onContinue }) => {
             onClick={onClose}
             className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
-            Cancel
+            Hủy
           </button>
           <button
             onClick={onContinue}
             className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-md"
           >
             <PenTool className="w-5 h-5" />
-            Continue Signing
+            Tiếp tục ký
           </button>
         </div>
       </div>

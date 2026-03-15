@@ -950,7 +950,7 @@ const StickyHeader = ({
                       </Typography>
                     </Box>
 
-                    {/* Dashboard */}
+                    {/* Dashboard - Different for Admin */}
                     <MenuItem
                       onClick={() => {
                         handleCloseMenu();
@@ -977,33 +977,58 @@ const StickyHeader = ({
                       />
                     </MenuItem>
 
-                    {/* Favorites */}
+                    {/* Profile - Always available */}
                     <MenuItem
                       onClick={() => {
                         handleCloseMenu();
-                        navigate("/my-favorites");
+                        navigate("/profile");
                       }}
                     >
                       <ListItemIcon>
-                        <Heart size={18} className="text-rose-500" />
+                        <AccountCircleIcon
+                          sx={{ fontSize: 18, color: "grey.700" }}
+                        />
                       </ListItemIcon>
                       <ListItemText
-                        primary="Yêu thích"
-                        secondary={`${favoritesCount} property đã lưu`}
+                        primary="Hồ sơ cá nhân"
+                        secondary="Xem và chỉnh sửa thông tin"
                         sx={{
                           "& .MuiListItemText-secondary": {
                             fontSize: "0.75rem",
                           },
                         }}
                       />
-                      {favoritesCount > 0 && (
-                        <Badge
-                          badgeContent={favoritesCount}
-                          color="error"
-                          sx={{ ml: 1 }}
-                        />
-                      )}
                     </MenuItem>
+
+                    {/* Favorites - Only for non-admin users */}
+                    {!isAdmin && (
+                      <MenuItem
+                        onClick={() => {
+                          handleCloseMenu();
+                          navigate("/my-favorites");
+                        }}
+                      >
+                        <ListItemIcon>
+                          <Heart size={18} className="text-rose-500" />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary="Yêu thích"
+                          secondary={`${favoritesCount} property đã lưu`}
+                          sx={{
+                            "& .MuiListItemText-secondary": {
+                              fontSize: "0.75rem",
+                            },
+                          }}
+                        />
+                        {favoritesCount > 0 && (
+                          <Badge
+                            badgeContent={favoritesCount}
+                            color="error"
+                            sx={{ ml: 1 }}
+                          />
+                        )}
+                      </MenuItem>
+                    )}
 
                     {/* Notifications */}
                     <MenuItem

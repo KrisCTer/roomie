@@ -1,0 +1,26 @@
+# === Environment & Secrets ===
+.env
+.env.local
+.env.*.local
+
+# === Java / Maven ===
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*.log
+
+# === Node ===
+**/node_modules/
+
+# === IDE ===
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# === OS ===
+.DS_Store
+Thumbs.db

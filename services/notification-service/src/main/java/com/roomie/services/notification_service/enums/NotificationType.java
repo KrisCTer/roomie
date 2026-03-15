@@ -7,7 +7,7 @@ public enum NotificationType {
     BOOKING_CANCELLED("booking.cancelled"),
     BOOKING_REJECTED("booking.rejected"),
     BOOKING_EXPIRED("booking.expired"),
-
+    BOOKING_TERMINATED("booking.terminated"),
     // Contract related
     CONTRACT_CREATED("contract.created"),
     CONTRACT_SIGNED_BY_TENANT("contract.signed.tenant"),

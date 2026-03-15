@@ -22,6 +22,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
@@ -30,12 +31,23 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
 
+    @Value("${spring.data.redis.host:localhost}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port:6379}")
+    private int redisPort;
+
+    @Value("${spring.data.redis.password:}")
+    private String redisPassword;
+
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisConf = new RedisStandaloneConfiguration();
-        redisConf.setHostName("localhost");
-        redisConf.setPort(6379);
-        redisConf.setPassword(RedisPassword.of("roomie123"));
+        redisConf.setHostName(redisHost);
+        redisConf.setPort(redisPort);
+        if (redisPassword != null && !redisPassword.isEmpty()) {
+            redisConf.setPassword(RedisPassword.of(redisPassword));
+        }
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .commandTimeout(Duration.ofSeconds(5))

@@ -408,8 +408,12 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <TrendingUp className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Revenue Chart</h2>
-            <p className="text-sm text-gray-600">Track your monthly income</p>
+            <h2 className="text-xl font-bold text-gray-900">
+              Biểu đồ doanh thu
+            </h2>
+            <p className="text-sm text-gray-600">
+              Theo dõi thu nhập hàng tháng của bạn
+            </p>
           </div>
         </div>
 
@@ -417,9 +421,9 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
           <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
             <BarChart3 className="w-10 h-10 text-gray-400" />
           </div>
-          <p className="text-gray-600 text-lg mb-2">No bill data available</p>
+          <p className="text-gray-600 text-lg mb-2">Không có dữ liệu hóa đơn</p>
           <p className="text-gray-500 text-sm">
-            Create your first bill to see the revenue chart
+            Tạo hóa đơn đầu tiên của bạn để xem biểu đồ doanh thu
           </p>
         </div>
       </div>
@@ -435,9 +439,11 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <TrendingUp className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Revenue Chart</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Biểu đồ doanh thu
+            </h2>
             <p className="text-sm text-gray-600">
-              Track your monthly income ({chartData.length} months)
+              Theo dõi thu nhập hàng tháng của bạn ({chartData.length} tháng)
             </p>
           </div>
         </div>
@@ -501,7 +507,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              6 months
+              6 tháng
             </button>
             <button
               onClick={() => setTimeRange("12months")}
@@ -511,7 +517,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              12 months
+              12 tháng
             </button>
           </div>
         </div>
@@ -529,24 +535,24 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-4 h-4 text-green-600" />
-            <span className="text-xs text-gray-700">Total Revenue</span>
+            <span className="text-xs text-gray-700">Tổng doanh thu</span>
           </div>
           <p className="text-2xl font-bold text-green-600">
             {stats.totalRevenue.toFixed(1)}M
           </p>
           <p className="text-xs text-gray-600 mt-1">
-            Avg:{" "}
+            Trung bình:{" "}
             {chartData.length > 0
               ? (stats.totalRevenue / chartData.length).toFixed(1)
               : 0}
-            M/month
+            M/tháng
           </p>
         </div>
 
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-blue-600" />
-            <span className="text-xs text-gray-700">Rent</span>
+            <span className="text-xs text-gray-700">Thuê</span>
           </div>
           <p className="text-2xl font-bold text-blue-600">
             {stats.totalRent.toFixed(1)}M
@@ -555,14 +561,14 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             {stats.totalRevenue > 0
               ? ((stats.totalRent / stats.totalRevenue) * 100).toFixed(0)
               : 0}
-            % of total
+            % tổng
           </p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-4 h-4 text-orange-600" />
-            <span className="text-xs text-gray-700">Utilities</span>
+            <span className="text-xs text-gray-700">Tiện ích</span>
           </div>
           <p className="text-2xl font-bold text-orange-600">
             {stats.totalUtilities.toFixed(1)}M
@@ -571,14 +577,14 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             {stats.totalRevenue > 0
               ? ((stats.totalUtilities / stats.totalRevenue) * 100).toFixed(0)
               : 0}
-            % of total
+            % tổng
           </p>
         </div>
 
         <div className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4 text-purple-600" />
-            <span className="text-xs text-gray-700">Growth</span>
+            <span className="text-xs text-gray-700">Tăng trưởng</span>
           </div>
           <div className="flex items-baseline gap-1">
             <p className="text-2xl font-bold text-purple-600">
@@ -591,7 +597,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               <TrendingDown className="w-4 h-4 text-red-600" />
             )}
           </div>
-          <p className="text-xs text-gray-600 mt-1">vs. previous month</p>
+          <p className="text-xs text-gray-600 mt-1">so với tháng trước</p>
         </div>
       </div>
     </div>

@@ -126,9 +126,9 @@ const Dashboard = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 60) return `${minutes} minutes ago`;
-    if (hours < 24) return `${hours} hours ago`;
-    return `${days} days ago`;
+    if (minutes < 60) return `${minutes} phút trước`;
+    if (hours < 24) return `${hours} giờ trước`;
+    return `${days} ngày trước`;
   };
 
   return (
@@ -147,8 +147,8 @@ const Dashboard = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <PageTitle
-          title="Dashboard"
-          subtitle="Manage your properties and track your revenue."
+          title="Bảng điều khiển"
+          subtitle="Quản lý bất động sản của bạn và theo dõi doanh thu."
         />
         <main className="p-8 w-full">
           {/* Loading State */}
@@ -195,15 +195,15 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    Useful Insights
+                    Những hiểu biết hữu ích
                   </h3>
                   <ul className="space-y-2 text-gray-700">
                     {stats.pendingProperties > 0 && (
                       <li className="flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 text-yellow-600" />
                         <span>
-                          You have {stats.pendingProperties} properties pending
-                          approval
+                          Bạn có {stats.pendingProperties} bất động sản đang chờ
+                          phê duyệt
                         </span>
                       </li>
                     )}
@@ -211,15 +211,17 @@ const Dashboard = () => {
                       <li className="flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-green-600" />
                         <span>
-                          You have {stats.availableProperties} properties
-                          available for rent
+                          Bạn có {stats.availableProperties} bất động sản sẵn
+                          sàng cho thuê
                         </span>
                       </li>
                     )}
                     {stats.unpaidBills > 0 && (
                       <li className="flex items-center gap-2">
                         <AlertCircle className="w-4 h-4 text-red-600" />
-                        <span>You have {stats.unpaidBills} unpaid bills</span>
+                        <span>
+                          Bạn có {stats.unpaidBills} hóa đơn chưa thanh toán
+                        </span>
                       </li>
                     )}
                   </ul>
@@ -237,11 +239,11 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    Attention Required!
+                    Cần chú ý!
                   </h3>
                   <p className="text-gray-700">
-                    You have {stats.unpaidBills} unpaid bills with a total
-                    amount of{" "}
+                    Bạn có {stats.unpaidBills} hóa đơn chưa thanh toán với tổng
+                    số tiền là{" "}
                     <span className="font-bold text-red-600">
                       {stats.totalBillAmount.toLocaleString()}đ
                     </span>
@@ -250,7 +252,7 @@ const Dashboard = () => {
                     onClick={() => navigate("/my-bills?status=unpaid")}
                     className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-sm"
                   >
-                    View Details
+                    Xem chi tiết
                   </button>
                 </div>
               </div>

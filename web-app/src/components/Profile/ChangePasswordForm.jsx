@@ -8,11 +8,11 @@ const ChangePasswordForm = ({ passwords, onChange, onSubmit }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-6">Change Password</h2>
+      <h2 className="text-xl font-bold mb-6">Thay đổi mật khẩu</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <PasswordField
-          label="Old Password"
+          label="Mật khẩu cũ"
           name="oldPassword"
           value={passwords.oldPassword}
           onChange={onChange}
@@ -21,7 +21,7 @@ const ChangePasswordForm = ({ passwords, onChange, onSubmit }) => {
         />
 
         <PasswordField
-          label="New Password"
+          label="Mật khẩu mới"
           name="newPassword"
           value={passwords.newPassword}
           onChange={onChange}
@@ -30,7 +30,7 @@ const ChangePasswordForm = ({ passwords, onChange, onSubmit }) => {
         />
 
         <PasswordField
-          label="Confirm Password"
+          label="Xác nhận mật khẩu"
           name="confirmPassword"
           value={passwords.confirmPassword}
           onChange={onChange}

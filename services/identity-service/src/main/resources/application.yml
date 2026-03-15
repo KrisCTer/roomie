@@ -10,7 +10,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: roomie
-    password: roomie123
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -26,14 +26,14 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: roomie123
+      password: ${REDIS_PASSWORD}
       timeout: 60000
 
   mail:
     host: smtp.gmail.com
     port: 587
     username: romie.housing.tech@gmail.com
-    password:
+    password: ${MAIL_PASSWORD:mznl wclo ddwt jrut}
     properties:
       mail:
         smtp:
@@ -46,16 +46,16 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            client-id: ${GOOGLE_CLIENT_ID:819833604355-fpld1hnsgt7t8uh8lv77gcaucm8gcksa.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
 
           facebook:
-            client-id: ${FACEBOOK_CLIENT_ID:}
-            client-secret: ${FACEBOOK_CLIENT_SECRET:}
+            client-id: ${FACEBOOK_CLIENT_ID:1466675014635254}
+            client-secret: ${FACEBOOK_CLIENT_SECRET}
             scope:
               - email
               - public_profile
@@ -90,27 +90,27 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:}
-  signerKey: ${JWT_SIGNER_KEY:}
-  valid-duration: 86400 # 24 hours in seconds
-  refreshable-duration: 604800 # 7 days in seconds
+  secret: ${JWT_SECRET}
+  signerKey: ${JWT_SIGNER_KEY}
+  valid-duration: 86400  # 24 hours in seconds
+  refreshable-duration: 604800  # 7 days in seconds
 
 # OTP Configuration
 otp:
-  expiration: 300000 # 5 minutes in milliseconds
+  expiration: 300000  # 5 minutes in milliseconds
   length: 6
 
 # Rate Limiting
 rate-limit:
   login:
     max-attempts: 5
-    duration: 900000 # 15 minutes
+    duration: 900000  # 15 minutes
   register:
     max-attempts: 3
-    duration: 3600000 # 1 hour
+    duration: 3600000  # 1 hour
   otp:
     max-attempts: 3
-    duration: 3600000 # 1 hour
+    duration: 3600000  # 1 hour
 
 # Kafka Topics
 kafka:

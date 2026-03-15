@@ -110,7 +110,7 @@ public class NotificationTemplateService {
         createTemplateIfNotExists(
                 NotificationType.BOOKING_CONFIRMED,
                 "vi",
-                "Đặt phòng được xác nhận! 🎉",
+                "Đặt phòng được xác nhận!",
                 "Chủ nhà đã xác nhận yêu cầu đặt phòng '{{propertyTitle}}'. Vui lòng hoàn tất thanh toán.",
                 "Đặt phòng đã được chấp nhận",
                 "/bookings/{{bookingId}}"
@@ -130,7 +130,7 @@ public class NotificationTemplateService {
         createTemplateIfNotExists(
                 NotificationType.PAYMENT_COMPLETED,
                 "vi",
-                "Thanh toán thành công! ✅",
+                "Thanh toán thành công!",
                 "Giao dịch {{amount}} VNĐ đã được xử lý thành công",
                 "Thanh toán thành công",
                 "/payments/{{paymentId}}"

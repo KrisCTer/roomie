@@ -34,7 +34,6 @@ const PropertyMapView = ({
     script.async = true;
 
     script.addEventListener("load", () => {
-      console.log("✅ Google Maps loaded");
       setMapsLoaded(true);
     });
 
@@ -81,7 +80,6 @@ const PropertyMapView = ({
           Math.abs(lastBoundsRef.current.west - newBounds.west) > 0.001;
 
         if (boundsChanged) {
-          console.log("🗺️ Map bounds changed:", newBounds);
           lastBoundsRef.current = newBounds;
           onBoundsChange?.(newBounds);
         }
@@ -96,7 +94,6 @@ const PropertyMapView = ({
     // Use a default center, but we'll auto-fit to properties later
     const center = { lat: 10.7769, lng: 106.7009 }; // Default: HCM
 
-    console.log(`🗺️ Initializing map with default center`);
 
     const mapInstance = new window.google.maps.Map(mapRef.current, {
       center,
@@ -122,7 +119,6 @@ const PropertyMapView = ({
   useEffect(() => {
     if (!map) return;
 
-    console.log("🎯 Adding bounds change listener");
 
     const listener = window.google.maps.event.addListener(
       map,
@@ -150,11 +146,9 @@ const PropertyMapView = ({
     );
 
     if (propertiesWithLocation.length === 0) {
-      console.log("⚠️ No properties with location data");
       return;
     }
 
-    console.log(
       `🎯 Auto-fitting map to ${propertiesWithLocation.length} properties`
     );
 
@@ -183,7 +177,6 @@ const PropertyMapView = ({
           map.setZoom(15); // Don't zoom in too much
         }
 
-        console.log("✅ Map auto-fitted to properties");
         hasAutoFittedRef.current = true;
 
         // Trigger initial bounds update
@@ -196,7 +189,6 @@ const PropertyMapView = ({
   useEffect(() => {
     if (!map || !initialCenter || !hasAutoFittedRef.current) return;
 
-    console.log("📍 User searched for specific location:", initialCenter);
     map.panTo(initialCenter);
     map.setZoom(initialZoom);
 
@@ -222,7 +214,6 @@ const PropertyMapView = ({
       return;
     }
 
-    console.log(`🎯 Creating ${propertiesWithLocation.length} markers`);
 
     propertiesWithLocation.forEach((prop) => {
       const [lat, lng] = prop.address.location
@@ -309,7 +300,6 @@ const PropertyMapView = ({
 
   const handleSearchThisArea = () => {
     setShowSearchButton(false);
-    console.log("🔍 Manual search triggered");
     handleBoundsChanged();
   };
 

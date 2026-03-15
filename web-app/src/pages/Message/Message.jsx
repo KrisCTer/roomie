@@ -93,7 +93,6 @@ const Message = () => {
       return;
     }
 
-    console.log("📞 Starting voice call with:", remotePeer);
     startCall(
       selectedConversation.id || selectedConversation.conversationId,
       remotePeer,
@@ -123,7 +122,6 @@ const Message = () => {
       return;
     }
 
-    console.log("📹 Starting video call with:", remotePeer);
     startCall(
       selectedConversation.id || selectedConversation.conversationId,
       remotePeer,

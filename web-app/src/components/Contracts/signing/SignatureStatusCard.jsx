@@ -6,7 +6,7 @@ const SignatureStatusCard = ({ contract }) => {
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
         <Shield className="w-6 h-6 text-blue-600" />
-        Signature Status
+        Trạng thái chữ ký
       </h2>
 
       <div className="space-y-4">
@@ -19,7 +19,7 @@ const SignatureStatusCard = ({ contract }) => {
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-900">Landlord</span>
+            <span className="font-semibold text-gray-900">Chủ nhà</span>
             {contract.landlordSigned ? (
               <CheckCircle className="w-6 h-6 text-green-600" />
             ) : (
@@ -31,7 +31,7 @@ const SignatureStatusCard = ({ contract }) => {
               contract.landlordSigned ? "text-green-700" : "text-gray-600"
             }`}
           >
-            {contract.landlordSigned ? "✓ Signed" : "Not signed yet"}
+            {contract.landlordSigned ? "✓ Đã ký" : "Chưa ký"}
           </p>
         </div>
 
@@ -44,7 +44,7 @@ const SignatureStatusCard = ({ contract }) => {
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-900">Tenant</span>
+            <span className="font-semibold text-gray-900">Người thuê</span>
             {contract.tenantSigned ? (
               <CheckCircle className="w-6 h-6 text-green-600" />
             ) : (
@@ -56,7 +56,7 @@ const SignatureStatusCard = ({ contract }) => {
               contract.tenantSigned ? "text-green-700" : "text-gray-600"
             }`}
           >
-            {contract.tenantSigned ? "✓ Signed" : "Not signed yet"}
+            {contract.tenantSigned ? "✓ Đã ký" : "Chưa ký"}
           </p>
         </div>
 
@@ -65,9 +65,7 @@ const SignatureStatusCard = ({ contract }) => {
           <div className="p-4 bg-green-100 border-2 border-green-400 rounded-lg">
             <div className="flex items-center gap-2 text-green-800">
               <CheckCircle className="w-5 h-5" />
-              <span className="font-semibold">
-                Both parties have signed the contract
-              </span>
+              <span className="font-semibold">Cả hai bên đã ký hợp đồng</span>
             </div>
           </div>
         )}

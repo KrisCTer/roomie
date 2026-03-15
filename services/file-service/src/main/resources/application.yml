@@ -8,12 +8,12 @@ spring:
     name: file-service
   data:
     mongodb:
-      uri: mongodb://admin:roomie123@localhost:27017/roomie_file?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_file?authSource=admin
       database: roomie_profile
     redis:
       host: localhost
       port: 6379
-      password: roomie123
+      password: ${REDIS_PASSWORD}
       timeout: 5000ms
   servlet:
     multipart:
@@ -29,4 +29,4 @@ app:
     endpoint: http://localhost:9000
     bucket: roomie-files
     access-key: roomie
-    secret-key: roomie123
+    secret-key: ${MINIO_SECRET_KEY}

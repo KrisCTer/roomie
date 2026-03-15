@@ -15,25 +15,25 @@ const QuickActions = ({ role }) => {
   const landlordActions = [
     {
       icon: Plus,
-      label: "New Listing",
+      label: "Danh sách mới",
       color: "blue",
       action: () => navigate("/add-property"),
     },
     {
       icon: Search,
-      label: "Find Tenants",
+      label: "Tìm người thuê",
       color: "green",
       action: () => navigate("/search-tenants"),
     },
     {
       icon: QuickFile,
-      label: "Create Contract",
+      label: "Tạo hợp đồng",
       color: "purple",
       action: () => navigate("/my-properties"),
     },
     {
       icon: MessageCircle,
-      label: "Messages",
+      label: "Tin nhắn",
       color: "yellow",
       action: () => navigate("/message"),
     },
@@ -42,25 +42,25 @@ const QuickActions = ({ role }) => {
   const tenantActions = [
     {
       icon: Search,
-      label: "Find Home",
+      label: "Tìm nhà",
       color: "blue",
       action: () => navigate("/search"),
     },
     {
       icon: QuickFile,
-      label: "My Contracts",
+      label: "Hợp đồng của tôi",
       color: "purple",
       action: () => navigate("/my-contracts"),
     },
     {
       icon: MessageCircle,
-      label: "Messages",
+      label: "Tin nhắn",
       color: "yellow",
       action: () => navigate("/messages"),
     },
     {
       icon: Settings,
-      label: "Settings",
+      label: "Cài đặt tài khoản",
       color: "gray",
       action: () => navigate("/profile"),
     },
@@ -80,7 +80,7 @@ const QuickActions = ({ role }) => {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Hành động nhanh</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {actions.map((action, index) => (
           <button

@@ -39,7 +39,6 @@ export const useContractSigning = () => {
     const user = getUserInfo();
     if (user) {
       setCurrentUser(user);
-      console.log("👤 Current User:", user);
     }
   }, []);
 
@@ -63,37 +62,31 @@ export const useContractSigning = () => {
   const fetchContractData = async () => {
     try {
       setLoading(true);
-      console.log("📄 Fetching contract:", id);
 
       const contractRes = await getContract(id);
-      console.log("📄 Contract Response:", contractRes);
 
       if (contractRes?.success && contractRes?.result) {
         const contractData = contractRes.result;
         setContract(contractData);
-        console.log("✅ Contract Data:", contractData);
 
         if (contractData.propertyId) {
           try {
-            console.log("🏠 Fetching property:", contractData.propertyId);
             const propertyRes = await getPropertyById(contractData.propertyId);
             if (propertyRes?.success && propertyRes?.result) {
               setProperty(propertyRes.result);
-              console.log("✅ Property Data:", propertyRes.result);
             }
           } catch (error) {
             console.error("❌ Error fetching property:", error);
           }
         }
-       // Fetch tenant profile
+
+        // Fetch tenant profile
         if (contractData.tenantId) {
           try {
-            console.log("👤 Fetch tenant profile:", contractData.tenantId);
             const res = await getUserProfile(contractData.tenantId);
 
             if (res?.result) {
               setTenantData(res.result);
-              console.log("✅ Tenant Data:", res.result);
             }
           } catch (e) {
             console.error("❌ Fetch tenant failed", e);
@@ -103,18 +96,15 @@ export const useContractSigning = () => {
         // Fetch landlord profile
         if (contractData.landlordId) {
           try {
-            console.log("👤 Fetch landlord profile:", contractData.landlordId);
             const res = await getUserProfile(contractData.landlordId);
 
             if (res?.result) {
               setLandlordData(res.result);
-              console.log("✅ Landlord Data:", res.result);
             }
           } catch (e) {
             console.error("❌ Fetch landlord failed", e);
           }
         }
-
       }
     } catch (error) {
       console.error("❌ Error fetching contract:", error);
@@ -175,7 +165,6 @@ export const useContractSigning = () => {
       setOtpError("");
       setOtpSuccess("");
 
-      console.log("📧 Requesting OTP for:", party, "Contract:", id);
 
       let response;
       if (party === "landlord") {
@@ -203,19 +192,25 @@ export const useContractSigning = () => {
     }
   };
 
-  // Verify OTP and sign
+  // ✅ FIXED: Verify OTP and sign with proper validation
   const handleVerifyAndSign = async () => {
-    if (!otpCode) {
+    // Clear previous errors
+    setOtpError("");
+
+    // Validation
+    if (!otpCode || otpCode.trim() === "") {
       setOtpError("Vui lòng nhập mã OTP");
       return;
     }
 
-    if (otpCode.length !== 6) {
-      setOtpError("Mã OTP phải có 6 số");
+    const cleanOtpCode = otpCode.trim();
+
+    if (cleanOtpCode.length !== 6) {
+      setOtpError("Mã OTP phải có đúng 6 số");
       return;
     }
 
-    if (!/^\d+$/.test(otpCode)) {
+    if (!/^\d{6}$/.test(cleanOtpCode)) {
       setOtpError("Mã OTP chỉ được chứa số");
       return;
     }
@@ -236,16 +231,20 @@ export const useContractSigning = () => {
       setSigning(true);
       setOtpError("");
 
-      console.log("✍️ Signing contract as:", party, "with OTP:", otpCode);
+
+      // ✅ Prepare correct payload format
+      const payload = {
+        otpCode: cleanOtpCode
+      };
+
 
       let response;
       if (party === "landlord") {
-        response = await landlordSignContract(id, { otpCode });
+        response = await landlordSignContract(id, payload);
       } else {
-        response = await tenantSignContract(id, { otp: otpCode });
+        response = await tenantSignContract(id, payload);
       }
 
-      console.log("✅ Sign Response:", response);
 
       if (response?.success) {
         alert("✓ Ký hợp đồng thành công!");
@@ -263,18 +262,26 @@ export const useContractSigning = () => {
         // Refresh contract data
         await fetchContractData();
       } else {
-        setOtpError(
-          response?.message ||
-            "Mã OTP không chính xác hoặc đã hết hạn. Vui lòng thử lại!"
-        );
+        const errorMsg = response?.message || "Mã OTP không chính xác. Vui lòng thử lại!";
+        setOtpError(errorMsg);
+        console.error("❌ Sign failed:", errorMsg);
       }
     } catch (error) {
       console.error("❌ Error signing contract:", error);
 
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Ký hợp đồng thất bại. Vui lòng kiểm tra lại mã OTP!";
+      let errorMessage = "Ký hợp đồng thất bại. Vui lòng kiểm tra lại mã OTP!";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      // Check for specific OTP errors
+      if (errorMessage.toLowerCase().includes("invalid otp") || 
+          errorMessage.toLowerCase().includes("otp")) {
+        errorMessage = "Mã OTP không chính xác hoặc đã hết hạn. Vui lòng thử lại!";
+      }
 
       setOtpError(errorMessage);
     } finally {
@@ -287,6 +294,7 @@ export const useContractSigning = () => {
     setOtpCode("");
     setOtpError("");
     setOtpSuccess("");
+    setOtpSent(false);
     await handleRequestOTP();
   };
 

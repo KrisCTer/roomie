@@ -106,7 +106,7 @@ const IdentityVerification = () => {
             onClick={() => {
               if (currentStep === "method") setCurrentStep("intro");
               else if (currentStep === "tips") setCurrentStep("method");
-              else navigate(-1);
+              else navigate("/");
             }}
             className="flex items-center gap-2 text-gray-600 dark:text-dark-secondary hover:text-gray-900 dark:hover:text-dark-primary transition-colors"
           >
@@ -257,7 +257,7 @@ const IdentityVerification = () => {
               </div>
 
               {/* Mobile App Option */}
-              <div
+              {/* <div
                 onClick={() => handleMethodSelect("mobile")}
                 className={`p-6 border-2 rounded-xl cursor-pointer transition-all hover:border-gray-400 dark:hover:border-dark-secondary ${
                   selectedMethod === "mobile"
@@ -275,7 +275,7 @@ const IdentityVerification = () => {
                     </h3>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {loading && (

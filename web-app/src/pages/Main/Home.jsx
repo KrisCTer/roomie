@@ -86,7 +86,6 @@ const Home = () => {
       setLoading(true);
 
       const res = await getAllProperties();
-      console.log("Home getAllProperties response:", res);
 
       let list = [];
       if (res && res.success && Array.isArray(res.result)) {

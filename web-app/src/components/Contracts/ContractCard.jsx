@@ -153,7 +153,7 @@ const ContractCard = ({
           </p>
 
           <p className="text-xs text-gray-500">
-            Contract ID: {contract.id?.substring(0, 8)}...
+            Mã số hợp đồng: {contract.id?.substring(0, 8)}...
           </p>
         </div>
 
@@ -201,21 +201,23 @@ const ContractCard = ({
         {/* Financial */}
         <div className="space-y-3">
           <div>
-            <p className="text-xs text-gray-500 mb-1">💰 Monthly Rent</p>
+            <p className="text-xs text-gray-500 mb-1">
+              💰 Tiền thuê hàng tháng
+            </p>
             {isPropertyLoading ? (
               <div className="animate-pulse bg-gray-200 rounded h-5 w-32"></div>
             ) : (
               <p className="text-sm font-bold text-blue-600">
                 {formatCurrency(monthlyRent)}
                 <span className="text-xs font-normal text-gray-600">
-                  /month
+                  /tháng
                 </span>
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-xs text-gray-500 mb-1">🏦 Deposit</p>
+            <p className="text-xs text-gray-500 mb-1">🏦 Tiền đặt cọc</p>
             {isPropertyLoading ? (
               <div className="animate-pulse bg-gray-200 rounded h-5 w-32"></div>
             ) : (
@@ -229,7 +231,7 @@ const ContractCard = ({
 
       {/* Lease period */}
       <div className="mb-4 pb-4 border-b">
-        <p className="text-xs text-gray-500 mb-2">📅 Lease Period</p>
+        <p className="text-xs text-gray-500 mb-2">📅 Thời gian thuê</p>
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-gray-900">
             {formatDate(contract.startDate)}
@@ -255,8 +257,8 @@ const ContractCard = ({
               <Clock className="w-4 h-4" />
             )}
             <span className="font-medium">
-              {role === "landlord" ? "Landlord" : "Tenant"}:{" "}
-              {isSigned ? "Signed" : "Not signed"}
+              {role === "landlord" ? "Chủ nhà" : "Người thuê nhà"}:{" "}
+              {isSigned ? "Đã ký" : "Chưa ký"}
             </span>
           </div>
 
@@ -271,8 +273,8 @@ const ContractCard = ({
               <Clock className="w-4 h-4" />
             )}
             <span className="font-medium">
-              {role === "landlord" ? "Tenant" : "Landlord"}:{" "}
-              {otherPartySigned ? "Signed" : "Not signed"}
+              {role === "landlord" ? "Người thuê nhà" : "Chủ nhà"}:{" "}
+              {otherPartySigned ? "Đã ký" : "Chưa ký"}
             </span>
           </div>
         </div>
@@ -281,12 +283,12 @@ const ContractCard = ({
           {contract.status === "PENDING_SIGNATURE" && !isSigned ? (
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
               <PenTool className="w-4 h-4" />
-              Sign Now
+              Ký ngay
             </button>
           ) : (
             <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium flex items-center gap-2">
               <Eye className="w-4 h-4" />
-              View Details
+              Xem chi tiết
             </button>
           )}
         </div>

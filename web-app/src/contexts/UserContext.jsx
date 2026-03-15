@@ -19,7 +19,6 @@ export const UserProvider = ({ children }) => {
         const profile = res?.result || res?.data?.result;
         if (profile) setUser(profile);
       } catch (e) {
-        console.log("Using cached user");
       } finally {
         setLoading(false);
       }

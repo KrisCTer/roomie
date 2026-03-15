@@ -1,47 +1,57 @@
 // src/routes/AppRoutes.jsx
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import RoleProtectedRoute from "../components/common/RoleProtectedRoute";
+import VerificationGuard from "../components/common/VerificationGuard";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
-/* ================= AUTH ================= */
-import Login from "../pages/Login";
-import Register from "../pages/Register";
-import OAuth2Callback from "../pages/OAuth2Callback";
-import IdentityVerification from "../pages/IdentityVerification/IdentityVerification";
+/* ================= AUTH (lazy) ================= */
+const Login = lazy(() => import("../pages/Login"));
+const Register = lazy(() => import("../pages/Register"));
+const OAuth2Callback = lazy(() => import("../pages/OAuth2Callback"));
+const IdentityVerification = lazy(() => import("../pages/IdentityVerification/IdentityVerification"));
 
-/* ================= MAIN / PUBLIC ================= */
-import Home from "../pages/Main/Home";
-import PropertyDetail from "../pages/Main/PropertyDetail";
-import PropertySearch from "../pages/Main/PropertySearch";
-import UserProfile from "../pages/Main/UserProfile";
-import MyFavorites from "../pages/Main/MyFavorites";
+/* ================= MAIN / PUBLIC (lazy) ================= */
+const Home = lazy(() => import("../pages/Main/Home"));
+const PropertyDetail = lazy(() => import("../pages/Main/PropertyDetail"));
+const PropertySearch = lazy(() => import("../pages/Main/PropertySearch"));
+const UserProfile = lazy(() => import("../pages/Main/UserProfile"));
+const MyFavorites = lazy(() => import("../pages/Main/MyFavorites"));
 
-/* ================= USER ================= */
-import Profile from "../pages/Profile/Profile";
-import Message from "../pages/Message/Message";
-import Dashboard from "../pages/User/Dashboard";
-import MyBookings from "../pages/Booking/MyBookings";
-import MyContracts from "../pages/Contracts/MyContracts";
-import ContractSigning from "../pages/Contracts/ContractSigning";
-import UnifiedBillsPage from "../pages/Billing/UnifiedBillsPage";
-import BillDetail from "../pages/Billing/BillDetail";
-import NotificationCenter from "../pages/NotificationCenter";
+/* ================= USER (lazy) ================= */
+const Profile = lazy(() => import("../pages/Profile/Profile"));
+const Message = lazy(() => import("../pages/Message/Message"));
+const Dashboard = lazy(() => import("../pages/User/Dashboard"));
+const MyBookings = lazy(() => import("../pages/Booking/MyBookings"));
+const MyContracts = lazy(() => import("../pages/Contracts/MyContracts"));
+const ContractSigning = lazy(() => import("../pages/Contracts/ContractSigning"));
+const UnifiedBillsPage = lazy(() => import("../pages/Billing/UnifiedBillsPage"));
+const BillDetail = lazy(() => import("../pages/Billing/BillDetail"));
+const NotificationCenter = lazy(() => import("../pages/NotificationCenter"));
 
-/* ================= LANDLORD ================= */
-import AddProperty from "../pages/Property/AddProperty";
-import MyProperties from "../pages/Property/MyProperties";
-import UtilityConfigPage from "../pages/Billing/UtilityConfigPage";
+/* ================= LANDLORD (lazy) ================= */
+const AddProperty = lazy(() => import("../pages/Property/AddProperty"));
+const MyProperties = lazy(() => import("../pages/Property/MyProperties"));
+const UtilityConfigPage = lazy(() => import("../pages/Billing/UtilityConfigPage"));
 
-/* ================= ADMIN ================= */
-import Admin from "../pages/User/Admin";
-import AdminProperties from "../pages/Admin/AdminProperties";
-import AdminUsers from "../pages/Admin/AdminUsers";
-import AdminDashboard from "../pages/Admin/AdminDashboard";
+/* ================= ADMIN (lazy) ================= */
+const Admin = lazy(() => import("../pages/User/Admin"));
+const AdminProperties = lazy(() => import("../pages/Admin/AdminProperties"));
+const AdminUsers = lazy(() => import("../pages/Admin/AdminUsers"));
+const AdminDashboard = lazy(() => import("../pages/Admin/AdminDashboard"));
+const NotFound = lazy(() => import("../pages/NotFound"));
 
 const AppRoutes = () => {
   return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner message="Đang tải trang..." />
+        </div>
+      }
+    >
     <Routes>
       {/* ================= OAUTH ================= */}
-      {/* ⚠️ PHẢI ĐẶT TRƯỚC */}
       <Route path="/oauth2/callback" element={<OAuth2Callback />} />
 
       {/* ================= AUTH ================= */}
@@ -70,7 +80,9 @@ const AppRoutes = () => {
         path="/profile"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord", "admin"]}>
-            <Profile />
+            <VerificationGuard>
+              <Profile />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -79,7 +91,9 @@ const AppRoutes = () => {
         path="/message"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord", "admin"]}>
-            <Message />
+            <VerificationGuard>
+              <Message />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -98,7 +112,9 @@ const AppRoutes = () => {
         path="/dashboard"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
-            <Dashboard />
+            <VerificationGuard>
+              <Dashboard />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -107,7 +123,9 @@ const AppRoutes = () => {
         path="/my-bookings"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
-            <MyBookings />
+            <VerificationGuard>
+              <MyBookings />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -116,7 +134,9 @@ const AppRoutes = () => {
         path="/my-contracts"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
-            <MyContracts />
+            <VerificationGuard>
+              <MyContracts />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -125,7 +145,9 @@ const AppRoutes = () => {
         path="/contract-signing/:id"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
-            <ContractSigning />
+            <VerificationGuard>
+              <ContractSigning />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -134,7 +156,9 @@ const AppRoutes = () => {
         path="/unified-bills"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
-            <UnifiedBillsPage />
+            <VerificationGuard>
+              <UnifiedBillsPage />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -143,7 +167,9 @@ const AppRoutes = () => {
         path="/bill-detail/:id"
         element={
           <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
-            <BillDetail />
+            <VerificationGuard>
+              <BillDetail />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -153,7 +179,9 @@ const AppRoutes = () => {
         path="/add-property"
         element={
           <RoleProtectedRoute allowedRoles={["landlord"]}>
-            <AddProperty />
+            <VerificationGuard>
+              <AddProperty />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -162,7 +190,9 @@ const AppRoutes = () => {
         path="/my-properties"
         element={
           <RoleProtectedRoute allowedRoles={["landlord"]}>
-            <MyProperties />
+            <VerificationGuard>
+              <MyProperties />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -171,7 +201,9 @@ const AppRoutes = () => {
         path="/utility-config"
         element={
           <RoleProtectedRoute allowedRoles={["landlord"]}>
-            <UtilityConfigPage />
+            <VerificationGuard>
+              <UtilityConfigPage />
+            </VerificationGuard>
           </RoleProtectedRoute>
         }
       />
@@ -212,10 +244,10 @@ const AppRoutes = () => {
           </RoleProtectedRoute>
         }
       />
-
       {/* ================= FALLBACK ================= */}
-      <Route path="*" element={<Home />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 

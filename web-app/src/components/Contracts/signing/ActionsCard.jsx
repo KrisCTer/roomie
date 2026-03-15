@@ -15,7 +15,7 @@ const ActionsCard = ({
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Actions</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Hành động</h2>
 
       <div className="space-y-3">
         {/* Show sign button if user can sign */}
@@ -25,7 +25,7 @@ const ActionsCard = ({
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-md"
           >
             <PenTool className="w-5 h-5" />
-            Sign Contract Now
+            Ký hợp đồng ngay
           </button>
         )}
 
@@ -34,7 +34,7 @@ const ActionsCard = ({
           <div className="p-3 bg-green-50 border-l-4 border-green-500 rounded-lg">
             <p className="text-sm text-green-700 font-medium text-center flex items-center justify-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              You have already signed this contract
+              Bạn đã ký hợp đồng này
             </p>
           </div>
         )}
@@ -44,10 +44,8 @@ const ActionsCard = ({
           <div className="p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
             <p className="text-sm text-yellow-700 text-center flex items-center justify-center gap-2">
               <Clock className="w-4 h-4" />
-              Waiting for {party === "landlord"
-                ? "the tenant"
-                : "the landlord"}{" "}
-              to sign
+              Đang chờ {party === "landlord" ? "người thuê" : "chủ nhà"} ký hợp
+              đồng
             </p>
           </div>
         )}
@@ -56,7 +54,7 @@ const ActionsCard = ({
         {!party && (
           <div className="p-3 bg-red-50 border-l-4 border-red-500 rounded-lg">
             <p className="text-sm text-red-700 text-center">
-              You are not a party to this contract
+              Bạn không phải là một bên tham gia vào hợp đồng này.
             </p>
           </div>
         )}
@@ -69,7 +67,7 @@ const ActionsCard = ({
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
           >
             <Download className="w-5 h-5" />
-            Download Contract
+            Tải xuống hợp đồng
           </a>
         )}
 
@@ -78,7 +76,7 @@ const ActionsCard = ({
           onClick={() => navigate("/my-contracts")}
           className="w-full px-4 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
         >
-          Back to List
+          Quay lại danh sách
         </button>
       </div>
     </div>

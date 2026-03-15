@@ -54,7 +54,6 @@ export const useFavorite = (propertyId) => {
         setFavoriteCount(response.result.favoriteCount);
         
         // Show success message (optional)
-        console.log(response.message);
       } else {
         throw new Error(response?.message || "Failed to toggle favorite");
       }
