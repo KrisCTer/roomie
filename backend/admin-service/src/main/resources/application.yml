@@ -1,0 +1,63 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /admin
+
+spring:
+  application:
+    name: admin-service
+
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          identity-service:
+            url: http://localhost:8080/identity
+          property-service:
+            url: http://localhost:8083/property
+  # MongoDB
+  data:
+    mongodb:
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_admin?authSource=admin
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 60000
+
+  # Elasticsearch
+  elasticsearch:
+    uris: http://localhost:9200
+
+  # Kafka
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: log-consumers
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# Eureka Client
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+
+# Custom config
+admin:
+  super-admin-email: ${ADMIN_EMAIL:admin@roomie.com}
+  admin-jwt-secret: ${ADMIN_JWT_SECRET:}
+  session-timeout-hours: 8
+
+app:
+  services:
+    identity: http://localhost:8080/identity
+    properties: http://localhost:8083/property

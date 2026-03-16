@@ -1,0 +1,137 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /profile
+
+spring:
+  application:
+    name: profile-service
+
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          file-service:
+            url: http://localhost:8088/file
+          identity-service:
+            url: http://localhost:8080/identity
+
+  devtools:
+    livereload:
+      enabled: false
+
+  # MongoDB Configuration - Additional Profile Data
+  data:
+    mongodb:
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_profile?authSource=admin
+      database: roomie_profile
+
+    # Redis Configuration - Caching
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # Neo4j Configuration - Relationship Graph
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: ${NEO4J_PASSWORD:}
+
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: profile-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+      auto-offset-reset: earliest
+
+  # Servlet Configuration for File Upload
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+management:
+  health:
+    mongo:
+      enabled: ${MANAGEMENT_HEALTH_MONGO_ENABLED:true}
+    neo4j:
+      enabled: ${MANAGEMENT_HEALTH_NEO4J_ENABLED:true}
+    redis:
+      enabled: ${MANAGEMENT_HEALTH_REDIS_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    com.roomie.services.profile_service: DEBUG
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+# Profile Service Configuration
+profile:
+  image:
+    max-size: 5MB
+    allowed-types: jpg,jpeg,png,gif
+    storage-path: /uploads/profiles
+  bio:
+    max-length: 500
+  preferences:
+    cache-ttl: 3600 # 1 hour in seconds
+
+# File Service Configuration
+file-service:
+  url: http://localhost:8084
+  connection-timeout: 5000
+  read-timeout: 10000
+
+# Kafka Topics
+kafka:
+  topics:
+    profile-events: profile-events
+    profile-created: profile-created
+    profile-updated: profile-updated
+    profile-deleted: profile-deleted
+    user-events: user-events
+
+# Cache Configuration
+cache:
+  profile:
+    ttl: 3600 # 1 hour
+  preferences:
+    ttl: 7200 # 2 hours
+  search:
+    ttl: 1800 # 30 minutes
+
+app:
+  services:
+    identity: http://localhost:8080/identity
+    files: http://localhost:8088/file

@@ -1,0 +1,60 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /booking
+
+spring:
+  application:
+    name: booking-service
+
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          profile-service:
+            url: http://localhost:8082/profile
+          property-service:
+            url: http://localhost:8083/property
+  data:
+    mongodb:
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_booking?authSource=admin
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000ms
+
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://eureka-server:8761/eureka
+      register-with-eureka: true
+      fetch-registry: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: booking-service
+      properties:
+        spring.json.trusted.packages: "*"
+
+  booking:
+    redis:
+      lock-ttl: 900000 # 15 minutes
+      pending-ttl: 900000
+
+  cache:
+    type: redis
+
+app:
+  services:
+    properties: http://localhost:8083/property
+    profile: http://localhost:8082/profile

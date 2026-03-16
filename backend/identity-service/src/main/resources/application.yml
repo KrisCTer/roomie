@@ -1,0 +1,153 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /identity
+
+spring:
+  application:
+    name: identity-service
+
+  devtools:
+    livereload:
+      enabled: false
+
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          profile-service:
+            url: http://localhost:8082/profile
+  datasource:
+    url: jdbc:mysql://localhost:3306/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: roomie
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      timeout: 60000
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: romie.housing.tech@gmail.com
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:819833604355-fpld1hnsgt7t8uh8lv77gcaucm8gcksa.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope:
+              - email
+              - profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+          facebook:
+            client-id: ${FACEBOOK_CLIENT_ID:1466675014635254}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:}
+            scope:
+              - email
+              - public_profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+          facebook:
+            authorization-uri: https://www.facebook.com/v12.0/dialog/oauth
+            token-uri: https://graph.facebook.com/v12.0/oauth/access_token
+            user-info-uri: https://graph.facebook.com/me?fields=id,name,email,picture
+            user-name-attribute: id
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: auth-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:}
+  signerKey: ${JWT_SIGNER_KEY:}
+  valid-duration: 86400 # 24 hours in seconds
+  refreshable-duration: 604800 # 7 days in seconds
+
+# OTP Configuration
+otp:
+  expiration: 300000 # 5 minutes in milliseconds
+  length: 6
+
+# Rate Limiting
+rate-limit:
+  login:
+    max-attempts: 5
+    duration: 900000 # 15 minutes
+  register:
+    max-attempts: 3
+    duration: 3600000 # 1 hour
+  otp:
+    max-attempts: 3
+    duration: 3600000 # 1 hour
+
+# Kafka Topics
+kafka:
+  topics:
+    user-events: user-events
+    auth-events: auth-events
+
+management:
+  health:
+    mail:
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.roomie.services.identity_service: DEBUG
+    org.springframework.security: DEBUG
+
+app:
+  services:
+    profile: http://localhost:8082/profile
+  oauth2:
+    redirectUri: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/callback}
