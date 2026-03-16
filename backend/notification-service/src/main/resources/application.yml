@@ -10,7 +10,7 @@ spring:
   # MongoDB Configuration
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_notification?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_notification?authSource=admin
       database: roomie_notification
 
   # Kafka Configuration
@@ -39,7 +39,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: romie.housing.tech@gmail.com
-    password: ${MAIL_PASSWORD:mznl wclo ddwt jrut}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:

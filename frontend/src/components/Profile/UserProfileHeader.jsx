@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   Camera,
   Shield,
@@ -37,7 +37,7 @@ const UserProfileHeader = ({ formData, onAvatarUpload, onVerifyIdentity }) => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center">
                   <span className="text-4xl font-bold text-white">
                     {formData.firstName?.[0]?.toUpperCase() || "U"}
                   </span>
@@ -137,7 +137,7 @@ const UserProfileHeader = ({ formData, onAvatarUpload, onVerifyIdentity }) => {
               icon={<CreditCard className="w-5 h-5" />}
               label="ID Card Number"
               value={formData.idCardNumber}
-              color="purple"
+              color="teal"
             />
 
             {/* Gender */}
@@ -196,8 +196,8 @@ const InfoItem = ({ icon, label, value, color }) => {
     blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
     green:
       "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
-    purple:
-      "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400",
+    teal:
+      "bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400",
     pink: "bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400",
   };
 
@@ -219,3 +219,4 @@ const InfoItem = ({ icon, label, value, color }) => {
 };
 
 export default UserProfileHeader;
+

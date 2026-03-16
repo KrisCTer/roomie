@@ -7,30 +7,43 @@ spring:
   application:
     name: profile-service
 
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          file-service:
+            url: http://localhost:8088/file
+          identity-service:
+            url: http://localhost:8080/identity
+
+  devtools:
+    livereload:
+      enabled: false
+
   # MongoDB Configuration - Additional Profile Data
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_profile?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_profile?authSource=admin
       database: roomie_profile
 
-    # Neo4j Configuration - Relationship Graph
-    neo4j:
-      uri: bolt://localhost:7687
-      authentication:
-        username: neo4j
-        password: ${MONGO_PASSWORD}
-
-  # Redis Configuration - Caching
+    # Redis Configuration - Caching
     redis:
       host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
       timeout: 60000
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
           min-idle: 0
+
+  # Neo4j Configuration - Relationship Graph
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: ${NEO4J_PASSWORD:}
 
   # Kafka Configuration
   kafka:
@@ -54,6 +67,23 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+
+management:
+  health:
+    mongo:
+      enabled: ${MANAGEMENT_HEALTH_MONGO_ENABLED:true}
+    neo4j:
+      enabled: ${MANAGEMENT_HEALTH_NEO4J_ENABLED:true}
+    redis:
+      enabled: ${MANAGEMENT_HEALTH_REDIS_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+logging:
+  level:
+    com.roomie.services.profile_service: DEBUG
 
 # Eureka Client Configuration
 eureka:

@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "property-service", url = "${app.services.property}",
+@FeignClient(name = "property-service",
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
 public interface PropertyClient {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

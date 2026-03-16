@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/Home/PropertySection.jsx
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
@@ -114,3 +115,5 @@ const PropertySection = ({
 };
 
 export default PropertySection;
+
+

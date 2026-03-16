@@ -1,3 +1,5 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* aria-label */
 // web-app/src/pages/Property/MyProperties.jsx
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
@@ -206,3 +208,5 @@ const MyProperties = () => {
 };
 
 export default MyProperties;
+
+

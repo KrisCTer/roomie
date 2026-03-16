@@ -1,4 +1,4 @@
-// src/components/layout/layoutUser/Sidebar.jsx
+﻿// src/components/layout/layoutUser/Sidebar.jsx
 import React, { useMemo } from "react";
 import {
   Home,
@@ -106,7 +106,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
       displayUser?.fullName?.[0] || displayUser?.username?.[0] || "U";
 
     return (
-      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-teal-600 rounded-full flex items-center justify-center">
         <span className="text-white font-bold text-sm">
           {initial.toUpperCase()}
         </span>
@@ -179,3 +179,4 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
 };
 
 export default Sidebar;
+

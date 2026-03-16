@@ -1,3 +1,4 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RefreshCw, Search, Eye } from "lucide-react";
@@ -440,3 +441,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Home, ArrowLeft } from "lucide-react";
 
@@ -10,7 +10,7 @@ const NotFound = () => {
       <div className="max-w-md w-full text-center space-y-8 animate-fade-in-up">
         {/* Error Code */}
         <div className="relative">
-          <h1 className="text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 opacity-20">
+          <h1 className="text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-600 opacity-20">
             404
           </h1>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -49,3 +49,4 @@ const NotFound = () => {
 };
 
 export default NotFound;
+

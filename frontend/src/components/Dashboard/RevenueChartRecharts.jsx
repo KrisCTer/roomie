@@ -1,4 +1,4 @@
-// src/pages/User/Dashboard/components/RevenueChartRecharts.jsx
+﻿// src/pages/User/Dashboard/components/RevenueChartRecharts.jsx
 import React, { useState, useMemo } from "react";
 import {
   LineChart,
@@ -253,9 +253,9 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               type="monotone"
               dataKey="services"
               name="Services"
-              stroke="#a855f7"
+              stroke="#14b8a6"
               strokeWidth={3}
-              dot={{ fill: "#a855f7", r: 4 }}
+              dot={{ fill: "#14b8a6", r: 4 }}
             />
           </LineChart>
         );
@@ -304,7 +304,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               type="monotone"
               dataKey="services"
               name="Services"
-              stroke="#a855f7"
+              stroke="#14b8a6"
               fillOpacity={1}
               fill="url(#colorRevenue)"
               stackId="1"
@@ -337,7 +337,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Bar
               dataKey="services"
               name="Services"
-              fill="#a855f7"
+              fill="#14b8a6"
               radius={[8, 8, 0, 0]}
               stackId="a"
             />
@@ -375,7 +375,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
             <Bar
               dataKey="services"
               name="Services"
-              fill="#a855f7"
+              fill="#14b8a6"
               radius={[8, 8, 0, 0]}
             />
           </BarChart>
@@ -404,8 +404,8 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
     return (
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-purple-600" />
+          <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-teal-600" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">
@@ -435,8 +435,8 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-purple-600" />
+          <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-teal-600" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">
@@ -455,7 +455,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("bar")}
               className={`p-2 rounded-md transition ${
                 chartType === "bar"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-teal-600 text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
               title="Bar Chart"
@@ -466,7 +466,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("line")}
               className={`p-2 rounded-md transition ${
                 chartType === "line"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-teal-600 text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
               title="Line Chart"
@@ -477,7 +477,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("area")}
               className={`p-2 rounded-md transition ${
                 chartType === "area"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-teal-600 text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
               title="Area Chart"
@@ -488,7 +488,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setChartType("composed")}
               className={`p-2 rounded-md transition ${
                 chartType === "composed"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-teal-600 text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
               title="Mixed Chart"
@@ -503,7 +503,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setTimeRange("6months")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeRange === "6months"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-teal-600 text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -513,7 +513,7 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
               onClick={() => setTimeRange("12months")}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
                 timeRange === "12months"
-                  ? "bg-purple-600 text-white shadow-sm"
+                  ? "bg-teal-600 text-white shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -581,13 +581,13 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-4 h-4 text-purple-600" />
+            <Calendar className="w-4 h-4 text-teal-600" />
             <span className="text-xs text-gray-700">Tăng trưởng</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <p className="text-2xl font-bold text-purple-600">
+            <p className="text-2xl font-bold text-teal-600">
               {stats.growthRate > 0 ? "+" : ""}
               {stats.growthRate}%
             </p>
@@ -605,3 +605,5 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
 };
 
 export default RevenueChartRecharts;
+
+

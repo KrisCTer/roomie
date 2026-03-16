@@ -8,12 +8,12 @@ spring:
     name: file-service
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_file?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_file?authSource=admin
       database: roomie_profile
     redis:
       host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
+      password: ${REDIS_PASSWORD:}
       timeout: 5000ms
   servlet:
     multipart:
@@ -26,7 +26,7 @@ app:
     download-prefix: http://localhost:8888/api/v1/file/media/download/
 
   minio:
-    endpoint: http://localhost:9000
-    bucket: roomie-files
-    access-key: roomie
-    secret-key: ${MINIO_SECRET_KEY}
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    bucket: ${MINIO_BUCKET:roomie-files}
+    access-key: ${MINIO_ACCESS_KEY:${MINIO_ROOT_USER:roomie}}
+    secret-key: ${MINIO_SECRET_KEY:${MINIO_ROOT_PASSWORD:}}

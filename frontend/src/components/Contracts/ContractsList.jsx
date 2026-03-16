@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import ContractCard from "./ContractCard";
 
@@ -56,3 +57,5 @@ const ContractsList = ({
 };
 
 export default ContractsList;
+
+

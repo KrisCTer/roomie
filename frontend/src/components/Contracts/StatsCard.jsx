@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 
 const StatsCard = ({ icon: Icon, label, value, bgColor, textColor }) => {
@@ -19,3 +20,5 @@ const StatsCard = ({ icon: Icon, label, value, bgColor, textColor }) => {
 };
 
 export default StatsCard;
+
+

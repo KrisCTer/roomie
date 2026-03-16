@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/Home/PropertyCard.jsx
 import React from "react";
 import {
@@ -356,3 +357,5 @@ const PropertyCard = ({ property, onClick }) => {
 };
 
 export default PropertyCard;
+
+

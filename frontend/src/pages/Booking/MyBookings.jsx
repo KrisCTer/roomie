@@ -1,3 +1,5 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* aria-label */
 // web-app/src/pages/Booking/MyBookings.jsx
 import React, { useState } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
@@ -135,3 +137,5 @@ const MyBookings = () => {
 };
 
 export default MyBookings;
+
+

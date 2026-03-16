@@ -61,6 +61,11 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- Lettuce (Redis Client) -->
         <dependency>
             <groupId>io.lettuce</groupId>

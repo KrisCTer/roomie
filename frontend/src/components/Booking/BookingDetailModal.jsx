@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, CheckCircle } from "lucide-react";
-import { getPropertyById } from "../../services/property.service";
+import { getPropertyById } from "../../services/propertyService";
 import PropertyInfoSection from "./PropertyInfoSection";
 import LeasePeriodSection from "./LeasePeriodSection";
 import FinancialDetailsSection from "./FinancialDetailsSection";
@@ -46,7 +46,6 @@ const BookingDetailModal = ({
   const statusConfig = getStatusConfig(booking.status);
 
   const formatDate = (dateString) => {
-
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",

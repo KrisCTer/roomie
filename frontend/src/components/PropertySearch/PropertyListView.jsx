@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/PropertySearch/PropertyListView.jsx
 import React from "react";
 import { Box, Typography, CircularProgress } from "@mui/material";
@@ -181,3 +182,5 @@ const PropertyListView = ({
 };
 
 export default PropertyListView;
+
+

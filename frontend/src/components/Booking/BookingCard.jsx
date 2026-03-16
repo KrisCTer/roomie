@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   Calendar,
@@ -68,9 +69,9 @@ const BookingCard = ({ booking, isOwner }) => {
         icon: <AlertCircle className="w-4 h-4" />,
       },
       RENEWED: {
-        bg: "bg-purple-100",
-        text: "text-purple-800",
-        border: "border-purple-300",
+        bg: "bg-teal-100",
+        text: "text-teal-800",
+        border: "border-teal-300",
         label: "Renewed",
         icon: <CheckCircle className="w-4 h-4" />,
       },
@@ -169,7 +170,7 @@ const BookingCard = ({ booking, isOwner }) => {
         {isOwner && tenantId && onViewTenantProfile && (
           <button
             onClick={onViewTenantProfile}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
           >
             <UserCircle className="w-4 h-4" />
             Hồ sơ người thuê
@@ -201,3 +202,5 @@ const BookingCard = ({ booking, isOwner }) => {
 };
 
 export default BookingCard;
+
+

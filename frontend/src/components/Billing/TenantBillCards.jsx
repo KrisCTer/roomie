@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { Home, Calendar, Clock, CreditCard } from "lucide-react";
 import {
@@ -106,3 +107,5 @@ const TenantBillCards = ({ bills, properties, contracts, onView, onPay }) => {
 };
 
 export default TenantBillCards;
+
+

@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @FeignClient(
         name = "file-service",
-        url = "${app.services.files}",
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class}
 )
 public interface FileClient {

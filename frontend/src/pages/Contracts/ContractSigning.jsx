@@ -1,3 +1,5 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* aria-label */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
@@ -245,3 +247,5 @@ const ContractSigning = () => {
 };
 
 export default ContractSigning;
+
+

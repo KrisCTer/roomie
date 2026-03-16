@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   FileText,
@@ -70,3 +71,5 @@ const LandlordStats = ({ stats }) => {
 };
 
 export default LandlordStats;
+
+

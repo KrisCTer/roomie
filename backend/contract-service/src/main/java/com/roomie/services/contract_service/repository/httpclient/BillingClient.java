@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "billing-service", url = "${app.services.billing}",
+@FeignClient(name = "billing-service",
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
 public interface  BillingClient {
     @PostMapping(value="/internal/bills", produces = MediaType.APPLICATION_JSON_VALUE)

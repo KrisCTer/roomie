@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "contract-service", url = "${app.services.contract}",
+@FeignClient(name = "contract-service",
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
 public interface ContractClient {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

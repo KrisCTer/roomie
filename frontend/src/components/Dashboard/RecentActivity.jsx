@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // RecentActivity.jsx
 import React from "react";
 import {
@@ -22,7 +23,7 @@ const RecentActivity = ({ activities = [], loading }) => {
     const colorMap = {
       property: "blue",
       booking: "green",
-      contract: "purple",
+      contract: "teal",
       payment: "yellow",
     };
     return colorMap[type] || "gray";
@@ -77,7 +78,7 @@ const RecentActivity = ({ activities = [], loading }) => {
           const colorClasses = {
             blue: "bg-blue-100 text-blue-600",
             green: "bg-green-100 text-green-600",
-            purple: "bg-purple-100 text-purple-600",
+            teal: "bg-teal-100 text-teal-600",
             yellow: "bg-yellow-100 text-yellow-600",
             gray: "bg-gray-100 text-gray-600",
           };
@@ -106,3 +107,5 @@ const RecentActivity = ({ activities = [], loading }) => {
 };
 
 export default RecentActivity;
+
+

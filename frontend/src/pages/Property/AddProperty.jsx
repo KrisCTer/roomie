@@ -1,3 +1,4 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 // web-app/src/pages/Property/AddProperty.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Building, CheckCircle, AlertCircle } from "lucide-react";
@@ -720,3 +721,5 @@ const AddProperty = () => {
 };
 
 export default AddProperty;
+
+

@@ -1,4 +1,4 @@
-// src/components/Billing/UtilityConfigModal.jsx
+﻿// src/components/Billing/UtilityConfigModal.jsx
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -104,7 +104,7 @@ const UtilityConfigModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl max-w-3xl w-full my-8 shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-5 rounded-t-2xl z-10">
+        <div className="sticky top-0 bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-5 rounded-t-2xl z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -116,7 +116,7 @@ const UtilityConfigModal = ({
                     ? "Cập nhật cấu hình tiện ích"
                     : "Tạo cấu hình tiện ích"}
                 </h2>
-                <p className="text-purple-100 text-sm">{configLevel}</p>
+                <p className="text-teal-100 text-sm">{configLevel}</p>
               </div>
             </div>
             <button
@@ -254,7 +254,7 @@ const UtilityConfigModal = ({
               {/* Internet */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  <Wifi className="w-4 h-4 text-purple-600" />
+                  <Wifi className="w-4 h-4 text-teal-600" />
                   Internet
                 </label>
                 <input
@@ -357,7 +357,7 @@ const UtilityConfigModal = ({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-xl hover:from-teal-700 hover:to-teal-800 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -379,3 +379,4 @@ const UtilityConfigModal = ({
 };
 
 export default UtilityConfigModal;
+

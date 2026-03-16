@@ -1,3 +1,5 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* aria-label */
 // web-app/src/pages/User/Dashboard.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -328,3 +330,5 @@ function generateMonthlyRevenue(properties, contracts, bills) {
 }
 
 export default Dashboard;
+
+

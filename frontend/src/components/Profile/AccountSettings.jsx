@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // web-app/src/components/Profile/AccountSettings.jsx
 import React from "react";
 import { Lock, Shield, Trash2, Key } from "lucide-react";
@@ -35,8 +36,8 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
         {/* Account Info */}
         <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
+              <Shield className="w-5 h-5 text-teal-600 dark:text-teal-400" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary">
@@ -107,3 +108,5 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
 };
 
 export default AccountSettings;
+
+

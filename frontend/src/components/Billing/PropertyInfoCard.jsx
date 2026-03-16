@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   Home,
@@ -20,7 +21,7 @@ const PropertyInfoCard = ({ property }) => {
   return (
     <div className="bg-white rounded-lg p-4 border border-gray-200">
       <div className="flex items-center gap-2 mb-3">
-        <Home className="w-5 h-5 text-purple-600" />
+        <Home className="w-5 h-5 text-teal-600" />
         <h3 className="font-bold text-gray-900">Property Information</h3>
       </div>
 
@@ -64,7 +65,7 @@ const PropertyInfoCard = ({ property }) => {
             </span>
 
             <span className="flex items-center gap-1">
-              <Bath className="w-4 h-4 text-purple-500" />
+              <Bath className="w-4 h-4 text-teal-500" />
               {property.bathrooms ?? 0} baths
             </span>
 
@@ -78,7 +79,7 @@ const PropertyInfoCard = ({ property }) => {
               Monthly Rent:
             </span>
 
-            <span className="font-bold text-purple-600 text-lg">
+            <span className="font-bold text-teal-600 text-lg">
               {new Intl.NumberFormat("vi-VN").format(property.monthlyRent)} đ /
               month
             </span>
@@ -90,3 +91,5 @@ const PropertyInfoCard = ({ property }) => {
 };
 
 export default PropertyInfoCard;
+
+

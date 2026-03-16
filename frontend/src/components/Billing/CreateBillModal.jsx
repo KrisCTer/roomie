@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Home,
   User,
@@ -195,9 +195,9 @@ const CreateBillModal = ({
           </div>
 
           {/* Step 2: Billing Period */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+          <div className="bg-gradient-to-br from-teal-50 to-pink-50 rounded-xl p-6 border border-teal-200">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+              <div className="w-8 h-8 bg-teal-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">
                 2
               </div>
               Thông tin thanh toán
@@ -215,7 +215,7 @@ const CreateBillModal = ({
                   value={formData.billingMonth}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
                 />
               </div>
 
@@ -230,7 +230,7 @@ const CreateBillModal = ({
                   value={formData.monthlyRent}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
                   placeholder="5000000"
                 />
               </div>
@@ -391,7 +391,7 @@ const CreateBillModal = ({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <Wifi className="w-4 h-4 text-purple-600" />
+                    <Wifi className="w-4 h-4 text-teal-600" />
                     Internet
                   </label>
                   <input
@@ -536,3 +536,4 @@ const CreateBillModal = ({
 };
 
 export default CreateBillModal;
+

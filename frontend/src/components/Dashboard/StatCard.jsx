@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/pages/User/Dashboard/components/StatCard.jsx
 import React from "react";
 
@@ -14,7 +15,7 @@ const StatCard = ({
     green: "bg-green-100 text-green-600",
     yellow: "bg-yellow-100 text-yellow-600",
     red: "bg-red-100 text-red-600",
-    purple: "bg-purple-100 text-purple-600",
+    teal: "bg-teal-100 text-teal-600",
     indigo: "bg-indigo-100 text-indigo-600",
     pink: "bg-pink-100 text-pink-600",
   };
@@ -53,3 +54,5 @@ const StatCard = ({
 };
 
 export default StatCard;
+
+

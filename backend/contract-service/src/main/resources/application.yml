@@ -7,13 +7,26 @@ spring:
   application:
     name: contract-service
 
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          billing-service:
+            url: http://localhost:8086/billing
+          file-service:
+            url: http://localhost:8088/file
+          profile-service:
+            url: http://localhost:8082/profile
+          property-service:
+            url: http://localhost:8083/property
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_contract?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_contract?authSource=admin
     redis:
       host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
+      password: ${REDIS_PASSWORD:}
       timeout: 5000ms
 
   eureka:
@@ -43,7 +56,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: romie.housing.tech@gmail.com
-    password: ${MAIL_PASSWORD:mznl wclo ddwt jrut}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -55,7 +68,7 @@ spring:
 
 digital:
   signature:
-    secret: ${DIGITAL_SIGNATURE_SECRET}
+    secret: ${DIGITAL_SIGNATURE_SECRET:}
 
 contract:
   cache-ttl-seconds: 300

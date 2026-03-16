@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   Calendar,
@@ -127,3 +128,5 @@ const BillDetailInfo = ({ bill, isOverdue, isPaid, tenant, landlord }) => {
 };
 
 export default BillDetailInfo;
+
+

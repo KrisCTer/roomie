@@ -8,7 +8,7 @@ import com.roomie.services.chat_service.dto.request.IntrospectRequest;
 import com.roomie.services.chat_service.dto.response.ApiResponse;
 import com.roomie.services.chat_service.dto.response.IntrospectResponse;
 
-@FeignClient(name = "identity-service", url = "${app.services.identity}")
+@FeignClient(name = "identity-service")
 public interface IdentityClient {
     @PostMapping("/auth/introspect")
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest introspectRequest);

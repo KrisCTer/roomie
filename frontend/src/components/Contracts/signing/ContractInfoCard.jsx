@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { UserRound, Mail, Phone, CircleUserRound } from "lucide-react";
 
@@ -101,3 +102,5 @@ const ContractInfoCard = ({ contract, tenant, landlord, formatDateTime }) => {
 };
 
 export default ContractInfoCard;
+
+

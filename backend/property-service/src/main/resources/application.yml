@@ -7,15 +7,25 @@ spring:
   application:
     name: property-service
 
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          profile-service:
+            url: http://localhost:8082/profile
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD}@localhost:27017/roomie_property?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@localhost:27017/roomie_property?authSource=admin
     redis:
       host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
-    elasticsearch:
-      uris: http://localhost:9200
+      password: ${REDIS_PASSWORD:}
+
+  elasticsearch:
+    uris: http://localhost:9200
+    username: ${ELASTIC_USERNAME:elastic}
+    password: ${ELASTIC_PASSWORD:}
 
   cache:
     type: redis

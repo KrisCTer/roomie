@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // web-app/src/components/Profile/ProfileOverview.jsx
 import React from "react";
 import {
@@ -179,17 +180,17 @@ const ProfileOverview = ({ formData, onEditClick }) => {
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-6 border border-purple-200 dark:border-purple-800">
+        <div className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-xl p-6 border border-teal-200 dark:border-teal-800">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            <span className="text-2xl font-bold text-teal-600 dark:text-teal-400">
               {new Date(formData.createdAt || Date.now()).toLocaleDateString(
                 "en-US",
                 { year: "numeric" }
               )}
             </span>
-            <Calendar className="w-8 h-8 text-purple-600 dark:text-purple-400 opacity-50" />
+            <Calendar className="w-8 h-8 text-teal-600 dark:text-teal-400 opacity-50" />
           </div>
-          <p className="text-sm font-medium text-purple-900 dark:text-purple-300">
+          <p className="text-sm font-medium text-teal-900 dark:text-teal-300">
             Thành viên từ
           </p>
         </div>
@@ -199,3 +200,5 @@ const ProfileOverview = ({ formData, onEditClick }) => {
 };
 
 export default ProfileOverview;
+
+

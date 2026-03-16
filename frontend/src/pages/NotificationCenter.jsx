@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/pages/NotificationCenter.jsx
 import React, { useState, useEffect } from "react";
 import { Bell, Filter, CheckCheck, Trash2, RefreshCw } from "lucide-react";
@@ -109,9 +110,9 @@ const NotificationCenter = () => {
                   {stats.todayCount}
                 </p>
               </div>
-              <div className="bg-purple-50 rounded-lg p-4">
-                <p className="text-sm text-purple-600 mb-1">Tuần này</p>
-                <p className="text-2xl font-bold text-purple-900">
+              <div className="bg-teal-50 rounded-lg p-4">
+                <p className="text-sm text-teal-600 mb-1">Tuần này</p>
+                <p className="text-2xl font-bold text-teal-900">
                   {stats.thisWeekCount}
                 </p>
               </div>
@@ -199,3 +200,5 @@ const NotificationCenter = () => {
 };
 
 export default NotificationCenter;
+
+

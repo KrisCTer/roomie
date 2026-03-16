@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   CheckCircle,
@@ -298,3 +299,5 @@ const ContractCard = ({
 };
 
 export default ContractCard;
+
+

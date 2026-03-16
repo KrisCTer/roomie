@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { Home, MapPin, BedDouble, Bath, Ruler } from "lucide-react";
 
@@ -60,7 +61,7 @@ const PropertyInfoCard = ({ property }) => {
             </span>
 
             <span className="flex items-center gap-1">
-              <Bath className="w-4 h-4 text-purple-500" />
+              <Bath className="w-4 h-4 text-teal-500" />
               {property.bathrooms ?? 0} phòng tắm
             </span>
 
@@ -75,7 +76,7 @@ const PropertyInfoCard = ({ property }) => {
             <span className="text-gray-600 whitespace-nowrap">
               Tiền thuê hàng tháng:
             </span>
-            <span className="font-bold text-purple-600 text-lg">
+            <span className="font-bold text-teal-600 text-lg">
               {new Intl.NumberFormat("vi-VN").format(property.monthlyRent || 0)}{" "}
               ₫ / tháng
             </span>
@@ -87,3 +88,5 @@ const PropertyInfoCard = ({ property }) => {
 };
 
 export default PropertyInfoCard;
+
+

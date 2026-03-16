@@ -1,3 +1,5 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* aria-label */
 // web-app/src/pages/Billing/UnifiedBillsPage.jsx
 import React, { useState, useEffect } from "react";
 import { Plus, Send } from "lucide-react";
@@ -279,3 +281,5 @@ const UnifiedBillsPage = () => {
 };
 
 export default UnifiedBillsPage;
+
+

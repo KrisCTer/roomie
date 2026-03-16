@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/layout/layoutAdmin/AdminSidebar.jsx
 import React from "react";
 import { Home, Building, Users, User, LogOut } from "lucide-react";
@@ -127,3 +128,5 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
 };
 
 export default AdminSidebar;
+
+

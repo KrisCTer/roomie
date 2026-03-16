@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   Home,
@@ -90,7 +91,7 @@ const LandlordStats = ({ stats, onStatClick }) => {
             icon={DollarSign}
             label="Thu nhập hàng tháng"
             value={`${stats.monthlyIncome.toLocaleString()}đ`}
-            color="purple"
+            color="teal"
           />
           <StatCard
             icon={FileText}
@@ -113,3 +114,5 @@ const LandlordStats = ({ stats, onStatClick }) => {
 };
 
 export default LandlordStats;
+
+

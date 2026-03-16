@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import {
   Calendar,
@@ -84,7 +85,7 @@ const TenantStats = ({ stats, onStatClick }) => {
             icon={Dollar}
             label="Tổng số tiền"
             value={`${stats.totalBillAmount.toLocaleString()}đ`}
-            color="purple"
+            color="teal"
           />
           <StatCard
             icon={ClockIcon}
@@ -107,3 +108,5 @@ const TenantStats = ({ stats, onStatClick }) => {
 };
 
 export default TenantStats;
+
+

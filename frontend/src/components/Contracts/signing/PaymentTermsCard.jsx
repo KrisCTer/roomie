@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { DollarSign, Calendar } from "lucide-react";
 
@@ -52,3 +53,5 @@ const PaymentTermsCard = ({
 };
 
 export default PaymentTermsCard;
+
+

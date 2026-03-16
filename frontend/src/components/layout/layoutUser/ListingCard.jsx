@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import { Edit, Trash2, UploadCloud } from "lucide-react";
 
 const ListingCard = ({ listing }) => {
@@ -12,8 +13,8 @@ const ListingCard = ({ listing }) => {
       APPROVED: { label: "Approved", color: "bg-green-500" },
       REJECTED: { label: "Rejected", color: "bg-red-500" },
       INACTIVE: { label: "Inactive", color: "bg-slate-500" },
-      SOLD: { label: "Sold", color: "bg-purple-500" },
-      RENTED: { label: "Rented", color: "bg-purple-500" },
+      SOLD: { label: "Sold", color: "bg-teal-500" },
+      RENTED: { label: "Rented", color: "bg-teal-500" },
       AVAILABLE: { label: "Available", color: "bg-green-500" },
     };
 
@@ -89,3 +90,5 @@ const ListingCard = ({ listing }) => {
 };
 
 export default ListingCard;
+
+

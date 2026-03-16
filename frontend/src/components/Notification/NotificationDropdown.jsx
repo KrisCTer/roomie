@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/notifications/NotificationDropdown.jsx
 import React from "react";
 import {
@@ -292,3 +293,5 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
 };
 
 export default NotificationDropdown;
+
+

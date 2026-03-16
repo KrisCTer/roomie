@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 
 const ProfileSkeleton = () => {
@@ -45,3 +46,5 @@ const ProfileSkeleton = () => {
 };
 
 export default ProfileSkeleton;
+
+

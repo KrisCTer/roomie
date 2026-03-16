@@ -1,3 +1,4 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 import React, { useEffect, useMemo, useState } from "react";
 import { Ban, PauseCircle, RefreshCw, Search } from "lucide-react";
 
@@ -286,3 +287,5 @@ const AdminUsers = () => {
 };
 
 export default AdminUsers;
+
+

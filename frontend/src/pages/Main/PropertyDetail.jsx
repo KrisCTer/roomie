@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/pages/Main/PropertyDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -331,3 +332,5 @@ const PropertyDetail = () => {
 };
 
 export default PropertyDetail;
+
+

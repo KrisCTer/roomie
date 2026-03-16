@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "identity-service", url = "${app.services.identity}",
+@FeignClient(name = "identity-service",
         configuration = { FeignMultipartConfig.class,AuthenticationRequestInterceptor.class })
 public interface IdentityClient {
     @GetMapping(value = "/internal/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)

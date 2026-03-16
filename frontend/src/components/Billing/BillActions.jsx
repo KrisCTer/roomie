@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React, { useState } from "react";
 import { DollarSign, Download, Share2, ArrowLeft, Eye } from "lucide-react";
 import {
@@ -72,7 +73,7 @@ const BillActions = ({ bill, canPay, onPayment, onBack }) => {
 
         <button
           onClick={handlePreviewPdf}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition font-medium"
         >
           <Eye className="w-5 h-5" />
           Preview PDF
@@ -117,3 +118,5 @@ const BillActions = ({ bill, canPay, onPayment, onBack }) => {
 };
 
 export default BillActions;
+
+

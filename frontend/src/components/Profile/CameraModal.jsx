@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React, { useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import jsQR from "jsqr";
@@ -193,3 +194,5 @@ const CameraModal = ({ show, onClose, onCapture }) => {
 };
 
 export default CameraModal;
+
+

@@ -7,33 +7,44 @@ spring:
   application:
     name: identity-service
 
+  devtools:
+    livereload:
+      enabled: false
+
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          profile-service:
+            url: http://localhost:8082/profile
   datasource:
     url: jdbc:mysql://localhost:3306/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: roomie
-    password: ${MYSQL_PASSWORD}
+    password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
   data:
     redis:
       host: localhost
       port: 6379
-      password: ${REDIS_PASSWORD}
+      password: ${REDIS_PASSWORD:}
       timeout: 60000
 
   mail:
     host: smtp.gmail.com
     port: 587
     username: romie.housing.tech@gmail.com
-    password: ${MAIL_PASSWORD:mznl wclo ddwt jrut}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -47,7 +58,7 @@ spring:
         registration:
           google:
             client-id: ${GOOGLE_CLIENT_ID:819833604355-fpld1hnsgt7t8uh8lv77gcaucm8gcksa.apps.googleusercontent.com}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
             scope:
               - email
               - profile
@@ -55,7 +66,7 @@ spring:
 
           facebook:
             client-id: ${FACEBOOK_CLIENT_ID:1466675014635254}
-            client-secret: ${FACEBOOK_CLIENT_SECRET}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:}
             scope:
               - email
               - public_profile
@@ -90,27 +101,27 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET}
-  signerKey: ${JWT_SIGNER_KEY}
-  valid-duration: 86400  # 24 hours in seconds
-  refreshable-duration: 604800  # 7 days in seconds
+  secret: ${JWT_SECRET:}
+  signerKey: ${JWT_SIGNER_KEY:}
+  valid-duration: 86400 # 24 hours in seconds
+  refreshable-duration: 604800 # 7 days in seconds
 
 # OTP Configuration
 otp:
-  expiration: 300000  # 5 minutes in milliseconds
+  expiration: 300000 # 5 minutes in milliseconds
   length: 6
 
 # Rate Limiting
 rate-limit:
   login:
     max-attempts: 5
-    duration: 900000  # 15 minutes
+    duration: 900000 # 15 minutes
   register:
     max-attempts: 3
-    duration: 3600000  # 1 hour
+    duration: 3600000 # 1 hour
   otp:
     max-attempts: 3
-    duration: 3600000  # 1 hour
+    duration: 3600000 # 1 hour
 
 # Kafka Topics
 kafka:
@@ -119,6 +130,9 @@ kafka:
     auth-events: auth-events
 
 management:
+  health:
+    mail:
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:true}
   endpoints:
     web:
       exposure:

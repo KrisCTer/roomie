@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "profile-service",
-        url = "${app.services.profile}",
         configuration = FeignConfiguration.class
 )
 public interface ProfileClient {

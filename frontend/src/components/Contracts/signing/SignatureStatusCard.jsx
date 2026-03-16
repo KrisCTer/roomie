@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { Shield, CheckCircle, Clock } from "lucide-react";
 
@@ -75,3 +76,5 @@ const SignatureStatusCard = ({ contract }) => {
 };
 
 export default SignatureStatusCard;
+
+

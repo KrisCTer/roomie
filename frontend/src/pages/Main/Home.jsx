@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/pages/Home/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -179,3 +180,5 @@ const Home = () => {
 };
 
 export default Home;
+
+

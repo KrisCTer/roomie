@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { CheckCircle, FileText } from "lucide-react";
 
@@ -72,3 +73,5 @@ const BookingCard = ({ booking, onCreateContract, creatingContract }) => {
 };
 
 export default BookingCard;
+
+

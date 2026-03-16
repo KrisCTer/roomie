@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/NotificationItem.jsx
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -135,3 +136,5 @@ const NotificationItem = ({ notification, onClick }) => {
 };
 
 export default NotificationItem;
+
+

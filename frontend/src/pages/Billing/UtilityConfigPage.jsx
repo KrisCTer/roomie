@@ -1,4 +1,4 @@
-// web-app/src/pages/Billing/UtilityConfigPage.jsx
+﻿// web-app/src/pages/Billing/UtilityConfigPage.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Settings, Plus, Edit, Trash2, Power } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
@@ -189,8 +189,8 @@ const UtilityConfigPage = () => {
 
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Settings className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                  <Settings className="w-6 h-6 text-teal-600" />
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">
@@ -225,13 +225,13 @@ const UtilityConfigPage = () => {
                     className="bg-white rounded-xl shadow-sm overflow-hidden"
                   >
                     {/* Property Header */}
-                    <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                    <div className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="text-xl font-bold text-white">
                             {property.title}
                           </h3>
-                          <p className="text-purple-100 text-sm">
+                          <p className="text-teal-100 text-sm">
                             {property.address?.district}
                           </p>
                         </div>
@@ -381,3 +381,4 @@ const UtilityConfigPage = () => {
 };
 
 export default UtilityConfigPage;
+

@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/pages/UserProfile/UserProfile.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -214,7 +215,7 @@ const UserProfile = () => {
             <div className="flex flex-col md:flex-row gap-8">
               {/* Avatar */}
               <div className="flex-shrink-0">
-                <div className="w-32 h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <div className="w-32 h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center shadow-lg">
                   {profile.avatar ? (
                     <img
                       src={profile.avatar}
@@ -293,8 +294,8 @@ const UserProfile = () => {
                   {/* Gender */}
                   {profile.gender && (
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                      <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <User className="w-5 h-5 text-purple-600" />
+                      <div className="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center">
+                        <User className="w-5 h-5 text-teal-600" />
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 mb-1">
@@ -394,3 +395,5 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { FileText, Zap, Droplet, Wifi, Car, Wrench } from "lucide-react";
 import { formatCurrency } from "../../utils/billDetailHelpers";
 
@@ -77,8 +77,8 @@ const BillBreakdown = ({ bill }) => {
             icon={Wifi}
             label="Internet"
             amount={bill.internetPrice}
-            iconColor="text-purple-600"
-            iconBg="bg-purple-100"
+            iconColor="text-teal-600"
+            iconBg="bg-teal-100"
           />
         )}
 
@@ -145,3 +145,4 @@ const BillBreakdown = ({ bill }) => {
 };
 
 export default BillBreakdown;
+

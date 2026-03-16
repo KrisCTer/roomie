@@ -1,4 +1,4 @@
-// src/components/PropertyDetail/PropertyAmenities.jsx
+﻿// src/components/PropertyDetail/PropertyAmenities.jsx
 import React, { useState } from "react";
 import {
   Shield,
@@ -32,9 +32,9 @@ const PropertyAmenities = ({ amenities }) => {
       title: "Phòng ngủ",
       icon: <Bed className="w-6 h-6" />,
       items: amenities.bedroom || [],
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
+      color: "text-teal-600",
+      bgColor: "bg-teal-50",
+      borderColor: "border-teal-200",
     },
     {
       key: "kitchen",
@@ -224,3 +224,4 @@ const PropertyAmenities = ({ amenities }) => {
 };
 
 export default PropertyAmenities;
+

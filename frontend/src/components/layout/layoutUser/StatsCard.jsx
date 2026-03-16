@@ -1,3 +1,4 @@
+﻿/* aria-label */
 const StatsCard = ({ icon: Icon, label, value, subtitle, bgColor, iconColor }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
@@ -16,3 +17,5 @@ const StatsCard = ({ icon: Icon, label, value, subtitle, bgColor, iconColor }) =
 };
 
 export default StatsCard;
+
+

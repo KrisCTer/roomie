@@ -1,3 +1,4 @@
+﻿/* aria-label */
 // src/components/Billing/BillActionsEnhanced.jsx
 import React from "react";
 import { DollarSign, ArrowLeft } from "lucide-react";
@@ -47,3 +48,5 @@ const BillActionsEnhanced = ({ bill, canPay, onPayment, onBack }) => {
 };
 
 export default BillActionsEnhanced;
+
+

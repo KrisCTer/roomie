@@ -1,3 +1,4 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 // web-app/src/pages/Message/Message.jsx
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
@@ -201,3 +202,5 @@ const Message = () => {
 };
 
 export default Message;
+
+

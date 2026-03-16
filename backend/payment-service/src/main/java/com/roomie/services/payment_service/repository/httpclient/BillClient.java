@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "billing-service", url = "${app.services.billing}",
+@FeignClient(name = "billing-service",
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
 public interface BillClient {
     @PostMapping("/{billId}/pay")

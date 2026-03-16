@@ -1,4 +1,4 @@
-// QuickActions.jsx
+﻿// QuickActions.jsx
 import React from "react";
 import {
   Plus,
@@ -28,7 +28,7 @@ const QuickActions = ({ role }) => {
     {
       icon: QuickFile,
       label: "Tạo hợp đồng",
-      color: "purple",
+      color: "teal",
       action: () => navigate("/my-properties"),
     },
     {
@@ -49,7 +49,7 @@ const QuickActions = ({ role }) => {
     {
       icon: QuickFile,
       label: "Hợp đồng của tôi",
-      color: "purple",
+      color: "teal",
       action: () => navigate("/my-contracts"),
     },
     {
@@ -71,8 +71,8 @@ const QuickActions = ({ role }) => {
   const colorClasses = {
     blue: "bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-200",
     green: "bg-green-100 text-green-600 hover:bg-green-200 border-green-200",
-    purple:
-      "bg-purple-100 text-purple-600 hover:bg-purple-200 border-purple-200",
+    teal:
+      "bg-teal-100 text-teal-600 hover:bg-teal-200 border-teal-200",
     yellow:
       "bg-yellow-100 text-yellow-600 hover:bg-yellow-200 border-yellow-200",
     gray: "bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200",
@@ -100,3 +100,4 @@ const QuickActions = ({ role }) => {
 };
 
 export default QuickActions;
+

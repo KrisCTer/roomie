@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "property-service", url = "${app.services.properties}",
+@FeignClient(name = "property-service",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface PropertyClient {
     @GetMapping("internal/pending")

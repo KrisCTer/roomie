@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(name = "property-service", url = "${app.services.properties}",
+@FeignClient(name = "property-service",
         configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
 public interface PropertyClient {
     @GetMapping(value = "/internal/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

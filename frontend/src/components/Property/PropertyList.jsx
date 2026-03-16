@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import PropertyCard from "./PropertyCard";
 
@@ -46,3 +47,5 @@ const PropertyList = ({
 };
 
 export default PropertyList;
+
+

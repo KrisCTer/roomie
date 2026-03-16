@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { Eye, Pencil, Send, Trash2, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +31,7 @@ const PropertyCard = ({
   const getPropertyStatusConfig = (status) => {
     const configs = {
       AVAILABLE: { bg: "bg-blue-600", text: "Available" },
-      RENTED: { bg: "bg-purple-600", text: "Rented" },
+      RENTED: { bg: "bg-teal-600", text: "Rented" },
       INACTIVE: { bg: "bg-gray-400", text: "Inactive" },
     };
     return configs[status];
@@ -150,3 +151,5 @@ const PropertyCard = ({
 };
 
 export default PropertyCard;
+
+

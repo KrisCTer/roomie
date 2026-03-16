@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "identity-service", url = "${app.services.identity}",
+@FeignClient(name = "identity-service",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface UserClient {
     @GetMapping(value = "/internal/users", produces = MediaType.APPLICATION_JSON_VALUE)

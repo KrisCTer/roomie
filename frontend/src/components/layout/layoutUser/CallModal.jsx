@@ -1,4 +1,4 @@
-// components/chat/CallModal.jsx
+﻿// components/chat/CallModal.jsx
 import React, { useState, useEffect } from "react";
 import { Phone, Video, X, Mic, MicOff, VideoOff, PhoneOff } from "lucide-react";
 import { useCall } from "../../../contexts/CallContext.jsx";
@@ -67,7 +67,7 @@ const CallModal = () => {
         {callState.isRinging && !callState.isInCall && (
           <div className="flex-1 flex flex-col items-center justify-center p-8">
             {/* Avatar */}
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold mb-6 animate-pulse">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center text-white text-4xl font-bold mb-6 animate-pulse">
               {callState.remotePeer?.firstName?.charAt(0) ||
                 callState.remotePeer?.username?.charAt(0) ||
                 "U"}
@@ -131,7 +131,7 @@ const CallModal = () => {
               {/* Remote Video Placeholder (if no video) */}
               {(!remoteStream || callState.callType === "voice") && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold mb-4">
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center text-white text-4xl font-bold mb-4">
                     {callState.remotePeer?.firstName?.charAt(0) ||
                       callState.remotePeer?.username?.charAt(0) ||
                       "U"}
@@ -176,7 +176,7 @@ const CallModal = () => {
             <div className="bg-gray-900 p-6 flex items-center justify-between">
               {/* Left: Caller Info */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center text-white font-bold">
                   {callState.remotePeer?.firstName?.charAt(0) ||
                     callState.remotePeer?.username?.charAt(0) ||
                     "U"}
@@ -259,3 +259,4 @@ const CallModal = () => {
 };
 
 export default CallModal;
+

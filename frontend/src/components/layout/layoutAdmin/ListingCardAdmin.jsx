@@ -1,3 +1,4 @@
+﻿/* aria-label */
 import React from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 
@@ -84,3 +85,5 @@ const ListingCardAdmin = ({ property, onApprove, onReject }) => {
 };
 
 export default ListingCardAdmin;
+
+

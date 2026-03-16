@@ -1,3 +1,4 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 // web-app/src/pages/Profile/Profile.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -135,7 +136,7 @@ const Profile = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center">
                           <span className="text-4xl font-bold text-white">
                             {formData.firstName?.[0]?.toUpperCase() || "U"}
                           </span>
@@ -267,3 +268,5 @@ const Profile = () => {
 };
 
 export default Profile;
+
+

@@ -1,3 +1,4 @@
+﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 import React, { useState } from "react";
 import {
   Heart,
@@ -185,8 +186,8 @@ const Admin = () => {
               icon={Heart}
               label="Favorites"
               value="06"
-              bgColor="bg-purple-50"
-              iconColor="text-purple-600"
+              bgColor="bg-teal-50"
+              iconColor="text-teal-600"
             />
             <StatsCard
               icon={Star}
@@ -343,3 +344,5 @@ const Admin = () => {
 };
 
 export default Admin;
+
+
