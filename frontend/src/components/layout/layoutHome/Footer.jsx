@@ -25,7 +25,7 @@ export default function Footer() {
       <Container maxWidth="lg">
         <Grid container spacing={4}>
           {/* Cột 1 */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
               Roomie
             </Typography>
@@ -37,7 +37,7 @@ export default function Footer() {
           </Grid>
 
           {/* Cột 2 */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
               {t("footer.about")}
             </Typography>
@@ -74,7 +74,7 @@ export default function Footer() {
           </Grid>
 
           {/* Cột 3 */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
               {t("footer.support")}
             </Typography>
@@ -104,7 +104,7 @@ export default function Footer() {
           </Grid>
 
           {/* Cột 4 */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
               {t("footer.connect")}
             </Typography>

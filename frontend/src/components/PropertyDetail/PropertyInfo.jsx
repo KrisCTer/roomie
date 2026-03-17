@@ -57,7 +57,7 @@ const PropertyInfo = ({ property }) => {
   if (!property) return null;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#ECDCC8] overflow-hidden shadow-[0_12px_30px_rgba(17,24,39,0.06)]">
       {/* ===== Header (Clickable) ===== */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -65,7 +65,7 @@ const PropertyInfo = ({ property }) => {
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg">
-            <Info className="w-5 h-5 text-blue-600" />
+            <Info className="w-5 h-5 text-[#C2410C]" />
           </div>
           <h3 className="text-xl font-bold text-gray-900">
             Thông tin chi tiết
@@ -89,7 +89,7 @@ const PropertyInfo = ({ property }) => {
                 <Home className="w-5 h-5 text-gray-500" />
                 <span className="text-gray-700 font-medium">Loại hình</span>
               </div>
-              <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg border border-blue-200">
+              <span className="px-3 py-1 bg-[#FFF4E8] text-[#9A3412] text-sm font-semibold rounded-lg border border-[#F5D9C4]">
                 {getPropertyTypeLabel(property.propertyType)}
               </span>
             </div>
@@ -102,7 +102,7 @@ const PropertyInfo = ({ property }) => {
               </div>
               <span
                 className={`px-3 py-1 text-sm font-semibold rounded-lg border ${getStatusColor(
-                  property.propertyStatus
+                  property.propertyStatus,
                 )}`}
               >
                 {getStatusLabel(property.propertyStatus)}

@@ -23,7 +23,7 @@ const PropertyFilters = ({
           placeholder="Tìm kiếm theo tiêu đề, địa chỉ..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-xl border border-[#E8D8C7] bg-[#FFFCF8] py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
         />
       </div>
 
@@ -38,7 +38,7 @@ const PropertyFilters = ({
         <select
           value={postStatus}
           onChange={(e) => setPostStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="rounded-xl border border-[#E8D8C7] bg-[#FFFCF8] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
         >
           <option value="">Tất cả trạng thái bài đăng</option>
           <option value="DRAFT">Bản nháp</option>
@@ -51,7 +51,7 @@ const PropertyFilters = ({
         <select
           value={propertyStatus}
           onChange={(e) => setPropertyStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="rounded-xl border border-[#E8D8C7] bg-[#FFFCF8] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
         >
           <option value="">Tất cả trạng thái cho thuê</option>
           <option value="AVAILABLE">Còn trống</option>
@@ -63,7 +63,7 @@ const PropertyFilters = ({
         {hasActiveFilters && onClearFilters && (
           <button
             onClick={onClearFilters}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
+            className="flex items-center gap-2 rounded-xl bg-[#F2E6DA] px-4 py-2 text-sm text-[#8A5A44] transition hover:bg-[#EADACA]"
           >
             <X className="w-4 h-4" />
             Xóa bộ lọc

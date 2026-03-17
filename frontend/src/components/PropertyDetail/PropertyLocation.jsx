@@ -1,39 +1,43 @@
 // src/components/PropertyDetail/PropertyLocation.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { loadGoogleMaps } from "../../utils/googleMapsLoader";
+
+const getFriendlyMapError = (error) => {
+  const rawMessage = error?.message || "";
+  const isAuthFailure = rawMessage.includes(
+    "Google Maps authentication failed",
+  );
+
+  if (isAuthFailure) {
+    return "Không thể xác thực Google Maps trên mạng hiện tại. Nếu bật WARP/VPN thì hoạt động bình thường, hãy thử đổi DNS sang 1.1.1.1 hoặc 8.8.8.8 và tải lại trang.";
+  }
+
+  return "Google Maps không tải được. Vui lòng kiểm tra API key, billing, HTTP referrers và kết nối mạng.";
+};
 
 const PropertyLocation = ({ address }) => {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
 
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsError, setMapsError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Load Google Maps
   useEffect(() => {
-    if (!address?.location) return;
+    if (!address?.location || !isExpanded || mapsLoaded) return;
 
-    if (window.google && window.google.maps) {
-      setMapsLoaded(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`;
-    script.async = true;
-
-    script.onload = () => {
-      setMapsLoaded(true);
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, [address?.location]);
+    loadGoogleMaps()
+      .then(() => setMapsLoaded(true))
+      .catch((error) => {
+        console.error(
+          "Failed to load Google Maps API:",
+          error?.message || error,
+        );
+        setMapsError(getFriendlyMapError(error));
+      });
+  }, [address?.location, isExpanded, mapsLoaded]);
 
   // Initialize map when expanded
   useEffect(() => {
@@ -184,6 +188,12 @@ const PropertyLocation = ({ address }) => {
                 {!mapsLoaded && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <p className="text-gray-600 font-medium">Loading map…</p>
+                  </div>
+                )}
+
+                {mapsError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/90 p-4 text-center">
+                    <p className="text-red-700 font-medium">{mapsError}</p>
                   </div>
                 )}
 

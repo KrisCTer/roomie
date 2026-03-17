@@ -143,7 +143,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
     setDarkMode(newTheme);
     localStorage.setItem("theme", newTheme ? "dark" : "light");
     window.dispatchEvent(
-      new CustomEvent("themeChange", { detail: { darkMode: newTheme } })
+      new CustomEvent("themeChange", { detail: { darkMode: newTheme } }),
     );
   };
 
@@ -174,19 +174,19 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    <header className="bg-white dark:bg-dark-secondary border-b border-gray-200 dark:border-dark-primary sticky top-0 z-40 shadow-sm dark:shadow-dark-sm">
-      <div className="flex items-center justify-between px-6 py-4">
+    <header className="sticky top-0 z-40 border-b border-[#EBDCC8] bg-[#FFFBF6]/95 shadow-[0_8px_20px_rgba(17,24,39,0.06)] backdrop-blur-sm">
+      <div className="flex items-center justify-between px-4 py-3 md:px-6">
         {/* Left side - Sidebar toggle + Refresh */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors"
+            className="rounded-xl p-2 transition-colors hover:bg-[#F7EBDD]"
             title="Toggle Sidebar"
           >
             {sidebarOpen ? (
-              <X className="w-5 h-5 text-gray-700 dark:text-dark-primary" />
+              <X className="w-5 h-5 text-[#2B2A28]" />
             ) : (
-              <MenuLucide className="w-5 h-5 text-gray-700 dark:text-dark-primary" />
+              <MenuLucide className="w-5 h-5 text-[#2B2A28]" />
             )}
           </button>
 
@@ -194,13 +194,13 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`rounded-xl p-2 transition-colors hover:bg-[#F7EBDD] disabled:cursor-not-allowed disabled:opacity-50 ${
               isRefreshing ? "animate-pulse" : ""
             }`}
             title="Refresh Data"
           >
             <RefreshCw
-              className={`w-5 h-5 text-gray-700 dark:text-dark-primary ${
+              className={`w-5 h-5 text-[#2B2A28] ${
                 isRefreshing ? "animate-spin" : ""
               }`}
             />
@@ -208,13 +208,13 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         {/* Center - Role Toggle (ALWAYS VISIBLE) */}
-        <div className="flex items-center gap-2 bg-gray-100 dark:bg-dark-tertiary rounded-lg p-1">
+        <div className="flex items-center gap-2 rounded-xl border border-[#EADACA] bg-white p-1.5 shadow-sm">
           <button
             onClick={() => switchRole("landlord")}
-            className={`px-4 py-2 rounded-md transition-all font-medium text-sm flex items-center gap-2 ${
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
               activeRole === "landlord"
-                ? "bg-white dark:bg-dark-quaternary text-blue-600 shadow-sm"
-                : "text-gray-600 dark:text-dark-secondary hover:text-gray-900 dark:hover:text-dark-primary"
+                ? "bg-[#CC6F4A] text-white shadow-sm"
+                : "text-[#6B6259] hover:text-[#2B2A28]"
             }`}
           >
             <Home size={18} />
@@ -222,10 +222,10 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
           </button>
           <button
             onClick={() => switchRole("tenant")}
-            className={`px-4 py-2 rounded-md transition-all font-medium text-sm flex items-center gap-2 ${
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
               activeRole === "tenant"
-                ? "bg-white dark:bg-dark-quaternary text-blue-600 shadow-sm"
-                : "text-gray-600 dark:text-dark-secondary hover:text-gray-900 dark:hover:text-dark-primary"
+                ? "bg-[#CC6F4A] text-white shadow-sm"
+                : "text-[#6B6259] hover:text-[#2B2A28]"
             }`}
           >
             <UserCircle size={18} />
@@ -238,12 +238,11 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
           {/* Notification Bell */}
           <IconButton
             onClick={handleOpenNotifications}
-            className="dark:text-dark-primary"
             sx={{
-              color: "grey.700",
+              color: "#2B2A28",
               transition: "all 0.2s",
               "&:hover": {
-                bgcolor: "grey.100",
+                bgcolor: "#F7EBDD",
                 transform: "scale(1.05)",
               },
             }}
@@ -275,13 +274,13 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
           {/* User Menu Button */}
           <Paper
             elevation={0}
-            className="dark:bg-dark-tertiary dark:border-dark-primary"
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 1,
               border: "1px solid",
-              borderColor: "grey.300",
+              borderColor: "#E6D8C5",
+              bgcolor: "#FFFDF9",
               borderRadius: 999,
               px: 1.5,
               py: 0.5,

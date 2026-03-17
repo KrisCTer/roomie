@@ -35,6 +35,15 @@ Not currently routed via gateway config:
 
 Infrastructure services include MySQL, MongoDB, Neo4j, Redis, MinIO, Zookeeper, Kafka, and Elasticsearch.
 
+### 2.0 Shared Database Connectivity (Multi-Machine)
+
+If multiple machines need to use one shared infrastructure host:
+
+1. Set `MYSQL_HOST`, `MONGO_HOST`, `REDIS_HOST`, `NEO4J_HOST`, `KAFKA_HOST`, `ELASTICSEARCH_HOST` in `infra/.env` to the host IP/domain.
+2. Set `KAFKA_ADVERTISED_HOST` to the same reachable IP/domain so Kafka clients on other machines do not receive `localhost` metadata.
+3. Keep all credentials synchronized across machines (`MYSQL_PASSWORD`, `MONGO_ROOT_PASSWORD`, `REDIS_PASSWORD`, `NEO4J_AUTH`, JWT keys).
+4. Restrict firewall sources and avoid exposing DB ports publicly.
+
 ### 2.1 Create Environment Variables
 
 1. Go to the infrastructure directory:

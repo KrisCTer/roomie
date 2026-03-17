@@ -16,7 +16,7 @@ const Step2Location = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div className="home-glass-card rounded-xl p-6 mb-6">
       <h2 className="text-xl font-bold mb-6">
         {t("propertyForm.step2.title")}
       </h2>

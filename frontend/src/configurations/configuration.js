@@ -9,6 +9,8 @@ export const CONFIG = {
 export const API = {
   // ========= AUTH (Identity Service - Port 8080) =========
   LOGIN: "/identity/auth/token",
+  FORGOT_PASSWORD: "/identity/auth/forgot-password",
+  RESET_PASSWORD: "/identity/auth/reset-password",
   INTROSPECT: "/identity/auth/introspect",
   LOGOUT: "/identity/auth/logout",
   REFRESH_TOKEN: "/identity/auth/refresh",

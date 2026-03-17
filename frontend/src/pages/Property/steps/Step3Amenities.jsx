@@ -41,7 +41,7 @@ const Step3Amenities = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="home-glass-card rounded-xl p-6">
         <h2 className="text-xl font-bold mb-6">
           {t("propertyForm.step3.amenitiesTitle")}
         </h2>
@@ -54,7 +54,7 @@ const Step3Amenities = ({
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="home-glass-card rounded-xl p-6">
         <h2 className="text-xl font-bold mb-6">
           {t("propertyForm.step3.mediaTitle")}
         </h2>

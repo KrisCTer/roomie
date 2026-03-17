@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // RecentActivity.jsx
 import React from "react";
 import {
@@ -8,7 +8,7 @@ import {
   DollarSign as ActivityDollar,
 } from "lucide-react";
 
-const RecentActivity = ({ activities = [], loading }) => {
+const RecentActivity = ({ activities = [], loading, hasMore, onLoadMore }) => {
   const getActivityIcon = (type) => {
     const iconMap = {
       property: <ActivityHome className="w-5 h-5" />,
@@ -31,7 +31,7 @@ const RecentActivity = ({ activities = [], loading }) => {
 
   if (loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+      <div className="apple-glass-panel rounded-2xl p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           Hoạt động gần đây
         </h2>
@@ -39,12 +39,12 @@ const RecentActivity = ({ activities = [], loading }) => {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="animate-pulse flex items-center gap-4 p-4 bg-gray-100 rounded-xl"
+              className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
             >
-              <div className="w-10 h-10 bg-gray-200 rounded-lg" />
+              <div className="w-10 h-10 bg-[#EFE6DA] rounded-lg" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-[#EFE6DA] rounded w-3/4" />
+                <div className="h-3 bg-[#EFE6DA] rounded w-1/2" />
               </div>
             </div>
           ))}
@@ -55,7 +55,7 @@ const RecentActivity = ({ activities = [], loading }) => {
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+      <div className="apple-glass-panel rounded-2xl p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">
           Hoạt động gần đây
         </h2>
@@ -68,7 +68,7 @@ const RecentActivity = ({ activities = [], loading }) => {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+    <div className="apple-glass-panel rounded-2xl p-6">
       <h2 className="text-xl font-bold text-gray-900 mb-4">
         Hoạt động gần đây
       </h2>
@@ -76,17 +76,17 @@ const RecentActivity = ({ activities = [], loading }) => {
         {activities.map((activity, index) => {
           const color = getActivityColor(activity.type);
           const colorClasses = {
-            blue: "bg-blue-100 text-blue-600",
-            green: "bg-green-100 text-green-600",
-            teal: "bg-teal-100 text-teal-600",
-            yellow: "bg-yellow-100 text-yellow-600",
-            gray: "bg-gray-100 text-gray-600",
+            blue: "bg-sky-100 text-sky-700",
+            green: "bg-emerald-100 text-emerald-700",
+            teal: "bg-teal-100 text-teal-700",
+            yellow: "bg-amber-100 text-amber-700",
+            gray: "bg-stone-100 text-stone-700",
           };
 
           return (
             <div
               key={index}
-              className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+              className="apple-glass-item flex cursor-pointer items-center gap-4 rounded-xl p-4 transition hover:bg-white"
             >
               <div
                 className={`w-10 h-10 rounded-lg ${colorClasses[color]} flex items-center justify-center`}
@@ -102,10 +102,16 @@ const RecentActivity = ({ activities = [], loading }) => {
           );
         })}
       </div>
+      {hasMore && (
+        <button
+          onClick={onLoadMore}
+          className="apple-glass-pill mt-4 w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-[#9A3412] hover:bg-white"
+        >
+          Tải thêm hoạt động
+        </button>
+      )}
     </div>
   );
 };
 
 export default RecentActivity;
-
-

@@ -1,118 +1,52 @@
 ﻿/* aria-label */
 import React from "react";
-import {
-  Home,
-  Clock,
-  CheckCircle,
-  DollarSign,
-  FileText,
-  AlertTriangle,
-  TrendingUp,
-} from "lucide-react";
+import { Home, Clock, CheckCircle, DollarSign, FileText } from "lucide-react";
 import StatCard from "../../components/Dashboard/StatCard";
 
 const LandlordStats = ({ stats, onStatClick }) => {
   return (
-    <div className="space-y-6">
-      {/* Property Stats */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          Bất động sản của bạn
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard
-            icon={Home}
-            label="Tổng số bất động sản"
-            value={stats.totalProperties}
-            color="blue"
-            onClick={() => onStatClick?.("properties")}
-          />
-          <StatCard
-            icon={Clock}
-            label="Đang chờ phê duyệt"
-            value={stats.pendingProperties}
-            color="yellow"
-            onClick={() => onStatClick?.("pending")}
-          />
-          <StatCard
-            icon={CheckCircle}
-            label="Đang cho thuê"
-            value={stats.rentedProperties}
-            color="green"
-            onClick={() => onStatClick?.("rented")}
-          />
-          <StatCard
-            icon={TrendingUp}
-            label="Sẵn sàng cho thuê"
-            value={stats.availableProperties}
-            color="indigo"
-            onClick={() => onStatClick?.("available")}
-          />
-        </div>
-      </div>
-
-      {/* Contract Stats */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Hợp đồng</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard
-            icon={FileText}
-            label="Tổng số hợp đồng"
-            value={stats.totalContracts}
-            color="blue"
-            onClick={() => onStatClick?.("contracts")}
-          />
-          <StatCard
-            icon={CheckCircle}
-            label="Đang hoạt động"
-            value={stats.activeContracts}
-            color="green"
-          />
-          <StatCard
-            icon={Clock}
-            label="Đang chờ ký"
-            value={stats.pendingContracts}
-            color="yellow"
-          />
-          <StatCard
-            icon={AlertTriangle}
-            label="Hết hạn/Hủy"
-            value={stats.expiredContracts}
-            color="red"
-          />
-        </div>
-      </div>
-
-      {/* Revenue Stats */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Doanh thu</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard
-            icon={DollarSign}
-            label="Thu nhập hàng tháng"
-            value={`${stats.monthlyIncome.toLocaleString()}đ`}
-            color="teal"
-          />
-          <StatCard
-            icon={FileText}
-            label="Hóa đơn chưa thanh toán"
-            value={stats.unpaidBills}
-            color="red"
-            onClick={() => onStatClick?.("unpaid-bills")}
-          />
-          <StatCard
-            icon={CheckCircle}
-            label="Hóa đơn đã thanh toán"
-            value={stats.paidBills}
-            color="green"
-            onClick={() => onStatClick?.("paid-bills")}
-          />
-        </div>
+    <div>
+      <h2 className="mb-4 text-xl font-bold text-gray-900">
+        KPI vận hành chính
+      </h2>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <StatCard
+          icon={Home}
+          label="Bất động sản"
+          value={stats.totalProperties}
+          color="blue"
+          onClick={() => onStatClick?.("properties")}
+        />
+        <StatCard
+          icon={Clock}
+          label="Chờ phê duyệt"
+          value={stats.pendingProperties}
+          color="yellow"
+          onClick={() => onStatClick?.("pending")}
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Hợp đồng hoạt động"
+          value={stats.activeContracts}
+          color="green"
+          onClick={() => onStatClick?.("contracts")}
+        />
+        <StatCard
+          icon={FileText}
+          label="Hóa đơn chưa thanh toán"
+          value={stats.unpaidBills}
+          color="red"
+          onClick={() => onStatClick?.("unpaid-bills")}
+        />
+        <StatCard
+          icon={DollarSign}
+          label="Doanh thu tháng"
+          value={`${stats.monthlyIncome.toLocaleString()}đ`}
+          color="teal"
+        />
       </div>
     </div>
   );
 };
 
 export default LandlordStats;
-
-

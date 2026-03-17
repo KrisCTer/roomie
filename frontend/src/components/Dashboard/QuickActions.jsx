@@ -1,4 +1,4 @@
-﻿// QuickActions.jsx
+// QuickActions.jsx
 import React from "react";
 import {
   Plus,
@@ -69,24 +69,23 @@ const QuickActions = ({ role }) => {
   const actions = role === "landlord" ? landlordActions : tenantActions;
 
   const colorClasses = {
-    blue: "bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-200",
-    green: "bg-green-100 text-green-600 hover:bg-green-200 border-green-200",
-    teal:
-      "bg-teal-100 text-teal-600 hover:bg-teal-200 border-teal-200",
-    yellow:
-      "bg-yellow-100 text-yellow-600 hover:bg-yellow-200 border-yellow-200",
-    gray: "bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200",
+    blue: "bg-sky-50 text-sky-700 hover:bg-sky-100 border-sky-200",
+    green:
+      "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200",
+    teal: "bg-teal-50 text-teal-700 hover:bg-teal-100 border-teal-200",
+    yellow: "bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200",
+    gray: "bg-stone-50 text-stone-700 hover:bg-stone-100 border-stone-200",
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+    <div className="apple-glass-panel rounded-2xl p-6">
       <h2 className="text-xl font-bold text-gray-900 mb-4">Hành động nhanh</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {actions.map((action, index) => (
           <button
             key={index}
             onClick={action.action}
-            className={`p-4 rounded-xl border transition-all ${
+            className={`apple-glass-item p-4 rounded-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-white ${
               colorClasses[action.color]
             }`}
           >
@@ -100,4 +99,3 @@ const QuickActions = ({ role }) => {
 };
 
 export default QuickActions;
-

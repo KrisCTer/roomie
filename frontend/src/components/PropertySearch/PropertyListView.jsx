@@ -1,14 +1,14 @@
-﻿/* aria-label */
 // src/components/PropertySearch/PropertyListView.jsx
 import React from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
-import PropertyCard from "../../components/layout/layoutHome/PropertyCard";
+import { Box, Typography, Pagination, Stack } from "@mui/material";
+import { BedDouble, Bath, Ruler, MapPin, ArrowUpRight } from "lucide-react";
 
 const PropertyListView = ({
   properties,
   loading,
-  loadingMore,
-  hasMore,
+  currentPage,
+  totalPages,
+  onPageChange,
   onPropertyHover,
   onPropertyClick,
 }) => {
@@ -18,15 +18,27 @@ const PropertyListView = ({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          gap: 3,
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, minmax(0, 1fr))",
+          },
+          gap: 2.4,
         }}
       >
         {[...Array(8)].map((_, i) => (
-          <Box key={i} className="animate-pulse">
+          <Box
+            key={i}
+            className="animate-pulse"
+            sx={{
+              p: 1.5,
+              borderRadius: 3,
+              border: "1px solid #F1ECE3",
+              bgcolor: "#FFFFFF",
+            }}
+          >
             <Box
               sx={{
-                bgcolor: "grey.200",
+                bgcolor: "#EEE7DC",
                 borderRadius: 3,
                 paddingTop: "66.67%",
                 mb: 2,
@@ -36,7 +48,7 @@ const PropertyListView = ({
               <Box
                 sx={{
                   height: 16,
-                  bgcolor: "grey.200",
+                  bgcolor: "#EEE7DC",
                   borderRadius: 1,
                   width: "75%",
                   mb: 1,
@@ -45,7 +57,7 @@ const PropertyListView = ({
               <Box
                 sx={{
                   height: 12,
-                  bgcolor: "grey.200",
+                  bgcolor: "#EEE7DC",
                   borderRadius: 1,
                   width: "50%",
                   mb: 1,
@@ -54,7 +66,7 @@ const PropertyListView = ({
               <Box
                 sx={{
                   height: 16,
-                  bgcolor: "grey.200",
+                  bgcolor: "#EEE7DC",
                   borderRadius: 1,
                   width: "40%",
                 }}
@@ -73,15 +85,19 @@ const PropertyListView = ({
         sx={{
           textAlign: "center",
           py: 12,
+          px: 2,
+          borderRadius: 3,
+          border: "1px dashed #E5E7EB",
+          bgcolor: "#FFFCF8",
         }}
       >
         <Typography
           variant="h6"
-          sx={{ color: "grey.600", mb: 2, fontWeight: 600 }}
+          sx={{ color: "#374151", mb: 1.5, fontWeight: 700 }}
         >
           Không tìm thấy bất động sản phù hợp
         </Typography>
-        <Typography variant="body2" sx={{ color: "grey.500" }}>
+        <Typography variant="body2" sx={{ color: "#6B7280" }}>
           Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm khu vực khác
         </Typography>
       </Box>
@@ -90,91 +106,170 @@ const PropertyListView = ({
 
   return (
     <Box>
-      {/* Properties Grid */}
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          gap: 3,
-          mb: 4,
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, minmax(0, 1fr))",
+          },
+          gap: 2.4,
+          mb: 3.2,
         }}
       >
         {properties.map((property) => {
-          // Transform property data
-          const transformedProperty = {
-            id: property.propertyId,
-            title: property.title,
-            image:
-              property.mediaList?.[0]?.url ||
-              "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-            price: `${property.monthlyRent?.toLocaleString("vi-VN")} đ`,
-            location: `${property.address?.district || ""}, ${
-              property.address?.province || ""
-            }`,
-            bedrooms: property.bedrooms,
-            bathrooms: property.bathrooms,
-            size: property.size,
-            type: property.propertyType,
-          };
+          const image =
+            property.mediaList?.[0]?.url ||
+            "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1100";
+          const location = `${property.address?.district || ""}, ${property.address?.province || ""}`;
 
           return (
             <Box
               key={property.propertyId}
+              className="search-result-card"
               onMouseEnter={() => onPropertyHover?.(property.propertyId)}
               onMouseLeave={() => onPropertyHover?.(null)}
+              onClick={() => onPropertyClick?.(property.propertyId)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onPropertyClick?.(property.propertyId);
+                }
+              }}
             >
-              <PropertyCard
-                property={transformedProperty}
-                onClick={() => onPropertyClick?.(property.propertyId)}
-              />
+              <Box
+                sx={{
+                  position: "relative",
+                  borderRadius: 2.5,
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={image}
+                  alt={property.title}
+                  loading="lazy"
+                  style={{
+                    width: "100%",
+                    height: 210,
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+                <span className="search-result-type">
+                  {property.propertyType || "PROPERTY"}
+                </span>
+              </Box>
+
+              <Box sx={{ p: 1.8 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  spacing={1}
+                >
+                  <Typography
+                    sx={{ fontWeight: 700, color: "#1F2937", lineHeight: 1.35 }}
+                  >
+                    {property.title}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 800,
+                      color: "#1F2937",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {property.monthlyRent?.toLocaleString("vi-VN")} đ
+                  </Typography>
+                </Stack>
+
+                <Typography
+                  sx={{
+                    mt: 0.8,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.8,
+                    fontSize: 13.5,
+                    color: "#6B7280",
+                  }}
+                >
+                  <MapPin size={14} />
+                  <span className="search-line-clamp-1">{location}</span>
+                </Typography>
+
+                <Stack direction="row" spacing={0.8} sx={{ mt: 1.2 }}>
+                  <span className="search-meta-pill">
+                    <BedDouble size={13} /> {property.bedrooms || "-"}
+                  </span>
+                  <span className="search-meta-pill">
+                    <Bath size={13} /> {property.bathrooms || "-"}
+                  </span>
+                  <span className="search-meta-pill">
+                    <Ruler size={13} />{" "}
+                    {property.size ? `${property.size}m²` : "-"}
+                  </span>
+                </Stack>
+
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mt: 1.4 }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      color: "#8A8177",
+                      letterSpacing: "0.08em",
+                      fontWeight: 700,
+                    }}
+                  >
+                    QUICK PREVIEW
+                  </Typography>
+                  <Typography
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.7,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "#B45309",
+                    }}
+                  >
+                    Xem chi tiết <ArrowUpRight size={14} />
+                  </Typography>
+                </Stack>
+              </Box>
             </Box>
           );
         })}
       </Box>
 
-      {/* Loading More Indicator */}
-      {loadingMore && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            py: 6,
-          }}
-        >
-          <CircularProgress size={40} thickness={4} />
-          <Typography
-            variant="body2"
-            sx={{ color: "grey.600", fontWeight: 600 }}
-          >
-            Đang tải thêm bất động sản...
-          </Typography>
-        </Box>
-      )}
-
-      {/* End of Results */}
-      {!hasMore && !loadingMore && properties.length > 0 && (
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 6,
-            borderTop: "1px solid",
-            borderColor: "grey.200",
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: "grey.500", fontWeight: 500 }}
-          >
-            🎉 Bạn đã xem hết {properties.length} bất động sản
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{ color: "grey.400", display: "block", mt: 1 }}
-          >
-            Hãy thử điều chỉnh bộ lọc để xem thêm kết quả khác
-          </Typography>
+      {totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 1.5 }}>
+          <Pagination
+            page={currentPage}
+            count={totalPages}
+            onChange={(_, page) => onPageChange?.(page)}
+            shape="rounded"
+            siblingCount={0}
+            sx={{
+              "& .MuiPaginationItem-root": {
+                borderRadius: 999,
+                minWidth: 36,
+                height: 36,
+                border: "1px solid #E5D5C1",
+                color: "#4B5563",
+              },
+              "& .Mui-selected": {
+                bgcolor: "#1F2937 !important",
+                color: "#fff",
+                borderColor: "#1F2937",
+              },
+            }}
+          />
         </Box>
       )}
     </Box>
@@ -182,5 +277,3 @@ const PropertyListView = ({
 };
 
 export default PropertyListView;
-
-

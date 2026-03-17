@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
   const { t } = useTranslation();
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div className="home-glass-card rounded-xl p-6 mb-6">
       <h2 className="text-xl font-bold mb-6">
         {t("propertyForm.step4.title")}
       </h2>

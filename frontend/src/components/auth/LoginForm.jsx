@@ -31,7 +31,10 @@ export default function LoginForm({ onSubmit, onSwitch, loading }) {
         Login
       </Button>
       <div className="alt">
-        Don’t you have an account? <a onClick={onSwitch}>Register</a>
+        Don’t have an account?{" "}
+        <button type="button" onClick={onSwitch} className="link-btn">
+          Register
+        </button>
       </div>
       <div className="or">or login with</div>
       <div className="socials">

@@ -17,24 +17,49 @@ const PropertyCard = ({
     navigate(`/property/${property.propertyId}`);
   };
 
+  const coverImage =
+    property.mediaList?.[0]?.url ||
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400";
+
   // ===== STATUS CONFIG =====
   const getApprovalConfig = (status) => {
     const configs = {
-      DRAFT: { bg: "bg-gray-500", text: "Draft" },
-      PENDING: { bg: "bg-orange-500", text: "Waiting approval" },
-      ACTIVE: { bg: "bg-green-600", text: "Approved" },
-      REJECTED: { bg: "bg-red-600", text: "Rejected" },
+      DRAFT: {
+        bg: "bg-[#F3F4F6] text-[#374151] border border-[#D1D5DB]",
+        text: "Draft",
+      },
+      PENDING: {
+        bg: "bg-[#FFF4E8] text-[#9A3412] border border-[#F5D9C4]",
+        text: "Waiting approval",
+      },
+      ACTIVE: {
+        bg: "bg-[#ECFDF5] text-[#166534] border border-[#BBF7D0]",
+        text: "Approved",
+      },
+      REJECTED: {
+        bg: "bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]",
+        text: "Rejected",
+      },
     };
     return configs[status] || configs.DRAFT;
   };
 
   const getPropertyStatusConfig = (status) => {
     const configs = {
-      AVAILABLE: { bg: "bg-blue-600", text: "Available" },
-      RENTED: { bg: "bg-teal-600", text: "Rented" },
-      INACTIVE: { bg: "bg-gray-400", text: "Inactive" },
+      AVAILABLE: {
+        bg: "bg-[#EEF4FF] text-[#1D4ED8] border border-[#D7E4FF]",
+        text: "Available",
+      },
+      RENTED: {
+        bg: "bg-[#EEFDF4] text-[#047857] border border-[#BFECD8]",
+        text: "Rented",
+      },
+      INACTIVE: {
+        bg: "bg-[#F3F4F6] text-[#4B5563] border border-[#D1D5DB]",
+        text: "Inactive",
+      },
     };
-    return configs[status];
+    return configs[status] || null;
   };
 
   const approvalConfig = getApprovalConfig(property.status);
@@ -52,39 +77,41 @@ const PropertyCard = ({
       : "N/A";
 
   return (
-    <div className="flex items-center gap-4 bg-white p-4 rounded-lg border hover:shadow-md transition">
+    <div className="rounded-2xl border border-[#E8D8C7] bg-white/95 p-4 shadow-[0_8px_18px_rgba(17,24,39,0.05)] transition hover:shadow-[0_14px_28px_rgba(17,24,39,0.08)] md:p-5">
       {/* ===== CLICKABLE CONTENT ===== */}
-      <div className="flex items-center gap-4 flex-1">
+      <div
+        className="flex cursor-pointer flex-col gap-4 sm:flex-row"
+        onClick={handleOpenDetail}
+      >
         <img
-          src={
-            property.mediaList?.[0]?.url ||
-            "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400"
-          }
+          src={coverImage}
           alt={property.title}
-          className="w-24 h-24 object-cover rounded-lg"
+          className="h-28 w-full rounded-xl object-cover sm:h-24 sm:w-32"
         />
 
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1">{property.title}</h3>
+          <h3 className="mb-1 line-clamp-1 text-base font-semibold text-gray-900">
+            {property.title}
+          </h3>
 
-          <p className="text-sm text-gray-500 mb-2">
+          <p className="mb-2 text-sm text-gray-500">
             {formatDate(property.createdAt)}
           </p>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-blue-600 font-semibold">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-[#CC6F4A] md:text-base">
               {property.monthlyRent?.toLocaleString()} VND
             </span>
 
             <span
-              className={`px-3 py-1 rounded-full text-white text-xs ${approvalConfig.bg}`}
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${approvalConfig.bg}`}
             >
               {approvalConfig.text}
             </span>
 
             {propertyStatusConfig && (
               <span
-                className={`px-3 py-1 rounded-full text-white text-xs ${propertyStatusConfig.bg}`}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${propertyStatusConfig.bg}`}
               >
                 {propertyStatusConfig.text}
               </span>
@@ -94,7 +121,7 @@ const PropertyCard = ({
       </div>
 
       {/* ===== ACTION ICONS ===== */}
-      <div className="flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#EFE3D4] pt-3 sm:justify-end">
         <IconButton
           icon={<Eye className="w-5 h-5" />}
           label="View"
@@ -151,5 +178,3 @@ const PropertyCard = ({
 };
 
 export default PropertyCard;
-
-

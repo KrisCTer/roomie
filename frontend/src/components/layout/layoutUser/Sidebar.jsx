@@ -7,7 +7,6 @@ import {
   Building,
   MessageSquare,
   Plus,
-  LogOut,
   Contact,
   BookOpen,
   FileText,
@@ -26,7 +25,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const { t } = useTranslation();
 
   const { activeRole } = useRole();
-  const { user, loading } = useUser();
+  const { user } = useUser();
 
   /* =========================
    * MENU CONFIG
@@ -121,23 +120,23 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
     <div
       className={`${
         sidebarOpen ? "w-64" : "w-0"
-      } bg-slate-900 text-white transition-all duration-300 overflow-hidden fixed left-0 top-0 h-full z-50`}
+      } fixed left-0 top-0 z-50 h-dvh overflow-hidden border-r border-[#E8D8C7] bg-gradient-to-b from-[#1F1D1A] via-[#2A2723] to-[#1C1A17] text-white transition-all duration-300`}
     >
-      <div className="p-6 h-full flex flex-col">
+      <div className="h-full p-5 flex flex-col">
         {/* Logo */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#CC6F4A] rounded-xl flex items-center justify-center shadow-[0_8px_18px_rgba(204,111,74,0.35)]">
             <Home className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-xl font-bold">Roomie</h1>
-            <p className="text-xs text-gray-400">real home, real value</p>
+            <p className="text-xs text-[#D5C4AF]">dashboard workspace</p>
           </div>
         </div>
 
         {/* Profile */}
-        <div className="mb-8 pb-6 border-b border-gray-700">
-          <p className="text-xs text-gray-400 mb-3">Profile</p>
+        <div className="mb-6 rounded-2xl border border-[#4A433A] bg-[#2F2A24]/70 p-3.5">
+          <p className="mb-3 text-xs text-[#C9B6A2]">Profile</p>
 
           <div className="flex items-center gap-3">
             {renderAvatar()}
@@ -146,7 +145,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
               <p className="text-sm font-medium truncate">
                 {displayUser?.fullName || "User"}
               </p>
-              <p className="text-xs text-gray-400 truncate">
+              <p className="text-xs text-[#C9B6A2] truncate">
                 {displayUser?.email || "No email"}
               </p>
             </div>
@@ -154,13 +153,15 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
         </div>
 
         {/* Menu */}
-        <nav className="space-y-1 flex-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1.5 overflow-hidden">
           {menuItems.map((item) => (
             <button
               key={item.label}
               onClick={() => handleNavigation(item)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive(item.path) ? "bg-blue-600" : "hover:bg-gray-800"
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
+                isActive(item.path)
+                  ? "bg-[#CC6F4A] text-white shadow-[0_8px_18px_rgba(204,111,74,0.35)]"
+                  : "text-[#F5E9DB] hover:bg-[#3A342D]"
               }`}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -170,8 +171,8 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
         </nav>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-gray-700 mt-4">
-          <p className="text-xs text-gray-400 text-center">© 2025 Roomie</p>
+        <div className="pt-4 border-t border-[#4A433A] mt-4">
+          <p className="text-xs text-[#C9B6A2] text-center">© 2026 Roomie</p>
         </div>
       </div>
     </div>
@@ -179,4 +180,3 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
 };
 
 export default Sidebar;
-

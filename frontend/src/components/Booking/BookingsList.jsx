@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 import React from "react";
 import { AlertCircle } from "lucide-react";
 import BookingCard from "./BookingCard.jsx";
@@ -14,7 +14,7 @@ const BookingsList = ({
   if (loading) {
     return (
       <div className="p-8 text-center text-gray-500">
-        <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p>Loading bookings...</p>
       </div>
     );
@@ -22,15 +22,15 @@ const BookingsList = ({
 
   if (bookings.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="p-10 text-center text-gray-500 bg-[#FFFCF8] border border-dashed border-[#E9DECF] rounded-2xl">
         <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
         <p className="text-lg font-medium">No bookings found</p>
         <p className="text-sm mt-2">
           {bookingStatus || searchTerm
             ? "Try adjusting your filters"
             : viewMode === "OWNER"
-            ? "No bookings for your properties yet"
-            : "You haven't made any bookings yet"}
+              ? "No bookings for your properties yet"
+              : "You haven't made any bookings yet"}
         </p>
       </div>
     );
@@ -46,5 +46,3 @@ const BookingsList = ({
 };
 
 export default BookingsList;
-
-

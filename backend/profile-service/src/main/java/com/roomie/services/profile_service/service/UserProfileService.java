@@ -154,8 +154,7 @@ public class UserProfileService {
 //    @CachePut(value = "profile", key = "#userId")
     public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        UserProfile profile = getOrCreateProfileForCurrentUser(userId);
 
         profile.setFirstName(request.getFirstName());
         profile.setLastName(request.getLastName());
@@ -173,7 +172,8 @@ public class UserProfileService {
 //    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getMyProfile() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getByUserId(userId);
+        UserProfile profile = getOrCreateProfileForCurrentUser(userId);
+        return userProfileMapper.toUserProfileResponse(profile);
     }
 
 //    @Cacheable(value = "profile", key = "#userId")
@@ -188,8 +188,7 @@ public class UserProfileService {
     public UserProfileResponse updateAvatar(MultipartFile file) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        UserProfile profile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+        UserProfile profile = getOrCreateProfileForCurrentUser(userId);
 
         // 1. Upload file lên file-service
         ApiResponse<FileResponse> response = fileClient.uploadFile(file, "avatar", profile.getId());
@@ -247,5 +246,32 @@ public class UserProfileService {
         String firstName = String.join(" ", java.util.Arrays.copyOfRange(parts, 1, parts.length));
 
         return new String[]{lastName, firstName};
+    }
+
+    private UserProfile getOrCreateProfileForCurrentUser(String userId) {
+        return userProfileRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    log.info("Profile not found for userId: {}. Auto-creating default profile.", userId);
+
+                    UserProfile.UserProfileBuilder builder = UserProfile.builder()
+                            .userId(userId)
+                            .username(userId)
+                            .status(AccountStatus.ACTIVE)
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now());
+
+                    try {
+                        UserResponse userFromIdentity = identityClient.getUser(userId).getResult();
+                        if (userFromIdentity != null) {
+                            builder.username(Optional.ofNullable(userFromIdentity.getUsername()).orElse(userId));
+                            builder.email(userFromIdentity.getEmail());
+                            builder.phoneNumber(userFromIdentity.getPhoneNumber());
+                        }
+                    } catch (Exception e) {
+                        log.warn("Cannot fetch identity data for userId {} while auto-creating profile: {}", userId, e.getMessage());
+                    }
+
+                    return userProfileRepository.save(builder.build());
+                });
     }
 }

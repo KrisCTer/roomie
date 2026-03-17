@@ -1,63 +1,73 @@
 // src/components/PropertySearch/PropertyMapView.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Box, CircularProgress, Button } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
+import { Box, CircularProgress } from "@mui/material";
+import { loadGoogleMaps } from "../../utils/googleMapsLoader";
+
+const getFriendlyMapError = (error) => {
+  const rawMessage = error?.message || "";
+  const isAuthFailure = rawMessage.includes(
+    "Google Maps authentication failed",
+  );
+
+  if (isAuthFailure) {
+    return [
+      "Không thể xác thực Google Maps trên mạng hiện tại.",
+      "Nếu bật WARP/VPN mà chạy được thì có thể ISP hoặc DNS đang chặn Google Maps.",
+      "Thử đổi DNS sang 1.1.1.1 hoặc 8.8.8.8 và tải lại trang.",
+    ].join(" ");
+  }
+
+  return "Google Maps không tải được. Vui lòng kiểm tra API key, billing, HTTP referrers và kết nối mạng.";
+};
 
 const PropertyMapView = ({
   properties,
   hoveredPropertyId,
   onPropertyClick,
   onBoundsChange,
+  onInitialBoundsReady,
   initialCenter = null,
   initialZoom = 12,
 }) => {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
+  const [mapsError, setMapsError] = useState(null);
   const markersRef = useRef([]);
   const isInitializedRef = useRef(false);
   const boundsChangeTimerRef = useRef(null);
   const lastBoundsRef = useRef(null);
   const hasAutoFittedRef = useRef(false); // Track if we've auto-fitted
+  const canEmitBoundsRef = useRef(false);
+  const hasNotifiedInitialReadyRef = useRef(false);
 
-  const [showSearchButton, setShowSearchButton] = useState(false);
+  const notifyInitialBoundsReady = useCallback(() => {
+    if (hasNotifiedInitialReadyRef.current) return;
+    hasNotifiedInitialReadyRef.current = true;
+    onInitialBoundsReady?.();
+  }, [onInitialBoundsReady]);
 
   // Load Google Maps
   useEffect(() => {
-    if (window.google && window.google.maps) {
-      setMapsLoaded(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`;
-    script.async = true;
-
-    script.addEventListener("load", () => {
-      setMapsLoaded(true);
-    });
-
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, []);
+    loadGoogleMaps()
+      .then(() => setMapsLoaded(true))
+      .catch((error) => {
+        console.error(
+          "Failed to load Google Maps API:",
+          error?.message || error,
+        );
+        setMapsError(getFriendlyMapError(error));
+        notifyInitialBoundsReady();
+      });
+  }, [notifyInitialBoundsReady]);
 
   // Debounced bounds change handler
   const handleBoundsChanged = useCallback(() => {
-    if (!map) return;
+    if (!map || !canEmitBoundsRef.current) return;
 
     // Clear existing timer
     if (boundsChangeTimerRef.current) {
       clearTimeout(boundsChangeTimerRef.current);
-    }
-
-    // Show search button after initial load
-    if (hasAutoFittedRef.current) {
-      setShowSearchButton(true);
     }
 
     // Debounce bounds update
@@ -94,7 +104,16 @@ const PropertyMapView = ({
     // Use a default center, but we'll auto-fit to properties later
     const center = { lat: 10.7769, lng: 106.7009 }; // Default: HCM
 
-    const mapInstance = new window.google.maps.Map(mapRef.current, {
+    const MapConstructor = window.google?.maps?.Map;
+    if (typeof MapConstructor !== "function") {
+      setMapsError(
+        "Google Maps API không khả dụng. Vui lòng kiểm tra API key, billing và allowed HTTP referrers.",
+      );
+      notifyInitialBoundsReady();
+      return;
+    }
+
+    const mapInstance = new MapConstructor(mapRef.current, {
       center,
       zoom: 5, // Start zoomed out
       mapTypeControl: false,
@@ -112,7 +131,7 @@ const PropertyMapView = ({
 
     setMap(mapInstance);
     isInitializedRef.current = true;
-  }, [mapsLoaded]);
+  }, [mapsLoaded, notifyInitialBoundsReady]);
 
   // Add bounds listener after map is created
   useEffect(() => {
@@ -144,12 +163,11 @@ const PropertyMapView = ({
     );
 
     if (propertiesWithLocation.length === 0) {
+      canEmitBoundsRef.current = true;
+      handleBoundsChanged();
+      notifyInitialBoundsReady();
       return;
     }
-
-    console.log(
-      `🎯 Auto-fitting map to ${propertiesWithLocation.length} properties`,
-    );
 
     const bounds = new window.google.maps.LatLngBounds();
 
@@ -167,22 +185,20 @@ const PropertyMapView = ({
     map.fitBounds(bounds);
 
     // Add padding and limit max zoom
-    const listener = window.google.maps.event.addListenerOnce(
-      map,
-      "idle",
-      () => {
-        const currentZoom = map.getZoom();
-        if (currentZoom > 15) {
-          map.setZoom(15); // Don't zoom in too much
-        }
+    window.google.maps.event.addListenerOnce(map, "idle", () => {
+      const currentZoom = map.getZoom();
+      if (currentZoom > 15) {
+        map.setZoom(15); // Don't zoom in too much
+      }
 
-        hasAutoFittedRef.current = true;
+      hasAutoFittedRef.current = true;
+      canEmitBoundsRef.current = true;
 
-        // Trigger initial bounds update
-        handleBoundsChanged();
-      },
-    );
-  }, [map, properties, handleBoundsChanged]);
+      // Trigger initial bounds update
+      handleBoundsChanged();
+      notifyInitialBoundsReady();
+    });
+  }, [map, properties, handleBoundsChanged, notifyInitialBoundsReady]);
 
   // Update map when search location changes (optional override)
   useEffect(() => {
@@ -193,7 +209,7 @@ const PropertyMapView = ({
 
     // Reset auto-fit flag so it can refit to new search results
     hasAutoFittedRef.current = false;
-  }, [initialCenter, initialZoom]);
+  }, [map, initialCenter, initialZoom]);
 
   // Update markers
   useEffect(() => {
@@ -296,11 +312,6 @@ const PropertyMapView = ({
     };
   }, [map, properties, hoveredPropertyId, onPropertyClick]);
 
-  const handleSearchThisArea = () => {
-    setShowSearchButton(false);
-    handleBoundsChanged();
-  };
-
   return (
     <Box
       sx={{
@@ -336,34 +347,25 @@ const PropertyMapView = ({
         </Box>
       )}
 
-      {/* {showSearchButton && (
-        <Button
-          onClick={handleSearchThisArea}
-          variant="contained"
-          startIcon={<SearchIcon />}
+      {mapsError && (
+        <Box
           sx={{
             position: "absolute",
-            top: 16,
-            left: "50%",
-            transform: "translateX(-50%)",
-            bgcolor: "grey.900",
-            color: "white",
-            borderRadius: 999,
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "rgba(255,255,255,0.95)",
             px: 3,
-            py: 1.5,
-            fontWeight: 700,
-            fontSize: "0.875rem",
-            textTransform: "none",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-            zIndex: 10,
-            "&:hover": {
-              bgcolor: "grey.800",
-            },
+            textAlign: "center",
+            color: "#b91c1c",
+            fontWeight: 600,
+            zIndex: 20,
           }}
         >
-          Tìm kiếm khu vực này
-        </Button>
-      )} */}
+          {mapsError}
+        </Box>
+      )}
     </Box>
   );
 };

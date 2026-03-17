@@ -2,15 +2,20 @@ package com.roomie.services.identity_service.service;
 
 
 import java.text.ParseException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
+import jakarta.annotation.PostConstruct;
 
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.roomie.services.identity_service.dto.request.AuthenticationRequest;
@@ -60,6 +65,29 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
+    @NonFinal
+    byte[] signerKeyBytes;
+
+    @PostConstruct
+    void validateSignerKey() {
+        if (SIGNER_KEY == null || SIGNER_KEY.isBlank()) {
+            throw new IllegalStateException("Invalid jwt.signerKey: value must not be blank");
+        }
+
+        byte[] rawKey = SIGNER_KEY.getBytes(StandardCharsets.UTF_8);
+        if (rawKey.length < 32) {
+            try {
+                signerKeyBytes = MessageDigest.getInstance("SHA-256").digest(rawKey);
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException("Unable to initialize jwt signer key", e);
+            }
+            log.warn("jwt.signerKey length ({}) is below 32 bytes. Derived a 256-bit key via SHA-256; please rotate JWT_SIGNER_KEY to >= 32 bytes.", rawKey.length);
+            return;
+        }
+
+        signerKeyBytes = rawKey;
+    }
+
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws ParseException {
         var token = introspectRequest.getToken();
         boolean isValid = true;
@@ -78,7 +106,7 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         var user = userRepository
-                .findByUsername(request.getUsername())
+                .findByUsernameWithRoles(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -120,7 +148,8 @@ public class AuthenticationService {
         var username = signedJWT.getJWTClaimsSet().getSubject();
 
         var user =
-                userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+            userRepository.findByUsernameWithRoles(username)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         var token = generateToken(user);
 
@@ -146,8 +175,11 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(signerKeyBytes));
             return jwsObject.serialize();
+        } catch (KeyLengthException e) {
+            log.error("Invalid jwt.signerKey length for HS256", e);
+            throw new AppException(ErrorCode.INVALID_KEY);
         } catch (JOSEException e) {
             log.error("Cannot create token", e);
             throw new RuntimeException(e);
@@ -155,7 +187,7 @@ public class AuthenticationService {
     }
 
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        JWSVerifier verifier = new MACVerifier(signerKeyBytes);
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
