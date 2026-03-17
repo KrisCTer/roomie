@@ -240,7 +240,7 @@ When user sends a slash command, read the corresponding workflow file **before**
 | Detail                | Value                                                  |
 | --------------------- | ------------------------------------------------------ |
 | Language / Framework  | Java 21, Spring Boot 3.2.5                             |
-| Frontend              | React 18, Tailwind CSS                                 |
+| Frontend              | React 19, Tailwind CSS                                 |
 | Backend services (13) | `backend/` — parent POM at `backend/pom.xml`           |
 | Infrastructure        | Docker Compose — `infra/docker-compose.yml`            |
 | Databases             | MySQL 8 (port 3306), MongoDB 7 (27017), Redis 7 (6379) |
@@ -250,21 +250,21 @@ When user sends a slash command, read the corresponding workflow file **before**
 
 ### Service Map
 
-| Service              | Port | DB                      |
-| -------------------- | ---- | ----------------------- |
-| api-gateway          | 8080 | —                       |
-| identity-service     | 8081 | MySQL                   |
-| profile-service      | 8082 | MySQL + MongoDB         |
-| property-service     | 8083 | MongoDB + Elasticsearch |
-| booking-service      | 8084 | MongoDB                 |
-| payment-service      | 8085 | MongoDB                 |
-| billing-service      | 8086 | MongoDB                 |
-| contract-service     | 8087 | MongoDB                 |
-| chat-service         | 8088 | MongoDB                 |
-| notification-service | 8089 | MongoDB                 |
-| file-service         | 8090 | MongoDB + MinIO         |
-| ai-service           | 8091 | MongoDB                 |
-| admin-service        | 8092 | MySQL + MongoDB         |
+| Service              | Port | DB                                      |
+| -------------------- | ---- | --------------------------------------- |
+| api-gateway          | 8888 | —                                       |
+| identity-service     | 8080 | MySQL + Redis + Kafka                   |
+| profile-service      | 8082 | MongoDB + Redis + Neo4j                 |
+| property-service     | 8083 | MongoDB + Elasticsearch                 |
+| booking-service      | 8084 | MongoDB + Redis + Kafka                 |
+| payment-service      | 8087 | MongoDB + Redis + Kafka                 |
+| billing-service      | 8086 | MongoDB                                 |
+| contract-service     | 8085 | MongoDB + Redis + Kafka                 |
+| chat-service         | 8089 | MongoDB + Redis                         |
+| notification-service | 8090 | MongoDB + Kafka                         |
+| file-service         | 8088 | MongoDB + Redis + MinIO                 |
+| ai-service           | 8091 | MongoDB                                 |
+| admin-service        | 8081 | MongoDB + Redis + Elasticsearch + Kafka |
 
 ### Key Config Notes
 
