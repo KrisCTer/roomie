@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Home, MapPin, Loader2, BedDouble, Bath, Ruler } from "lucide-react";
-import { getPropertyById } from "../../services/property.service";
+import { getPropertyById } from "../../services/propertyService";
 
 const PropertyDetailSection = ({ propertyId }) => {
   const [property, setProperty] = useState(null);
@@ -114,4 +114,3 @@ const PropertyDetailSection = ({ propertyId }) => {
 };
 
 export default PropertyDetailSection;
-

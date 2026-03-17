@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 import React, { useEffect, useMemo, useState } from "react";
 import { Ban, PauseCircle, RefreshCw, Search } from "lucide-react";
 
@@ -11,7 +11,7 @@ import {
   adminGetUsers,
   adminSuspendUser,
   adminBanUser,
-} from "../../services/adminUser.service";
+} from "../../services/adminUserService";
 
 /* =========================
    Helpers

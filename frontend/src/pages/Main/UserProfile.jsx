@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // src/pages/UserProfile/UserProfile.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -20,7 +20,7 @@ import Footer from "../../components/layout/layoutHome/Footer";
 import { useTranslation } from "react-i18next";
 
 // Services
-import { getUserProfile } from "../../services/user.service";
+import { getUserProfile } from "../../services/userService";
 import { API } from "../../configurations/configuration";
 import BaseService from "../../services/BaseService";
 

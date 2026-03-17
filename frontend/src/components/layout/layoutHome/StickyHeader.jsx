@@ -41,7 +41,7 @@ import {
 } from "../../../services/localStorageService";
 import SearchFilters from "../../PropertySearch/SearchFilters";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
-import { getMyFavorites } from "../../../services/favorite.service";
+import { getMyFavorites } from "../../../services/favoriteService";
 import {
   Moon,
   Sun,
@@ -188,7 +188,7 @@ const StickyHeader = ({
     setDarkMode(newTheme);
     localStorage.setItem("theme", newTheme ? "dark" : "light");
     window.dispatchEvent(
-      new CustomEvent("themeChange", { detail: { darkMode: newTheme } })
+      new CustomEvent("themeChange", { detail: { darkMode: newTheme } }),
     );
   };
 
@@ -430,7 +430,7 @@ const StickyHeader = ({
                     >
                       {searchData.propertyType
                         ? propertyTypes.find(
-                            (p) => p.value === searchData.propertyType
+                            (p) => p.value === searchData.propertyType,
                           )?.label
                         : "Loại hình"}
                     </Typography>
@@ -471,9 +471,9 @@ const StickyHeader = ({
                       searchData.priceRange[1] === 20000000
                         ? "Giá thuê"
                         : `${(searchData.priceRange[0] / 1000000).toFixed(
-                            0
+                            0,
                           )}-${(searchData.priceRange[1] / 1000000).toFixed(
-                            0
+                            0,
                           )}M`}
                     </Typography>
                   </Box>
@@ -614,7 +614,7 @@ const StickyHeader = ({
                           key={`popular-${index}`}
                           onClick={() =>
                             handleQuickSearch(
-                              `${loc.district}, ${loc.province}`
+                              `${loc.district}, ${loc.province}`,
                             )
                           }
                         >

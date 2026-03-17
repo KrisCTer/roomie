@@ -94,7 +94,6 @@ const PropertyMapView = ({
     // Use a default center, but we'll auto-fit to properties later
     const center = { lat: 10.7769, lng: 106.7009 }; // Default: HCM
 
-
     const mapInstance = new window.google.maps.Map(mapRef.current, {
       center,
       zoom: 5, // Start zoomed out
@@ -119,11 +118,10 @@ const PropertyMapView = ({
   useEffect(() => {
     if (!map) return;
 
-
     const listener = window.google.maps.event.addListener(
       map,
       "bounds_changed",
-      handleBoundsChanged
+      handleBoundsChanged,
     );
 
     return () => {
@@ -142,14 +140,15 @@ const PropertyMapView = ({
     if (hasAutoFittedRef.current) return;
 
     const propertiesWithLocation = properties.filter(
-      (prop) => prop.address?.location
+      (prop) => prop.address?.location,
     );
 
     if (propertiesWithLocation.length === 0) {
       return;
     }
 
-      `🎯 Auto-fitting map to ${propertiesWithLocation.length} properties`
+    console.log(
+      `🎯 Auto-fitting map to ${propertiesWithLocation.length} properties`,
     );
 
     const bounds = new window.google.maps.LatLngBounds();
@@ -181,7 +180,7 @@ const PropertyMapView = ({
 
         // Trigger initial bounds update
         handleBoundsChanged();
-      }
+      },
     );
   }, [map, properties, handleBoundsChanged]);
 
@@ -207,13 +206,12 @@ const PropertyMapView = ({
     markersRef.current = [];
 
     const propertiesWithLocation = properties.filter(
-      (prop) => prop.address?.location
+      (prop) => prop.address?.location,
     );
 
     if (propertiesWithLocation.length === 0) {
       return;
     }
-
 
     propertiesWithLocation.forEach((prop) => {
       const [lat, lng] = prop.address.location
@@ -284,7 +282,7 @@ const PropertyMapView = ({
         priceInMillions,
         isHovered,
         prop.propertyId,
-        (id) => onPropertyClick?.(id)
+        (id) => onPropertyClick?.(id),
       );
 
       overlay.setMap(map);

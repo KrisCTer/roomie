@@ -1,9 +1,9 @@
 // src/pages/User/Dashboard/hooks/useDashboardData.jsx
 import { useState, useEffect, useCallback } from "react";
-import { getPropertiesByOwner } from "../services/property.service";
-import { getMyBookings, getOwnerBookings } from "../services/booking.service";
-import { getMyContracts } from "../services/contract.service";
-import { getMyTenantBills, getMyLandlordBills } from "../services/billing.service";
+import { getPropertiesByOwner } from "../services/propertyService";
+import { getMyBookings, getOwnerBookings } from "../services/bookingService";
+import { getMyContracts } from "../services/contractService";
+import { getMyTenantBills, getMyLandlordBills } from "../services/billingService";
 
 const useDashboardData = (activeRole) => {
   const [loading, setLoading] = useState(false);

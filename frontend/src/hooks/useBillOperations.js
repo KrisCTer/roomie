@@ -10,10 +10,10 @@ import {
   bulkSendBills,
   getLandlordStats as fetchLandlordStats,
   getTenantStats as fetchTenantStats,
-} from "../services/billing.service";
-import { getMyContracts } from "../services/contract.service";
-import { getPropertiesByOwner } from "../services/property.service";
-import { getUserProfile } from "../services/user.service";
+} from "../services/billingService";
+import { getMyContracts } from "../services/contractService";
+import { getPropertiesByOwner } from "../services/propertyService";
+import { getUserProfile } from "../services/userService";
 
 export const useBillOperations = (activeRole) => {
   // Data states

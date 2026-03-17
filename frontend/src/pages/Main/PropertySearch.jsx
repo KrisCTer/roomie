@@ -10,7 +10,7 @@ import PropertyMapView from "../../components/PropertySearch/PropertyMapView";
 import Footer from "../../components/layout/layoutHome/Footer";
 import { useTranslation } from "react-i18next";
 // Services
-import { getAllProperties } from "../../services/property.service";
+import { getAllProperties } from "../../services/propertyService";
 
 // Vietnam provinces geocoding data
 const PROVINCE_COORDINATES = {
@@ -69,6 +69,7 @@ const PropertySearch = () => {
     const minPrice = parseInt(searchParams.get("minPrice")) || 0;
     const maxPrice = parseInt(searchParams.get("maxPrice")) || 50000000;
 
+    console.log("🔍 URL Search params:", {
       location,
       type,
       minPrice,
@@ -135,16 +136,18 @@ const PropertySearch = () => {
         }`.toLowerCase();
         return propertyLocation.includes(searchLocation);
       });
-        `📍 Location filter: "${searchCriteria.location}" → ${filtered.length} results`
+      console.log(
+        `📍 Location filter: "${searchCriteria.location}" → ${filtered.length} results`,
       );
     }
 
     // Filter by property type (from URL search)
     if (searchCriteria.propertyType) {
       filtered = filtered.filter(
-        (p) => p.propertyType === searchCriteria.propertyType
+        (p) => p.propertyType === searchCriteria.propertyType,
       );
-        `🏠 Type filter: "${searchCriteria.propertyType}" → ${filtered.length} results`
+      console.log(
+        `🏠 Type filter: "${searchCriteria.propertyType}" → ${filtered.length} results`,
       );
     }
 
@@ -153,22 +156,24 @@ const PropertySearch = () => {
       filtered = filtered.filter(
         (p) =>
           p.monthlyRent >= filters.priceRange[0] &&
-          p.monthlyRent <= filters.priceRange[1]
+          p.monthlyRent <= filters.priceRange[1],
       );
+      console.log(
         `💰 Price filter: ${filters.priceRange[0].toLocaleString()}-${filters.priceRange[1].toLocaleString()} → ${
           filtered.length
-        } results`
+        } results`,
       );
     }
 
     // Filter by property types (from filter drawer - multiple selection)
     if (filters.propertyTypes.length > 0) {
       filtered = filtered.filter((p) =>
-        filters.propertyTypes.includes(p.propertyType)
+        filters.propertyTypes.includes(p.propertyType),
       );
+      console.log(
         `🏘️ Types filter: ${filters.propertyTypes.join(", ")} → ${
           filtered.length
-        } results`
+        } results`,
       );
     }
 
@@ -178,7 +183,8 @@ const PropertySearch = () => {
         if (filters.bedrooms === 4) return p.bedrooms >= 4;
         return p.bedrooms === filters.bedrooms;
       });
-        `🛏️ Bedrooms filter: ${filters.bedrooms} → ${filtered.length} results`
+      console.log(
+        `🛏️ Bedrooms filter: ${filters.bedrooms} → ${filtered.length} results`,
       );
     }
 
@@ -188,7 +194,8 @@ const PropertySearch = () => {
         if (filters.bathrooms === 3) return p.bathrooms >= 3;
         return p.bathrooms === filters.bathrooms;
       });
-        `🚿 Bathrooms filter: ${filters.bathrooms} → ${filtered.length} results`
+      console.log(
+        `🚿 Bathrooms filter: ${filters.bathrooms} → ${filtered.length} results`,
       );
     }
 
@@ -199,7 +206,8 @@ const PropertySearch = () => {
   useEffect(() => {
     if (!mapBounds) {
       // No bounds set yet, show all base filtered
-        `🗺️ No bounds filter - showing all ${baseFilteredProperties.length} properties`
+      console.log(
+        `🗺️ No bounds filter - showing all ${baseFilteredProperties.length} properties`,
       );
       setDisplayedProperties(baseFilteredProperties);
       return;
@@ -223,7 +231,8 @@ const PropertySearch = () => {
       );
     });
 
-      `🗺️ Map bounds filter: ${boundsFiltered.length} properties in view (from ${baseFilteredProperties.length} base filtered)`
+    console.log(
+      `🗺️ Map bounds filter: ${boundsFiltered.length} properties in view (from ${baseFilteredProperties.length} base filtered)`,
     );
 
     setDisplayedProperties(boundsFiltered);
@@ -247,7 +256,7 @@ const PropertySearch = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProperties = displayedProperties.slice(
     indexOfFirstItem,
-    indexOfLastItem
+    indexOfLastItem,
   );
   const totalPages = Math.ceil(displayedProperties.length / itemsPerPage);
 
@@ -301,7 +310,7 @@ const PropertySearch = () => {
                   }${
                     totalPages > 1
                       ? ` · ${t(
-                          "propertySearch.page"
+                          "propertySearch.page",
                         )} ${currentPage}/${totalPages}`
                       : ""
                   }`}

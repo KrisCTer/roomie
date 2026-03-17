@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // src/pages/Main/PropertyDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -23,9 +23,9 @@ import OwnerContact from "../../components/PropertyDetail/OwnerContact";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 // Services
-import { getPropertyById } from "../../services/property.service";
-import { createConversation } from "../../services/chat.service";
-import { createBooking } from "../../services/booking.service";
+import { getPropertyById } from "../../services/propertyService";
+import { createConversation } from "../../services/chatService";
+import { createBooking } from "../../services/bookingService";
 import { getUserInfo } from "../../services/localStorageService";
 import { useFavorite } from "../../hooks/useFavorite";
 

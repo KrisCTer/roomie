@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { User, Mail, Phone, Loader2 } from "lucide-react";
-import { getUserProfile } from "../../services/user.service";
+import { getUserProfile } from "../../services/userService";
 
 const TenantInfoSection = ({ tenantId }) => {
   const [tenant, setTenant] = useState(null);

@@ -7,7 +7,7 @@ import {
   confirmBooking,
   getOwnerBookings,
   getMyBookings,
-} from "../services/booking.service";
+} from "../services/bookingService";
 import { getUserInfo } from "../services/localStorageService";
 
 export const useBookingOperations = () => {

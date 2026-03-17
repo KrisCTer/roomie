@@ -15,7 +15,7 @@ import {
   uploadMeterPhotoWithAI,
   createManualMeterReading,
   updateMeterReadingValues,
-} from "../../services/meterReading.service";
+} from "../../services/meterReadingService";
 
 /**
  * MeterReadingModal

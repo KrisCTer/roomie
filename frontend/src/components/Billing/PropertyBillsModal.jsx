@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Plus, ArrowLeft, Home } from "lucide-react";
 import BillHistoryList from "./BillHistoryList";
 import CreateBillModal from "./CreateBillModal";
-import { getBillsByContract } from "../../services/billing.service";
+import { getBillsByContract } from "../../services/billingService";
 import { formatCurrency } from "../../utils/billHelpers";
 
 const PropertyBillsModal = ({

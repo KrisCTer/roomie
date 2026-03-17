@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RefreshCw, Search, Eye } from "lucide-react";
@@ -7,8 +7,8 @@ import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar";
 import Header from "../../components/layout/layoutUser/Header";
 import Footer from "../../components/layout/layoutUser/Footer";
 
-import { adminGetAllProperties } from "../../services/adminProperty.service";
-import { adminGetUsers } from "../../services/adminUser.service";
+import { adminGetAllProperties } from "../../services/adminPropertyService";
+import { adminGetUsers } from "../../services/adminUserService";
 import { useTranslation } from "react-i18next";
 /* =========================
    Helpers

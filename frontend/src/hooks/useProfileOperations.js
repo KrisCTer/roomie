@@ -5,7 +5,7 @@ import {
   updateMyProfile,
   uploadAvatar,
   updateIdCard,
-} from "../services/user.service";
+} from "../services/userService";
 
 export const useProfileOperations = () => {
   const [loading, setLoading] = useState(true);

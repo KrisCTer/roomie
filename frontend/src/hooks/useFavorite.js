@@ -1,6 +1,6 @@
 // web-app/src/hooks/useFavorite.js
 import { useState, useEffect } from "react";
-import { toggleFavorite, checkFavorite } from "../services/favorite.service";
+import { toggleFavorite, checkFavorite } from "../services/favoriteService";
 
 /**
  * Custom hook for managing favorite status of a property

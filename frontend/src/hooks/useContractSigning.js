@@ -6,10 +6,10 @@ import {
   landlordSignContract,
   requestLandlordOTP,
   requestTenantOTP,
-} from "../services/contract.service";
-import { getPropertyById } from "../services/property.service";
+} from "../services/contractService";
+import { getPropertyById } from "../services/propertyService";
 import { getUserInfo } from "../services/localStorageService";
-import { getUserProfile } from "../services/user.service";
+import { getUserProfile } from "../services/userService";
 
 export const useContractSigning = () => {
   const { id } = useParams();
