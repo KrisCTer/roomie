@@ -1,10 +1,10 @@
-﻿/* aria-label */
+/* aria-label */
 import React, { useState } from "react";
 import { DollarSign, Download, Share2, ArrowLeft, Eye } from "lucide-react";
 import {
   downloadBillPdf,
   openBillPdfPreview,
-} from "../../services/billing.service";
+} from "../../services/billingService";
 import { useNotificationContext } from "../../contexts/NotificationContext";
 
 const BillActions = ({ bill, canPay, onPayment, onBack }) => {

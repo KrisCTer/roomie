@@ -5,9 +5,9 @@ import {
   getPropertiesByOwner,
   deleteProperty,
   publishProperty,
-} from "../services/property.service";
-import { getPropertyBookings } from "../services/booking.service";
-import { createContract } from "../services/contract.service";
+} from "../services/propertyService";
+import { getPropertyBookings } from "../services/bookingService";
+import { createContract } from "../services/contractService";
 
 export const usePropertyOperations = () => {
   const navigate = useNavigate();

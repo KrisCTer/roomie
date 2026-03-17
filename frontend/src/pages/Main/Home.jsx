@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // src/pages/Home/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import PropertySection from "../../components/layout/layoutHome/PropertySection"
 import Footer from "../../components/layout/layoutHome/Footer";
 
 // Services
-import { getAllProperties } from "../../services/property.service";
+import { getAllProperties } from "../../services/propertyService";
 
 // Utils
 const filterApproved = (items) => {

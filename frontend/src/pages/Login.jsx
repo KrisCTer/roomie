@@ -17,7 +17,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login as loginApi } from "../services/auth.service";
+import { login as loginApi } from "../services/authService";
 import { useTranslation } from "react-i18next";
 
 const BACKEND_URL = "http://localhost:8080/identity";

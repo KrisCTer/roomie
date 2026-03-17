@@ -66,7 +66,8 @@ httpClient.interceptors.response.use(
         const currentToken = getToken();
         const res = await axios.post(
           `${CONFIG.API_GATEWAY}${API.REFRESH_TOKEN}`,
-          { token: currentToken }
+          { token: currentToken },
+          { timeout: 10000 }
         );
 
         const newToken = res.data?.result?.token ?? res.data?.token;
@@ -76,6 +77,9 @@ httpClient.interceptors.response.use(
           processQueue(null, newToken);
           return httpClient(originalRequest);
         }
+
+        // Ensure pending requests are released when refresh responds without a token.
+        throw new Error("Refresh token failed: empty token response");
       } catch (refreshError) {
         processQueue(refreshError, null);
         removeToken();

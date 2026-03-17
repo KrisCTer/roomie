@@ -1,9 +1,9 @@
 // web-app/src/hooks/useContractOperations.js
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMyContracts } from "../services/contract.service";
-import { getPropertyById } from "../services/property.service";
-import { getUserProfile } from "../services/user.service";
+import { getMyContracts } from "../services/contractService";
+import { getPropertyById } from "../services/propertyService";
+import { getUserProfile } from "../services/userService";
 import { getCompleteUserInfo } from "../services/localStorageService";
 
 export const useContractOperations = (activeRole) => {

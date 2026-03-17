@@ -1,4 +1,4 @@
-﻿// web-app/src/pages/Billing/UtilityConfigPage.jsx
+// web-app/src/pages/Billing/UtilityConfigPage.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Settings, Plus, Edit, Trash2, Power } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
@@ -15,8 +15,8 @@ import {
   updateUtilityConfig,
   deactivateUtilityConfig,
   deleteUtilityConfig,
-} from "../../services/utility.service";
-import { getPropertiesByOwner } from "../../services/property.service";
+} from "../../services/utilityService";
+import { getPropertiesByOwner } from "../../services/propertyService";
 import { formatCurrency } from "../../utils/billHelpers";
 
 const UtilityConfigPage = () => {

@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 // src/pages/Admin/AdminProperties.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import {
   adminGetAllProperties,
   adminApproveProperty,
   adminRejectProperty,
-} from "../../services/adminProperty.service";
+} from "../../services/adminPropertyService";
 
 import { Eye, Check, X } from "lucide-react";
 

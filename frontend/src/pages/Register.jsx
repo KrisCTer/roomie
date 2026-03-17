@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { register as registerApi } from "../services/auth.service";
+import { register as registerApi } from "../services/authService";
 import { useTranslation } from "react-i18next";
 
 export default function Register() {

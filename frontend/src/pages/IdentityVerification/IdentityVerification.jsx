@@ -11,7 +11,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { updateIdCard, getUserProfile } from "../../services/user.service";
+import { updateIdCard, getUserProfile } from "../../services/userService";
 import CameraModal from "../../components/Profile/CameraModal";
 
 const IdentityVerification = () => {

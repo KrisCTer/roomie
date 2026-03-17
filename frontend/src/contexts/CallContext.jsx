@@ -81,7 +81,6 @@ export const CallProvider = ({ children }) => {
 
   // ========== END CALL ==========
   const endCall = useCallback(() => {
-
     if (socket && isConnected && callState.remotePeer?.userId) {
       socket.emit("end-call", {
         to: callState.remotePeer.userId,
@@ -113,12 +112,10 @@ export const CallProvider = ({ children }) => {
       remotePeer: null,
       conversationId: null,
     });
-
   }, [callState, localStream, socket, isConnected]);
 
   // ========== REJECT CALL ==========
   const rejectCall = useCallback(() => {
-
     const { remotePeer } = callState;
 
     if (socket && isConnected && remotePeer?.userId) {
@@ -145,12 +142,6 @@ export const CallProvider = ({ children }) => {
           console.warn("⏳ Waiting for user to load...");
           return alert("User not ready yet. Please wait 1-2 seconds.");
         }
-
-          from: currentUser.userId,
-          to: remotePeer.userId,
-          conversationId,
-          callType,
-        });
 
         if (remotePeer.userId === currentUser.userId) {
           alert("You cannot call yourself.");
@@ -232,19 +223,17 @@ export const CallProvider = ({ children }) => {
         };
 
         socket.emit("call-user", callData);
-
       } catch (error) {
         console.error("❌ Error starting call:", error);
         alert(`Cannot start call: ${error.message}`);
         endCall();
       }
     },
-    [socket, isConnected, currentUser, endCall]
+    [socket, isConnected, currentUser, endCall],
   );
 
   // ========== HANDLE INCOMING CALL ==========
   const handleIncomingCall = useCallback((data) => {
-
     setCallState({
       isInCall: false,
       isRinging: true,
@@ -258,7 +247,6 @@ export const CallProvider = ({ children }) => {
   // ========== ACCEPT CALL ==========
   const acceptCall = useCallback(async () => {
     try {
-
       if (!socket || !isConnected) {
         throw new Error("Socket not connected");
       }
@@ -305,7 +293,7 @@ export const CallProvider = ({ children }) => {
       };
 
       await peerConnection.setRemoteDescription(
-        new RTCSessionDescription(offer)
+        new RTCSessionDescription(offer),
       );
 
       pendingCandidatesRef.current.forEach((c) => {
@@ -326,7 +314,6 @@ export const CallProvider = ({ children }) => {
         isInCall: true,
         isRinging: false,
       }));
-
     } catch (error) {
       console.error("❌ Error accepting call:", error);
       alert(`Cannot accept call: ${error.message}`);
@@ -335,8 +322,7 @@ export const CallProvider = ({ children }) => {
   }, [callState, socket, isConnected, rejectCall]);
 
   // ========== HANDLE CALL ACCEPTED ==========
-  const handleCallAccepted = useCallback((data) => {
-  }, []);
+  const handleCallAccepted = useCallback((data) => {}, []);
 
   // ========== HANDLE CALL REJECTED ==========
   const handleCallRejected = useCallback(() => {
@@ -369,15 +355,14 @@ export const CallProvider = ({ children }) => {
   }, []);
 
   // ========== HANDLE OFFER (FOR CALLEE) ==========
-  const handleOffer = useCallback(async (data) => {
-  }, []);
+  const handleOffer = useCallback(async (data) => {}, []);
 
   // ========== HANDLE ANSWER (FOR CALLER) ==========
   const handleAnswer = useCallback(async (data) => {
     try {
       if (peerConnectionRef.current) {
         await peerConnectionRef.current.setRemoteDescription(
-          new RTCSessionDescription(data.answer)
+          new RTCSessionDescription(data.answer),
         );
       }
     } catch (error) {

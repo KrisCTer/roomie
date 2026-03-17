@@ -6,8 +6,8 @@ import {
   createConversation,
   getMessages,
   createMessage,
-} from "../services/chat.service";
-import { searchUsers } from "../services/user.service";
+} from "../services/chatService";
+import { searchUsers } from "../services/userService";
 import { getUserInfo } from "../services/localStorageService";
 import { useSocket } from "../contexts/SocketContext";
 import { scrollToBottom as scrollHelper } from "../utils/chatHelpers";

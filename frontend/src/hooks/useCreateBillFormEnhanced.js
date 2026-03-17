@@ -1,8 +1,8 @@
 // src/hooks/useCreateBillFormEnhanced.js
 import { useState, useEffect } from "react";
-import { createOrUpdateBill } from "../services/billing.service";
-import { getActiveUtilityForContract } from "../services/utility.service";
-import { getBillsByContract } from "../services/billing.service";
+import { createOrUpdateBill } from "../services/billingService";
+import { getActiveUtilityForContract } from "../services/utilityService";
+import { getBillsByContract } from "../services/billingService";
 
 /**
  * Helper: Calculate next month from YYYY-MM string
@@ -127,6 +127,7 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
       const contract = contracts.find((c) => c.id === selectedContract);
       if (!contract) return;
 
+      console.log("🔍 Loading utility config for:", {
         contractId: contract.id,
         propertyId: contract.propertyId,
       });
@@ -266,6 +267,8 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
         ...formData,
         contractId: selectedContract,
       };
+
+      console.log("📤 Submitting bill payload:", payload);
 
 
       const res = await createOrUpdateBill(payload);

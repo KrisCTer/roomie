@@ -6,11 +6,11 @@ import {
   downloadBillPdf, 
   previewBillPdf,
   sendBill 
-} from "../services/billing.service";
-import { createPayment } from "../services/payment.service";
-import { getContract } from "../services/contract.service";
-import { getPropertyById } from "../services/property.service";
-import { getUserProfile } from "../services/user.service";
+} from "../services/billingService";
+import { createPayment } from "../services/paymentService";
+import { getContract } from "../services/contractService";
+import { getPropertyById } from "../services/propertyService";
+import { getUserProfile } from "../services/userService";
 
 export const useBillDetail = () => {
   const { id } = useParams();

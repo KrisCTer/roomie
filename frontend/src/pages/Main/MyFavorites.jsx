@@ -18,7 +18,7 @@ import Footer from "../../components/layout/layoutHome/Footer";
 import {
   getMyFavorites,
   removeFavorite,
-} from "../../services/favorite.service";
+} from "../../services/favoriteService";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const MyFavorites = () => {
