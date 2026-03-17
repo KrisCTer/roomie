@@ -1,587 +1,106 @@
 # Roomie System Architecture
 
-## 🏗️ Overview
-Roomie sử dụng kiến trúc microservices với event-driven communication để xây dựng một hệ thống quản lý và cho thuê phòng trọ có khả năng mở rộng cao.
+Roomie is a Java Spring Boot microservices monorepo with a React frontend and shared infrastructure.
 
-## 📐 Architecture Diagram
+## 1. Monorepo Layout
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web Client    │    │  Mobile App     │    │   Admin Panel   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                ┌────────────────▼─────────────────┐
-                │           API Gateway            │
-                │     (Spring Cloud Gateway)       │
-                └────────────────┬─────────────────┘
-                                 │
-            ┌────────────────────┼────────────────────┐
-            │                    │                    │
-    ┌───────▼──────┐    ┌────────▼─────┐    ┌─────────▼────────┐
-    │ Auth Service │    │ Admin Service│    │Property Service  │
-    └──────┬───────┘    └──────────────┘    └───────┬──────────┘
-           │                                        │
-    ┌──────▼────────────────────────────────────────▼─────┐
-    │              Event Bus (Apache Kafka)               │
-    └────────────────────┬────────────────────────────────┘
-                         │
-    ┌────────────────────┼────────────────────┐
-    │                    │                    │
-┌───▼────┐         ┌─────▼─────┐       ┌──────▼──────┐
-│Booking │         │ Payment   │       │   Chat      │
-│Service │         │ Service   │       │   Service   │
-└────────┘         └───────────┘       └─────────────┘
-```
+- `backend/`: parent Maven project and 13 microservices
+- `frontend/`: React 19 application
+- `infra/`: Docker Compose and infrastructure bootstrap files
+- `.agent/`: agent, skill, and workflow system used for AI-assisted development
+- `docs/`: project documentation
 
-## 🔧 Microservices Architecture
+## 2. Backend Services
 
-### 1. API Gateway
-**Technology**: Spring Cloud Gateway
-**Responsibilities**:
-- Request routing và load balancing
-- Authentication và authorization
-- Rate limiting và throttling
-- Request/Response transformation
-- Circuit breaker pattern
-- CORS handling
+All backend modules are listed in `backend/pom.xml`.
 
-**Key Features**:
-```yaml
-gateway:
-  routes:
-    - id: auth-service
-      uri: lb://auth-service
-      predicates:
-        - Path=/api/auth/**
-      filters:
-        - StripPrefix=2
-    - id: property-service
-      uri: lb://property-service
-      predicates:
-        - Path=/api/properties/**
-```
+| Service              | Port | Context Path    |
+| -------------------- | ---- | --------------- |
+| api-gateway          | 8888 | (none)          |
+| identity-service     | 8080 | `/identity`     |
+| admin-service        | 8081 | `/admin`        |
+| profile-service      | 8082 | `/profile`      |
+| property-service     | 8083 | `/property`     |
+| booking-service      | 8084 | `/booking`      |
+| contract-service     | 8085 | `/contract`     |
+| billing-service      | 8086 | `/billing`      |
+| payment-service      | 8087 | `/payment`      |
+| file-service         | 8088 | `/file`         |
+| chat-service         | 8089 | `/chat`         |
+| notification-service | 8090 | `/notification` |
+| ai-service           | 8091 | `/ai`           |
 
-### 2. Service Registry
-**Technology**: Netflix Eureka
-**Responsibilities**:
-- Service discovery và registration
-- Health monitoring
-- Load balancing information
+## 3. API Gateway
 
-### 3. Core Business Services
+Gateway configuration source:
 
-#### Auth Service
-**Database**: MySQL + Redis
-**Responsibilities**:
-- User authentication (JWT, OAuth2)
-- Authorization và role management
-- Session management
-- Password reset functionality
+- `backend/api-gateway/src/main/resources/application.yml`
 
-**Endpoints**:
-```
-POST /auth/login
-POST /auth/register
-POST /auth/refresh-token
-POST /auth/logout
-GET  /auth/me
-```
+Current routing prefix:
 
-#### Property Service
-**Database**: MySQL + MongoDB (for media)
-**Responsibilities**:
-- Property CRUD operations
-- Property search và filtering
-- Image và media management
-- Geo-location services
-- Property categories và amenities
+- `/api/v1`
 
-**Domain Model**:
-```java
-Property {
-  id: Long
-  title: String
-  description: String
-  address: Address
-  price: BigDecimal
-  amenities: List<Amenity>
-  images: List<PropertyImage>
-  availability: PropertyAvailability
-  owner: User
-}
-```
+Current gateway routes:
 
-#### Booking Service
-**Database**: MySQL + Redis (caching)
-**Responsibilities**:
-- Booking lifecycle management
-- Schedule management
-- Conflict resolution
-- Booking notifications
+- identity, admin, profile, property, booking, contract, billing, payment, file, chat
 
-**State Machine**:
-```
-PENDING → CONFIRMED → CHECKED_IN → CHECKED_OUT
-    ↓         ↓           ↓
- CANCELLED  CANCELLED  CANCELLED
-```
+Not currently routed in gateway config:
 
-#### Contract Service
-**Database**: MySQL + File Storage
-**Responsibilities**:
-- Contract template management
-- Digital signature integration
-- Contract generation (PDF)
-- Contract lifecycle tracking
-- Legal compliance
+- notification-service
+- ai-service
 
-#### Payment Service
-**Database**: MySQL + External APIs
-**Responsibilities**:
-- Payment processing (VNPay, MoMo, Banking)
-- Transaction management
-- Refund handling
-- Payment notifications
-- Financial reporting
+## 4. Data and Infrastructure Topology
 
-**Payment Flow**:
-```
-Booking Created → Payment Request → Gateway Processing 
-     ↓                                    ↓
-Payment Confirmed ← Webhook Notification ← Gateway Response
-```
+Infrastructure is defined in `infra/docker-compose.yml`.
 
-#### Billing Service
-**Database**: MySQL
-**Responsibilities**:
-- Invoice generation
-- Recurring billing
-- Payment tracking
-- Overdue management
-- Financial reports
+### 4.1 Shared Infrastructure Services
 
-### 4. Support Services
+- MySQL 8 (`3306`)
+- MongoDB 7 (`27017`)
+- Redis 7 (`6379`)
+- Neo4j 5 (`7474`, `7687`)
+- Elasticsearch 8.11 (`9200`, `9300`, `xpack.security.enabled=true`)
+- Kafka + Zookeeper (`9092`, `2181`)
+- MinIO (`9000`, `9001`)
+- Prometheus (`9090`)
+- Eureka Server (`8761`)
 
-#### Chat Service
-**Database**: MongoDB + Redis
-**Technology**: WebSocket + SockJS
-**Responsibilities**:
-- Real-time messaging
-- Chat history
-- File sharing in chat
-- Online presence
-- Message notifications
+### 4.2 Service Dependency Map (from application.yml)
 
-#### Notification Service
-**Database**: MongoDB + Redis Queue
-**Responsibilities**:
-- Multi-channel notifications (Email, SMS, Push, In-app)
-- Template management
-- Delivery tracking
-- Notification preferences
-- Scheduled notifications
+| Service              | Main Data/Infra Dependencies           |
+| -------------------- | -------------------------------------- |
+| identity-service     | MySQL, Redis, Kafka                    |
+| admin-service        | MongoDB, Redis, Elasticsearch, Kafka   |
+| profile-service      | MongoDB, Redis, Neo4j, Kafka           |
+| property-service     | MongoDB, Redis, Elasticsearch          |
+| booking-service      | MongoDB, Redis, Kafka                  |
+| contract-service     | MongoDB, Redis, Kafka                  |
+| billing-service      | MongoDB, Redis, Kafka                  |
+| payment-service      | MongoDB, Redis, Kafka                  |
+| file-service         | MongoDB, Redis, MinIO                  |
+| chat-service         | MongoDB, Redis                         |
+| notification-service | MongoDB, Kafka                         |
+| ai-service           | MongoDB                                |
+| api-gateway          | Routing layer (no local DB configured) |
 
-**Channels**:
-```java
-enum NotificationChannel {
-    EMAIL, SMS, PUSH_NOTIFICATION, IN_APP, WEBHOOK
-}
-```
+## 5. Startup Model
 
-#### File Service
-**Storage**: MinIO/AWS S3 + MySQL (metadata)
-**Responsibilities**:
-- File upload/download
-- Image resizing và optimization
-- File security và access control
-- CDN integration
-- File versioning
+### 5.1 Infrastructure
 
-### 5. Infrastructure Services
+Start infra from `infra/` first with Docker Compose.
 
-#### Profile Service
-**Database**: MongoDB + Redis
-**Responsibilities**:
-- User profile management
-- Preferences management
-- Avatar và document storage
-- Profile verification
-- Privacy settings
+### 5.2 Backend
 
-## 🗄️ Database Architecture
+- Build all modules via parent POM in `backend/pom.xml`.
+- Local multi-service startup script: `backend/run-all-services.bat`.
 
-### MySQL (OLTP - Transactional Data)
-```
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│   Users     │  │ Properties  │  │  Bookings   │
-│             │  │             │  │             │
-├─────────────┤  ├─────────────┤  ├─────────────┤
-│ id          │  │ id          │  │ id          │
-│ email       │  │ title       │  │ property_id │
-│ password    │  │ description │  │ user_id     │
-│ role        │  │ price       │  │ start_date  │
-│ created_at  │  │ owner_id    │  │ end_date    │
-└─────────────┘  └─────────────┘  └─────────────┘
-```
+### 5.3 Frontend
 
-### MongoDB (Document Store)
-```javascript
-// Chat Messages
-{
-  _id: ObjectId,
-  chatId: String,
-  senderId: String,
-  message: String,
-  timestamp: Date,
-  messageType: "TEXT|IMAGE|FILE",
-  metadata: {}
-}
+- Run frontend from `frontend/`.
+- Default dev port is `3000` (or another available port if `3000` is occupied).
 
-// Property Media
-{
-  _id: ObjectId,
-  propertyId: String,
-  mediaType: "IMAGE|VIDEO|DOCUMENT",
-  url: String,
-  thumbnailUrl: String,
-  metadata: {
-    size: Number,
-    dimensions: {width: Number, height: Number}
-  }
-}
-```
+## 6. Configuration Rules
 
-### Redis (Caching & Sessions)
-```
-# Session Storage
-session:{sessionId} → {userId, role, permissions, expiresAt}
-
-# Property Cache
-property:{propertyId} → {serialized property data}
-
-# Search Cache
-search:{query_hash} → {search results}
-
-# Rate Limiting
-ratelimit:{userId}:{endpoint} → {count, resetTime}
-```
-
-### Neo4j (Relationship & Recommendations)
-```cypher
-// User-Property Relationships
-(:User)-[:OWNS]->(:Property)
-(:User)-[:BOOKMARKED]->(:Property)
-(:User)-[:VIEWED]->(:Property)
-(:User)-[:BOOKED]->(:Property)
-
-// Recommendation Queries
-MATCH (u:User)-[:VIEWED]->(p:Property)<-[:VIEWED]-(other:User)
-MATCH (other)-[:BOOKED]->(recommended:Property)
-WHERE NOT (u)-[:VIEWED]->(recommended)
-RETURN recommended
-ORDER BY COUNT(other) DESC
-LIMIT 10
-```
-
-## 🔄 Event-Driven Architecture
-
-### Kafka Topics
-```yaml
-Topics:
-  user-events:          # User registration, profile updates
-  property-events:      # Property created, updated, deleted
-  booking-events:       # Booking lifecycle events
-  payment-events:       # Payment processing events
-  notification-events:  # Notification triggers
-```
-
-### Event Flow Example: Booking Process
-```
-1. User creates booking
-   ↓
-2. booking-service publishes 'BookingCreated'
-   ↓
-3. payment-service listens → creates payment request
-   ↓
-4. payment-service publishes 'PaymentRequested'
-   ↓
-5. notification-service listens → sends confirmation email
-```
-
-## 🔐 Security Architecture
-
-### Authentication Flow
-```
-Client → API Gateway → Auth Service → JWT Token
-  ↓
-Protected Resource ← Token Validation ← JWT Token
-```
-
-### Authorization Matrix
-```
-Role        | Property | Booking | Payment | Admin
-------------|----------|---------|---------|-------
-GUEST       | Read     | Create  | Own     | None
-USER        | CRUD     | CRUD    | Own     | None  
-ADMIN       | CRUD     | CRUD    | CRUD    | CRUD
-```
-
-## 📊 Monitoring & Observability
-
-### Metrics Collection
-```
-Application Metrics (Micrometer):
-- Request rate, latency, error rate
-- Database connection pool metrics
-- JVM metrics (heap, GC, threads)
-
-Business Metrics:
-- Booking conversion rate
-- Property view/booking ratio
-- Payment success rate
-- User engagement metrics
-```
-
-### Distributed Tracing
-```
-Request Flow:
-API Gateway → Auth Service → Property Service → Database
-     |            |              |                |
-     └─────────────┴──────────────┴────────────────┘
-                 Jaeger Trace ID: abc-123-def
-```
-
-## 🚀 Scalability Patterns
-
-### Horizontal Scaling
-- Each microservice can scale independently
-- Database sharding cho high-traffic services
-- CDN cho static content và images
-- Read replicas cho read-heavy operations
-
-### Caching Strategy
-```
-Level 1: Application Cache (Caffeine)
-Level 2: Distributed Cache (Redis)
-Level 3: CDN (CloudFlare/AWS CloudFront)
-Level 4: Database Query Cache
-```
-
-### Load Balancing
-```
-Client → Load Balancer → API Gateway → Service Registry
-                            ↓
-                    Round-robin/Weighted routing
-                            ↓
-                   Service Instances (Auto-scaled)
-```
-
-## 🔄 Data Consistency
-
-### Eventual Consistency
-- Sử dụng Event Sourcing cho critical workflows
-- Saga pattern cho distributed transactions
-- Compensating transactions cho rollback
-
-### CQRS Implementation
-```
-Write Side (Command):
-BookingService → MySQL → Event Store
-
-Read Side (Query):
-Event Store → View Updater → MongoDB
-```
-
-## 🛠️ Development Guidelines
-
-### Service Design Principles
-1. **Single Responsibility**: Mỗi service có một business domain
-2. **Database per Service**: Không share database giữa services
-3. **API First**: Design API contract trước khi implement
-4. **Event-Driven**: Sử dụng events cho inter-service communication
-5. **Resilience**: Circuit breaker, retry, timeout patterns
-
-### Technology Stack
-```yaml
-Backend:
-  - Java 17 + Spring Boot 3
-  - Spring Cloud (Gateway, Eureka)
-  - Apache Kafka
-  - Docker & Docker Compose
-
-Databases:
-  - MySQL 8.0
-  - MongoDB 6.0
-  - Redis 7.0
-  - Neo4j 5.0
-
-Monitoring:
-  - Prometheus + Grafana
-  - Jaeger (Tracing)
-  - ELK Stack (Logging)
-```
-
-## 📋 Service Dependencies
-
-### Startup Order
-```
-1. Infrastructure Services:
-   - Kafka, Redis, Databases
-   
-2. Discovery & Configuration:
-   - Eureka Server
-   
-3. Gateway & Security:
-   - API Gateway  
-   - Auth Service
-   
-4. Core Business Services:
-   - Profile Service
-   - Property Service
-   - File Service
-   
-5. Dependent Services:
-   - Booking Service (depends on Property, Profile)
-   - Payment Service (depends on Booking)
-   - Contract Service (depends on Booking)
-   - Billing Service (depends on Contract)
-   
-6. Support Services:
-   - Chat Service
-   - Notification Service
-```
-
-## 🚀 Deployment Strategies
-
-### Blue-Green Deployment
-```yaml
-# docker-compose.blue.yml
-version: '3.8'
-services:
-  property-service-blue:
-    image: roomie/property-service:v1.2.0
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod,blue
-      - SERVER_PORT=8081
-
-# docker-compose.green.yml  
-  property-service-green:
-    image: roomie/property-service:v1.3.0
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod,green
-      - SERVER_PORT=8082
-```
-
-### Canary Deployment
-```yaml
-# Load balancer config
-upstream property-service {
-    server property-service-v1:8080 weight=90;
-    server property-service-v2:8080 weight=10;
-}
-```
-
-## 🔄 Data Migration Strategy
-
-### Database Versioning
-```sql
--- V1.0__Initial_schema.sql
-CREATE TABLE users (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- V1.1__Add_user_profile.sql  
-ALTER TABLE users ADD COLUMN full_name VARCHAR(255);
-ALTER TABLE users ADD COLUMN phone_number VARCHAR(20);
-
--- V1.2__Create_properties.sql
-CREATE TABLE properties (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(500) NOT NULL,
-    owner_id BIGINT NOT NULL,
-    FOREIGN KEY (owner_id) REFERENCES users(id)
-);
-```
-
-### Event Store Migration
-```java
-@EventHandler
-public class PropertyEventMigrationHandler {
-    
-    @EventSourcingHandler
-    public void on(PropertyCreatedEvent_V1 event) {
-        // Migrate V1 events to V2 format
-        PropertyCreatedEvent_V2 newEvent = new PropertyCreatedEvent_V2(
-            event.getId(),
-            event.getTitle(),
-            event.getPrice(),
-            // Add new fields with defaults
-            PropertyType.APARTMENT,
-            Collections.emptyList()
-        );
-        eventStore.saveEvent(newEvent);
-    }
-}
-```
-
-## 📈 Performance Optimization
-
-### Database Optimization
-```sql
--- Indexing Strategy
-CREATE INDEX idx_properties_city_price ON properties(city, price);
-CREATE INDEX idx_bookings_user_date ON bookings(user_id, check_in_date);
-CREATE INDEX idx_messages_chat_timestamp ON messages(chat_id, created_at DESC);
-
-```
-
-### Caching Strategies
-```java
-@Service
-public class PropertyService {
-    
-    @Cacheable(value = "properties", key = "#contractId")
-    public Property findById(Long id) {
-        return propertyRepository.findById(id);
-    }
-    
-    @Cacheable(value = "property-search", key = "#criteria.hashCode()")
-    public List<Property> search(SearchCriteria criteria) {
-        return searchRepository.search(criteria);
-    }
-    
-    @CacheEvict(value = {"properties", "property-search"}, allEntries = true)
-    public Property updateProperty(Property property) {
-        return propertyRepository.save(property);
-    }
-}
-```
-
-### Connection Pool Optimization
-```yaml
-# application.yml
-spring:
-  datasource:
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      connection-timeout: 30000
-      leak-detection-threshold: 60000
-      
-  data:
-    mongodb:
-      connection-pool:
-        max-size: 100
-        min-size: 10
-        max-wait-time: 2000
-        max-connection-idle-time: 60000
-```
-
----
-
-Kiến trúc này đảm bảo hệ thống Roomie có thể mở rộng để phục vụ hàng triệu người dùng với hiệu suất cao, độ tin cậy và khả năng bảo trì tốt.
+- Keep Spring environment placeholders in format: `${VAR_NAME:fallback}`
+- Do not commit secrets; use local env files or OS-level environment variables
+- Elasticsearch credentials must use `spring.elasticsearch.username` and `spring.elasticsearch.password`

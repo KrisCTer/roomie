@@ -5,6 +5,21 @@
 Roomie contains 13 backend microservices and a React frontend application.
 This guide explains how to build, configure, and run the full project safely.
 
+## Runtime Endpoints (Local)
+
+- Frontend: `http://localhost:3000`
+- API Gateway: `http://localhost:8888`
+- API Prefix via Gateway: `/api/v1`
+
+Current gateway routes include:
+
+- identity, admin, profile, property, booking, contract, billing, payment, file, chat
+
+Not currently routed via gateway config:
+
+- notification-service
+- ai-service
+
 ---
 
 ## 1. Prerequisites

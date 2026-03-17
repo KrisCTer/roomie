@@ -33,6 +33,28 @@ Roomie is a rental property management platform built with a microservices archi
 - ai-service
 - admin-service
 
+## Service Ports (Source of Truth)
+
+| Service              | Port | Context Path  |
+| -------------------- | ---- | ------------- |
+| api-gateway          | 8888 | (none)        |
+| identity-service     | 8080 | /identity     |
+| admin-service        | 8081 | /admin        |
+| profile-service      | 8082 | /profile      |
+| property-service     | 8083 | /property     |
+| booking-service      | 8084 | /booking      |
+| contract-service     | 8085 | /contract     |
+| billing-service      | 8086 | /billing      |
+| payment-service      | 8087 | /payment      |
+| file-service         | 8088 | /file         |
+| chat-service         | 8089 | /chat         |
+| notification-service | 8090 | /notification |
+| ai-service           | 8091 | /ai           |
+
+Gateway base URL (local): `http://localhost:8888/api/v1`
+
+Note: Current gateway config does not include routes for `notification-service` and `ai-service`.
+
 ## System Requirements
 
 - Docker and Docker Compose

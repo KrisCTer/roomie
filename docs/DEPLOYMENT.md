@@ -5,6 +5,21 @@
 Roomie contains 13 backend microservices and a React frontend application.
 This guide explains how to build, configure, and run the full project safely.
 
+## Runtime Endpoints (Local)
+
+- Frontend: `http://localhost:3000`
+- API Gateway: `http://localhost:8888`
+- API Prefix via Gateway: `/api/v1`
+
+Current gateway routes include:
+
+- identity, admin, profile, property, booking, contract, billing, payment, file, chat
+
+Not currently routed via gateway config:
+
+- notification-service
+- ai-service
+
 ---
 
 ## 1. Prerequisites
@@ -41,7 +56,7 @@ Copy-Item .env.example .env
 If `.env.example` is not present, create `.env` manually and define all required variables.
 
 3. Replace all placeholder values with strong secrets.
-Use at least 16 characters with uppercase, lowercase, numbers, and symbols.
+   Use at least 16 characters with uppercase, lowercase, numbers, and symbols.
 
 Optional password generator:
 
@@ -166,4 +181,3 @@ git check-ignore infra/.env frontend/.env
 - Project overview: [README.md](README.md)
 - API docs: [docs/API.md](docs/API.md)
 - Architecture docs: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-
