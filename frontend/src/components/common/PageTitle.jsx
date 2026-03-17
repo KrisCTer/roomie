@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ChevronRight, Sparkles, Home } from "lucide-react";
-import "../../styles/bubble-animation.css";
+import { ChevronRight, Home } from "lucide-react";
 
 const PageTitle = ({ title, subtitle }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -10,89 +9,34 @@ const PageTitle = ({ title, subtitle }) => {
   }, []);
 
   return (
-    <div
-      className="relative overflow-hidden px-8 py-6 border-b shadow-lg"
-      style={{
-        backgroundColor: "#E1F5FE",
-        backgroundImage:
-          "linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 50%, #81D4FA 100%)",
-      }}
-    >
-      {/* Animated Background Gradient Wave */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="wave-animation"></div>
-      </div>
+    <div className="relative overflow-hidden border-b border-[#E8D8C7] bg-[#FFFBF6] px-4 py-5 md:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(204,111,74,0.14),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(167,139,93,0.12),transparent_40%)]" />
+      <div className="pointer-events-none absolute right-8 top-3 h-20 w-20 rounded-full bg-[#F6E3CF] blur-3xl opacity-60 animate-pulse" />
 
-      {/* Floating Bubbles Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="bubble"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${4 + Math.random() * 6}s`,
-              transform: `scale(${0.5 + Math.random() * 1.5})`,
-            }}
-          ></div>
-        ))}
-      </div>
-
-      {/* Sparkle Effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`sparkle-${i}`}
-            className="sparkle-particle"
-            style={{
-              left: `${10 + Math.random() * 80}%`,
-              top: `${10 + Math.random() * 80}%`,
-              animationDelay: `${Math.random() * 2}s`,
-            }}
-          >
-            <Sparkles className="w-3 h-3 text-blue-300" />
-          </div>
-        ))}
-      </div>
-
-      {/* Main Content */}
       <div
-        className={`relative z-10 flex flex-col transition-all duration-700 ${
-          isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        className={`relative z-10 flex flex-col transition-all duration-500 ${
+          isVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
       >
-        {/* Breadcrumb with Animation */}
-        <div className="flex items-center gap-2 mb-2">
-          <Home className="w-3.5 h-3.5 text-blue-600 animate-pulse" />
-          <span className="text-xs uppercase text-gray-600 tracking-widest font-medium slide-in-left">
-            ROOMIE
-          </span>
-          <ChevronRight className="w-3 h-3 text-gray-400" />
-          <span className="text-xs uppercase text-blue-700 tracking-widest font-semibold slide-in-right">
-            {title.toUpperCase()}
-          </span>
+        <div className="mb-1.5 flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-[#8A5A44]">
+          <Home className="h-3.5 w-3.5" />
+          <span className="font-semibold">Roomie</span>
+          <ChevronRight className="h-3 w-3 text-[#BFA58D]" />
+          <span className="font-bold">{title}</span>
         </div>
 
-        {/* Title with Gradient Text */}
-        <div className="flex items-center gap-3">
-          <div className="title-icon-wrapper">
-            <ChevronRight className="w-5 h-5 text-blue-700" />
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-600 bg-clip-text text-transparent animate-gradient">
-            {subtitle}
-          </h1>
-        </div>
+        <h1 className="text-xl font-bold text-[#1F2937] md:text-2xl">
+          {subtitle}
+        </h1>
 
-        {/* Decorative underline */}
-        <div className="mt-2 flex items-center gap-2">
-          <div className="h-1 bg-gradient-to-r from-blue-500 to-transparent rounded-full underline-animation"></div>
+        <div className="mt-3 h-1.5 w-full max-w-56 overflow-hidden rounded-full bg-[#F0E1CF]">
+          <div
+            className={`h-full rounded-full bg-gradient-to-r from-[#CC6F4A] via-[#D88762] to-[#E7B087] transition-all duration-700 ${
+              isVisible ? "w-40 md:w-48" : "w-8"
+            }`}
+          />
         </div>
       </div>
-
-      {/* Corner Decorations */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200 rounded-full blur-3xl opacity-20 animate-float"></div>
-      <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-200 rounded-full blur-3xl opacity-20 animate-float-delayed"></div>
     </div>
   );
 };

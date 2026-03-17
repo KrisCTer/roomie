@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 import React from "react";
 import {
   Calendar,
@@ -13,9 +13,7 @@ import {
 
 const BookingCard = ({ booking, isOwner }) => {
   const {
-    id,
     bookingReference,
-    propertyId,
     leaseStart,
     leaseEnd,
     duration,
@@ -34,37 +32,37 @@ const BookingCard = ({ booking, isOwner }) => {
   const getStatusConfig = (status) => {
     const configs = {
       PENDING_APPROVAL: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-800",
-        border: "border-yellow-300",
+        bg: "bg-amber-100",
+        text: "text-amber-800",
+        border: "border-amber-300",
         label: "Pending",
         icon: <Clock className="w-4 h-4" />,
       },
       ACTIVE: {
-        bg: "bg-green-100",
-        text: "text-green-800",
-        border: "border-green-300",
+        bg: "bg-emerald-100",
+        text: "text-emerald-800",
+        border: "border-emerald-300",
         label: "Active",
         icon: <CheckCircle className="w-4 h-4" />,
       },
       PAUSED: {
-        bg: "bg-blue-100",
-        text: "text-blue-800",
-        border: "border-blue-300",
+        bg: "bg-sky-100",
+        text: "text-sky-800",
+        border: "border-sky-300",
         label: "Paused",
         icon: <AlertCircle className="w-4 h-4" />,
       },
       TERMINATED: {
-        bg: "bg-red-100",
-        text: "text-red-800",
-        border: "border-red-300",
+        bg: "bg-rose-100",
+        text: "text-rose-800",
+        border: "border-rose-300",
         label: "Terminated",
         icon: <X className="w-4 h-4" />,
       },
       EXPIRED: {
-        bg: "bg-gray-100",
-        text: "text-gray-800",
-        border: "border-gray-300",
+        bg: "bg-stone-100",
+        text: "text-stone-800",
+        border: "border-stone-300",
         label: "Expired",
         icon: <AlertCircle className="w-4 h-4" />,
       },
@@ -82,7 +80,7 @@ const BookingCard = ({ booking, isOwner }) => {
   const statusConfig = getStatusConfig(status);
 
   return (
-    <div className="border rounded-lg p-6 hover:shadow-md transition-shadow bg-white">
+    <div className="border border-[#ECE1D3] rounded-2xl p-6 hover:shadow-[0_12px_28px_rgba(17,24,39,0.08)] transition-all duration-200 bg-white">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
@@ -104,9 +102,9 @@ const BookingCard = ({ booking, isOwner }) => {
       </div>
 
       {/* Lease Period */}
-      <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-[#EFE6DA]">
         <div className="flex items-start gap-2">
-          <Calendar className="w-4 h-4 text-blue-600 mt-1" />
+          <Calendar className="w-4 h-4 text-orange-600 mt-1" />
           <div>
             <div className="text-xs text-gray-500">Ngày bắt đầu</div>
             <div className="text-sm font-medium text-gray-900">
@@ -115,14 +113,14 @@ const BookingCard = ({ booking, isOwner }) => {
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Calendar className="w-4 h-4 text-blue-600 mt-1" />
+          <Calendar className="w-4 h-4 text-orange-600 mt-1" />
           <div>
             <div className="text-xs text-gray-500">Ngày kết thúc</div>
             <div className="text-sm font-medium text-gray-900">{leaseEnd}</div>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Clock className="w-4 h-4 text-blue-600 mt-1" />
+          <Clock className="w-4 h-4 text-orange-600 mt-1" />
           <div>
             <div className="text-xs text-gray-500">Thời gian</div>
             <div className="text-sm font-medium text-gray-900">{duration}</div>
@@ -132,7 +130,7 @@ const BookingCard = ({ booking, isOwner }) => {
 
       {/* Financial Info */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-green-600" />
             <div>
@@ -160,7 +158,7 @@ const BookingCard = ({ booking, isOwner }) => {
       <div className="flex gap-2 flex-wrap">
         <button
           onClick={onView}
-          className="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-colors text-sm font-medium"
         >
           <Eye className="w-4 h-4" />
           View Details
@@ -170,7 +168,7 @@ const BookingCard = ({ booking, isOwner }) => {
         {isOwner && tenantId && onViewTenantProfile && (
           <button
             onClick={onViewTenantProfile}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium"
           >
             <UserCircle className="w-4 h-4" />
             Hồ sơ người thuê
@@ -180,7 +178,7 @@ const BookingCard = ({ booking, isOwner }) => {
         {status === "PENDING_APPROVAL" && onConfirm && (
           <button
             onClick={onConfirm}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-medium"
           >
             <CheckCircle className="w-4 h-4" />
             Xác nhận
@@ -190,7 +188,7 @@ const BookingCard = ({ booking, isOwner }) => {
         {(status === "PENDING_APPROVAL" || status === "ACTIVE") && onCancel && (
           <button
             onClick={onCancel}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-colors text-sm font-medium"
           >
             <X className="w-4 h-4" />
             {status === "ACTIVE" ? "Kết thúc" : "Hủy bỏ"}
@@ -202,5 +200,3 @@ const BookingCard = ({ booking, isOwner }) => {
 };
 
 export default BookingCard;
-
-

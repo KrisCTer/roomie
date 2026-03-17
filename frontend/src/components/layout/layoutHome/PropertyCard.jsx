@@ -169,27 +169,31 @@ const PropertyCard = ({ property, onClick }) => {
 
           {/* Favorite Button */}
           <Tooltip title={isFavorited ? "Bỏ lưu" : "Lưu"} arrow>
-            <IconButton
-              onClick={handleFavoriteClick}
-              disabled={favoriteLoading}
-              size="small"
-              sx={{
-                bgcolor: isFavorited ? "rose.50" : "white",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                "&:hover": {
-                  bgcolor: isFavorited ? "rose.100" : "grey.100",
-                  transform: "scale(1.1)",
-                },
-                transition: "all 0.2s",
-              }}
-            >
-              <Heart
-                size={16}
-                className={
-                  isFavorited ? "fill-rose-600 text-rose-600" : "text-gray-700"
-                }
-              />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={handleFavoriteClick}
+                disabled={favoriteLoading}
+                size="small"
+                sx={{
+                  bgcolor: isFavorited ? "rose.50" : "white",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  "&:hover": {
+                    bgcolor: isFavorited ? "rose.100" : "grey.100",
+                    transform: "scale(1.1)",
+                  },
+                  transition: "all 0.2s",
+                }}
+              >
+                <Heart
+                  size={16}
+                  className={
+                    isFavorited
+                      ? "fill-rose-600 text-rose-600"
+                      : "text-gray-700"
+                  }
+                />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
 
@@ -357,5 +361,3 @@ const PropertyCard = ({ property, onClick }) => {
 };
 
 export default PropertyCard;
-
-

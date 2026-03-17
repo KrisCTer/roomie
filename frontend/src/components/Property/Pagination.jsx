@@ -16,11 +16,11 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t">
+    <div className="mt-6 flex items-center justify-center gap-2 border-t border-[#E8D8C7] pt-6">
       <button
         onClick={handlePrevious}
         disabled={currentPage === 1}
-        className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="rounded-xl px-3 py-2 text-gray-600 transition hover:bg-[#F6EEE5] disabled:cursor-not-allowed disabled:opacity-50"
       >
         ‹
       </button>
@@ -33,8 +33,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
             onClick={() => onPageChange(pageNum)}
             className={`px-4 py-2 rounded-lg transition ${
               currentPage === pageNum
-                ? "bg-blue-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-[#CC6F4A] text-white"
+                : "text-gray-600 hover:bg-[#F6EEE5]"
             }`}
           >
             {pageNum}
@@ -45,7 +45,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages}
-        className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="rounded-xl px-3 py-2 text-gray-600 transition hover:bg-[#F6EEE5] disabled:cursor-not-allowed disabled:opacity-50"
       >
         ›
       </button>

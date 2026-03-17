@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // src/pages/User/Dashboard/components/StatCard.jsx
 import React from "react";
 
@@ -11,25 +11,25 @@ const StatCard = ({
   onClick,
 }) => {
   const colorMap = {
-    blue: "bg-blue-100 text-blue-600",
-    green: "bg-green-100 text-green-600",
-    yellow: "bg-yellow-100 text-yellow-600",
-    red: "bg-red-100 text-red-600",
-    teal: "bg-teal-100 text-teal-600",
-    indigo: "bg-indigo-100 text-indigo-600",
-    pink: "bg-pink-100 text-pink-600",
+    blue: "bg-sky-100 text-sky-700",
+    green: "bg-emerald-100 text-emerald-700",
+    yellow: "bg-amber-100 text-amber-700",
+    red: "bg-rose-100 text-rose-700",
+    teal: "bg-teal-100 text-teal-700",
+    indigo: "bg-indigo-100 text-indigo-700",
+    pink: "bg-pink-100 text-pink-700",
   };
 
   return (
     <div
       onClick={onClick}
-      className={`bg-white border border-gray-200 rounded-2xl p-6 transition-all hover:border-gray-300 hover:shadow-lg ${
+      className={`apple-glass-panel rounded-2xl p-6 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-[0_18px_42px_rgba(17,24,39,0.18)] ${
         onClick ? "cursor-pointer" : ""
       }`}
     >
       <div className="flex items-center gap-4">
         <div
-          className={`w-14 h-14 rounded-xl ${colorMap[color]} flex items-center justify-center`}
+          className={`apple-glass-item w-14 h-14 rounded-xl ${colorMap[color]} flex items-center justify-center`}
         >
           <Icon className="w-7 h-7" />
         </div>
@@ -54,5 +54,3 @@ const StatCard = ({
 };
 
 export default StatCard;
-
-

@@ -17,7 +17,15 @@ const BookingCard = ({
   onLeaseStartChange,
   onLeaseEndChange,
   onBooking,
+  loading,
+  setLeaseStart,
+  setLeaseEnd,
+  onBook,
 }) => {
+  const isSubmitting = bookingLoading || loading;
+  const handleStartChange = onLeaseStartChange || setLeaseStart;
+  const handleEndChange = onLeaseEndChange || setLeaseEnd;
+  const handleBooking = onBooking || onBook;
   const today = new Date().toISOString().split("T")[0];
   const isAvailable = property.propertyStatus === "AVAILABLE";
   const startDateRef = useRef(null);
@@ -41,11 +49,14 @@ const BookingCard = ({
   }, [leaseEnd]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+    <div className="bg-white rounded-2xl shadow-[0_16px_42px_rgba(17,24,39,0.08)] border border-[#ECDCC8] p-6 sticky top-24">
       {/* Price Header */}
-      <div className="mb-6 pb-6 border-b border-gray-200">
+      <div className="mb-6 pb-6 border-b border-[#EFE3D4]">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9A3412]">
+          Tinh toan chi phi
+        </p>
         <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-3xl font-bold text-gray-900">
+          <span className="text-3xl font-bold text-[#111827]">
             {property.monthlyRent?.toLocaleString()}đ
           </span>
           <span className="text-gray-600">/tháng</span>
@@ -53,7 +64,7 @@ const BookingCard = ({
 
         {property.rentalDeposit > 0 && (
           <div className="flex items-center gap-2 mt-2">
-            <CreditCard className="w-4 h-4 text-gray-500" />
+            <CreditCard className="w-4 h-4 text-[#9A3412]" />
             <p className="text-sm text-gray-600">
               Cọc:{" "}
               <span className="font-semibold">
@@ -81,14 +92,14 @@ const BookingCard = ({
               value={displayStartDate}
               readOnly
               placeholder="dd/MM/yyyy"
-              className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-lg bg-white cursor-pointer hover:border-blue-500 focus:border-blue-500 focus:outline-none transition-colors"
+              className="w-full pl-11 pr-4 py-3 border-2 border-[#E5D5C2] rounded-xl bg-white cursor-pointer hover:border-[#CC6F4A] focus:border-[#CC6F4A] focus:outline-none transition-colors"
             />
             <input
               ref={startDateRef}
               type="date"
               min={today}
               value={leaseStart}
-              onChange={(e) => onLeaseStartChange(e.target.value)}
+              onChange={(e) => handleStartChange?.(e.target.value)}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
           </div>
@@ -109,14 +120,14 @@ const BookingCard = ({
               value={displayEndDate}
               readOnly
               placeholder="dd/MM/yyyy"
-              className="w-full pl-11 pr-4 py-3 border-2 border-gray-300 rounded-lg bg-white cursor-pointer hover:border-blue-500 focus:border-blue-500 focus:outline-none transition-colors"
+              className="w-full pl-11 pr-4 py-3 border-2 border-[#E5D5C2] rounded-xl bg-white cursor-pointer hover:border-[#CC6F4A] focus:border-[#CC6F4A] focus:outline-none transition-colors"
             />
             <input
               ref={endDateRef}
               type="date"
               min={leaseStart || today}
               value={leaseEnd}
-              onChange={(e) => onLeaseEndChange(e.target.value)}
+              onChange={(e) => handleEndChange?.(e.target.value)}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
           </div>
@@ -125,7 +136,7 @@ const BookingCard = ({
 
       {/* Cost Breakdown */}
       {leaseStart && leaseEnd && leaseDuration > 0 && (
-        <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-3 border border-gray-200">
+        <div className="bg-[#FFFBF6] rounded-xl p-4 mb-6 space-y-3 border border-[#ECDCC8]">
           <div className="flex justify-between text-sm">
             <span className="text-gray-700">
               {property.monthlyRent.toLocaleString()}đ × {leaseDuration} tháng
@@ -146,7 +157,7 @@ const BookingCard = ({
 
           <div className="pt-3 border-t border-gray-300 flex justify-between">
             <span className="font-bold text-gray-900">Tổng cộng</span>
-            <span className="text-xl font-bold text-blue-600">
+            <span className="text-xl font-bold text-[#C2410C]">
               {estimatedCost.toLocaleString()}đ
             </span>
           </div>
@@ -155,15 +166,15 @@ const BookingCard = ({
 
       {/* Booking Button */}
       <button
-        onClick={onBooking}
-        disabled={bookingLoading || !leaseStart || !leaseEnd || !isAvailable}
+        onClick={handleBooking}
+        disabled={isSubmitting || !leaseStart || !leaseEnd || !isAvailable}
         className={`w-full py-3.5 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
           !isAvailable
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg active:scale-95"
+            : "bg-[#CC6F4A] hover:bg-[#b7603f] shadow-md hover:shadow-lg active:scale-95"
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
-        {bookingLoading ? (
+        {isSubmitting ? (
           <>
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             Đang xử lý...
@@ -183,7 +194,7 @@ const BookingCard = ({
 
       {/* Info Notes */}
       <div className="mt-4 space-y-2">
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+        <div className="p-3 bg-[#FFF4E8] border border-[#F5D9C4] rounded-lg flex items-center gap-2">
           <Info className="w-4 h-4 text-amber-700 shrink-0" />
           <p className="text-xs text-amber-900">
             Bạn chưa bị tính phí cho đến khi chủ nhà xác nhận đặt phòng.
@@ -191,9 +202,9 @@ const BookingCard = ({
         </div>
 
         {leaseStart && leaseEnd && leaseDuration > 0 && (
-          <div className="  p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-blue-700 shrink-0" />
-            <p className="text-xs text-blue-900">
+          <div className="p-3 bg-[#F9FBFF] border border-[#D9E7FF] rounded-lg flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#1D4ED8] shrink-0" />
+            <p className="text-xs text-[#1E3A8A]">
               Thời gian thuê:{" "}
               <span className="font-semibold">{leaseDuration} tháng</span>
             </p>

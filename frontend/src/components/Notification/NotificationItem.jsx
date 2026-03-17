@@ -1,21 +1,34 @@
-﻿/* aria-label */
+/* aria-label */
 // src/components/NotificationItem.jsx
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { X } from "lucide-react";
-import { useNotifications } from "../../hooks/useNotifications";
+import { useNotificationContext } from "../../contexts/NotificationContext";
 
-const NotificationItem = ({ notification, onClick }) => {
-  const { markAsRead, deleteNotification } = useNotifications();
+const NotificationItem = ({
+  notification,
+  onClick,
+  onMarkAsRead,
+  onDelete,
+  onNavigate,
+}) => {
+  const { markAsRead, deleteNotification } = useNotificationContext();
+
+  const markReadAction = onMarkAsRead || markAsRead;
+  const deleteAction = onDelete || deleteNotification;
 
   const handleClick = async () => {
     if (!notification.isRead) {
-      await markAsRead(notification.id);
+      await markReadAction(notification.id);
     }
 
     if (notification.actionUrl) {
-      window.location.href = notification.actionUrl;
+      if (onNavigate) {
+        onNavigate(notification.actionUrl);
+      } else {
+        window.location.href = notification.actionUrl;
+      }
     }
 
     onClick?.();
@@ -23,7 +36,7 @@ const NotificationItem = ({ notification, onClick }) => {
 
   const handleDelete = async (e) => {
     e.stopPropagation();
-    await deleteNotification(notification.id);
+    await deleteAction(notification.id);
   };
 
   const getTimeAgo = (date) => {
@@ -40,13 +53,13 @@ const NotificationItem = ({ notification, onClick }) => {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "URGENT":
-        return "bg-red-100 border-red-400";
+        return "bg-rose-100 border-rose-300 text-rose-800";
       case "HIGH":
-        return "bg-orange-100 border-orange-400";
+        return "bg-amber-100 border-amber-300 text-amber-800";
       case "NORMAL":
-        return "bg-blue-100 border-blue-400";
+        return "bg-sky-100 border-sky-300 text-sky-800";
       default:
-        return "bg-gray-100 border-gray-400";
+        return "bg-stone-100 border-stone-300 text-stone-800";
     }
   };
 
@@ -67,8 +80,8 @@ const NotificationItem = ({ notification, onClick }) => {
     <div
       onClick={handleClick}
       className={`
-        p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors
-        ${!notification.isRead ? "bg-blue-50" : "bg-white"}
+        p-4 border-b border-[#F3ECE2] hover:bg-[#FAF6EF] cursor-pointer transition-colors
+        ${!notification.isRead ? "bg-[#FFF4E8]" : "bg-white"}
       `}
     >
       <div className="flex items-start gap-3">
@@ -81,7 +94,7 @@ const NotificationItem = ({ notification, onClick }) => {
               className="w-10 h-10 rounded-full"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-xl">
+            <div className="w-10 h-10 rounded-full bg-[#F3E8D9] flex items-center justify-center text-xl">
               {getTypeIcon(notification.type)}
             </div>
           )}
@@ -102,7 +115,8 @@ const NotificationItem = ({ notification, onClick }) => {
             {/* Delete button */}
             <button
               onClick={handleDelete}
-              className="flex-shrink-0 ml-2 p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+              aria-label="Delete notification"
+              className="flex-shrink-0 ml-2 p-1 rounded-lg hover:bg-[#F3ECE2] text-gray-400 hover:text-gray-600"
             >
               <X className="w-4 h-4" />
             </button>
@@ -126,7 +140,7 @@ const NotificationItem = ({ notification, onClick }) => {
             )}
 
             {!notification.isRead && (
-              <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
             )}
           </div>
         </div>
@@ -136,5 +150,3 @@ const NotificationItem = ({ notification, onClick }) => {
 };
 
 export default NotificationItem;
-
-

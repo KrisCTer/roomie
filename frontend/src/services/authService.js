@@ -36,6 +36,10 @@ export const logout = async () => {
 };
 
 export const register = (payload) => BaseService.post(API.REGISTER, payload);
+export const forgotPassword = (payload) =>
+  BaseService.post(API.FORGOT_PASSWORD, payload);
+export const resetPassword = (payload) =>
+  BaseService.post(API.RESET_PASSWORD, payload);
 export const introspect = (token) => BaseService.post(API.INTROSPECT, { token });
 export const refreshToken = (refreshToken) =>
   BaseService.post(API.REFRESH_TOKEN, { token: refreshToken });

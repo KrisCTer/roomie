@@ -1,9 +1,8 @@
-﻿/* aria-label */
+/* aria-label */
 // src/components/notifications/NotificationDropdown.jsx
 import React from "react";
 import {
   Menu,
-  MenuItem,
   Typography,
   Box,
   Button,
@@ -36,8 +35,13 @@ import { vi } from "date-fns/locale";
 
 const NotificationDropdown = ({ anchorEl, open, onClose }) => {
   const navigate = useNavigate();
-  const { notifications, markAsRead, markAllAsRead, deleteNotification } =
-    useNotificationContext();
+  const {
+    notifications,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+  } = useNotificationContext();
 
   /* ================= ICON MAP ================= */
   const getNotificationIcon = (type) => {
@@ -106,11 +110,14 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: 400,
+          width: 420,
           maxHeight: 600,
           mt: 1,
-          borderRadius: 2,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          borderRadius: 4,
+          border: "1px solid #EFE6DA",
+          boxShadow: "0 24px 48px rgba(17,24,39,0.14)",
+          background: "#FFFCF8",
+          overflow: "hidden",
         },
       }}
       transformOrigin={{ horizontal: "right", vertical: "top" }}
@@ -119,30 +126,65 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
       {/* ===== HEADER ===== */}
       <Box
         sx={{
-          p: 2,
+          px: 2,
+          py: 1.8,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          borderBottom: "1px solid #F0E7DB",
+          background:
+            "linear-gradient(110deg, rgba(255,249,242,1) 0%, rgba(255,252,248,1) 100%)",
         }}
       >
-        <Typography variant="h6" fontWeight={600}>
+        <Typography variant="h6" fontWeight={700}>
           Thông báo
         </Typography>
         <Button
           size="small"
           startIcon={<MailCheck size={18} />}
           onClick={handleMarkAllRead}
-          sx={{ textTransform: "none" }}
+          sx={{ textTransform: "none", color: "#B45309", fontWeight: 600 }}
         >
           Đánh dấu tất cả
         </Button>
       </Box>
 
-      <Divider />
-
       {/* ===== LIST ===== */}
       <Box sx={{ maxHeight: 400, overflow: "auto" }}>
-        {notifications.length === 0 ? (
+        {loading ? (
+          <Box sx={{ p: 2 }}>
+            {[...Array(4)].map((_, idx) => (
+              <Box
+                key={`dropdown-skeleton-${idx}`}
+                sx={{
+                  border: "1px solid #F0E7DB",
+                  borderRadius: 3,
+                  bgcolor: "#FFFFFF",
+                  p: 1.5,
+                  mb: 1.25,
+                }}
+              >
+                <Box
+                  sx={{
+                    height: 12,
+                    width: "45%",
+                    bgcolor: "#EFE6DA",
+                    borderRadius: 1,
+                    mb: 1,
+                  }}
+                />
+                <Box
+                  sx={{
+                    height: 10,
+                    width: "70%",
+                    bgcolor: "#EFE6DA",
+                    borderRadius: 1,
+                  }}
+                />
+              </Box>
+            ))}
+          </Box>
+        ) : notifications.length === 0 ? (
           <Box sx={{ p: 4, textAlign: "center" }}>
             <Bell size={56} className="text-gray-400 mb-2" />
             <Typography color="text.secondary">
@@ -157,19 +199,18 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                 onClick={() => handleNotificationClick(notification)}
                 sx={{
                   cursor: "pointer",
-                  bgcolor: notification.isRead ? "transparent" : "action.hover",
+                  bgcolor: notification.isRead ? "transparent" : "#FFF4E8",
                   "&:hover": {
-                    bgcolor: "action.selected",
+                    bgcolor: "#FAF3E9",
                   },
-                  borderBottom: "1px solid",
-                  borderColor: "divider",
+                  borderBottom: "1px solid #F3ECE2",
                 }}
               >
                 {/* ICON */}
                 <ListItemAvatar>
                   <Avatar
                     sx={{
-                      bgcolor: "primary.main",
+                      bgcolor: "#111827",
                       width: 36,
                       height: 36,
                     }}
@@ -240,7 +281,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                             {
                               addSuffix: true,
                               locale: vi,
-                            }
+                            },
                           )}
                         </Typography>
 
@@ -262,7 +303,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                               width: 8,
                               height: 8,
                               borderRadius: "50%",
-                              bgcolor: "primary.main",
+                              bgcolor: "#EA580C",
                             }}
                           />
                         )}
@@ -279,11 +320,19 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
       <Divider />
 
       {/* ===== FOOTER ===== */}
-      <Box sx={{ p: 1 }}>
+      <Box sx={{ p: 1.2, borderTop: "1px solid #F0E7DB", bgcolor: "#FFFFFF" }}>
         <Button
           fullWidth
           onClick={handleViewAll}
-          sx={{ textTransform: "none" }}
+          sx={{
+            textTransform: "none",
+            borderRadius: 999,
+            minHeight: 40,
+            bgcolor: "#111827",
+            color: "#fff",
+            fontWeight: 700,
+            "&:hover": { bgcolor: "#030712" },
+          }}
         >
           Xem tất cả thông báo
         </Button>
@@ -293,5 +342,3 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
 };
 
 export default NotificationDropdown;
-
-

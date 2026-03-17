@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 /* aria-label */
 // web-app/src/pages/Booking/MyBookings.jsx
 import React, { useState } from "react";
@@ -52,15 +52,15 @@ const MyBookings = () => {
   const transformedBookings = bookings.map(transformBookingToCard);
 
   const ownerCount = bookings.filter(
-    (b) => b.landlordId === currentUserId
+    (b) => b.landlordId === currentUserId,
   ).length;
 
   const tenantCount = bookings.filter(
-    (b) => b.tenantId === currentUserId
+    (b) => b.tenantId === currentUserId,
   ).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-[#FAFAFA]">
       {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
@@ -84,7 +84,19 @@ const MyBookings = () => {
         />
 
         <main className="p-8 w-full">
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="bg-white border border-[#EFE6DA] rounded-2xl shadow-sm p-6 mb-6">
+            <div className="mb-6 rounded-2xl border border-[#F0E5D8] bg-gradient-to-r from-[#FFF8EE] to-[#FFFCF8] px-4 py-3 flex flex-wrap items-center gap-3 text-sm">
+              <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
+                Tổng booking: {bookings.length}
+              </span>
+              <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
+                Vai trò chủ nhà: {ownerCount}
+              </span>
+              <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
+                Vai trò người thuê: {tenantCount}
+              </span>
+            </div>
+
             {/* ❌ Remove ViewModeToggle - Role toggle is now in Header */}
 
             {/* Filters */}
@@ -96,7 +108,7 @@ const MyBookings = () => {
             />
 
             {/* Bookings List */}
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-white rounded-xl border border-[#EFE6DA] shadow-sm">
               <BookingsList
                 bookings={transformedBookings}
                 loading={loading}
@@ -137,5 +149,3 @@ const MyBookings = () => {
 };
 
 export default MyBookings;
-
-

@@ -565,7 +565,7 @@ const StickyHeader = ({
                   </Box>
 
                   {!selectedProvince ? (
-                    <>
+                    <Box component="div">
                       {/* Recent Searches */}
                       {recentSearches.length > 0 && (
                         <>
@@ -654,9 +654,9 @@ const StickyHeader = ({
                           </MenuItem>
                         ))}
                       </Box>
-                    </>
+                    </Box>
                   ) : (
-                    <>
+                    <Box component="div">
                       <MenuItem
                         onClick={() => {
                           setSelectedProvince(null);
@@ -688,7 +688,7 @@ const StickyHeader = ({
                           </MenuItem>
                         ))}
                       </Box>
-                    </>
+                    </Box>
                   )}
                 </Menu>
 

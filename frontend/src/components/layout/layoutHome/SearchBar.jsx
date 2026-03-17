@@ -32,7 +32,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
   const [searchData, setSearchData] = useState({
     location: "",
     propertyType: "",
-    priceRange: [0, 20000000],
+    priceRange: [0, 50000000],
   });
 
   // Location suggestions
@@ -191,7 +191,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
               <Typography sx={{ fontSize: "0.875rem", color: "grey.600" }}>
                 {searchData.propertyType
                   ? propertyTypes.find(
-                      (p) => p.value === searchData.propertyType
+                      (p) => p.value === searchData.propertyType,
                     )?.label
                   : "Tất cả"}
               </Typography>
@@ -232,7 +232,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
 
           {/* ====== CHỌN TỈNH / GỢI Ý ====== */}
           {!selectedProvince && (
-            <>
+            <Box component="div">
               {/* Recent Searches */}
               {recentSearches.length > 0 && (
                 <>
@@ -322,12 +322,12 @@ const SearchBar = ({ compact = false, onSearch }) => {
                   </MenuItem>
                 ))}
               </Box>
-            </>
+            </Box>
           )}
 
           {/* ====== CHỌN QUẬN / HUYỆN ====== */}
           {selectedProvince && (
-            <>
+            <Box component="div">
               <MenuItem
                 onClick={() => {
                   setSelectedProvince(null);
@@ -361,7 +361,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                   </MenuItem>
                 ))}
               </Box>
-            </>
+            </Box>
           )}
         </Menu>
       </>
@@ -448,7 +448,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
           >
             {/* VIEW: CHỌN TỈNH / GỢI Ý */}
             {!selectedProvince && (
-              <>
+              <Box component="div">
                 {recentSearches.length > 0 && (
                   <>
                     <Box sx={{ px: 2, py: 1 }}>
@@ -535,12 +535,12 @@ const SearchBar = ({ compact = false, onSearch }) => {
                     <ListItemText primary={p.name} />
                   </MenuItem>
                 ))}
-              </>
+              </Box>
             )}
 
             {/* VIEW: CHỌN QUẬN / HUYỆN */}
             {selectedProvince && (
-              <>
+              <Box component="div">
                 <MenuItem
                   onClick={() => {
                     setSelectedProvince(null);
@@ -561,7 +561,7 @@ const SearchBar = ({ compact = false, onSearch }) => {
                     {d.name}
                   </MenuItem>
                 ))}
-              </>
+              </Box>
             )}
           </Menu>
         </Box>
