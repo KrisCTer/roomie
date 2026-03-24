@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // src/components/Billing/BillActionsEnhanced.jsx
 import React from "react";
 import { DollarSign, ArrowLeft } from "lucide-react";
@@ -10,23 +10,23 @@ import BillPdfDownloader from "./BillPdfDownloader";
  */
 const BillActionsEnhanced = ({ bill, canPay, onPayment, onBack }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Actions</h2>
+    <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+      <h2 className="text-xl font-bold text-slate-900 mb-5">Thao tác</h2>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Pay Button */}
         {canPay && (
           <button
             onClick={onPayment}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold shadow-md"
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all font-bold shadow-lg shadow-slate-200 group"
           >
-            <DollarSign className="w-5 h-5" />
-            Pay Now
+            <DollarSign className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            Thanh toán hóa đơn
           </button>
         )}
 
         {/* PDF Download */}
-        <div className="pt-2 border-t">
+        <div className="pt-2">
           <BillPdfDownloader
             billId={bill.id}
             billMonth={bill.billingMonth?.substring(0, 7)}
@@ -37,10 +37,10 @@ const BillActionsEnhanced = ({ bill, canPay, onPayment, onBack }) => {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+          className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all font-bold border border-slate-100"
         >
           <ArrowLeft className="w-5 h-5" />
-          Back to List
+          Quay lại danh sách
         </button>
       </div>
     </div>

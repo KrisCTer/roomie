@@ -46,28 +46,34 @@ export const getStatusConfig = (status) => {
 export const getPaymentMethods = () => {
   return [
     {
-      id: "VNPAY",
-      name: "VNPay",
-      description: "Pay via VNPay",
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-      border: "border-blue-200",
+      id: "MOMO",
+      name: "MoMo Wallet",
+      description: "Thanh toán ngay qua ứng dụng MoMo - Nhanh chóng & An toàn.",
+      instructions: "Bạn sẽ được chuyển hướng đến hệ thống thanh toán của MoMo. Vui lòng quét mã QR hoặc đăng nhập để hoàn tất.",
+      color: "bg-[#A50064] text-white", // Brand MoMo Pink
+      iconColor: "text-[#A50064]",
+      bg: "bg-[#fdf2f8]",
+      border: "border-[#fbcfe8] hover:border-[#A50064]",
     },
     {
-      id: "MOMO",
-      name: "MoMo",
-      description: "Pay via MoMo wallet",
-      color: "text-pink-600",
-      bg: "bg-pink-50",
-      border: "border-pink-200",
+      id: "VNPAY",
+      name: "VNPay / Thẻ ATM",
+      description: "Thanh toán qua cổng VNPay bằng QR Code hoặc Thẻ Nội Địa.",
+      instructions: "Hệ thống sẽ chuyển hướng bạn đến cổng thanh toán VNPay. Hỗ trợ tất cả các ngân hàng Việt Nam.",
+      color: "bg-[#1E3A8A] text-white", // Brand VNPay Blue
+      iconColor: "text-[#1E3A8A]",
+      bg: "bg-[#eff6ff]",
+      border: "border-[#dbeafe] hover:border-[#1E3A8A]",
     },
     {
       id: "CASH",
-      name: "Cash",
-      description: "Pay in cash",
-      color: "text-green-600",
-      bg: "bg-green-50",
-      border: "border-green-200",
+      name: "Tiền mặt",
+      description: "Thanh toán trực tiếp cho chủ nhà khi nhận hóa đơn.",
+      instructions: "Vui lòng liên hệ trực tiếp với chủ nhà để xác nhận việc thanh toán bằng tiền mặt.",
+      color: "bg-[#10B981] text-white", // Green
+      iconColor: "text-[#10B981]",
+      bg: "bg-[#f0fdf4]",
+      border: "border-[#dcfce7] hover:border-[#10B981]",
     },
   ];
 };
