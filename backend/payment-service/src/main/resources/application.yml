@@ -3,6 +3,10 @@ server:
   servlet:
     context-path: /payment
 spring:
+  config:
+    import:
+      - optional:file:../../infra/.env[.properties]
+      - optional:file:infra/.env[.properties]
   application:
     name: payment-service
 
