@@ -23,7 +23,7 @@ spring:
     mongodb:
       uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/roomie_payment?authSource=admin
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:100.69.114.54}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 5000ms
