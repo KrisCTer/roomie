@@ -50,7 +50,7 @@ All backend services are configured to read these host/port variables with local
 
 Quick-start files for this mode:
 
-1. LAN env template: [infra/.env.lan.example](infra/.env.lan.example)
+1. Env template: [infra/.env.example](infra/.env.example) — change `*_HOST` to DB server IP for multi-machine
 2. Automated backup script: [infra/scripts/database/backup-db.sh](infra/scripts/database/backup-db.sh)
 3. Tailscale sharing guide: [docs/TAILSCALE_LAN_SETUP.md](docs/TAILSCALE_LAN_SETUP.md)
 4. Ubuntu one-time setup script: [infra/scripts/deployment/setup-ubuntu.sh](infra/scripts/deployment/setup-ubuntu.sh)
