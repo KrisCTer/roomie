@@ -24,12 +24,12 @@ spring:
   # MongoDB Configuration - Additional Profile Data
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/roomie_profile?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:100.96.78.62}:${MONGO_PORT:27017}/roomie_profile?authSource=admin
       database: roomie_profile
 
     # Redis Configuration - Caching
     redis:
-      host: ${REDIS_HOST:100.69.114.54}
+      host: ${REDIS_HOST:100.96.78.62}
       port: ${REDIS_PORT:6379}
       timeout: 60000
       lettuce:
@@ -40,14 +40,14 @@ spring:
 
   # Neo4j Configuration - Relationship Graph
   neo4j:
-    uri: bolt://${NEO4J_HOST:localhost}:${NEO4J_PORT:7687}
+    uri: bolt://${NEO4J_HOST:100.96.78.62}:${NEO4J_PORT:7687}
     authentication:
       username: neo4j
       password: ${NEO4J_PASSWORD:${SPRING_NEO4J_AUTHENTICATION_PASSWORD:}}
 
   # Kafka Configuration
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+    bootstrap-servers: ${KAFKA_HOST:100.96.78.62}:${KAFKA_PORT:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

@@ -19,7 +19,7 @@ spring:
           profile-service:
             url: http://localhost:8082/profile
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:100.69.114.54}:${MYSQL_PORT:3306}/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${MYSQL_HOST:100.96.78.62}:${MYSQL_PORT:3306}/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:roomie}
     password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -36,7 +36,7 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:100.69.114.54}
+      host: ${REDIS_HOST:100.96.78.62}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 60000
@@ -87,7 +87,7 @@ spring:
             user-name-attribute: id
 
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+    bootstrap-servers: ${KAFKA_HOST:100.96.78.62}:${KAFKA_PORT:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
