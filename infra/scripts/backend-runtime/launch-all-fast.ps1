@@ -1,7 +1,8 @@
 # launch-all-fast.ps1 - Stable 13-service launcher
 
 param(
-    [object]$Headless = $true
+    [object]$Headless = $true,
+    [switch]$SkipCompile
 )
 
 $HeadlessMode = $true
@@ -69,6 +70,29 @@ $SERVICES = @(
     @{ name = "ai-service"; port = 8091; phase = 3 }
 )
 
+function Invoke-ServiceCompile([string]$serviceName) {
+    $serviceDir = Join-Path $BACKEND_ROOT $serviceName
+    $mvnw = Join-Path $serviceDir "mvnw.cmd"
+
+    if (-not (Test-Path $mvnw)) {
+        Write-Host "  [ERROR] ${serviceName}: mvnw.cmd not found" -ForegroundColor Red
+        return $false
+    }
+
+    Push-Location $serviceDir
+    & $mvnw -q clean compile -DskipTests
+    $compileExit = $LASTEXITCODE
+    Pop-Location
+
+    if ($compileExit -ne 0) {
+        Write-Host "  [ERROR] ${serviceName}: compile failed" -ForegroundColor Red
+        return $false
+    }
+
+    Write-Host "  [OK] ${serviceName}: compile success" -ForegroundColor Green
+    return $true
+}
+
 function Get-ServiceJar([string]$serviceName) {
     $targetDir = Join-Path $BACKEND_ROOT "$serviceName\target"
     if (-not (Test-Path $targetDir)) {
@@ -129,14 +153,22 @@ function Ensure-ExecutableJar([string]$serviceName) {
 
 $missing = @($SERVICES | Where-Object { -not (Get-ServiceJar $_.name) })
 if ($missing.Count -gt 0) {
-    Write-Host "`n[BUILD] Missing JARs for $($missing.Count) services. Running build once..." -ForegroundColor Yellow
-    Push-Location $BACKEND_ROOT
-    & mvn clean install -DskipTests
-    $buildExit = $LASTEXITCODE
-    Pop-Location
-    if ($buildExit -ne 0) {
-        Write-Host "[ERROR] Build failed. Please fix build errors then retry." -ForegroundColor Red
-        exit 1
+    Write-Host "`n[BUILD] Missing JARs for $($missing.Count) services. Building missing services..." -ForegroundColor Yellow
+    foreach ($svc in $missing) {
+        if (-not (Invoke-ServiceCompile $svc.name)) {
+            Write-Host "[ERROR] Build failed. Please fix compile errors then retry." -ForegroundColor Red
+            exit 1
+        }
+    }
+}
+
+if (-not $SkipCompile.IsPresent) {
+    Write-Host "`n[PRECHECK] Compiling all services to generate MapStruct mappers..." -ForegroundColor Cyan
+    foreach ($svc in $SERVICES) {
+        if (-not (Invoke-ServiceCompile $svc.name)) {
+            Write-Host "[ERROR] Precheck compile failed. Please fix errors then retry." -ForegroundColor Red
+            exit 1
+        }
     }
 }
 
