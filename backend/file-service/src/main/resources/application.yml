@@ -31,7 +31,6 @@ app:
     access-key: ${MINIO_ACCESS_KEY:${MINIO_ROOT_USER:${MINIO_USER:}}}
     secret-key: ${MINIO_SECRET_KEY:${MINIO_ROOT_PASSWORD:${MINIO_PASSWORD:}}}
 
-
 springdoc:
   api-docs:
     enabled: false
