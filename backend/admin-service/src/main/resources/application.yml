@@ -28,7 +28,7 @@ spring:
 
   # Elasticsearch
   elasticsearch:
-    uris: http://${ELASTICSEARCH_HOST:localhost}:${ELASTICSEARCH_PORT:9200}
+    uris: http://${ELASTICSEARCH_HOST:100.69.114.54}:${ELASTICSEARCH_PORT:9200}
 
   # Kafka
   kafka:

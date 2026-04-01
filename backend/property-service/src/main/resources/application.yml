@@ -23,7 +23,7 @@ spring:
       password: ${REDIS_PASSWORD:}
 
   elasticsearch:
-    uris: http://${ELASTICSEARCH_HOST:localhost}:${ELASTICSEARCH_PORT:9200}
+    uris: http://${ELASTICSEARCH_HOST:100.69.114.54}:${ELASTICSEARCH_PORT:9200}
     username: ${ELASTICSEARCH_USERNAME:${ELASTIC_USERNAME:elastic}}
     password: ${ELASTICSEARCH_PASSWORD:${ELASTIC_PASSWORD:}}
 
