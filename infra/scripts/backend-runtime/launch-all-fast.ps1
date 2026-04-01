@@ -76,9 +76,9 @@ function Get-ServiceJar([string]$serviceName) {
     }
 
     Get-ChildItem -Path $targetDir -Filter "*-SNAPSHOT.jar" -File -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -notlike "*.original" } |
-        Sort-Object LastWriteTime -Descending |
-        Select-Object -First 1
+    Where-Object { $_.Name -notlike "*.original" } |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
 }
 
 function Test-ExecutableJar([string]$jarPath) {
