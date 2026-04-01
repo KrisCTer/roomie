@@ -1,8 +1,6 @@
 package com.roomie.services.booking_service.service;
 
-import com.roomie.services.booking_service.dto.event.BookingCreatedEvent;
 import com.roomie.services.booking_service.dto.event.BookingEvent;
-import com.roomie.services.booking_service.dto.event.NotificationEvent;
 import com.roomie.services.booking_service.dto.request.BookingRequest;
 import com.roomie.services.booking_service.dto.response.BookingResponse;
 import com.roomie.services.booking_service.dto.response.property.PropertyResponse;
@@ -27,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service

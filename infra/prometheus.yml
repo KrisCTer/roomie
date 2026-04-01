@@ -4,17 +4,19 @@ global:
 scrape_configs:
   - job_name: 'spring-boot-services'
     metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
     static_configs:
       - targets:
-          - 'auth-service:8080'
-          - 'property-service:8083'
-          - 'api-gateway:8888'
-    scrape_interval: 10s
-
-  - job_name: 'kafka'
-    static_configs:
-      - targets: ['kafka:9101']
-
-  - job_name: 'mysql'
-    static_configs:
-      - targets: ['mysql:3306']
+          - 'localhost:8888'  # api-gateway
+          - 'localhost:8080'  # identity-service
+          - 'localhost:8081'  # admin-service
+          - 'localhost:8082'  # profile-service
+          - 'localhost:8083'  # property-service
+          - 'localhost:8084'  # booking-service
+          - 'localhost:8085'  # contract-service
+          - 'localhost:8086'  # billing-service
+          - 'localhost:8087'  # payment-service
+          - 'localhost:8088'  # file-service
+          - 'localhost:8089'  # chat-service
+          - 'localhost:8090'  # notification-service
+          - 'localhost:8091'  # ai-service

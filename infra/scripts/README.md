@@ -3,6 +3,7 @@
 This folder is organized by function for easier usage, maintenance, and onboarding.
 
 ## backend-runtime
+- `build-all.ps1`: clean compile (or package) all 13 backend services via Maven.
 - `launch-all-fast.ps1`: launch 13 backend services from local JARs.
 - `check-services.ps1`: health check with `HEALTHY/DEGRADED/OFFLINE` classification.
 - `stop-all-services.ps1`: stop backend Java service processes.

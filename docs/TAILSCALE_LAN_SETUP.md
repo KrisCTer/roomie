@@ -1,6 +1,8 @@
-# Roomie Shared DB Access via Tailscale
+# Roomie Shared DB Access (LAN / Tailscale)
 
-Use this guide when one machine hosts Roomie infrastructure and other machines need to use the same DB/API.
+Use this guide when one machine hosts Roomie infrastructure and other machines need to share the same databases.
+
+---
 
 ## 1. Host Machine (runs Docker services)
 
@@ -13,62 +15,130 @@ tailscale ip -4
 
 3. Set this IP in `infra/.env` for shared endpoints:
 
-- `MYSQL_HOST=<host-tailscale-ip>`
-- `MONGO_HOST=<host-tailscale-ip>`
-- `REDIS_HOST=<host-tailscale-ip>`
-- `NEO4J_HOST=<host-tailscale-ip>`
-- `KAFKA_HOST=<host-tailscale-ip>`
-- `KAFKA_ADVERTISED_HOST=<host-tailscale-ip>`
-- `ELASTICSEARCH_HOST=<host-tailscale-ip>`
+```dotenv
+MYSQL_HOST=<HOST_IP>
+MONGO_HOST=<HOST_IP>
+REDIS_HOST=<HOST_IP>
+NEO4J_HOST=<HOST_IP>
+KAFKA_HOST=<HOST_IP>
+KAFKA_ADVERTISED_HOST=<HOST_IP>
+ELASTICSEARCH_HOST=<HOST_IP>
+```
 
-4. Start infrastructure and backend services.
+4. Start infrastructure:
 
-## 2. Client Machine (other teammate)
+```bash
+cd infra
+docker-compose --env-file .env up -d
+```
+
+5. Start backend services as normal.
+
+---
+
+## 2. Partner / Client Machine
+
+### 2.1 One-Time Setup
 
 1. Install Tailscale and join the same tailnet.
-2. Verify connectivity to host machine:
+2. Get `infra/.env` from the host owner (via secure channel, **never** in chat/git).
+3. Replace all `*_HOST` values with the host's Tailscale/LAN IP.
 
-```bash
-ping <host-tailscale-ip>
+### 2.2 Copy-Paste Environment Block
+
+Add or override these variables in your `infra/.env`:
+
+```dotenv
+# Replace <HOST_IP> with actual host Tailscale/LAN IP
+MYSQL_HOST=<HOST_IP>
+MYSQL_PORT=3306
+
+MONGO_HOST=<HOST_IP>
+MONGO_PORT=27017
+
+REDIS_HOST=<HOST_IP>
+REDIS_PORT=6379
+
+NEO4J_HOST=<HOST_IP>
+NEO4J_PORT=7687
+
+ELASTICSEARCH_HOST=<HOST_IP>
+ELASTICSEARCH_PORT=9200
+
+KAFKA_HOST=<HOST_IP>
+KAFKA_PORT=9092
 ```
 
-3. In local backend env, point DB host variables to host Tailscale IP.
-4. Use shared API base URL to access services.
+Note:
+- If your app runs inside the same Docker network as Kafka broker, use `kafka:29092`.
+- If your app runs on host machine (normal local run), use `<HOST_IP>:9092`.
 
-## 2.1 Connectivity Checks (Recommended)
+### 2.3 Connectivity Test
 
-Run these from a client machine before starting services:
-
-```bash
-nc -vz <host-tailscale-ip> 3306
-nc -vz <host-tailscale-ip> 27017
-nc -vz <host-tailscale-ip> 6379
-nc -vz <host-tailscale-ip> 7687
-nc -vz <host-tailscale-ip> 9092
-nc -vz <host-tailscale-ip> 9200
-```
-
-If `nc` is unavailable on Windows PowerShell, use:
+**Windows PowerShell:**
 
 ```powershell
-Test-NetConnection <host-tailscale-ip> -Port 3306
-Test-NetConnection <host-tailscale-ip> -Port 27017
-Test-NetConnection <host-tailscale-ip> -Port 6379
-Test-NetConnection <host-tailscale-ip> -Port 7687
-Test-NetConnection <host-tailscale-ip> -Port 9092
-Test-NetConnection <host-tailscale-ip> -Port 9200
+Test-NetConnection <HOST_IP> -Port 3306
+Test-NetConnection <HOST_IP> -Port 27017
+Test-NetConnection <HOST_IP> -Port 6379
+Test-NetConnection <HOST_IP> -Port 7687
+Test-NetConnection <HOST_IP> -Port 9092
+Test-NetConnection <HOST_IP> -Port 9200
 ```
 
-## 3. Security Baseline
+**Linux/macOS:**
+
+```bash
+nc -zv <HOST_IP> 3306
+nc -zv <HOST_IP> 27017
+nc -zv <HOST_IP> 6379
+nc -zv <HOST_IP> 7687
+nc -zv <HOST_IP> 9092
+nc -zv <HOST_IP> 9200
+```
+
+Expected: all checks should be reachable/open.
+
+### 2.4 Run Application
+
+- Partner does NOT need local MySQL/Mongo/Redis/Kafka/Neo4j/Elasticsearch containers.
+- Start backend/frontend as normal — services will connect to the shared host.
+
+---
+
+## 3. Security
 
 1. Keep strong credentials in `infra/.env`.
 2. Do not expose DB ports publicly on router/cloud firewall.
 3. Share access only through tailnet members.
 4. Rotate passwords if a device leaves your team.
+5. If any credentials were shared in chat or logs, rotate secrets in `infra/.env` and distribute updated values via secure channel.
 
-## 4. Optional Automation
+---
 
-- Run backup script daily on host machine:
+## 4. Quick Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---|---|---|
+| `Connection refused` on all ports | Host infra is down, or firewall blocks inbound | Check `docker-compose ps` on host |
+| Only Kafka fails | App using wrong Kafka address | Use `<HOST_IP>:9092` for host-run apps, not `kafka:29092` |
+| Intermittent Kafka errors | Kafka still stabilizing after start | Wait 30s, retry |
+| Neo4j auth failure | Credentials mismatch | Verify `NEO4J_AUTH` in `.env` matches on both machines |
+
+---
+
+## 5. Host-Side Health Commands (for owner)
+
+```bash
+docker compose --env-file infra/.env -f infra/docker-compose.yml ps
+docker compose --env-file infra/.env -f infra/docker-compose.yml logs -f kafka
+```
+
+---
+
+## 6. Optional: Automated Backups
+
+Run backup script daily on host machine:
 
 ```bash
 bash infra/scripts/database/backup-db.sh
