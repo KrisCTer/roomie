@@ -100,9 +100,22 @@ mvn -f pom.xml clean install -DskipTests
 Windows:
 
 ```cmd
-cd backend
-run-all-services.bat
+infra\scripts\backend-runtime\run-from-jars.bat
+powershell -NoProfile -ExecutionPolicy Bypass -File .\infra\scripts\backend-runtime\check-services.ps1
 ```
+
+Health check output meanings:
+
+- HEALTHY: service responds with HTTP 200
+- DEGRADED: service responds but health endpoint is non-200 (commonly HTTP 503)
+- OFFLINE: service is unreachable on its expected port
+
+Typical causes of DEGRADED (HTTP 503):
+
+- Eureka server unavailable at `http://localhost:8761`
+- Elasticsearch credentials not configured correctly
+- Redis authentication/connection mismatch
+- Mail health check failure (SMTP auth/host)
 
 Suggested manual startup order (if needed):
 

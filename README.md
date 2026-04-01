@@ -84,9 +84,27 @@ mvn -f pom.xml clean install -DskipTests
 Windows:
 
 ```cmd
-cd backend
-run-all-services.bat
+infra\scripts\backend-runtime\run-from-jars.bat
 ```
+
+Optional helpers (works from CMD/PowerShell/Git Bash):
+
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -File .\infra\scripts\backend-runtime\stop-all-services.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\infra\scripts\backend-runtime\check-services.ps1
+```
+
+Health check output meanings:
+
+- HEALTHY: endpoint returned HTTP 200
+- DEGRADED: service is running and reachable, but health endpoint returned non-200 (often HTTP 503)
+- OFFLINE: service process/port not reachable
+
+Important: DEGRADED is commonly caused by dependency health checks (for example Eureka, Elasticsearch, Redis, or Mail), not by a crashed JVM.
+
+Runtime backend scripts are centralized under `infra/scripts/backend-runtime` to avoid duplicate copies.
+
+> **Note on Swagger UI:** Swagger API documentation is disabled by default for security. To view it, start your services using the `dev` profile (e.g., `mvn spring-boot:run -Dspring-boot.run.profiles=dev`) and visit `http://localhost:<PORT><CONTEXT_PATH>/swagger-ui.html`. See [docs/API.md](docs/API.md) for details.
 
 ### 4) Run Frontend Locally
 

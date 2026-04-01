@@ -92,7 +92,7 @@ Start infra from `infra/` first with Docker Compose.
 ### 5.2 Backend
 
 - Build all modules via parent POM in `backend/pom.xml`.
-- Local multi-service startup script: `backend/run-all-services.bat`.
+- Local multi-service startup script: `infra/scripts/backend-runtime/run-from-jars.bat`.
 
 ### 5.3 Frontend
 
@@ -104,3 +104,12 @@ Start infra from `infra/` first with Docker Compose.
 - Keep Spring environment placeholders in format: `${VAR_NAME:fallback}`
 - Do not commit secrets; use local env files or OS-level environment variables
 - Elasticsearch credentials must use `spring.elasticsearch.username` and `spring.elasticsearch.password`
+
+## 7. Runtime Health Semantics
+
+- Health endpoint for each service is exposed under its own context path, not root path.
+- HTTP 503 from `/actuator/health` usually means dependency health is DOWN (for example Redis, Elasticsearch, Mail, Eureka), while service process and HTTP server may still be running.
+- Operational checks should distinguish three states:
+	- HEALTHY (HTTP 200)
+	- DEGRADED (reachable non-200)
+	- OFFLINE (unreachable)

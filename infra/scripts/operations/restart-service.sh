@@ -15,5 +15,5 @@ if [ $# -eq 1 ]; then
 
     echo "✅ $service_name restarted"
 else
-    echo "Usage: ./scripts/restart-service.sh <service-name>"
+    echo "Usage: ./infra/scripts/operations/restart-service.sh <service-name>"
 fi

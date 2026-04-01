@@ -40,12 +40,12 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/
 
 vnpay:
-  merchantCode: ${VNPAY_MERCHANT_CODE:TIZRZATK}
+  merchantCode: ${VNPAY_MERCHANT_CODE:}
   secretKey: ${VNPAY_SECRET_KEY:}
   returnUrl: ${VNPAY_RETURN_URL:http://localhost:8087/payment/webhook/vnpay}
 
 momo:
-  partnerCode: ${MOMO_PARTNER_CODE:MOMORZW420251202_TEST}
+  partnerCode: ${MOMO_PARTNER_CODE:}
   accessKey: ${MOMO_ACCESS_KEY:}
   secretKey: ${MOMO_SECRET_KEY:}
   returnUrl: ${MOMO_RETURN_URL:http://localhost:8087/payment/momo/return}
@@ -56,3 +56,21 @@ app:
     profile: http://localhost:8082/profile
     files: http://localhost:8088/file
     billing: http://localhost:8086/billing
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

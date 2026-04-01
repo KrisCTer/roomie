@@ -30,3 +30,21 @@ app:
     bucket: ${MINIO_BUCKET:roomie-files}
     access-key: ${MINIO_ACCESS_KEY:${MINIO_ROOT_USER:roomie}}
     secret-key: ${MINIO_SECRET_KEY:${MINIO_ROOT_PASSWORD:}}
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

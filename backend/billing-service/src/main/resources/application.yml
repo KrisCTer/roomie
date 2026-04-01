@@ -46,7 +46,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: romie.housing.tech@gmail.com
+    username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
     properties:
       mail:
@@ -70,7 +70,7 @@ billing:
   # Payment Configuration
   payment:
     momo:
-      partnerCode: ${MOMO_PARTNER_CODE:MOMORZW420251202_TEST}
+      partnerCode: ${MOMO_PARTNER_CODE:}
       accessKey: ${MOMO_ACCESS_KEY:}
       secretKey: ${MOMO_SECRET_KEY:}
       endpoint: ${MOMO_ENDPOINT:https://test-payment.momo.vn/v2/gateway/api/create}
@@ -95,3 +95,21 @@ app:
     contract: http://localhost:8085/contract
     property: http://localhost:8083/property
     files: http://localhost:8088/file
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

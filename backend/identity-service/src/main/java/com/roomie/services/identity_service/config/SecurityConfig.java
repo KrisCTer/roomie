@@ -47,6 +47,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, OAuth2SuccessHandler oAuth2SuccessHandler) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
                 .anyRequest()
