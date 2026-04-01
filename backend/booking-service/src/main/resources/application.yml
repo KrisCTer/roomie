@@ -58,3 +58,21 @@ app:
   services:
     properties: http://localhost:8083/property
     profile: http://localhost:8082/profile
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

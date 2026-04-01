@@ -71,11 +71,11 @@ Test-NetConnection <host-tailscale-ip> -Port 9200
 - Run backup script daily on host machine:
 
 ```bash
-bash infra/scripts/backup-db.sh
+bash infra/scripts/database/backup-db.sh
 ```
 
 Linux cron example:
 
 ```bash
-0 2 * * * /bin/bash /path/to/roomie/infra/scripts/backup-db.sh >> /path/to/roomie/infra/backups/backup.log 2>&1
+0 2 * * * /bin/bash /path/to/roomie/infra/scripts/database/backup-db.sh >> /path/to/roomie/infra/backups/backup.log 2>&1
 ```

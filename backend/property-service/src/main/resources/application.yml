@@ -24,8 +24,8 @@ spring:
 
   elasticsearch:
     uris: http://${ELASTICSEARCH_HOST:localhost}:${ELASTICSEARCH_PORT:9200}
-    username: ${ELASTIC_USERNAME:elastic}
-    password: ${ELASTIC_PASSWORD:}
+    username: ${ELASTICSEARCH_USERNAME:${ELASTIC_USERNAME:elastic}}
+    password: ${ELASTICSEARCH_PASSWORD:${ELASTIC_PASSWORD:}}
 
   cache:
     type: redis
@@ -45,8 +45,25 @@ management:
 property:
   max-images: 20
   image-max-size: 10MB
-  google-maps-api-key: your-google-maps-api-key
+  google-maps-api-key: ${GOOGLE_MAPS_API_KEY:}
 
 app:
   services:
     profile: http://localhost:8082/profile
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

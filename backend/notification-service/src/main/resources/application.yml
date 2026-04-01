@@ -38,7 +38,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: romie.housing.tech@gmail.com
+    username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
     properties:
       mail:
@@ -64,6 +64,9 @@ notification:
 
 # Actuator Configuration
 management:
+  health:
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -79,3 +82,21 @@ logging:
     org.springframework.kafka: INFO
     org.springframework.messaging: DEBUG
     org.springframework.web.socket: DEBUG
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

@@ -34,3 +34,21 @@ logging:
   level:
     com.roomie.services.ai_service: DEBUG
     org.springframework.web: DEBUG
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

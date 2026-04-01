@@ -10,6 +10,6 @@ else
     echo "  - infrastructure: mysql, mongodb, redis, kafka, etc."
     echo "  - services: auth-service, property-service, etc."
     echo ""
-    echo "Usage: ./scripts/logs.sh <service-name>"
-    echo "Example: ./scripts/logs.sh auth-service"
+    echo "Usage: ./infra/scripts/operations/logs.sh <service-name>"
+    echo "Example: ./infra/scripts/operations/logs.sh auth-service"
 fi

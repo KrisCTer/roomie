@@ -137,3 +137,21 @@ app:
   services:
     identity: http://localhost:8080/identity
     files: http://localhost:8088/file
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

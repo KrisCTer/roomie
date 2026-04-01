@@ -51,9 +51,9 @@ All backend services are configured to read these host/port variables with local
 Quick-start files for this mode:
 
 1. LAN env template: [infra/.env.lan.example](infra/.env.lan.example)
-2. Automated backup script: [infra/scripts/backup-db.sh](infra/scripts/backup-db.sh)
+2. Automated backup script: [infra/scripts/database/backup-db.sh](infra/scripts/database/backup-db.sh)
 3. Tailscale sharing guide: [docs/TAILSCALE_LAN_SETUP.md](docs/TAILSCALE_LAN_SETUP.md)
-4. Ubuntu one-time setup script: [infra/scripts/setup-ubuntu.sh](infra/scripts/setup-ubuntu.sh)
+4. Ubuntu one-time setup script: [infra/scripts/deployment/setup-ubuntu.sh](infra/scripts/deployment/setup-ubuntu.sh)
 
 ### 2.1 Create Environment Variables
 
@@ -111,9 +111,22 @@ mvn -f pom.xml clean install -DskipTests
 Windows:
 
 ```cmd
-cd backend
-run-all-services.bat
+infra\scripts\backend-runtime\run-from-jars.bat
+powershell -NoProfile -ExecutionPolicy Bypass -File .\infra\scripts\backend-runtime\check-services.ps1
 ```
+
+Health check output meanings:
+
+- HEALTHY: service responds with HTTP 200
+- DEGRADED: service responds but health endpoint is non-200 (commonly HTTP 503)
+- OFFLINE: service is unreachable on its expected port
+
+Typical causes of DEGRADED (HTTP 503):
+
+- Eureka server unavailable at `http://localhost:8761`
+- Elasticsearch credentials not configured correctly
+- Redis authentication/connection mismatch
+- Mail health check failure (SMTP auth/host)
 
 Suggested manual startup order (if needed):
 
@@ -260,8 +273,8 @@ Target architecture:
 The repository now includes practical VPS deployment templates:
 
 - Nginx reverse proxy template: [infra/config/nginx/nginx.vps.conf.template](infra/config/nginx/nginx.vps.conf.template)
-- Deploy script: [infra/scripts/deploy-vps.sh](infra/scripts/deploy-vps.sh)
-- Smoke test script: [infra/scripts/smoke-test-vps.sh](infra/scripts/smoke-test-vps.sh)
+- Deploy script: [infra/scripts/deployment/deploy-vps.sh](infra/scripts/deployment/deploy-vps.sh)
+- Smoke test script: [infra/scripts/deployment/smoke-test-vps.sh](infra/scripts/deployment/smoke-test-vps.sh)
 
 Suggested first run on VPS:
 
@@ -270,13 +283,13 @@ Suggested first run on VPS:
 3. Run deployment script from repository root:
 
 ```bash
-bash infra/scripts/deploy-vps.sh
+bash infra/scripts/deployment/deploy-vps.sh
 ```
 
 4. Run smoke test:
 
 ```bash
-bash infra/scripts/smoke-test-vps.sh https://api.your-domain.com
+bash infra/scripts/deployment/smoke-test-vps.sh https://api.your-domain.com
 ```
 
 ---

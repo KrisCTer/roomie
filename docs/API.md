@@ -68,3 +68,33 @@ Authentication and token flow are handled by identity-service.
 - Through gateway: `/api/v1/identity/**`
 
 For exact endpoint contracts (request/response schemas), use controller source of each service as source of truth.
+
+## 5.1 Health Endpoint Notes
+
+Health endpoint must include each service context path:
+
+- Correct format: `http://localhost:<PORT><CONTEXT_PATH>/actuator/health`
+- Example: `http://localhost:8082/profile/actuator/health`
+
+If you call `http://localhost:<PORT>/actuator/health` on services that have context path, you will typically get HTTP 404.
+
+When health returns HTTP 503, the service may still be running; this usually indicates downstream dependency checks are DOWN.
+
+## 6. Swagger / OpenAPI Documentation
+
+All 13 microservices have individual Swagger UI pages for exploring and testing their APIs.
+
+**Important Requirements:**
+- Services **MUST** be started with the `dev` profile to enable Swagger. (Example: `mvn spring-boot:run -Dspring-boot.run.profiles=dev`)
+- By default, Swagger is entirely disabled for security reasons to prevent API exposure in production.
+
+**Accessing Swagger UI:**
+The URL format for any service is: `http://localhost:<PORT><CONTEXT_PATH>/swagger-ui.html`
+
+*Examples:*
+- Identity Service: `http://localhost:8080/identity/swagger-ui.html` 
+- Profile Service: `http://localhost:8082/profile/swagger-ui.html`
+- API Gateway: `http://localhost:8888/swagger-ui.html`
+
+**Testing with JWT:**
+Each service's Swagger UI includes an **Authorize** button. You can paste your JWT Bearer token there to easily test protected endpoints directly from the browser.

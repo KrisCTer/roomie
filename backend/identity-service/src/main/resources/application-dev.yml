@@ -1,0 +1,69 @@
+# application-dev.yml - Optimized for local development startup speed
+
+server:
+  port: 8080
+  servlet:
+    context-path: /identity
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 10
+
+spring:
+  application:
+    name: identity-service
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false  # DISABLED FOR SPEED
+    properties:
+      hibernate:
+        format_sql: false  # DISABLED FOR SPEED
+        jdbc:
+          batch_size: 20
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  devtools:
+    livereload:
+      enabled: false
+    restart:
+      enabled: false
+
+  cloud:
+    openfeign:
+      lazy-attributes-resolution: true
+      client:
+        config:
+          profile-service:
+            url: http://localhost:8082/profile
+
+  defer-datasource-initialization: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info  # MINIMAL ACTUATOR
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    root: WARN
+    com.roomie: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+
+---
+# DO NOT LOG SQL IN DEV
+spring:
+  jpa:
+    properties:
+      hibernate:
+        generate_statistics: false

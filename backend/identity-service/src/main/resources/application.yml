@@ -43,7 +43,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: romie.housing.tech@gmail.com
+    username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
     properties:
       mail:
@@ -57,16 +57,16 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:819833604355-fpld1hnsgt7t8uh8lv77gcaucm8gcksa.apps.googleusercontent.com}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            client-id: ${GOOGLE_CLIENT_ID:dev-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:dev-google-client-secret}
             scope:
               - email
               - profile
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
 
           facebook:
-            client-id: ${FACEBOOK_CLIENT_ID:1466675014635254}
-            client-secret: ${FACEBOOK_CLIENT_SECRET:}
+            client-id: ${FACEBOOK_CLIENT_ID:dev-facebook-client-id}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:dev-facebook-client-secret}
             scope:
               - email
               - public_profile
@@ -132,7 +132,7 @@ kafka:
 management:
   health:
     mail:
-      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:true}
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:false}
   endpoints:
     web:
       exposure:
@@ -151,3 +151,20 @@ app:
     profile: http://localhost:8082/profile
   oauth2:
     redirectUri: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/callback}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

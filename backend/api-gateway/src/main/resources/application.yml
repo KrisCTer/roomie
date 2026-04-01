@@ -90,3 +90,21 @@ spring:
             - Path=${app.api-prefix}/chat/**
           filters:
             - StripPrefix=2
+
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
