@@ -19,8 +19,8 @@ spring:
           profile-service:
             url: http://localhost:8082/profile
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
-    username: roomie
+    url: jdbc:mysql://${MYSQL_HOST:100.69.114.54}:${MYSQL_PORT:3306}/roomie?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:roomie}
     password: ${MYSQL_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
@@ -32,10 +32,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:100.69.114.54}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 60000

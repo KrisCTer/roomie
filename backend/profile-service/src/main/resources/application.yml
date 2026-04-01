@@ -29,7 +29,7 @@ spring:
 
     # Redis Configuration - Caching
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:100.69.114.54}
       port: ${REDIS_PORT:6379}
       timeout: 60000
       lettuce:
