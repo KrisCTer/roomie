@@ -32,8 +32,8 @@ public class PaymentService {
     MoMoService moMoService;
     ProfileClient profileClient;
     ContractClient contractClient;
-    BillClient  billingClient;
-    PaymentMapper paymentMapper = PaymentMapper.INSTANCE;
+    BillClient billingClient;
+    PaymentMapper paymentMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     // Tạo payment & trả URL thanh toán
@@ -66,21 +66,18 @@ public class PaymentService {
         return saved;
     }
 
-
     private String generatePaymentUrl(Payment payment) {
         switch (payment.getMethod()) {
             case "VNPAY":
                 return vnPayService.createPaymentUrl(
                         payment.getId(),
                         payment.getAmount(),
-                        "Thanh toan Roomie: " + payment.getDescription()
-                );
+                        "Thanh toan Roomie: " + payment.getDescription());
             case "MOMO":
                 return moMoService.createPaymentUrl(
                         payment.getId(),
                         payment.getAmount(),
-                        "Thanh toan Roomie: " + payment.getDescription()
-                );
+                        "Thanh toan Roomie: " + payment.getDescription());
             case "CASH":
                 return null;
             default:
@@ -128,8 +125,7 @@ public class PaymentService {
                             updated.getBillId(), e);
                 }
             }
-        }
-        else {
+        } else {
             kafkaTemplate.send("payment.failed", event);
             log.info("Published payment.failed event for paymentId={}", updated.getId());
         }
@@ -141,7 +137,23 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-        String status = (resultCode == 0) ? "COMPLETED" : "FAILED";
+        String status = Integer.valueOf(0).equals(resultCode) ? "COMPLETED" : "FAILED";
+
+        // Idempotency guard: avoid duplicate side effects when both returnUrl and
+        // webhook hit.
+        if ("COMPLETED".equalsIgnoreCase(payment.getStatus())) {
+            log.info(
+                    "Skip duplicate MoMo callback for paymentId={}, currentStatus={}, incomingStatus={}, transId={}",
+                    payment.getId(), payment.getStatus(), status, transId);
+            return paymentMapper.toResponse(payment);
+        }
+
+        if ("FAILED".equalsIgnoreCase(payment.getStatus()) && "FAILED".equalsIgnoreCase(status)) {
+            log.info(
+                    "Skip duplicated failed MoMo callback for paymentId={}, transId={}",
+                    payment.getId(), transId);
+            return paymentMapper.toResponse(payment);
+        }
 
         payment.setStatus(status);
         payment.setTransactionId(transId);
@@ -179,8 +191,7 @@ public class PaymentService {
                             updated.getBillId(), e);
                 }
             }
-        }
-        else {
+        } else {
             kafkaTemplate.send("payment.failed", event);
             log.info("Published payment.failed event for paymentId={}", updated.getId());
         }

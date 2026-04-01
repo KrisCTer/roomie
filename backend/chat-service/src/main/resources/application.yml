@@ -26,10 +26,10 @@ spring:
             url: http://localhost:8082/profile
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/roomie_chat?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:100.96.78.62}:${MONGO_PORT:27017}/roomie_chat?authSource=admin
       auto-index-creation: true
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:100.96.78.62}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 

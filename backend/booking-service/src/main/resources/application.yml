@@ -22,9 +22,9 @@ spring:
             url: http://localhost:8083/property
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/roomie_booking?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:100.96.78.62}:${MONGO_PORT:27017}/roomie_booking?authSource=admin
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:100.96.78.62}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 5000ms
@@ -37,7 +37,7 @@ spring:
       fetch-registry: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+    bootstrap-servers: ${KAFKA_HOST:100.96.78.62}:${KAFKA_PORT:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

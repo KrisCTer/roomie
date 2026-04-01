@@ -220,8 +220,6 @@ export const API = {
   CREATE_PAYMENT: "/payment/",
   GET_PAYMENT: (id) => `/payment/${id}`,
   GET_ALL_PAYMENTS: "/payment/",
-  PAYMENT_VNPAY_WEBHOOK: "/payment/webhook/vnpay",
-  PAYMENT_MOMO_WEBHOOK: "/payment/webhook/momo",
 
   // ========= CHAT (Chat Service - Port 8089) =========
   // Conversations

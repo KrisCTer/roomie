@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.*;
 
 @Slf4j
@@ -18,6 +20,35 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MoMoService {
+
+    private static final List<String> IPN_SIGNATURE_KEYS = List.of(
+            "accessKey",
+            "amount",
+            "extraData",
+            "message",
+            "orderId",
+            "orderInfo",
+            "orderType",
+            "partnerCode",
+            "payType",
+            "requestId",
+            "responseTime",
+            "resultCode",
+            "transId");
+
+    private static final List<String> IPN_SIGNATURE_KEYS_NO_ACCESS_KEY = List.of(
+            "amount",
+            "extraData",
+            "message",
+            "orderId",
+            "orderInfo",
+            "orderType",
+            "partnerCode",
+            "payType",
+            "requestId",
+            "responseTime",
+            "resultCode",
+            "transId");
 
     @Value("${momo.partnerCode}")
     String partnerCode;
@@ -46,17 +77,16 @@ public class MoMoService {
             String extraData = "";
 
             // Build rawSignature đúng chuẩn MoMo
-            String rawSignature =
-                    "accessKey=" + accessKey +
-                            "&amount=" + amount +
-                            "&extraData=" + extraData +
-                            "&ipnUrl=" + notifyUrl +
-                            "&orderId=" + orderId +
-                            "&orderInfo=" + orderInfo +
-                            "&partnerCode=" + partnerCode +
-                            "&redirectUrl=" + returnUrl +
-                            "&requestId=" + requestId +
-                            "&requestType=" + requestType;
+            String rawSignature = "accessKey=" + accessKey +
+                    "&amount=" + amount +
+                    "&extraData=" + extraData +
+                    "&ipnUrl=" + notifyUrl +
+                    "&orderId=" + orderId +
+                    "&orderInfo=" + orderInfo +
+                    "&partnerCode=" + partnerCode +
+                    "&redirectUrl=" + returnUrl +
+                    "&requestId=" + requestId +
+                    "&requestType=" + requestType;
 
             String signature = hmacSHA256(rawSignature, secretKey);
 
@@ -98,12 +128,57 @@ public class MoMoService {
         }
     }
 
+    public boolean verifyWebhookSignature(Map<String, Object> payload) {
+        String receivedSignature = toSafeString(payload.get("signature"));
+        if (receivedSignature.isEmpty()) {
+            log.warn("MoMo webhook missing signature");
+            return false;
+        }
+
+        try {
+            // MoMo docs differ by API flavor; try both canonical variants to avoid false
+            // negatives.
+            String rawWithAccessKey = buildRawSignature(payload, IPN_SIGNATURE_KEYS);
+            String rawWithoutAccessKey = buildRawSignature(payload, IPN_SIGNATURE_KEYS_NO_ACCESS_KEY);
+
+            String expectedWithAccessKey = hmacSHA256(rawWithAccessKey, secretKey);
+            String expectedWithoutAccessKey = hmacSHA256(rawWithoutAccessKey, secretKey);
+
+            return safeEquals(receivedSignature, expectedWithAccessKey)
+                    || safeEquals(receivedSignature, expectedWithoutAccessKey);
+        } catch (Exception e) {
+            log.error("Failed to verify MoMo webhook signature", e);
+            return false;
+        }
+    }
+
+    private String buildRawSignature(Map<String, Object> payload, List<String> keys) {
+        StringJoiner joiner = new StringJoiner("&");
+        for (String key : keys) {
+            if (payload.containsKey(key)) {
+                joiner.add(key + "=" + toSafeString(payload.get(key)));
+            }
+        }
+        return joiner.toString();
+    }
+
+    private String toSafeString(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    private boolean safeEquals(String left, String right) {
+        return MessageDigest.isEqual(
+                left.getBytes(StandardCharsets.UTF_8),
+                right.getBytes(StandardCharsets.UTF_8));
+    }
+
     private String hmacSHA256(String data, String key) throws Exception {
         Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(key.getBytes(), "HmacSHA256"));
-        byte[] hash = mac.doFinal(data.getBytes());
+        mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        byte[] hash = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
         StringBuilder hex = new StringBuilder();
-        for (byte b : hash) hex.append(String.format("%02x", b));
+        for (byte b : hash)
+            hex.append(String.format("%02x", b));
         return hex.toString();
     }
 }

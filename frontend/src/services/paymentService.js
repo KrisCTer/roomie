@@ -10,10 +10,3 @@ export const getPayment = (id) =>
 
 export const getAllPayments = () =>
   BaseService.get(API.GET_ALL_PAYMENTS);
-
-// Webhook thường là backend gọi, FE ít gọi trực tiếp, nhưng vẫn để nếu cần:
-export const handleVnPayWebhook = (params) =>
-  BaseService.get(API.PAYMENT_VNPAY_WEBHOOK, params);
-
-export const handleMomoWebhook = (params) =>
-  BaseService.get(API.PAYMENT_MOMO_WEBHOOK, params);

@@ -23,20 +23,20 @@ spring:
   # MongoDB
   data:
     mongodb:
-      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/roomie_admin?authSource=admin
+      uri: mongodb://admin:${MONGO_PASSWORD:${MONGO_ROOT_PASSWORD:}}@${MONGO_HOST:100.96.78.62}:${MONGO_PORT:27017}/roomie_admin?authSource=admin
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:100.96.78.62}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 60000
 
   # Elasticsearch
   elasticsearch:
-    uris: http://${ELASTICSEARCH_HOST:localhost}:${ELASTICSEARCH_PORT:9200}
+    uris: http://${ELASTICSEARCH_HOST:100.96.78.62}:${ELASTICSEARCH_PORT:9200}
 
   # Kafka
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}
+    bootstrap-servers: ${KAFKA_HOST:100.96.78.62}:${KAFKA_PORT:9092}
     consumer:
       group-id: log-consumers
       auto-offset-reset: earliest
@@ -65,7 +65,6 @@ app:
   services:
     identity: http://localhost:8080/identity
     properties: http://localhost:8083/property
-
 
 springdoc:
   api-docs:
