@@ -62,7 +62,6 @@ app:
     identity: http://localhost:8080/identity
     properties: http://localhost:8083/property
 
-
 springdoc:
   api-docs:
     enabled: false
