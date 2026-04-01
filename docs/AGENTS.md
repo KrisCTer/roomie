@@ -254,11 +254,11 @@ When user sends a slash command, read the corresponding workflow file **before**
 | -------------------- | ---- | --------------------------------------- |
 | api-gateway          | 8888 | —                                       |
 | identity-service     | 8080 | MySQL + Redis + Kafka                   |
-| profile-service      | 8082 | MongoDB + Redis + Neo4j                 |
-| property-service     | 8083 | MongoDB + Elasticsearch                 |
+| profile-service      | 8082 | MongoDB + Redis + Neo4j + Kafka         |
+| property-service     | 8083 | MongoDB + Redis + Elasticsearch         |
 | booking-service      | 8084 | MongoDB + Redis + Kafka                 |
 | payment-service      | 8087 | MongoDB + Redis + Kafka                 |
-| billing-service      | 8086 | MongoDB                                 |
+| billing-service      | 8086 | MongoDB + Redis + Kafka                 |
 | contract-service     | 8085 | MongoDB + Redis + Kafka                 |
 | chat-service         | 8089 | MongoDB + Redis                         |
 | notification-service | 8090 | MongoDB + Kafka                         |
