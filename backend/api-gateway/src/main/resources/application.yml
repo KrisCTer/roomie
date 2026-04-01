@@ -5,6 +5,10 @@ app:
   api-prefix: /api/v1
 
 spring:
+  config:
+    import:
+      - optional:file:../../infra/.env[.properties]
+      - optional:file:infra/.env[.properties]
   application:
     name: api-gateway
   cloud:
