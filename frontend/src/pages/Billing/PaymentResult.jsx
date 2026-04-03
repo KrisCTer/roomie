@@ -1,3 +1,19 @@
+/**
+ * PaymentResult Page
+ *
+ * Displayed after user returns from MoMo/VNPay payment gateway.
+ * Shows payment success or failure status with transaction details.
+ *
+ * Route: /payment-result?status=success|failed&paymentId=xxx
+ *
+ * Features:
+ * - Animated success/failure icons
+ * - Transaction ID and amount display
+ * - Navigation to bill detail or bills list
+ * - Loading state while fetching payment details
+ *
+ * @component
+ */
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle, XCircle, Clock3, ArrowRight, Receipt, List } from "lucide-react";
@@ -13,6 +29,7 @@ const PaymentResult = () => {
   const [loading, setLoading] = useState(false);
   const [payment, setPayment] = useState(null);
 
+  // Fetch payment details on mount to display amount and method
   useEffect(() => {
     const loadPayment = async () => {
       if (!paymentId) return;
@@ -32,6 +49,7 @@ const PaymentResult = () => {
     loadPayment();
   }, [paymentId]);
 
+  // Compute UI config based on payment status
   const ui = useMemo(() => {
     if (status === "success") {
       return {
@@ -56,6 +74,7 @@ const PaymentResult = () => {
     };
   }, [status]);
 
+  // Navigate to bill detail if available, otherwise to bills list
   const handleGoDetail = () => {
     if (payment?.billId) {
       navigate(`/bill-detail/${payment.billId}`);
