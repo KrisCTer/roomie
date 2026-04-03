@@ -133,6 +133,18 @@ public class PaymentService {
         return paymentMapper.toResponse(updated);
     }
 
+    /**
+     * Handle MoMo payment callback (from both return URL and webhook IPN).
+     *
+     * <p>Idempotent: safely ignores duplicate callbacks for the same payment.
+     * On success, publishes Kafka event and updates billing/contract services.
+     *
+     * @param orderId   payment ID (same as our internal payment ID)
+     * @param resultCode MoMo result code (0 = success, others = failure)
+     * @param transId   MoMo transaction ID for reference
+     * @return updated payment response
+     * @throws AppException if payment not found
+     */
     public PaymentResponse handleMoMoCallback(String orderId, Integer resultCode, String transId) {
         Payment payment = paymentRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
