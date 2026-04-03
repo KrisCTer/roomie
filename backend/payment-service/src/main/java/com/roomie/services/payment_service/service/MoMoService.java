@@ -15,6 +15,18 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
 
+/**
+ * MoMo Payment Gateway Integration Service.
+ *
+ * <p>Handles communication with MoMo V2 Gateway API:
+ * <ul>
+ *   <li>Creating payment URLs via captureWallet request type</li>
+ *   <li>HMAC-SHA256 signature generation and verification</li>
+ *   <li>Webhook IPN signature validation with dual-format support</li>
+ * </ul>
+ *
+ * @see <a href="https://developers.momo.vn/v3/docs/payment/api/wallet/onetime">MoMo API Docs</a>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -69,6 +81,15 @@ public class MoMoService {
     static final ObjectMapper mapper = new ObjectMapper();
     final OkHttpClient client = new OkHttpClient();
 
+    /**
+     * Creates a MoMo payment URL using captureWallet request type.
+     *
+     * @param transactionId unique payment ID (used as orderId and requestId)
+     * @param amount        payment amount in VND (>= 1000)
+     * @param orderInfo     description shown on MoMo payment screen
+     * @return payment URL for frontend redirect
+     * @throws RuntimeException if MoMo API call fails
+     */
     public String createPaymentUrl(String transactionId, long amount, String orderInfo) {
         try {
             String requestId = transactionId;
