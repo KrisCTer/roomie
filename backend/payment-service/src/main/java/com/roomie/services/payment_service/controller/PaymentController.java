@@ -18,6 +18,26 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Payment REST Controller.
+ *
+ * <p>Provides endpoints for:
+ * <ul>
+ *   <li>Creating payments (MoMo, VNPay, Cash)</li>
+ *   <li>Querying payment status</li>
+ *   <li>Handling payment gateway callbacks (MoMo return URL, MoMo webhook IPN, VNPay callback)</li>
+ * </ul>
+ *
+ * <p>Payment flow for MoMo:
+ * <pre>
+ *   1. Frontend calls POST /payment with method=MOMO
+ *   2. Backend creates Payment record (PENDING) and calls MoMo API
+ *   3. MoMo returns payUrl → backend saves it and returns to frontend
+ *   4. Frontend redirects user to payUrl
+ *   5. After payment, MoMo redirects to GET /payment/momo/return
+ *   6. MoMo also sends POST /payment/webhook/momo (IPN) for server-to-server confirmation
+ * </pre>
+ */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -26,12 +46,31 @@ public class PaymentController {
     PaymentService paymentService;
     MoMoService moMoService;
 
+    /**
+     * Create a new payment transaction.
+     *
+     * <p>Accepts payment details including method (MOMO/VNPAY/CASH), creates a
+     * Payment record in MongoDB with status PENDING, calls the appropriate payment
+     * gateway to generate a payment URL, and returns the Payment object with paymentUrl.
+     *
+     * @param req payment request containing billId, amount, method, description
+     * @return the created Payment entity with paymentUrl for gateway redirect
+     */
     @PostMapping
     public ApiResponse<Payment> createPayment(@RequestBody PaymentRequest req) {
-        Payment response = paymentService.createPayment(req);
-        return ApiResponse.success(response, "Payment created");
+        return ApiResponse.success(paymentService.createPayment(req), "Payment created");
     }
 
+    /**
+     * Get payment details by ID.
+     *
+     * <p>Returns the current state of a payment including its status
+     * (PENDING, COMPLETED, FAILED), transaction ID from the gateway,
+     * and timestamp information.
+     *
+     * @param id the payment ID
+     * @return payment details wrapped in ApiResponse
+     */
     @GetMapping("/{id}")
     public ApiResponse<PaymentResponse> getPayment(@PathVariable String id) {
         return ApiResponse.success(paymentService.getPayment(id), "Get payment by id successful");
@@ -42,7 +81,6 @@ public class PaymentController {
         return ApiResponse.success(paymentService.getAllPayments(), "Get all payment successful");
     }
 
-    // VNPay callback
     @GetMapping("/webhook/vnpay")
     public void vnPayCallback(
             @RequestParam String transactionId,
@@ -52,7 +90,6 @@ public class PaymentController {
 
         PaymentResponse payment = paymentService.handleVnPayCallback(transactionId, status);
 
-        // Redirect based on status
         String billId = payment.getBillId();
         String contractId = payment.getContractId();
         String bookingId = payment.getBookingId();
@@ -72,52 +109,29 @@ public class PaymentController {
         response.sendRedirect(redirectUrl);
     }
 
-    // MoMo return URL (redirect user)
-    // @GetMapping("/momo/return")
-    // public void momoReturn(
-    // @RequestParam Map<String, String> params,
-    // HttpServletResponse response
-    // ) throws IOException {
-    // log.info("MoMo return received - params: {}", params);
-    //
-    // String orderId = params.get("orderId");
-    // String resultCode = params.get("resultCode");
-    //
-    // Payment payment = paymentRepository.findById(orderId)
-    // .orElseThrow(() -> new RuntimeException("Payment not found"));
-    //
-    // String redirectUrl = "http://localhost:3000";
-    //
-    // if (payment.getBillId() != null) {
-    // redirectUrl += "/bill-detail/" + payment.getBillId();
-    // } else if (payment.getContractId() != null) {
-    // redirectUrl += "/contracts/" + payment.getContractId();
-    // } else if (payment.getBookingId() != null) {
-    // redirectUrl += "/bookings/" + payment.getBookingId();
-    // }
-    //
-    // redirectUrl += "?payment=" + ("0".equals(resultCode) ? "success" : "failed");
-    //
-    // response.sendRedirect(redirectUrl);
-    // }
-
+    /**
+     * MoMo return URL handler.
+     *
+     * <p>Called when MoMo redirects the user back after completing (or cancelling)
+     * payment on MoMo's page. Processes the result and redirects to the frontend
+     * payment result page.
+     *
+     * @param params query parameters from MoMo including orderId, resultCode, transId
+     * @param response HTTP response for redirect
+     */
     @GetMapping("/momo/return")
     public void momoReturn(
             @RequestParam Map<String, String> params,
             HttpServletResponse response) throws IOException {
 
-        log.info("🔥 MoMo RETURN received: {}", params);
+        log.info("MoMo RETURN received: {}", params);
 
         String orderId = params.get("orderId");
         String resultCode = params.get("resultCode");
         String transId = params.get("transId");
 
-        // ⚠️ SANDBOX FIX: xử lý luôn payment tại đây
         if ("0".equals(resultCode)) {
-            paymentService.handleMoMoCallback(
-                    orderId,
-                    0,
-                    transId);
+            paymentService.handleMoMoCallback(orderId, 0, transId);
         }
 
         String redirectUrl = "http://localhost:3000/payment-result"
@@ -127,7 +141,19 @@ public class PaymentController {
         response.sendRedirect(redirectUrl);
     }
 
-    // MoMo webhook (IPN - Instant Payment Notification)
+    /**
+     * MoMo IPN (Instant Payment Notification) webhook handler.
+     *
+     * <p>Server-to-server callback from MoMo confirming payment result.
+     * This is more reliable than the return URL since it doesn't depend
+     * on the user's browser.
+     *
+     * <p>Validates the HMAC-SHA256 signature before processing.
+     * Idempotent: duplicate callbacks for the same payment are safely ignored.
+     *
+     * @param body the full webhook payload from MoMo
+     * @return acknowledgement response to MoMo
+     */
     @PostMapping("/webhook/momo")
     public ResponseEntity<?> momoWebhook(@RequestBody Map<String, Object> body) {
         log.info("MoMo webhook received - body: {}", body);
@@ -135,9 +161,7 @@ public class PaymentController {
         try {
             if (!moMoService.verifyWebhookSignature(body)) {
                 log.warn("MoMo webhook rejected due to invalid signature");
-                return ResponseEntity.ok(Map.of(
-                        "message", "Invalid signature",
-                        "resultCode", -1));
+                return ResponseEntity.ok(Map.of("message", "Invalid signature", "resultCode", -1));
             }
 
             String orderId = (String) body.get("orderId");
@@ -146,14 +170,10 @@ public class PaymentController {
 
             paymentService.handleMoMoCallback(orderId, resultCode, transId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Webhook processed successfully",
-                    "resultCode", 0));
+            return ResponseEntity.ok(Map.of("message", "Webhook processed successfully", "resultCode", 0));
         } catch (Exception e) {
             log.error("Error processing MoMo webhook", e);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Webhook processing failed",
-                    "resultCode", -1));
+            return ResponseEntity.ok(Map.of("message", "Webhook processing failed", "resultCode", -1));
         }
     }
 }

@@ -15,6 +15,22 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
 
+/**
+ * MoMo Payment Gateway Integration Service.
+ *
+ * <p>Handles all communication with the MoMo payment gateway including:
+ * <ul>
+ *   <li>Creating payment URLs via the MoMo captureWallet API</li>
+ *   <li>Verifying webhook signatures for IPN callbacks</li>
+ *   <li>HMAC-SHA256 signature generation and validation</li>
+ * </ul>
+ *
+ * <p>Uses the MoMo V2 Gateway API:
+ * <a href="https://developers.momo.vn/v3/docs/payment/api/wallet/onetime">MoMo Docs</a>
+ *
+ * @see PaymentService
+ * @see com.roomie.services.payment_service.controller.PaymentController
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -69,6 +85,23 @@ public class MoMoService {
     static final ObjectMapper mapper = new ObjectMapper();
     final OkHttpClient client = new OkHttpClient();
 
+    /**
+     * Creates a MoMo payment URL using the captureWallet request type.
+     *
+     * <p>Flow:
+     * <ol>
+     *   <li>Build the raw signature string following MoMo's canonical format</li>
+     *   <li>Sign with HMAC-SHA256 using the secret key</li>
+     *   <li>POST to MoMo's /v2/gateway/api/create endpoint</li>
+     *   <li>Extract and return the payUrl from MoMo's response</li>
+     * </ol>
+     *
+     * @param transactionId unique payment ID (used as both orderId and requestId)
+     * @param amount        payment amount in VND (must be >= 1000)
+     * @param orderInfo     description shown to user on MoMo payment screen
+     * @return the payment URL that the frontend should redirect the user to
+     * @throws RuntimeException if MoMo API call fails or returns an error
+     */
     public String createPaymentUrl(String transactionId, long amount, String orderInfo) {
         try {
             String requestId = transactionId;
@@ -76,7 +109,7 @@ public class MoMoService {
             String requestType = "captureWallet";
             String extraData = "";
 
-            // Build rawSignature đúng chuẩn MoMo
+            // Build rawSignature following MoMo's canonical alphabetical order
             String rawSignature = "accessKey=" + accessKey +
                     "&amount=" + amount +
                     "&extraData=" + extraData +
@@ -90,7 +123,7 @@ public class MoMoService {
 
             String signature = hmacSHA256(rawSignature, secretKey);
 
-            // Build request body
+            // Build request body matching MoMo API spec
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("partnerCode", partnerCode);
             body.put("partnerName", "Roomie");
@@ -128,6 +161,19 @@ public class MoMoService {
         }
     }
 
+    /**
+     * Verifies the HMAC-SHA256 signature from a MoMo IPN webhook callback.
+     *
+     * <p>MoMo documentation has inconsistencies between API versions regarding
+     * whether {@code accessKey} is included in the signature. This method tries
+     * both variants (with and without accessKey) to avoid false negatives.
+     *
+     * <p>Uses constant-time comparison via {@link MessageDigest#isEqual} to
+     * prevent timing-based side-channel attacks.
+     *
+     * @param payload the full webhook request body as a map
+     * @return {@code true} if the signature is valid, {@code false} otherwise
+     */
     public boolean verifyWebhookSignature(Map<String, Object> payload) {
         String receivedSignature = toSafeString(payload.get("signature"));
         if (receivedSignature.isEmpty()) {
@@ -166,6 +212,9 @@ public class MoMoService {
         return value == null ? "" : String.valueOf(value);
     }
 
+    /**
+     * Constant-time string comparison to prevent timing attacks on signature verification.
+     */
     private boolean safeEquals(String left, String right) {
         return MessageDigest.isEqual(
                 left.getBytes(StandardCharsets.UTF_8),
