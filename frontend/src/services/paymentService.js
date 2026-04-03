@@ -1,3 +1,11 @@
+/**
+ * Payment Service API — ROOMIE-15
+ *
+ * Provides methods to interact with payment-service backend.
+ * Supports MoMo, VNPay, and Cash payment methods.
+ *
+ * @module paymentService
+ */
 // src/services/paymentService.js
 import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
