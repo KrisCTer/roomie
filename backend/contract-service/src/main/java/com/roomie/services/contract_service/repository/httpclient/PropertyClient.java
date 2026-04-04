@@ -1,6 +1,5 @@
 package com.roomie.services.contract_service.repository.httpclient;
 
-import com.roomie.services.contract_service.configuration.AuthenticationRequestInterceptor;
 import com.roomie.services.contract_service.configuration.FeignMultipartConfig;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.property.PropertyResponse;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name = "property-service",
-        configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
+        configuration = {FeignMultipartConfig.class})
 public interface PropertyClient {
     @GetMapping(value = "/internal/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<PropertyResponse> getProperty(@PathVariable("id") String id);
@@ -20,3 +19,4 @@ public interface PropertyClient {
     @PostMapping("/{propertyId}/available")
     ApiResponse<String> markAsAvailable(@PathVariable String propertyId);
 }
+

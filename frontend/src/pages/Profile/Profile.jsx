@@ -17,6 +17,8 @@ import {
   CheckCircle,
   Mail,
   Eye,
+  AlertCircle,
+  X,
 } from "lucide-react";
 
 // Import custom components
@@ -46,6 +48,13 @@ const Profile = () => {
     handleSubmitProfile,
     handleAvatarUpload,
     handlePasswordUpdate,
+    handleDeleteAccount,
+    updatingPassword,
+    deletingAccount,
+    error,
+    success,
+    setError,
+    setSuccess,
     refetchProfile,
   } = useProfileOperations();
 
@@ -65,6 +74,24 @@ const Profile = () => {
       }
     }
   }, [loading, formData, navigate]);
+
+  useEffect(() => {
+    if (!error && !success) return;
+
+    const timer = setTimeout(() => {
+      setError(null);
+      setSuccess(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [error, success, setError, setSuccess]);
+
+  const onDeleteAccount = async () => {
+    const deleted = await handleDeleteAccount();
+    if (deleted) {
+      navigate("/login", { replace: true });
+    }
+  };
 
   const isAdmin = useMemo(() => {
     const lsUsername = (localStorage.getItem("username") || "").toLowerCase();
@@ -118,6 +145,44 @@ const Profile = () => {
         />
 
         <div className="px-10 py-8 w-full max-w-7xl mx-auto">
+          {(error || success) && (
+            <div className="mb-6 space-y-3">
+              {error && (
+                <div className="flex items-start justify-between gap-3 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-900">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                    <p className="text-sm font-medium">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setError(null)}
+                    className="text-red-700 hover:text-red-900"
+                    aria-label="Dismiss error"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {success && (
+                <div className="flex items-start justify-between gap-3 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-900">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                    <p className="text-sm font-medium">{success}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSuccess(null)}
+                    className="text-green-700 hover:text-green-900"
+                    aria-label="Dismiss success"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {loading ? (
             <ProfileSkeleton />
           ) : (
@@ -253,6 +318,9 @@ const Profile = () => {
                     onChange={handlePasswordChange}
                     onSubmit={handlePasswordUpdate}
                     formData={formData}
+                    onDeleteAccount={onDeleteAccount}
+                    updatingPassword={updatingPassword}
+                    deletingAccount={deletingAccount}
                   />
                 )}
               </div>

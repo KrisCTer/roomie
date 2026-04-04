@@ -5,6 +5,9 @@ import EditorialFooter from "../../../components/layout/layoutHome/EditorialFoot
 import PropertyHeader from "../../../components/PropertyDetail/PropertyHeader";
 import ImageGallery from "../../../components/PropertyDetail/ImageGallery";
 import PropertyOverview from "../../../components/PropertyDetail/PropertyOverview";
+import PropertyDescription from "../../../components/PropertyDetail/PropertyDescription";
+import PropertyAmenities from "../../../components/PropertyDetail/PropertyAmenities";
+import PropertyLocation from "../../../components/PropertyDetail/PropertyLocation";
 import PropertyInfo from "../../../components/PropertyDetail/PropertyInfo";
 import OwnerContact from "../../../components/PropertyDetail/OwnerContact";
 import BookingCard from "../../../components/PropertyDetail/BookingCard";
@@ -63,6 +66,9 @@ const PropertyDetailPage = () => {
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
             <PropertyOverview property={property} />
+            <PropertyDescription description={property.description} />
+            <PropertyAmenities amenities={property.amenities} />
+            <PropertyLocation address={property.address} />
             <PropertyInfo property={property} />
           </div>
 

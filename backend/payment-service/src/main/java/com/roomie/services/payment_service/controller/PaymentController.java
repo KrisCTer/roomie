@@ -28,8 +28,7 @@ public class PaymentController {
 
     @PostMapping
     public ApiResponse<Payment> createPayment(@RequestBody PaymentRequest req) {
-        Payment response = paymentService.createPayment(req);
-        return ApiResponse.success(response, "Payment created");
+        return ApiResponse.success(paymentService.createPayment(req), "Payment created");
     }
 
     @GetMapping("/{id}")
@@ -42,7 +41,6 @@ public class PaymentController {
         return ApiResponse.success(paymentService.getAllPayments(), "Get all payment successful");
     }
 
-    // VNPay callback
     @GetMapping("/webhook/vnpay")
     public void vnPayCallback(
             @RequestParam String transactionId,
@@ -52,7 +50,6 @@ public class PaymentController {
 
         PaymentResponse payment = paymentService.handleVnPayCallback(transactionId, status);
 
-        // Redirect based on status
         String billId = payment.getBillId();
         String contractId = payment.getContractId();
         String bookingId = payment.getBookingId();
@@ -72,52 +69,19 @@ public class PaymentController {
         response.sendRedirect(redirectUrl);
     }
 
-    // MoMo return URL (redirect user)
-    // @GetMapping("/momo/return")
-    // public void momoReturn(
-    // @RequestParam Map<String, String> params,
-    // HttpServletResponse response
-    // ) throws IOException {
-    // log.info("MoMo return received - params: {}", params);
-    //
-    // String orderId = params.get("orderId");
-    // String resultCode = params.get("resultCode");
-    //
-    // Payment payment = paymentRepository.findById(orderId)
-    // .orElseThrow(() -> new RuntimeException("Payment not found"));
-    //
-    // String redirectUrl = "http://localhost:3000";
-    //
-    // if (payment.getBillId() != null) {
-    // redirectUrl += "/bill-detail/" + payment.getBillId();
-    // } else if (payment.getContractId() != null) {
-    // redirectUrl += "/contracts/" + payment.getContractId();
-    // } else if (payment.getBookingId() != null) {
-    // redirectUrl += "/bookings/" + payment.getBookingId();
-    // }
-    //
-    // redirectUrl += "?payment=" + ("0".equals(resultCode) ? "success" : "failed");
-    //
-    // response.sendRedirect(redirectUrl);
-    // }
-
     @GetMapping("/momo/return")
     public void momoReturn(
             @RequestParam Map<String, String> params,
             HttpServletResponse response) throws IOException {
 
-        log.info("🔥 MoMo RETURN received: {}", params);
+        log.info("MoMo RETURN received: {}", params);
 
         String orderId = params.get("orderId");
         String resultCode = params.get("resultCode");
         String transId = params.get("transId");
 
-        // ⚠️ SANDBOX FIX: xử lý luôn payment tại đây
         if ("0".equals(resultCode)) {
-            paymentService.handleMoMoCallback(
-                    orderId,
-                    0,
-                    transId);
+            paymentService.handleMoMoCallback(orderId, 0, transId);
         }
 
         String redirectUrl = "http://localhost:3000/payment-result"
@@ -127,7 +91,6 @@ public class PaymentController {
         response.sendRedirect(redirectUrl);
     }
 
-    // MoMo webhook (IPN - Instant Payment Notification)
     @PostMapping("/webhook/momo")
     public ResponseEntity<?> momoWebhook(@RequestBody Map<String, Object> body) {
         log.info("MoMo webhook received - body: {}", body);
@@ -135,9 +98,7 @@ public class PaymentController {
         try {
             if (!moMoService.verifyWebhookSignature(body)) {
                 log.warn("MoMo webhook rejected due to invalid signature");
-                return ResponseEntity.ok(Map.of(
-                        "message", "Invalid signature",
-                        "resultCode", -1));
+                return ResponseEntity.ok(Map.of("message", "Invalid signature", "resultCode", -1));
             }
 
             String orderId = (String) body.get("orderId");
@@ -146,14 +107,10 @@ public class PaymentController {
 
             paymentService.handleMoMoCallback(orderId, resultCode, transId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Webhook processed successfully",
-                    "resultCode", 0));
+            return ResponseEntity.ok(Map.of("message", "Webhook processed successfully", "resultCode", 0));
         } catch (Exception e) {
             log.error("Error processing MoMo webhook", e);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Webhook processing failed",
-                    "resultCode", -1));
+            return ResponseEntity.ok(Map.of("message", "Webhook processing failed", "resultCode", -1));
         }
     }
 }

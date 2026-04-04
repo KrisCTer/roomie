@@ -1,5 +1,6 @@
 package com.roomie.services.file_service.controller;
 
+import org.springframework.http.ResponseEntity;
 import com.roomie.services.file_service.dto.response.ApiResponse;
 import com.roomie.services.file_service.dto.response.FileData;
 import com.roomie.services.file_service.dto.response.FileResponse;
@@ -10,31 +11,27 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileController {
-
-    private final FileService fileService;
+    FileService fileService;
 
     @PostMapping("/upload")
-    public ResponseEntity<ApiResponse<FileResponse>> uploadFile(
+    public ApiResponse<FileResponse> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("entityType") String entityType,
             @RequestParam("entityId") String entityId
     ) throws Exception {
 
         FileResponse result = fileService.uploadFile(file, entityType, entityId);
-        return ResponseEntity.ok(
-                ApiResponse.success(result, "Uploaded successfully")
-        );
+        return ApiResponse.success(result, "Uploaded successfully");
     }
 
     @GetMapping("/download/{fileId}")
@@ -48,29 +45,23 @@ public class FileController {
     }
 
     @GetMapping("/entity/{entityType}/{entityId}")
-    public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByEntity(
+    public ApiResponse<List<FileResponse>> listFilesByEntity(
             @PathVariable String entityType,
             @PathVariable String entityId
     ) {
         List<FileResponse> result = fileService.listFilesByEntity(entityType, entityId);
-        return ResponseEntity.ok(
-                ApiResponse.success(result, "Fetched files by entity successfully")
-        );
+        return ApiResponse.success(result, "Fetched files by entity successfully");
     }
 
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<ApiResponse<List<FileResponse>>> listFilesByOwner(@PathVariable String ownerId) {
+    public ApiResponse<List<FileResponse>> listFilesByOwner(@PathVariable String ownerId) {
         List<FileResponse> result = fileService.listFilesByOwner(ownerId);
-        return ResponseEntity.ok(
-                ApiResponse.success(result, "Fetched files by owner successfully")
-        );
+        return ApiResponse.success(result, "Fetched files by owner successfully");
     }
 
     @DeleteMapping("/{fileId}")
-    public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable String fileId) throws Exception {
+    public ApiResponse<Void> deleteFile(@PathVariable String fileId) throws Exception {
         fileService.deleteFile(fileId);
-        return ResponseEntity.ok(
-                ApiResponse.success(null, "Deleted file successfully")
-        );
+        return ApiResponse.success(null, "Deleted file successfully");
     }
 }

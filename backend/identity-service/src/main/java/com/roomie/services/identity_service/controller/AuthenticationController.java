@@ -2,6 +2,7 @@ package com.roomie.services.identity_service.controller;
 
 import com.nimbusds.jose.JOSEException;
 import com.roomie.services.identity_service.dto.request.*;
+import com.roomie.services.identity_service.dto.response.ApiResponse;
 import com.roomie.services.identity_service.dto.response.AuthenticationResponse;
 import com.roomie.services.identity_service.dto.response.IntrospectResponse;
 import com.roomie.services.identity_service.service.AuthenticationService;
@@ -23,27 +24,24 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/token")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        var result = authenticationService.authenticate(request);
-        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
+    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        return ApiResponse.success(authenticationService.authenticate(request), "Authenticated successfully");
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request) throws ParseException {
-        var result = authenticationService.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder().result(result).build();
+    public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException {
+        return ApiResponse.success(authenticationService.introspect(request), "Token introspected");
     }
 
     @PostMapping("/refresh")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody RefreshRequest request)
+    public ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request)
             throws ParseException, JOSEException {
-        var result = authenticationService.refreshToken(request);
-        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
+        return ApiResponse.success(authenticationService.refreshToken(request), "Token refreshed");
     }
 
     @PostMapping("/logout")
-    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+    public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
-        return ApiResponse.<Void>builder().build();
+        return ApiResponse.success(null, "Logged out successfully");
     }
 }

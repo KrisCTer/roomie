@@ -79,7 +79,9 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   const username = getUsername();
-  const isAdmin = username?.toLowerCase() === "admin";
+  const isAdmin =
+    user?.role?.toLowerCase() === "admin" ||
+    username?.toLowerCase() === "admin";
   const currentLanguage = i18n.language || "en";
 
   const languages = [
@@ -147,6 +149,11 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
     );
   };
 
+  const handleRoleChange = (role) => {
+    switchRole(role);
+    handleCloseMenu();
+  };
+
   const getPageKey = () => {
     const path = location.pathname;
     if (path.includes("add-property")) {
@@ -204,32 +211,6 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
                 isRefreshing ? "animate-spin" : ""
               }`}
             />
-          </button>
-        </div>
-
-        {/* Center - Role Toggle (ALWAYS VISIBLE) */}
-        <div className="flex items-center gap-2 rounded-xl border border-[#EADACA] bg-white p-1.5 shadow-sm">
-          <button
-            onClick={() => switchRole("landlord")}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
-              activeRole === "landlord"
-                ? "bg-[#CC6F4A] text-white shadow-sm"
-                : "text-[#6B6259] hover:text-[#2B2A28]"
-            }`}
-          >
-            <Home size={18} />
-            <span className="hidden md:inline">Landlord</span>
-          </button>
-          <button
-            onClick={() => switchRole("tenant")}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all ${
-              activeRole === "tenant"
-                ? "bg-[#CC6F4A] text-white shadow-sm"
-                : "text-[#6B6259] hover:text-[#2B2A28]"
-            }`}
-          >
-            <UserCircle size={18} />
-            <span className="hidden md:inline">Tenant</span>
           </button>
         </div>
 
@@ -352,6 +333,71 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             transformOrigin={{ horizontal: "right", vertical: "top" }}
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
           >
+            <Box
+              sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
+              className="dark:bg-dark-tertiary"
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 700,
+                  color: "grey.600",
+                  textTransform: "uppercase",
+                }}
+                className="dark:text-dark-secondary"
+              >
+                Vai trò
+              </Typography>
+            </Box>
+
+            <MenuItem
+              onClick={() => handleRoleChange("landlord")}
+              selected={activeRole === "landlord"}
+              className="dark:hover:bg-dark-hover"
+              sx={{
+                bgcolor:
+                  activeRole === "landlord" ? "primary.light" : "transparent",
+              }}
+            >
+              <ListItemIcon>
+                <Home size={18} className="text-[#CC6F4A]" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Landlord"
+                secondary="Quản lý tài sản, hợp đồng"
+                sx={{
+                  "& .MuiListItemText-secondary": {
+                    fontSize: "0.75rem",
+                  },
+                }}
+              />
+            </MenuItem>
+
+            <MenuItem
+              onClick={() => handleRoleChange("tenant")}
+              selected={activeRole === "tenant"}
+              className="dark:hover:bg-dark-hover"
+              sx={{
+                bgcolor:
+                  activeRole === "tenant" ? "primary.light" : "transparent",
+              }}
+            >
+              <ListItemIcon>
+                <UserCircle size={18} className="text-[#CC6F4A]" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Tenant"
+                secondary="Tìm phòng, quản lý đặt chỗ"
+                sx={{
+                  "& .MuiListItemText-secondary": {
+                    fontSize: "0.75rem",
+                  },
+                }}
+              />
+            </MenuItem>
+
+            <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
+
             {/* Become a Tenant */}
             <MenuItem
               onClick={() => {

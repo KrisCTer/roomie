@@ -1,14 +1,34 @@
 // web-app/src/components/Profile/EditProfileForm.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Save, X, Calendar } from "lucide-react";
+import { Save, X, Calendar, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
   const { t } = useTranslation();
   const dobRef = useRef(null);
+  const isComposingAddressRef = useRef(false);
 
   // Display date state
   const [displayDob, setDisplayDob] = useState("");
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [addressDetail, setAddressDetail] = useState("");
+
+  const normalizeAddressName = (value) =>
+    (value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(
+        /^(tinh|thanh pho|tp\.?|quan|huyen|thi xa|thi tran|phuong|xa)\s+/,
+        "",
+      )
+      .replace(/\s+/g, " ")
+      .trim();
 
   // Format date for display (dd/MM/yyyy)
   const formatDateForDisplay = (dateStr) => {
@@ -45,6 +65,154 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
     }
   }, [formData.dob]);
 
+  useEffect(() => {
+    fetch("https://provinces.open-api.vn/api/?depth=3")
+      .then((res) => res.json())
+      .then((data) => {
+        setProvinces(Array.isArray(data) ? data : []);
+      })
+      .catch((error) => {
+        console.error("Failed to load provinces:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProvince) {
+      setDistricts([]);
+      return;
+    }
+
+    const province = provinces.find((item) => item.name === selectedProvince);
+    setDistricts(province?.districts || []);
+  }, [selectedProvince, provinces]);
+
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setWards([]);
+      return;
+    }
+
+    const district = districts.find((item) => item.name === selectedDistrict);
+    setWards(district?.wards || []);
+  }, [selectedDistrict, districts]);
+
+  useEffect(() => {
+    if (isComposingAddressRef.current) {
+      isComposingAddressRef.current = false;
+      return;
+    }
+
+    const rawAddress = (formData.currentAddress || "").trim();
+    if (!rawAddress) {
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setAddressDetail("");
+      return;
+    }
+
+    const parts = rawAddress
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    if (parts.length < 4 || provinces.length === 0) {
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setAddressDetail(rawAddress);
+      return;
+    }
+
+    const provinceName = parts[parts.length - 1];
+    const districtName = parts[parts.length - 2];
+    const wardName = parts[parts.length - 3];
+    const detail = parts.slice(0, -3).join(", ");
+
+    const province = provinces.find(
+      (item) =>
+        normalizeAddressName(item.name) === normalizeAddressName(provinceName),
+    );
+    if (!province) {
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setAddressDetail(rawAddress);
+      return;
+    }
+
+    const district = (province.districts || []).find(
+      (item) =>
+        normalizeAddressName(item.name) === normalizeAddressName(districtName),
+    );
+    const ward = (district?.wards || []).find(
+      (item) => normalizeAddressName(item.name) === normalizeAddressName(wardName),
+    );
+
+    if (!district || !ward) {
+      setSelectedProvince("");
+      setSelectedDistrict("");
+      setSelectedWard("");
+      setAddressDetail(rawAddress);
+      return;
+    }
+
+    setSelectedProvince(province.name);
+    setSelectedDistrict(district.name);
+    setSelectedWard(ward.name);
+    setAddressDetail(detail);
+  }, [formData.currentAddress, provinces]);
+
+  useEffect(() => {
+    const hasHierarchy =
+      !!selectedProvince && !!selectedDistrict && !!selectedWard;
+
+    let detailValue = (addressDetail || "").trim();
+
+    if (hasHierarchy && detailValue) {
+      const hierarchyParts = [selectedWard, selectedDistrict, selectedProvince]
+        .map((part) => normalizeAddressName(part))
+        .filter(Boolean);
+
+      const detailParts = detailValue
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .filter(
+          (part) =>
+            !hierarchyParts.includes(normalizeAddressName(part)),
+        );
+
+      detailValue = detailParts.join(", ");
+    }
+
+    const composedAddress = hasHierarchy
+      ? [detailValue, selectedWard, selectedDistrict, selectedProvince]
+          .map((part) => part?.trim())
+          .filter(Boolean)
+          .join(", ")
+      : detailValue;
+
+    if (composedAddress === (formData.currentAddress || "")) {
+      return;
+    }
+
+    isComposingAddressRef.current = true;
+    onChange({
+      target: {
+        name: "currentAddress",
+        value: composedAddress,
+      },
+    });
+  }, [
+    addressDetail,
+    selectedWard,
+    selectedDistrict,
+    selectedProvince,
+    formData.currentAddress,
+    onChange,
+  ]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(e);
@@ -63,6 +231,19 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
 
     // Update display
     setDisplayDob(formatDateForDisplay(dateValue));
+  };
+
+  const handleProvinceChange = (e) => {
+    const nextProvince = e.target.value;
+    setSelectedProvince(nextProvince);
+    setSelectedDistrict("");
+    setSelectedWard("");
+  };
+
+  const handleDistrictChange = (e) => {
+    const nextDistrict = e.target.value;
+    setSelectedDistrict(nextDistrict);
+    setSelectedWard("");
   };
 
   return (
@@ -209,14 +390,70 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
               <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
                 Địa chỉ
               </label>
-              <textarea
-                name="currentAddress"
-                value={formData.currentAddress || ""}
-                onChange={onChange}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
-                placeholder="Enter your address"
-              />
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <select
+                    value={selectedProvince}
+                    onChange={handleProvinceChange}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                  >
+                    <option value="">Chọn Tỉnh/Thành</option>
+                    {provinces.map((province) => (
+                      <option key={province.code} value={province.name}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedDistrict}
+                    onChange={handleDistrictChange}
+                    disabled={!selectedProvince}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">Chọn Quận/Huyện</option>
+                    {districts.map((district) => (
+                      <option key={district.code} value={district.name}>
+                        {district.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={selectedWard}
+                    onChange={(e) => setSelectedWard(e.target.value)}
+                    disabled={!selectedDistrict}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">Chọn Phường/Xã</option>
+                    {wards.map((ward) => (
+                      <option key={ward.code} value={ward.name}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <input
+                  type="text"
+                  value={addressDetail}
+                  onChange={(e) => setAddressDetail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                  placeholder="Số nhà, tên đường"
+                />
+
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    name="currentAddress"
+                    value={formData.currentAddress || ""}
+                    readOnly
+                    className="w-full pl-11 pr-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-gray-50 dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary"
+                    placeholder="Địa chỉ đầy đủ sẽ hiển thị tại đây"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

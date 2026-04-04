@@ -1,6 +1,5 @@
 package com.roomie.services.contract_service.repository.httpclient;
 
-import com.roomie.services.contract_service.configuration.AuthenticationRequestInterceptor;
 import com.roomie.services.contract_service.configuration.FeignMultipartConfig;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.file.FileResponse;
@@ -13,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @FeignClient(
         name = "file-service",
-        configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class}
+        configuration = {FeignMultipartConfig.class}
 )
 public interface FileClient {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -23,6 +23,7 @@ public enum ErrorCode {
     USER_ID_REQUIRED(1014,"User id required", HttpStatus.BAD_REQUEST),
     FILE_UPLOAD_FAILED(1015,"File upload failed", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND(1016,"User not found", HttpStatus.NOT_FOUND),
+    INVALID_FILE(1017,"Invalid file format", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

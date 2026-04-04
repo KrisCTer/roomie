@@ -4,11 +4,12 @@ import com.roomie.services.profile_service.dto.request.SearchUserRequest;
 import com.roomie.services.profile_service.dto.request.UpdateProfileRequest;
 import com.roomie.services.profile_service.dto.response.ApiResponse;
 import com.roomie.services.profile_service.dto.response.UserProfileResponse;
+import com.roomie.services.profile_service.exception.AppException;
+import com.roomie.services.profile_service.exception.ErrorCode;
 import com.roomie.services.profile_service.service.UserProfileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,64 +21,44 @@ import java.util.List;
 public class UserProfileController {
     UserProfileService userProfileService;
 
-    //    @PostMapping("/users")
-//    ApiResponse<UserProfileResponse> createProfile(@RequestBody ProfileCreationRequest request) {
-//        return ApiResponse.<UserProfileResponse>builder()
-//                .result(userProfileService.createProfile(request))
-//                .build();
-//    }
     @PutMapping("/me/id-card")
-    public ApiResponse<UserProfileResponse> updateProfileFromIDCard(
-            @RequestParam("file") MultipartFile file) {
-
+    public ApiResponse<UserProfileResponse> updateProfileFromIDCard(@RequestParam("file") MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            return ApiResponse.error(400, "Please upload a photo of your Citizen Identification Card/National Identity Card.");
+            throw new AppException(ErrorCode.INVALID_FILE);
         }
-
         if (!file.getContentType().startsWith("image/")) {
-            return ApiResponse.error(400, "The file must be in image format.");
+            throw new AppException(ErrorCode.INVALID_FILE);
         }
-
-        UserProfileResponse result = userProfileService.updateProfileFromIDCard(file);
-        return ApiResponse.success(result, "Profile update from Citizen Identification Card successful!");
+        return ApiResponse.success(userProfileService.updateProfileFromIDCard(file), "Profile updated from ID card successfully");
     }
 
     @GetMapping("/users/{profileId}")
-    ApiResponse<UserProfileResponse> getProfile(@PathVariable String profileId) {
-        return ApiResponse.<UserProfileResponse>builder()
-                .result(userProfileService.getByUserId(profileId))
-                .build();
+    public ApiResponse<UserProfileResponse> getProfile(@PathVariable String profileId) {
+        return ApiResponse.success(userProfileService.getByUserId(profileId), "Fetched profile successfully");
     }
 
     @GetMapping("/users")
-    ApiResponse<List<UserProfileResponse>> getAllProfiles() {
-        return ApiResponse.<List<UserProfileResponse>>builder()
-                .result(userProfileService.getAllProfiles())
-                .build();
+    public ApiResponse<List<UserProfileResponse>> getAllProfiles() {
+        return ApiResponse.success(userProfileService.getAllProfiles(), "Fetched all profiles");
     }
 
     @GetMapping("/users/my-profile")
-    ApiResponse<UserProfileResponse> getMyProfile() {
-        return ApiResponse.<UserProfileResponse>builder()
-                .result(userProfileService.getMyProfile())
-                .build();
+    public ApiResponse<UserProfileResponse> getMyProfile() {
+        return ApiResponse.success(userProfileService.getMyProfile(), "Fetched my profile");
     }
 
     @PutMapping("/users/my-profile")
     public ApiResponse<UserProfileResponse> updateMyProfile(@RequestBody UpdateProfileRequest request) {
-        return ApiResponse.success(userProfileService.updateMyProfile(request),"Update user successful");
+        return ApiResponse.success(userProfileService.updateMyProfile(request), "Profile updated successfully");
     }
 
-
     @PutMapping("/users/avatar")
-    ApiResponse<UserProfileResponse> updateAvatar(@RequestParam("file") MultipartFile file) {
-        return ApiResponse.<UserProfileResponse>builder()
-                .result(userProfileService.updateAvatar(file))
-                .build();
+    public ApiResponse<UserProfileResponse> updateAvatar(@RequestParam("file") MultipartFile file) {
+        return ApiResponse.success(userProfileService.updateAvatar(file), "Avatar updated successfully");
     }
 
     @PostMapping("/search")
     public ApiResponse<List<UserProfileResponse>> search(@RequestBody SearchUserRequest request) {
-        return ApiResponse.success(userProfileService.search(request),"Search User successful");
+        return ApiResponse.success(userProfileService.search(request), "Search completed successfully");
     }
 }

@@ -15,6 +15,10 @@ const EditorialHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const loggedIn = isAuthenticated();
   const user = getCompleteUserInfo();
+  const isAdmin =
+    user?.role?.toLowerCase() === "admin" ||
+    user?.username?.toLowerCase() === "admin";
+  const dashboardPath = isAdmin ? "/admin/dashboard" : "/dashboard";
 
   const isHomeActive =
     location.pathname === "/" || location.pathname === "/home";
@@ -80,7 +84,7 @@ const EditorialHeader = () => {
             <>
               <button
                 type="button"
-                onClick={() => handleNavigate("/dashboard")}
+                onClick={() => handleNavigate(dashboardPath)}
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--home-border)] px-4 text-sm font-semibold text-[var(--home-charcoal)] transition hover:bg-[var(--home-surface-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--home-focus)]"
               >
                 <User size={16} />

@@ -1,5 +1,5 @@
 // src/contexts/UserContext.jsx
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import {
   getCompleteUserInfo,
   getToken,
@@ -14,38 +14,46 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const token = getToken();
-      if (!token) {
+  const refreshUser = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return null;
+    }
+
+    setLoading(true);
+
+    try {
+      const cached = getCompleteUserInfo();
+      if (cached) setUser(cached);
+
+      const res = await getMyProfile();
+      const profile = res?.result || res?.data?.result;
+      if (profile) {
+        setUser(profile);
+      }
+
+      return profile ?? null;
+    } catch (e) {
+      if (e?.response?.status === 401) {
+        removeToken();
+        removeUserProfile();
         setUser(null);
-        setLoading(false);
-        return;
       }
 
-      try {
-        const cached = getCompleteUserInfo();
-        if (cached) setUser(cached);
-
-        const res = await getMyProfile();
-        const profile = res?.result || res?.data?.result;
-        if (profile) setUser(profile);
-      } catch (e) {
-        if (e?.response?.status === 401) {
-          removeToken();
-          removeUserProfile();
-          setUser(null);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUser();
+      return null;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
   return (
-    <UserContext.Provider value={{ user, loading }}>
+    <UserContext.Provider value={{ user, loading, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

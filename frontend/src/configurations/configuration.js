@@ -20,6 +20,7 @@ export const API = {
   GET_ALL_USERS: "/identity/users",
   GET_USER: (userId) => `/identity/users/${userId}`,
   GET_MY_INFO: "/identity/users/my-info",
+  DELETE_MY_ACCOUNT: "/identity/users/me",
   UPDATE_USER: (userId) => `/identity/users/${userId}`,
   DELETE_USER: (userId) => `/identity/users/${userId}`,
 

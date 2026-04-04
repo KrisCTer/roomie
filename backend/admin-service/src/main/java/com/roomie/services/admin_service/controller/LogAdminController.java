@@ -10,7 +10,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +28,7 @@ public class LogAdminController {
     LogStreamService logStreamService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<LogsPageResponse>> getLogs(
+    public ApiResponse<LogsPageResponse> getLogs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
@@ -40,7 +39,7 @@ public class LogAdminController {
         Instant f = from != null ? from : Instant.now().minusSeconds(86400);
         Instant t = to != null ? to : Instant.now();
         LogsPageResponse logs = logAdminService.getAllLogs(page, size, f, t, type, userId);
-        return ResponseEntity.ok(ApiResponse.success(logs,"Get logs success"));
+        return ApiResponse.success(logs,"Get logs success");
     }
 
     @GetMapping(path = "/stream/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,14 +21,14 @@ public class SystemConfigController {
     SystemConfigMapper mapper;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<SystemConfigResponse>> getConfig() {
-        return ResponseEntity.ok(ApiResponse.success(mapper.toResponse(systemConfigService.getConfig()), ""));
+    public ApiResponse<SystemConfigResponse> getConfig() {
+        return ApiResponse.success(mapper.toResponse(systemConfigService.getConfig()), "");
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<SystemConfigResponse>> updateConfig(
+    public ApiResponse<SystemConfigResponse> updateConfig(
             @RequestBody SystemConfigRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.success(mapper.toResponse(systemConfigService.updateConfig(request)), "System configuration updated successfully"));
+        return ApiResponse.success(mapper.toResponse(systemConfigService.updateConfig(request)), "System configuration updated successfully");
     }
 }

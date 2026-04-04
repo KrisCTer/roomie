@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import {
   Calendar,
   CheckCircle,
@@ -6,6 +6,7 @@ import {
   CreditCard,
   Info,
 } from "lucide-react";
+import WheelDatePicker from "./WheelDatePicker";
 
 const BookingCard = ({
   property,
@@ -28,25 +29,36 @@ const BookingCard = ({
   const handleBooking = onBooking || onBook;
   const today = new Date().toISOString().split("T")[0];
   const isAvailable = property.propertyStatus === "AVAILABLE";
-  const startDateRef = useRef(null);
-  const endDateRef = useRef(null);
+  const formatCurrency = (amount) =>
+    Math.round(Number(amount || 0)).toLocaleString("vi-VN");
 
-  const [displayStartDate, setDisplayStartDate] = useState("");
-  const [displayEndDate, setDisplayEndDate] = useState("");
-
-  const formatDateForDisplay = (dateStr) => {
-    if (!dateStr) return "";
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year}`;
+  const normalizeStartDate = (nextDate) => {
+    if (!nextDate) return today;
+    return nextDate < today ? today : nextDate;
   };
 
-  useEffect(() => {
-    if (leaseStart) setDisplayStartDate(formatDateForDisplay(leaseStart));
-  }, [leaseStart]);
+  const normalizeEndDate = (nextDate, startDate) => {
+    const minEndDate = startDate || today;
+    if (!nextDate) return minEndDate;
+    return nextDate < minEndDate ? minEndDate : nextDate;
+  };
 
-  useEffect(() => {
-    if (leaseEnd) setDisplayEndDate(formatDateForDisplay(leaseEnd));
-  }, [leaseEnd]);
+  const handleStartDateChange = (nextDate) => {
+    const normalizedStart = normalizeStartDate(nextDate);
+    handleStartChange?.(normalizedStart);
+
+    if (leaseEnd && leaseEnd < normalizedStart) {
+      handleEndChange?.(normalizedStart);
+    }
+  };
+
+  const handleEndDateSelection = (nextDate) => {
+    const normalizedEnd = normalizeEndDate(nextDate, leaseStart);
+    handleEndChange?.(normalizedEnd);
+  };
+
+  const isDateRangeValid =
+    !!leaseStart && !!leaseEnd && leaseStart >= today && leaseEnd >= leaseStart;
 
   return (
     <div className="bg-white rounded-2xl shadow-[0_16px_42px_rgba(17,24,39,0.08)] border border-[#ECDCC8] p-6 sticky top-24">
@@ -57,7 +69,7 @@ const BookingCard = ({
         </p>
         <div className="flex items-baseline gap-2 mb-1">
           <span className="text-3xl font-bold text-[#111827]">
-            {property.monthlyRent?.toLocaleString()}đ
+            {formatCurrency(property.monthlyRent)}đ
           </span>
           <span className="text-gray-600">/tháng</span>
         </div>
@@ -68,7 +80,7 @@ const BookingCard = ({
             <p className="text-sm text-gray-600">
               Cọc:{" "}
               <span className="font-semibold">
-                {property.rentalDeposit.toLocaleString()}đ
+                {formatCurrency(property.rentalDeposit)}đ
               </span>
             </p>
           </div>
@@ -78,60 +90,20 @@ const BookingCard = ({
       {/* Date Selection */}
       <div className="space-y-4 mb-6">
         {/* Start Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-            Ngày bắt đầu thuê
-          </label>
-          <div
-            className="relative cursor-pointer"
-            onClick={() => startDateRef.current?.showPicker?.()}
-          >
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
-            <input
-              type="text"
-              value={displayStartDate}
-              readOnly
-              placeholder="dd/MM/yyyy"
-              className="w-full pl-11 pr-4 py-3 border-2 border-[#E5D5C2] rounded-xl bg-white cursor-pointer hover:border-[#CC6F4A] focus:border-[#CC6F4A] focus:outline-none transition-colors"
-            />
-            <input
-              ref={startDateRef}
-              type="date"
-              min={today}
-              value={leaseStart}
-              onChange={(e) => handleStartChange?.(e.target.value)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-          </div>
-        </div>
+        <WheelDatePicker
+          value={leaseStart}
+          onchange={handleStartDateChange}
+          minDate={today}
+          label="Ngày bắt đầu thuê"
+        />
 
         {/* End Date */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-            Ngày kết thúc thuê
-          </label>
-          <div
-            className="relative cursor-pointer"
-            onClick={() => endDateRef.current?.showPicker?.()}
-          >
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
-            <input
-              type="text"
-              value={displayEndDate}
-              readOnly
-              placeholder="dd/MM/yyyy"
-              className="w-full pl-11 pr-4 py-3 border-2 border-[#E5D5C2] rounded-xl bg-white cursor-pointer hover:border-[#CC6F4A] focus:border-[#CC6F4A] focus:outline-none transition-colors"
-            />
-            <input
-              ref={endDateRef}
-              type="date"
-              min={leaseStart || today}
-              value={leaseEnd}
-              onChange={(e) => handleEndChange?.(e.target.value)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-          </div>
-        </div>
+        <WheelDatePicker
+          value={leaseEnd}
+          onchange={handleEndDateSelection}
+          minDate={leaseStart || today}
+          label="Ngày kết thúc thuê"
+        />
       </div>
 
       {/* Cost Breakdown */}
@@ -139,10 +111,10 @@ const BookingCard = ({
         <div className="bg-[#FFFBF6] rounded-xl p-4 mb-6 space-y-3 border border-[#ECDCC8]">
           <div className="flex justify-between text-sm">
             <span className="text-gray-700">
-              {property.monthlyRent.toLocaleString()}đ × {leaseDuration} tháng
+              {formatCurrency(property.monthlyRent)}đ × {leaseDuration} tháng
             </span>
             <span className="font-semibold text-gray-900">
-              {(property.monthlyRent * leaseDuration).toLocaleString()}đ
+              {formatCurrency(property.monthlyRent * leaseDuration)}đ
             </span>
           </div>
 
@@ -150,7 +122,7 @@ const BookingCard = ({
             <div className="flex justify-between text-sm">
               <span className="text-gray-700">Tiền cọc</span>
               <span className="font-semibold text-gray-900">
-                {property.rentalDeposit.toLocaleString()}đ
+                {formatCurrency(property.rentalDeposit)}đ
               </span>
             </div>
           )}
@@ -158,7 +130,7 @@ const BookingCard = ({
           <div className="pt-3 border-t border-gray-300 flex justify-between">
             <span className="font-bold text-gray-900">Tổng cộng</span>
             <span className="text-xl font-bold text-[#C2410C]">
-              {estimatedCost.toLocaleString()}đ
+              {formatCurrency(estimatedCost)}đ
             </span>
           </div>
         </div>
@@ -167,7 +139,13 @@ const BookingCard = ({
       {/* Booking Button */}
       <button
         onClick={handleBooking}
-        disabled={isSubmitting || !leaseStart || !leaseEnd || !isAvailable}
+        disabled={
+          isSubmitting ||
+          !leaseStart ||
+          !leaseEnd ||
+          !isDateRangeValid ||
+          !isAvailable
+        }
         className={`w-full py-3.5 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
           !isAvailable
             ? "bg-gray-400 cursor-not-allowed"

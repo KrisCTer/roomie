@@ -17,7 +17,12 @@ const useLoginForm = ({ navigate, t }) => {
       const res = await loginApi(form.username, form.password);
       localStorage.setItem("access_token", res.result.token);
       localStorage.setItem("username", form.username);
-      navigate("/home");
+      const user = res?.result?.user ?? res?.user;
+      const role = (user?.role || "").toLowerCase();
+      const isAdmin =
+        role === "admin" || form.username.toLowerCase() === "admin";
+
+      navigate(isAdmin ? "/admin/dashboard" : "/home");
     } catch (error) {
       window.alert(t("auth.loginError"));
     } finally {
