@@ -1,6 +1,6 @@
 package com.roomie.services.identity_service.controller;
 
-import com.roomie.services.identity_service.dto.request.ApiResponse;
+import com.roomie.services.identity_service.dto.response.ApiResponse;
 import com.roomie.services.identity_service.dto.request.UserUpdateRequest;
 import com.roomie.services.identity_service.dto.response.UserResponse;
 import com.roomie.services.identity_service.service.UserService;
@@ -15,43 +15,41 @@ import java.util.List;
 @RestController
 @RequestMapping("/internal/users")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InternalUserController {
-   UserService userService;
+    UserService userService;
 
     @GetMapping
-    ApiResponse<List<UserResponse>> getAllUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getUsers())
-                .build();
+    public ApiResponse<List<UserResponse>> getAllUsers() {
+        return ApiResponse.success(userService.getUsers(), "Fetched all users");
     }
+
     @GetMapping("/{userId}")
-    ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.getUser(userId))
-                .build();
+    public ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
+        return ApiResponse.success(userService.getUser(userId), "Fetched user");
     }
+
     @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteUser(@PathVariable String userId) {
+    public ApiResponse<String> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
-        return ApiResponse.<String>builder().result("User has been deleted").build();
+        return ApiResponse.success("User has been deleted", "User deleted successfully");
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.updateUser(userId, request))
-                .build();
+    public ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+        return ApiResponse.success(userService.updateUser(userId, request), "User updated successfully");
     }
+
     @PostMapping("/{userId}/suspend")
-    ApiResponse<String> suspendUser(@PathVariable String userId) {
+    public ApiResponse<String> suspendUser(@PathVariable String userId) {
         userService.suspendUser(userId);
-        return ApiResponse.<String>builder().result("User has been suspend").build();
+        return ApiResponse.success("User has been suspended", "User suspended successfully");
     }
+
     @PostMapping("/{userId}/ban")
-    ApiResponse<String> banUser(@PathVariable String userId) {
+    public ApiResponse<String> banUser(@PathVariable String userId) {
         userService.banUser(userId);
-        return ApiResponse.<String>builder().result("User has been banned").build();
+        return ApiResponse.success("User has been banned", "User banned successfully");
     }
 }

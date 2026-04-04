@@ -13,17 +13,14 @@ import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
 
-@Controller
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Controller
 public class WebSocketController {
 
     WebSocketNotificationService webSocketService;
 
-    /**
-     * Handle WebSocket subscription
-     */
     @MessageMapping("/notifications/subscribe")
     @SendTo("/topic/notifications")
     public String handleSubscribe(@Payload String message, SimpMessageHeaderAccessor headerAccessor) {
@@ -35,9 +32,6 @@ public class WebSocketController {
         return "Subscription failed";
     }
 
-    /**
-     * Handle ping/pong for connection keep-alive
-     */
     @MessageMapping("/notifications/ping")
     @SendTo("/topic/notifications/pong")
     public String handlePing() {

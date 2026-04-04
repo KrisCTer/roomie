@@ -10,21 +10,22 @@ import com.roomie.services.payment_service.repository.PaymentRepository;
 import com.roomie.services.payment_service.repository.httpclient.BillClient;
 import com.roomie.services.payment_service.repository.httpclient.ContractClient;
 import com.roomie.services.payment_service.repository.httpclient.ProfileClient;
+import com.roomie.services.payment_service.exception.AppException;
+import com.roomie.services.payment_service.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentService {
     PaymentRepository paymentRepository;
@@ -81,13 +82,13 @@ public class PaymentService {
             case "CASH":
                 return null;
             default:
-                throw new RuntimeException("Unsupported payment method");
+                throw new AppException(ErrorCode.UNSUPPORTED_PAYMENT_METHOD);
         }
     }
 
     public PaymentResponse handleVnPayCallback(String transactionId, String status) {
         Payment payment = paymentRepository.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
         payment.setStatus(status);
         payment.setTransactionId(transactionId);
@@ -135,7 +136,7 @@ public class PaymentService {
 
     public PaymentResponse handleMoMoCallback(String orderId, Integer resultCode, String transId) {
         Payment payment = paymentRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
         String status = Integer.valueOf(0).equals(resultCode) ? "COMPLETED" : "FAILED";
 
@@ -201,7 +202,7 @@ public class PaymentService {
 
     public PaymentResponse handleCashPayment(String paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
         payment.setStatus("COMPLETED");
         payment.setPaidAt(Instant.now());
@@ -227,26 +228,26 @@ public class PaymentService {
 
     public PaymentResponse getPayment(String id) {
         Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
         return paymentMapper.toResponse(payment);
     }
 
     public List<PaymentResponse> getAllPayments() {
         return paymentRepository.findAll().stream()
                 .map(paymentMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<PaymentResponse> getPaymentsByUser(String userId) {
         return paymentRepository.findByUserId(userId).stream()
                 .map(paymentMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<PaymentResponse> getPaymentsByContract(String contractId) {
         return paymentRepository.findByContractId(contractId).stream()
                 .map(paymentMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private PaymentEvent buildPaymentEvent(Payment payment) {

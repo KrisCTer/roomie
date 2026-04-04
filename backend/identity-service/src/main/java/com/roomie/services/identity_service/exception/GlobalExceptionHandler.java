@@ -3,7 +3,7 @@ package com.roomie.services.identity_service.exception;
 import java.util.Map;
 import java.util.Objects;
 
-import com.roomie.services.identity_service.dto.request.ApiResponse;
+import com.roomie.services.identity_service.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 
 import org.springframework.http.ResponseEntity;

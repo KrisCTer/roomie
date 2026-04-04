@@ -1,6 +1,6 @@
 package com.roomie.services.identity_service.controller;
 
-import com.roomie.services.identity_service.dto.request.ApiResponse;
+import com.roomie.services.identity_service.dto.response.ApiResponse;
 import com.roomie.services.identity_service.dto.request.UserCreationRequest;
 import com.roomie.services.identity_service.dto.request.UserUpdateRequest;
 import com.roomie.services.identity_service.dto.response.UserResponse;
@@ -17,50 +17,39 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
 
     @PostMapping("/register")
-    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.createUser(request))
-                .message("Đăng ký tài khoản thành công!")
-                .build();
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        return ApiResponse.success(userService.createUser(request), "User registered successfully");
     }
 
     @GetMapping
-    ApiResponse<List<UserResponse>> getUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getUsers())
-                .build();
+    public ApiResponse<List<UserResponse>> getUsers() {
+        return ApiResponse.success(userService.getUsers(), "Fetched all users");
     }
 
     @GetMapping("/{userId}")
-    ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.getUser(userId))
-                .build();
+    public ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
+        return ApiResponse.success(userService.getUser(userId), "Fetched user successfully");
     }
 
     @GetMapping("/my-info")
-    ApiResponse<UserResponse> getMyInfo() {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.getMyInfo())
-                .build();
+    public ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.success(userService.getMyInfo(), "Fetched user info");
     }
 
     @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteUser(@PathVariable String userId) {
+    public ApiResponse<String> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
-        return ApiResponse.<String>builder().result("User has been deleted").build();
+        return ApiResponse.success("User has been deleted", "User deleted successfully");
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.updateUser(userId, request))
-                .build();
+    public ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+        return ApiResponse.success(userService.updateUser(userId, request), "User updated successfully");
     }
 }
