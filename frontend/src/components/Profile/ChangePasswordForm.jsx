@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import PasswordField from "./PasswordField";
 
-const ChangePasswordForm = ({ passwords, onChange, onSubmit }) => {
+const ChangePasswordForm = ({ passwords, onChange, onSubmit, loading }) => {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,15 +41,15 @@ const ChangePasswordForm = ({ passwords, onChange, onSubmit }) => {
       </div>
 
       <button
+        type="button"
+        disabled={loading}
         onClick={onSubmit}
-        className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
+        className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        Update Password
+        {loading ? "Đang cập nhật..." : "Update Password"}
       </button>
     </div>
   );
 };
 
 export default ChangePasswordForm;
-
-

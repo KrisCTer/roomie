@@ -5,7 +5,10 @@ import {
   updateMyProfile,
   uploadAvatar,
   updateIdCard,
+  changeMyPassword,
+  deleteMyAccount,
 } from "../services/userService";
+import { logout as logoutApi } from "../services/authService";
 
 export const useProfileOperations = () => {
   const [loading, setLoading] = useState(true);
@@ -13,6 +16,8 @@ export const useProfileOperations = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const [formData, setFormData] = useState({
     avatarUrl: "",
@@ -51,6 +56,7 @@ export const useProfileOperations = () => {
 
       setFormData({
         id:  p.userId,
+        createdAt: p.createdAt || p.createdDate || p.created_time || "",
         avatarUrl: p.avatar || "",
         username: p.username || "",
         email: p.email || "",
@@ -198,13 +204,23 @@ export const useProfileOperations = () => {
       return;
     }
 
-    try {
-      // await changePassword({
-      //   oldPassword: passwords.oldPassword,
-      //   newPassword: passwords.newPassword,
-      // });
+    if (!passwords.oldPassword || !passwords.newPassword) {
+      setError("Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới.");
+      return;
+    }
 
-      setSuccess("Password updated successfully!");
+    try {
+      setUpdatingPassword(true);
+      setError(null);
+      setSuccess(null);
+
+      await changeMyPassword({
+        username: formData.username,
+        oldPassword: passwords.oldPassword,
+        newPassword: passwords.newPassword,
+      });
+
+      setSuccess("Đổi mật khẩu thành công!");
       setPasswords({
         oldPassword: "",
         newPassword: "",
@@ -212,9 +228,36 @@ export const useProfileOperations = () => {
       });
     } catch (e) {
       console.error(e);
-      setError("Không thể đổi mật khẩu.");
+      setError(
+        e?.response?.data?.message ||
+          "Không thể đổi mật khẩu. Vui lòng kiểm tra mật khẩu cũ.",
+      );
+    } finally {
+      setUpdatingPassword(false);
     }
-  }, [passwords]);
+  }, [passwords, formData.username]);
+
+  const handleDeleteAccount = useCallback(async () => {
+    try {
+      setDeletingAccount(true);
+      setError(null);
+      setSuccess(null);
+
+      await deleteMyAccount();
+      await logoutApi();
+      setSuccess("Tài khoản đã được xóa thành công.");
+      return true;
+    } catch (e) {
+      console.error(e);
+      setError(
+        e?.response?.data?.message ||
+          "Không thể xóa tài khoản. Vui lòng thử lại sau.",
+      );
+      return false;
+    } finally {
+      setDeletingAccount(false);
+    }
+  }, []);
 
   const handleOpenCamera = useCallback(() => {
     setShowCamera(true);
@@ -237,6 +280,8 @@ export const useProfileOperations = () => {
     showCamera,
     error,
     success,
+    updatingPassword,
+    deletingAccount,
     setError,
     setSuccess,
 
@@ -247,6 +292,7 @@ export const useProfileOperations = () => {
     handleAvatarUpload,
     handleIdCardFileSelect,
     handlePasswordUpdate,
+    handleDeleteAccount,
     handleOpenCamera,
     handleCloseCamera,
     handleCameraCapture,

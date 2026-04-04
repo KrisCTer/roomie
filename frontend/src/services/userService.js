@@ -2,6 +2,10 @@
 import BaseService from "./BaseService";
 import httpClient from "../configurations/httpClient";
 import { API } from "../configurations/configuration";
+import {
+  getCompleteUserInfo,
+  getUserProfile as getStoredUserProfile,
+} from "./localStorageService";
 
 // ========= USER (Identity Service) =========
 export const getAllUsers = () => 
@@ -18,6 +22,70 @@ export const updateUser = (userId, data) =>
 
 export const deleteUser = (userId) => 
   BaseService.delete(API.DELETE_USER(userId));
+
+const resolveCurrentIdentity = () => {
+  const complete = getCompleteUserInfo() || {};
+  const storedProfile = getStoredUserProfile() || {};
+
+  const userId = complete.userId || storedProfile.userId || storedProfile.id;
+
+  const roleCandidates = [
+    ...(Array.isArray(storedProfile.roles)
+      ? storedProfile.roles.map((role) =>
+          typeof role === "string" ? role : role?.name,
+        )
+      : []),
+    storedProfile.role,
+    storedProfile.userRole,
+    complete.role,
+  ]
+    .map((role) => (role || "").toString().trim())
+    .filter(Boolean);
+
+  const roles = [...new Set(roleCandidates.map((role) => role.toUpperCase()))];
+
+  return {
+    userId,
+    roles,
+    username: complete.username || storedProfile.username || "",
+  };
+};
+
+export const changeMyPassword = async ({ username, oldPassword, newPassword }) => {
+  const identity = resolveCurrentIdentity();
+  const currentUsername = username || identity.username;
+
+  if (!currentUsername || !oldPassword || !newPassword) {
+    throw new Error("Missing required fields for password update");
+  }
+
+  // Validate old password against login API before updating
+  await BaseService.post(API.LOGIN, {
+    username: currentUsername,
+    password: oldPassword,
+  });
+
+  const { userId, roles } = identity;
+
+  if (!userId || roles.length === 0) {
+    throw new Error("Cannot resolve user identity for password update");
+  }
+
+  return updateUser(userId, {
+    password: newPassword,
+    roles,
+  });
+};
+
+export const deleteMyAccount = async () => {
+  const { userId } = resolveCurrentIdentity();
+
+  if (!userId) {
+    throw new Error("Cannot resolve user identity for account deletion");
+  }
+
+  return deleteUser(userId);
+};
 
 // ========= PROFILE (Profile Service) =========
 export const getMyProfile = () => 
@@ -113,6 +181,8 @@ export default {
   getMyInfo,
   updateUser,
   deleteUser,
+  changeMyPassword,
+  deleteMyAccount,
   getMyProfile,
   updateMyProfile,
   getUserProfile,

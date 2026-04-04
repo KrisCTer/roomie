@@ -16,6 +16,10 @@ import { useTranslation } from "react-i18next";
 const ProfileOverview = ({ formData, onEditClick }) => {
   const { t } = useTranslation();
 
+  const memberSinceYear = formData.createdAt
+    ? new Date(formData.createdAt).getFullYear()
+    : "-";
+
   // Format date to dd/MM/yyyy
   const formatDate = (dateStr) => {
     if (!dateStr) return "Not provided";
@@ -183,10 +187,7 @@ const ProfileOverview = ({ formData, onEditClick }) => {
         <div className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-xl p-6 border border-teal-200 dark:border-teal-800">
           <div className="flex items-center justify-between mb-2">
             <span className="text-2xl font-bold text-teal-600 dark:text-teal-400">
-              {new Date(formData.createdAt || Date.now()).toLocaleDateString(
-                "en-US",
-                { year: "numeric" }
-              )}
+              {memberSinceYear}
             </span>
             <Calendar className="w-8 h-8 text-teal-600 dark:text-teal-400 opacity-50" />
           </div>
@@ -200,5 +201,3 @@ const ProfileOverview = ({ formData, onEditClick }) => {
 };
 
 export default ProfileOverview;
-
-

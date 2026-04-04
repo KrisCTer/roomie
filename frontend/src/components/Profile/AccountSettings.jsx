@@ -1,10 +1,18 @@
 ﻿/* aria-label */
 // web-app/src/components/Profile/AccountSettings.jsx
 import React from "react";
-import { Lock, Shield, Trash2, Key } from "lucide-react";
+import { Lock, Shield, Trash2 } from "lucide-react";
 import ChangePasswordForm from "./ChangePasswordForm";
 
-const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
+const AccountSettings = ({
+  passwords,
+  onChange,
+  onSubmit,
+  formData,
+  updatingPassword,
+  onDeleteAccount,
+  deletingAccount,
+}) => {
   return (
     <div>
       {/* Security Section */}
@@ -30,6 +38,7 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
             passwords={passwords}
             onChange={onChange}
             onSubmit={onSubmit}
+            loading={updatingPassword}
           />
         </div>
 
@@ -88,18 +97,20 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
           </div>
 
           <button
+            type="button"
+            disabled={deletingAccount}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-            onClick={() => {
+            onClick={async () => {
               if (
                 window.confirm(
-                  "Are you sure you want to delete your account? This action cannot be undone."
+                  "Are you sure you want to delete your account? This action cannot be undone.",
                 )
               ) {
-                // Handle account deletion
+                await onDeleteAccount?.();
               }
             }}
           >
-            Xóa tài khoản
+            {deletingAccount ? "Đang xóa..." : "Xóa tài khoản"}
           </button>
         </div>
       </div>
@@ -108,5 +119,3 @@ const AccountSettings = ({ passwords, onChange, onSubmit, formData }) => {
 };
 
 export default AccountSettings;
-
-
