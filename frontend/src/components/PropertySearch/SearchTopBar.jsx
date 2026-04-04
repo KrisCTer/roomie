@@ -1,7 +1,6 @@
 // src/components/PropertySearch/SearchTopBar.jsx
 import React, { useState } from "react";
 import { Box, Container, IconButton, Button, Paper } from "@mui/material";
-import { FilterList as FilterIcon } from "@mui/icons-material";
 import SearchBar from "../layout/layoutHome/SearchBar";
 
 const SearchTopBar = ({ onFilterClick, filterCount }) => {
@@ -33,7 +32,6 @@ const SearchTopBar = ({ onFilterClick, filterCount }) => {
           {/* Filter Button */}
           <Button
             onClick={onFilterClick}
-            startIcon={<FilterIcon />}
             variant="outlined"
             sx={{
               borderRadius: 999,

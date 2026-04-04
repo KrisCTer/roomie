@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { loadGoogleMaps } from "../../utils/googleMapsLoader";
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 const getFriendlyMapError = (error) => {
   const rawMessage = error?.message || "";
@@ -38,6 +39,7 @@ const PropertyMapView = ({
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [mapsError, setMapsError] = useState(null);
   const markersRef = useRef([]);
+  const clustererRef = useRef(null);
   const isInitializedRef = useRef(false);
   const boundsChangeTimerRef = useRef(null);
   const lastBoundsRef = useRef(null);
@@ -217,15 +219,19 @@ const PropertyMapView = ({
     hasAutoFittedRef.current = false;
   }, [map, initialCenter, initialZoom]);
 
-  // Update markers
+  // Update markers + cluster
   useEffect(() => {
     if (!map || !window.google) return;
 
     // Clear existing markers
-    markersRef.current.forEach(({ overlay }) => {
-      if (overlay) overlay.setMap(null);
+    markersRef.current.forEach((marker) => {
+      marker.setMap(null);
     });
     markersRef.current = [];
+    if (clustererRef.current) {
+      clustererRef.current.clearMarkers();
+      clustererRef.current = null;
+    }
 
     const propertiesWithLocation = properties.filter(
       (prop) => prop.address?.location,
@@ -235,85 +241,57 @@ const PropertyMapView = ({
       return;
     }
 
-    propertiesWithLocation.forEach((prop) => {
-      const [lat, lng] = prop.address.location
-        .split(",")
-        .map((v) => parseFloat(v.trim()));
+    const markers = propertiesWithLocation
+      .map((prop) => {
+        const [lat, lng] = prop.address.location
+          .split(",")
+          .map((v) => parseFloat(v.trim()));
 
-      if (isNaN(lat) || isNaN(lng)) return;
+        if (isNaN(lat) || isNaN(lng)) return null;
 
-      const isHovered = prop.propertyId === hoveredPropertyId;
-      const priceInMillions = (prop.monthlyRent / 1000000).toFixed(1);
+        const isHovered = prop.propertyId === hoveredPropertyId;
+        const priceInMillions = (prop.monthlyRent / 1000000).toFixed(1);
 
-      class PriceOverlay extends window.google.maps.OverlayView {
-        constructor(position, price, isHovered, propertyId, onClick) {
-          super();
-          this.position = position;
-          this.price = price;
-          this.isHovered = isHovered;
-          this.propertyId = propertyId;
-          this.onClick = onClick;
-        }
+        const marker = new window.google.maps.Marker({
+          position: { lat, lng },
+          map,
+          label: {
+            text: `${priceInMillions}tr`,
+            color: isHovered ? "#FFFFFF" : "#1E293B",
+            fontSize: isHovered ? "13px" : "12px",
+            fontWeight: "700",
+          },
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: isHovered ? "#1E293B" : "#FFFFFF",
+            fillOpacity: 1,
+            strokeColor: isHovered ? "#FFFFFF" : "#E5E7EB",
+            strokeWeight: isHovered ? 2 : 1,
+            scale: isHovered ? 26 : 22,
+          },
+          zIndex: isHovered ? 1000 : 10,
+        });
 
-        onAdd() {
-          const div = document.createElement("div");
-          div.style.cssText = `
-            background: ${this.isHovered ? "#1e293b" : "white"};
-            color: ${this.isHovered ? "white" : "#1e293b"};
-            padding: 8px 14px;
-            border-radius: 24px;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s;
-            transform: ${this.isHovered ? "scale(1.15)" : "scale(1)"};
-            border: ${this.isHovered ? "2px solid white" : "1px solid #e5e7eb"};
-            position: absolute;
-            user-select: none;
-            z-index: ${this.isHovered ? "1000" : "1"};
-          `;
-          div.innerHTML = `${this.price}tr`;
-          div.onclick = () => this.onClick(this.propertyId);
+        marker.addListener("click", () => onPropertyClick?.(prop.propertyId));
+        return marker;
+      })
+      .filter(Boolean);
 
-          this.div = div;
-          const panes = this.getPanes();
-          panes.overlayMouseTarget.appendChild(div);
-        }
+    markersRef.current = markers;
 
-        draw() {
-          const projection = this.getProjection();
-          const position = projection.fromLatLngToDivPixel(this.position);
-          if (this.div) {
-            this.div.style.left = position.x - 45 + "px";
-            this.div.style.top = position.y - 20 + "px";
-          }
-        }
-
-        onRemove() {
-          if (this.div && this.div.parentNode) {
-            this.div.parentNode.removeChild(this.div);
-            this.div = null;
-          }
-        }
-      }
-
-      const overlay = new PriceOverlay(
-        new window.google.maps.LatLng(lat, lng),
-        priceInMillions,
-        isHovered,
-        prop.propertyId,
-        (id) => onPropertyClick?.(id),
-      );
-
-      overlay.setMap(map);
-      markersRef.current.push({ overlay, propertyId: prop.propertyId });
+    clustererRef.current = new MarkerClusterer({
+      map,
+      markers,
     });
 
     return () => {
-      markersRef.current.forEach(({ overlay }) => {
-        if (overlay) overlay.setMap(null);
+      if (clustererRef.current) {
+        clustererRef.current.clearMarkers();
+        clustererRef.current = null;
+      }
+
+      markersRef.current.forEach((marker) => {
+        marker.setMap(null);
       });
     };
   }, [map, properties, hoveredPropertyId, onPropertyClick]);

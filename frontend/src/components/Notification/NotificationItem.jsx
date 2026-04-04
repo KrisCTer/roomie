@@ -3,7 +3,14 @@
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
-import { X } from "lucide-react";
+import {
+  X,
+  Bell,
+  CheckCircle2,
+  FileText,
+  Wallet,
+  MessageCircle,
+} from "lucide-react";
 import { useNotificationContext } from "../../contexts/NotificationContext";
 
 const NotificationItem = ({
@@ -64,16 +71,15 @@ const NotificationItem = ({
   };
 
   const getTypeIcon = (type) => {
-    // Return emoji or icon based on notification type
     const iconMap = {
-      BOOKING_CONFIRMED: "✅",
-      CONTRACT_ACTIVATED: "📝",
-      PAYMENT_COMPLETED: "💰",
-      NEW_MESSAGE: "💬",
-      // Add more mappings
+      BOOKING_CONFIRMED: CheckCircle2,
+      CONTRACT_ACTIVATED: FileText,
+      PAYMENT_COMPLETED: Wallet,
+      NEW_MESSAGE: MessageCircle,
     };
 
-    return iconMap[type] || "🔔";
+    const Icon = iconMap[type] || Bell;
+    return <Icon className="w-5 h-5 text-[#A8653A]" />;
   };
 
   return (
@@ -94,7 +100,7 @@ const NotificationItem = ({
               className="w-10 h-10 rounded-full"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-[#F3E8D9] flex items-center justify-center text-xl">
+            <div className="w-10 h-10 rounded-full bg-[#F3E8D9] flex items-center justify-center">
               {getTypeIcon(notification.type)}
             </div>
           )}
