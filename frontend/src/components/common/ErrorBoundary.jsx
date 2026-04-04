@@ -60,23 +60,23 @@ class ErrorBoundary extends React.Component {
             </p>
 
             {/* Error detail (dev only) */}
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {import.meta.env.MODE === "development" && this.state.error && (
               <pre className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-left text-xs text-red-700 dark:text-red-300 overflow-auto max-h-32">
                 {this.state.error.toString()}
               </pre>
             )}
 
             {/* Actions */}
-            <div className="flex gap-3 justify-center">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 onClick={this.handleReload}
-                className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+                className="w-full px-5 py-2.5 bg-[#CC6F4A] hover:bg-[#B9603F] text-white rounded-lg font-medium transition-colors shadow-sm"
               >
                 Tải lại trang
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-medium transition-colors"
+                className="w-full px-5 py-2.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-medium transition-colors"
               >
                 Về trang chủ
               </button>

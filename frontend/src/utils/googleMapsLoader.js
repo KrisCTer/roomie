@@ -78,9 +78,9 @@ export function loadGoogleMaps(libraries = DEFAULT_LIBRARIES) {
     return googleMapsPromise;
   }
 
-  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_KEY?.trim();
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_KEY?.trim();
   if (!apiKey) {
-    return Promise.reject(new Error("Missing REACT_APP_GOOGLE_MAPS_KEY"));
+    return Promise.reject(new Error("Missing VITE_GOOGLE_MAPS_KEY"));
   }
 
   const origin = window.location?.origin || "unknown-origin";

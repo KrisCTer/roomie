@@ -1,6 +1,6 @@
 // src/routes/AppRoutes.jsx
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import RoleProtectedRoute from "../components/common/RoleProtectedRoute";
 import VerificationGuard from "../components/common/VerificationGuard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
@@ -227,7 +227,7 @@ const AppRoutes = () => {
           path="/admin"
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
-              <Admin />
+              <Navigate to="/admin/dashboard" replace />
             </RoleProtectedRoute>
           }
         />

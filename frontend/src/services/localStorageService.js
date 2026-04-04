@@ -43,10 +43,13 @@ export const getCompleteUserInfo = () => {
   if (!jwt) return null;
 
   const profile = getUserProfile() || {};
+  const storedUsername = localStorage.getItem("username") || "";
 
   return {
     userId: jwt.sub,
-    username: profile.username ?? `user_${jwt.sub.substring(0, 8)}`,
+    username:
+      profile.username || storedUsername || `user_${jwt.sub.substring(0, 8)}`,
+    role: profile.role ?? profile.roles?.[0] ?? profile.userRole ?? "",
     firstName: profile.firstName ?? "",
     lastName: profile.lastName ?? "",
     avatar: profile.avatar ?? "",
