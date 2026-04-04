@@ -1,6 +1,5 @@
 package com.roomie.services.payment_service.repository.httpclient;
 
-import com.roomie.services.payment_service.configuration.AuthenticationRequestInterceptor;
 import com.roomie.services.payment_service.configuration.FeignMultipartConfig;
 import com.roomie.services.payment_service.dto.response.ApiResponse;
 import com.roomie.services.payment_service.dto.response.ContractResponse;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(name = "contract-service",
-        configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
+        configuration = {FeignMultipartConfig.class})
 public interface ContractClient {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ApiResponse<ContractResponse>> get(@PathVariable String id);
