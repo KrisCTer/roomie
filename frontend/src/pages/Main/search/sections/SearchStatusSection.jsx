@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Chip, Container, Stack, Typography } from "@mui/material";
+import { MapPin } from "lucide-react";
 
 const SearchStatusSection = ({
   loading,
@@ -50,8 +51,11 @@ const SearchStatusSection = ({
                 variant="body2"
                 sx={{ color: "#DD6B20", fontWeight: 600, mt: 0.5 }}
               >
-                📍 {t("propertySearch.searchResultAt")}:{" "}
-                {searchCriteria.location}
+                <MapPin
+                  size={14}
+                  style={{ display: "inline-block", marginRight: 4 }}
+                />
+                {t("propertySearch.searchResultAt")}: {searchCriteria.location}
               </Typography>
             )}
           </Box>
