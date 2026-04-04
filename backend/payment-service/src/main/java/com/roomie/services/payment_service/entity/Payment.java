@@ -7,11 +7,6 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.Instant;
 
-/**
- * Payment entity stored in MongoDB {@code payments} collection.
- *
- * <p>Status lifecycle: PENDING → COMPLETED | FAILED
- */
 @Data
 @Builder
 @NoArgsConstructor
