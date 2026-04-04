@@ -28,6 +28,10 @@ const PropertyMapView = ({
   onInitialBoundsReady,
   initialCenter = null,
   initialZoom = 12,
+  nearbyEnabled = false,
+  nearbyLat = null,
+  nearbyLng = null,
+  nearbyRadiusKm = 5,
 }) => {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -37,9 +41,11 @@ const PropertyMapView = ({
   const isInitializedRef = useRef(false);
   const boundsChangeTimerRef = useRef(null);
   const lastBoundsRef = useRef(null);
-  const hasAutoFittedRef = useRef(false); // Track if we've auto-fitted
+  const hasAutoFittedRef = useRef(false);
   const canEmitBoundsRef = useRef(false);
   const hasNotifiedInitialReadyRef = useRef(false);
+  const nearbyCircleRef = useRef(null);
+  const userMarkerRef = useRef(null);
 
   const notifyInitialBoundsReady = useCallback(() => {
     if (hasNotifiedInitialReadyRef.current) return;
@@ -311,6 +317,69 @@ const PropertyMapView = ({
       });
     };
   }, [map, properties, hoveredPropertyId, onPropertyClick]);
+
+  // Nearby mode: draw circle + user marker
+  useEffect(() => {
+    // Cleanup previous
+    if (nearbyCircleRef.current) {
+      nearbyCircleRef.current.setMap(null);
+      nearbyCircleRef.current = null;
+    }
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setMap(null);
+      userMarkerRef.current = null;
+    }
+
+    if (!map || !window.google || !nearbyEnabled || !nearbyLat || !nearbyLng) return;
+
+    const center = { lat: nearbyLat, lng: nearbyLng };
+
+    // Draw radius circle
+    nearbyCircleRef.current = new window.google.maps.Circle({
+      map,
+      center,
+      radius: nearbyRadiusKm * 1000,
+      fillColor: "#059669",
+      fillOpacity: 0.08,
+      strokeColor: "#059669",
+      strokeOpacity: 0.4,
+      strokeWeight: 2,
+      clickable: false,
+    });
+
+    // Draw user location marker
+    userMarkerRef.current = new window.google.maps.Marker({
+      map,
+      position: center,
+      title: "Vi tri cua ban",
+      icon: {
+        path: window.google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: "#2563EB",
+        fillOpacity: 1,
+        strokeColor: "white",
+        strokeWeight: 3,
+      },
+      zIndex: 999,
+    });
+
+    // Fit bounds to circle
+    const circleBounds = nearbyCircleRef.current.getBounds();
+    if (circleBounds) {
+      map.fitBounds(circleBounds);
+    }
+
+    return () => {
+      if (nearbyCircleRef.current) {
+        nearbyCircleRef.current.setMap(null);
+        nearbyCircleRef.current = null;
+      }
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setMap(null);
+        userMarkerRef.current = null;
+      }
+    };
+  }, [map, nearbyEnabled, nearbyLat, nearbyLng, nearbyRadiusKm]);
 
   return (
     <Box

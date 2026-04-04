@@ -31,3 +31,6 @@ export const getPropertiesByOwner = (params) =>
 
 export const publishProperty = (propertyId) =>
   BaseService.post(API.PUBLISH_PROPERTY(propertyId));
+
+export const searchNearbyProperties = ({ lat, lng, radiusKm, page, size }) =>
+  BaseService.get(API.PROPERTY_NEARBY, { lat, lng, radiusKm, page, size });

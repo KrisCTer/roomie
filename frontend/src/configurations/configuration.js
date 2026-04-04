@@ -86,6 +86,7 @@ export const API = {
   MARK_AS_RENTER: (propertyId) => `/property/${propertyId}/rented`,
   MARK_AS_AVAILABLE: (propertyId) => `/property/${propertyId}/available`,
   MARK_AS_DEACTIVATED: (propertyId) => `/property/${propertyId}/deactivate`,
+  PROPERTY_NEARBY: "/property/nearby",
 
   // Internal Property endpoints
   PROPERTY_INTERNAL_PENDING: "/property/internal/pending",

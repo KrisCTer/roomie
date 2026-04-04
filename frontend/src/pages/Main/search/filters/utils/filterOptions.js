@@ -3,7 +3,13 @@ export const DEFAULT_FILTERS = {
   propertyTypes: [],
   bedrooms: 0,
   bathrooms: 0,
+  nearbyEnabled: false,
+  nearbyLat: null,
+  nearbyLng: null,
+  nearbyRadiusKm: 5,
 };
+
+export const RADIUS_OPTIONS = [1, 2, 3, 5, 10, 15, 20];
 
 export const PROPERTY_TYPES = [
   { value: "ROOM", label: "Phong tro", icon: "🏠" },
@@ -40,6 +46,7 @@ export const getActiveFilterCount = (currentFilters) => {
   ) {
     count += 1;
   }
+  if (currentFilters.nearbyEnabled) count += 1;
 
   return count;
 };
