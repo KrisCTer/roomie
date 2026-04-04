@@ -23,9 +23,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ChatMessageService {
     SocketIOServer server;
@@ -91,7 +91,7 @@ public class ChatMessageService {
 
         String room = request.getConversationId();
 
-        log.info("🔥 Emitting new_message to room {}", room);
+        log.info("Emitting new_message to room {}", room);
 
         server.getRoomOperations(room).sendEvent("new_message", response);
 

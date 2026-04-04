@@ -29,10 +29,10 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BookingService {
-    LeaseLongTermRepository ltRepo;
+    LeaseLongTermRepository leaseLongTermRepository;
     BookingMapper bookingMapper;
     RedisLockService lockService;
     RedisCacheService cacheService;
@@ -68,7 +68,7 @@ public class BookingService {
             lease.setCreatedAt(Instant.now());
             lease.setUpdatedAt(Instant.now());
 
-            LeaseLongTerm saved = ltRepo.save(lease);
+            LeaseLongTerm saved = leaseLongTermRepository.save(lease);
             cacheService.put(cacheKey(saved.getId()), saved, CACHE_TTL_SECONDS);
 
             BookingEvent event = buildBookingEvent(saved, property);
@@ -83,15 +83,16 @@ public class BookingService {
 
     public Optional<BookingResponse> getById(String id) {
         Optional<LeaseLongTerm> cached = cacheService.get(cacheKey(id), LeaseLongTerm.class);
-        if (cached.isPresent()) return Optional.of(bookingMapper.leaseToResponse(cached.get()));
-        return ltRepo.findById(id).map(e -> {
+        if (cached.isPresent())
+            return Optional.of(bookingMapper.leaseToResponse(cached.get()));
+        return leaseLongTermRepository.findById(id).map(e -> {
             cacheService.put(cacheKey(id), e, CACHE_TTL_SECONDS);
             return bookingMapper.leaseToResponse(e);
         });
     }
 
     public List<BookingResponse> getBookingsByTenant(String tenantId) {
-        List<LeaseLongTerm> leases = ltRepo.findByTenantId(tenantId);
+        List<LeaseLongTerm> leases = leaseLongTermRepository.findByTenantId(tenantId);
         return leases.stream()
                 .map(bookingMapper::leaseToResponse)
                 .toList();
@@ -102,14 +103,14 @@ public class BookingService {
         List<String> propertyIds = getOwnerPropertyIds(ownerId);
 
         // Get all bookings for these properties
-        List<LeaseLongTerm> leases = ltRepo.findByPropertyIdIn(propertyIds);
+        List<LeaseLongTerm> leases = leaseLongTermRepository.findByPropertyIdIn(propertyIds);
         return leases.stream()
                 .map(bookingMapper::leaseToResponse)
                 .toList();
     }
 
     public List<BookingResponse> getBookingsByProperty(String propertyId) {
-        List<LeaseLongTerm> leases = ltRepo.findByPropertyId(propertyId);
+        List<LeaseLongTerm> leases = leaseLongTermRepository.findByPropertyId(propertyId);
         return leases.stream()
                 .map(bookingMapper::leaseToResponse)
                 .toList();
@@ -134,7 +135,8 @@ public class BookingService {
     }
 
     public BookingResponse confirm(String id) {
-        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        LeaseLongTerm lease = leaseLongTermRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         if (lease.getStatus() != LeaseStatus.PENDING_APPROVAL)
             throw new AppException(ErrorCode.LONG_TERM_INVALID_STATUS);
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -145,7 +147,7 @@ public class BookingService {
 
         lease.setStatus(LeaseStatus.ACTIVE);
         lease.setUpdatedAt(Instant.now());
-        LeaseLongTerm saved = ltRepo.save(lease);
+        LeaseLongTerm saved = leaseLongTermRepository.save(lease);
         cacheService.put(cacheKey(id), saved, CACHE_TTL_SECONDS);
         BookingEvent event = buildBookingEvent(saved, property);
         kafkaTemplate.send("booking.confirmed", event);
@@ -154,7 +156,7 @@ public class BookingService {
     }
 
     public BookingResponse reject(String id, String reason) {
-        LeaseLongTerm lease = ltRepo.findById(id)
+        LeaseLongTerm lease = leaseLongTermRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         if (lease.getStatus() != LeaseStatus.PENDING_APPROVAL)
@@ -169,7 +171,7 @@ public class BookingService {
 
         lease.setStatus(LeaseStatus.REJECTED);
         lease.setUpdatedAt(Instant.now());
-        LeaseLongTerm saved = ltRepo.save(lease);
+        LeaseLongTerm saved = leaseLongTermRepository.save(lease);
         cacheService.evict(cacheKey(id));
 
         BookingEvent event = buildBookingEvent(saved, property);
@@ -180,7 +182,7 @@ public class BookingService {
     }
 
     public BookingResponse cancel(String id) {
-        LeaseLongTerm lease = ltRepo.findById(id)
+        LeaseLongTerm lease = leaseLongTermRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -190,7 +192,7 @@ public class BookingService {
 
         lease.setStatus(LeaseStatus.TERMINATED);
         lease.setUpdatedAt(Instant.now());
-        LeaseLongTerm saved = ltRepo.save(lease);
+        LeaseLongTerm saved = leaseLongTermRepository.save(lease);
         cacheService.evict(cacheKey(id));
 
         BookingEvent event = buildBookingEvent(saved, property);
@@ -202,28 +204,30 @@ public class BookingService {
     }
 
     public BookingResponse pause(String id, String reason) {
-        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        LeaseLongTerm lease = leaseLongTermRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         lease.setStatus(LeaseStatus.PAUSED);
         lease.setUpdatedAt(Instant.now());
-        ltRepo.save(lease);
-        return bookingMapper.leaseToResponse(ltRepo.save(lease));
+        leaseLongTermRepository.save(lease);
+        return bookingMapper.leaseToResponse(leaseLongTermRepository.save(lease));
     }
 
     public BookingResponse resume(String id) {
-        LeaseLongTerm lease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        LeaseLongTerm lease = leaseLongTermRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         lease.setStatus(LeaseStatus.ACTIVE);
         lease.setUpdatedAt(Instant.now());
-        ltRepo.save(lease);
-        return bookingMapper.leaseToResponse(ltRepo.save(lease));
+        leaseLongTermRepository.save(lease);
+        return bookingMapper.leaseToResponse(leaseLongTermRepository.save(lease));
     }
 
     public BookingResponse terminate(String id, String reason) {
-        LeaseLongTerm lease = ltRepo.findById(id)
+        LeaseLongTerm lease = leaseLongTermRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         lease.setStatus(LeaseStatus.TERMINATED);
         lease.setUpdatedAt(Instant.now());
-        LeaseLongTerm saved = ltRepo.save(lease);
+        LeaseLongTerm saved = leaseLongTermRepository.save(lease);
 
         PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
         propertyClient.markAsAvailable(lease.getPropertyId());
@@ -253,7 +257,7 @@ public class BookingService {
     @Scheduled(cron = "0 0 1 * * *") // Daily at 1 AM
     public void expireLeases() {
         Instant now = Instant.now();
-        List<LeaseLongTerm> expiring = ltRepo.findByStatusAndLeaseEndBefore(
+        List<LeaseLongTerm> expiring = leaseLongTermRepository.findByStatusAndLeaseEndBefore(
                 LeaseStatus.ACTIVE,
                 now
         );
@@ -261,7 +265,7 @@ public class BookingService {
         for (LeaseLongTerm lease : expiring) {
             lease.setStatus(LeaseStatus.EXPIRED);
             lease.setUpdatedAt(now);
-            LeaseLongTerm saved = ltRepo.save(lease);
+            LeaseLongTerm saved = leaseLongTermRepository.save(lease);
 
             try {
                 PropertyResponse property = propertyClient.getById(lease.getPropertyId()).getResult();
@@ -277,14 +281,15 @@ public class BookingService {
     }
 
     public BookingResponse renew(String id, BookingRequest renewalRequest) {
-        LeaseLongTerm oldLease = ltRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        LeaseLongTerm oldLease = leaseLongTermRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         // Mark old lease as RENEWED
         oldLease.setStatus(LeaseStatus.RENEWED);
         oldLease.setUpdatedAt(Instant.now());
-        ltRepo.save(oldLease);
+        leaseLongTermRepository.save(oldLease);
         BookingResponse newLease = create(renewalRequest);
-        ltRepo.save(oldLease);
+        leaseLongTermRepository.save(oldLease);
         return newLease;
     }
 
@@ -293,7 +298,7 @@ public class BookingService {
     }
 
     private boolean isLongTermAvailable(String propertyId, Instant start, Instant end) {
-        var overlapping = ltRepo.findOverlapping(propertyId, start, end);
+        var overlapping = leaseLongTermRepository.findOverlapping(propertyId, start, end);
         return overlapping.stream().noneMatch(l -> {
             switch (l.getStatus()) {
                 case TERMINATED, EXPIRED -> {

@@ -25,10 +25,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Component
 public class SocketHandler {
     SocketIOServer server;
     IdentityService identityService;
@@ -66,10 +66,6 @@ public class SocketHandler {
     public void startServer() {
         server.start();
         server.addListeners(this);
-
-        // ========== CALL SIGNALING EVENTS ==========
-        // ⭐ CRITICAL: Use Object.class to handle socket.io's flexible format
-        // ⭐ JOIN CONVERSATION ROOM
         server.addEventListener("join_conversation", Map.class, (client, data, ackRequest) -> {
             try {
                 String room = (String) data.get("conversationId");
@@ -83,28 +79,20 @@ public class SocketHandler {
                 log.error("❌ Error processing join_conversation event", e);
             }
         });
-
-        // Initiate call
         server.addEventListener("call-user", Object.class, new DataListener<Object>() {
             @Override
             public void onData(
                     SocketIOClient client, Object rawData, com.corundumstudio.socketio.AckRequest ackRequest) {
                 try {
-
-                    // Parse data (might be List or Map depending on socket.io version)
                     Map<String, Object> data = parseSocketData(rawData);
 
                     String fromUserId = (String) data.get("from");
                     String toUserId = (String) data.get("to");
-
-                    // FIX NPE: validate before equals
                     if (fromUserId == null || toUserId == null) {
                         log.warn("❌ call-user missing required fields: from={}, to={}", fromUserId, toUserId);
                         client.sendEvent("call-failed", Map.of("reason", "Invalid call data"));
                         return;
                     }
-
-                    // Prevent self-calling
                     if (fromUserId.equals(toUserId)) {
                         log.warn("❌ User {} attempted to call themselves", fromUserId);
                         client.sendEvent("call-failed", Map.of("reason", "Cannot call yourself"));
@@ -112,17 +100,12 @@ public class SocketHandler {
                     }
 
                     log.info("📞 Call request from {} to {}", data.get("from"), toUserId);
-
-                    // Find target user's socket session
                     var targetSession = webSocketSessionService.findByUserId(toUserId);
                     if (targetSession != null) {
-                        // Find target client
                         for (SocketIOClient targetClient : server.getAllClients()) {
                             if (targetClient.getSessionId().toString().equals(targetSession.getSocketSessionId())) {
                                 targetClient.sendEvent("incoming-call", data);
                                 log.info("✅ Call request sent to user {}", toUserId);
-
-                                // Send acknowledgment to caller
                                 if (ackRequest.isAckRequested()) {
                                     ackRequest.sendAckData(Map.of("status", "sent"));
                                 }
@@ -143,8 +126,6 @@ public class SocketHandler {
                 }
             }
         });
-
-        // Notify caller that callee accepted the call
         server.addEventListener("accept-call", Object.class, (client, rawData, ack) -> {
             try {
                 Map<String, Object> data = parseSocketData(rawData);
@@ -166,8 +147,6 @@ public class SocketHandler {
                 log.error("❌ Error processing accept-call event", e);
             }
         });
-
-        // Answer call
         server.addEventListener("answer-call", Object.class, new DataListener<Object>() {
             @Override
             public void onData(
@@ -192,8 +171,6 @@ public class SocketHandler {
                 }
             }
         });
-
-        // Reject call
         server.addEventListener("reject-call", Object.class, new DataListener<Object>() {
             @Override
             public void onData(
@@ -218,8 +195,6 @@ public class SocketHandler {
                 }
             }
         });
-
-        // End call
         server.addEventListener("end-call", Object.class, new DataListener<Object>() {
             @Override
             public void onData(
@@ -244,8 +219,6 @@ public class SocketHandler {
                 }
             }
         });
-
-        // ICE candidate exchange
         server.addEventListener("ice-candidate", Object.class, new DataListener<Object>() {
             @Override
             public void onData(
@@ -273,10 +246,6 @@ public class SocketHandler {
         log.info("✅ Server started with call signaling support");
     }
 
-    /**
-     * Parse socket.io data which might come as List or Map
-     * Socket.io client sometimes wraps data in an array
-     */
     @SuppressWarnings("unchecked")
     private Map<String, Object> parseSocketData(Object rawData) {
         if (rawData instanceof Map) {
@@ -287,8 +256,6 @@ public class SocketHandler {
                 return (Map<String, Object>) list.get(0);
             }
         }
-
-        // Try to convert via Jackson
         try {
             String json = objectMapper.writeValueAsString(rawData);
             return objectMapper.readValue(json, Map.class);

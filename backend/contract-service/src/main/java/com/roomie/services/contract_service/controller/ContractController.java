@@ -5,15 +5,14 @@ import com.roomie.services.contract_service.dto.request.OTPSignRequest;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
 import com.roomie.services.contract_service.dto.response.OTPResponse;
-import com.roomie.services.contract_service.entity.Contract;
+import com.roomie.services.contract_service.exception.AppException;
+import com.roomie.services.contract_service.exception.ErrorCode;
 import com.roomie.services.contract_service.mapper.ContractMapper;
 import com.roomie.services.contract_service.service.ContractService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,47 +25,30 @@ import java.util.Map;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ContractController {
-    ContractService service;
+    ContractService contractService;
     ContractMapper contractMapper;
 
-    /**
-     * Tạo contract mới (sẽ tạo bản PREVIEW)
-     */
     @PostMapping
-    public ResponseEntity<ApiResponse<ContractResponse>> create(@RequestBody ContractRequest req) {
-        log.info("Creating new contract for bookingId={}", req.getBookingId());
-        ContractResponse data = service.create(req);
-        return ResponseEntity.ok(
-                ApiResponse.success(data, "Created contract successfully")
-        );
+    public ApiResponse<ContractResponse> create(@RequestBody ContractRequest req) {
+        return ApiResponse.success(contractService.create(req), "Created contract successfully");
     }
 
-    /**
-     * Lấy thông tin contract
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ContractResponse>> get(@PathVariable String id) {
-        return service.getById(id)
-                .map(contract -> ResponseEntity.ok(
-                        ApiResponse.success(contract, "Fetched contract successfully")
-                ))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("Contract not found", 404)));
+    public ApiResponse<ContractResponse> get(@PathVariable String id) {
+        ContractResponse contract = contractService.getById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+        return ApiResponse.success(contract, "Fetched contract successfully");
     }
 
     @GetMapping("/my-contracts")
     public ApiResponse<Map<String, List<ContractResponse>>> getMyContracts() {
-
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        List<Contract> landlordContracts = service.getContractsByLandlord(userId);
-        List<Contract> tenantContracts = service.getContractsByTenant(userId);
-
-        List<ContractResponse> asLandlord = landlordContracts.stream()
+        List<ContractResponse> asLandlord = contractService.getContractsByLandlord(userId).stream()
                 .map(contractMapper::toResponse)
                 .toList();
 
-        List<ContractResponse> asTenant = tenantContracts.stream()
+        List<ContractResponse> asTenant = contractService.getContractsByTenant(userId).stream()
                 .map(contractMapper::toResponse)
                 .toList();
 
@@ -74,168 +56,89 @@ public class ContractController {
         result.put("asLandlord", asLandlord);
         result.put("asTenant", asTenant);
 
-        return ApiResponse.success(result,"Fetched contract successfully");
+        return ApiResponse.success(result, "Fetched contracts successfully");
     }
 
-
-
-
-    /**
-     * Tenant ký hợp đồng
-     * - Nếu landlord đã ký -> tạo bản FINAL
-     * - Nếu chưa -> status = PENDING_SIGNATURE
-     */
     @PostMapping("/{id}/sign/tenant")
-    public ResponseEntity<ApiResponse<ContractResponse>> tenantSign(
-            @PathVariable String id,
-            @RequestBody(required = false) String payload) {
-
-        log.info("Tenant signing contract contractId={}", id);
-        ContractResponse data = service.tenantSign(id, payload);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(data, "Tenant signed contract successfully")
-        );
+    public ApiResponse<ContractResponse> tenantSign(@PathVariable String id, @RequestBody(required = false) String payload) {
+        return ApiResponse.success(contractService.tenantSign(id, payload), "Tenant signed contract successfully");
     }
 
     @PostMapping("/{id}/sign/tenant/otp")
-    public ResponseEntity<ApiResponse<ContractResponse>> tenantSignWithOTP(
-            @PathVariable String id,
-            @RequestBody OTPSignRequest req) {
-
-        ContractResponse data = service.tenantSignWithOTP(id, req);
-        return ResponseEntity.ok(ApiResponse.success(data, "Tenant signed with OTP"));
+    public ApiResponse<ContractResponse> tenantSignWithOTP(@PathVariable String id, @RequestBody OTPSignRequest req) {
+        return ApiResponse.success(contractService.tenantSignWithOTP(id, req), "Tenant signed with OTP");
     }
 
-    /**
-     * Landlord ký hợp đồng
-     * - Nếu tenant đã ký -> tạo bản FINAL
-     * - Nếu chưa -> status = PENDING_SIGNATURE
-     */
     @PostMapping("/{id}/sign/landlord")
-    public ResponseEntity<ApiResponse<ContractResponse>> landlordSign(
-            @PathVariable String id,
-            @RequestBody(required = false) String payload) {
-
-        log.info("Landlord signing contract contractId={}", id);
-        ContractResponse data = service.landlordSign(id, payload);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(data, "Landlord signed contract successfully")
-        );
+    public ApiResponse<ContractResponse> landlordSign(@PathVariable String id, @RequestBody(required = false) String payload) {
+        return ApiResponse.success(contractService.landlordSign(id, payload), "Landlord signed contract successfully");
     }
 
     @PostMapping("/{id}/sign/landlord/otp")
-    public ResponseEntity<ApiResponse<ContractResponse>> landlordSignWithOTP(
-            @PathVariable String id,
-            @RequestBody OTPSignRequest req) {
-
-        ContractResponse data = service.landlordSignWithOTP(id, req);
-        return ResponseEntity.ok(ApiResponse.success(data, "Landlord signed with OTP"));
+    public ApiResponse<ContractResponse> landlordSignWithOTP(@PathVariable String id, @RequestBody OTPSignRequest req) {
+        return ApiResponse.success(contractService.landlordSignWithOTP(id, req), "Landlord signed with OTP");
     }
 
-    /**
-     * Download PDF contract
-     * URL sẽ tự động trỏ đến bản PREVIEW hoặc FINAL tùy trạng thái
-     */
     @GetMapping("/{id}/pdf")
-    public ResponseEntity<ApiResponse<PdfInfo>> downloadPdf(@PathVariable String id) {
-        return service.getById(id)
-                .map(contract -> {
-                    PdfInfo body = new PdfInfo(contract.getPdfUrl());
-                    return ResponseEntity.ok(
-                            ApiResponse.success(body, "Fetched contract PDF url successfully")
-                    );
-                })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("Contract not found", 404)));
+    public ApiResponse<PdfInfo> downloadPdf(@PathVariable String id) {
+        ContractResponse contract = contractService.getById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+        return ApiResponse.success(new PdfInfo(contract.getPdfUrl()), "Fetched contract PDF url successfully");
     }
 
-    /**
-     * Kiểm tra trạng thái ký
-     */
     @GetMapping("/{id}/signature-status")
-    public ResponseEntity<ApiResponse<SignatureStatus>> getSignatureStatus(@PathVariable String id) {
-        return service.getById(id)
-                .map(contract -> {
-                    SignatureStatus status = new SignatureStatus(
-                            contract.isTenantSigned(),
-                            contract.isLandlordSigned(),
-                            contract.isTenantSigned() && contract.isLandlordSigned(),
-                            contract.getStatus().toString(),
-                            contract.getPdfUrl()
-                    );
-                    return ResponseEntity.ok(
-                            ApiResponse.success(status, "Fetched signature status successfully")
-                    );
-                })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("Contract not found", 404)));
+    public ApiResponse<SignatureStatus> getSignatureStatus(@PathVariable String id) {
+        ContractResponse contract = contractService.getById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+        SignatureStatus status = new SignatureStatus(
+                contract.isTenantSigned(),
+                contract.isLandlordSigned(),
+                contract.isTenantSigned() && contract.isLandlordSigned(),
+                contract.getStatus().toString(),
+                contract.getPdfUrl()
+        );
+        return ApiResponse.success(status, "Fetched signature status successfully");
     }
 
     @PostMapping("/{id}/pause")
-    public ApiResponse<ContractResponse> pauseContract(
-            @PathVariable String id,
-            @RequestParam(required = false) String reason
-    ) {
-        ContractResponse response = service.pause(id, reason);
-        return ApiResponse.success(response, "Contract paused successfully");
+    public ApiResponse<ContractResponse> pauseContract(@PathVariable String id, @RequestParam(required = false) String reason) {
+        return ApiResponse.success(contractService.pause(id, reason), "Contract paused successfully");
     }
 
     @PostMapping("/{id}/resume")
     public ApiResponse<ContractResponse> resumeContract(@PathVariable String id) {
-        ContractResponse response = service.resume(id);
-        return ApiResponse.success(response, "Contract resumed successfully");
+        return ApiResponse.success(contractService.resume(id), "Contract resumed successfully");
     }
 
     @PostMapping("/{id}/terminate")
-    public ApiResponse<ContractResponse> terminateContract(
-            @PathVariable String id,
-            @RequestParam(required = false) String reason
-    ) {
-        ContractResponse response = service.terminate(id, reason);
-        return ApiResponse.success(response, "Contract terminated successfully");
+    public ApiResponse<ContractResponse> terminateContract(@PathVariable String id, @RequestParam(required = false) String reason) {
+        return ApiResponse.success(contractService.terminate(id, reason), "Contract terminated successfully");
     }
 
     @PostMapping("/{id}/request-otp/tenant")
-    public ResponseEntity<ApiResponse<OTPResponse>> requestTenantOTP(@PathVariable String id) {
+    public ApiResponse<OTPResponse> requestTenantOTP(@PathVariable String id) {
         String tenantId = SecurityContextHolder.getContext().getAuthentication().getName();
-        OTPResponse response = service.requestTenantOTP(id, tenantId);
-        return ResponseEntity.ok(
-                ApiResponse.success(response, "OTP sent to your email successfully")
-        );
+        return ApiResponse.success(contractService.requestTenantOTP(id, tenantId), "OTP sent to your email successfully");
     }
 
     @PostMapping("/{id}/request-otp/landlord")
-    public ResponseEntity<ApiResponse<OTPResponse>> requestLandlordOTP(@PathVariable String id) {
+    public ApiResponse<OTPResponse> requestLandlordOTP(@PathVariable String id) {
         String landlordId = SecurityContextHolder.getContext().getAuthentication().getName();
-        OTPResponse response = service.requestLandlordOTP(id, landlordId);
-        return ResponseEntity.ok(
-                ApiResponse.success(response, "OTP sent to your email successfully")
-        );
+        return ApiResponse.success(contractService.requestLandlordOTP(id, landlordId), "OTP sent to your email successfully");
     }
 
     @PutMapping("/{id}/payment-completed")
-    public ResponseEntity<ApiResponse<ContractResponse>> onPaymentCompleted(@PathVariable String id) {
-        log.info("Marking payment completed for contract contractId={}", id);
-
-        ContractResponse data = service.markPaymentCompleted(id);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(data, "Contract activated after payment successfully")
-        );
+    public ApiResponse<ContractResponse> onPaymentCompleted(@PathVariable String id) {
+        return ApiResponse.success(contractService.markPaymentCompleted(id), "Contract activated after payment successfully");
     }
 
-    // Inner DTO for signature status
     private record SignatureStatus(
             boolean tenantSigned,
             boolean landlordSigned,
             boolean bothSigned,
             String contractStatus,
             String pdfUrl
-    ) {
-    }
+    ) {}
 
-    private record PdfInfo(String pdfUrl) {
-    }
+    private record PdfInfo(String pdfUrl) {}
 }

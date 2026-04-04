@@ -37,15 +37,15 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class ContractService {
-    ContractRepository repo;
-    ContractMapper mapper;
+    ContractRepository contractRepository;
+    ContractMapper contractMapper;
     PdfFileService pdfFileService;
     ContractTemplateService templateService;
     DigitalSignatureService signatureService;
@@ -54,6 +54,9 @@ public class ContractService {
     KafkaTemplate<String, Object> kafkaTemplate;
     PropertyClient propertyClient;
     BillingClient billingClient;
+    ProfileClient profileClient;
+    OTPVerificationRepository otpVerificationRepository;
+    EmailService emailService;
 
     @Value("${contract.lock-ttl-seconds:30}")
     long LOCK_TTL = 30;
@@ -63,22 +66,18 @@ public class ContractService {
 
     @Value("${contract.template-type:FULL}")
     String templateType = "FULL";
-    private final ProfileClient profileClient;
-    private final OTPVerificationRepository oTPVerificationRepository;
-    private final EmailService emailService;
 
-    /**
-     * Tạo contract mới - Generate bản PREVIEW
-     */
+
     public ContractResponse create(ContractRequest req) {
         if (req.getBookingId() != null) {
-            Optional<Contract> exists = repo.findByBookingId(req.getBookingId());
-            if (exists.isPresent()) throw new AppException(ErrorCode.CONTRACT_EXISTS);
+            Optional<Contract> exists = contractRepository.findByBookingId(req.getBookingId());
+            if (exists.isPresent())
+                throw new AppException(ErrorCode.CONTRACT_EXISTS);
         }
         PropertyResponse property = propertyClient.getProperty(req.getPropertyId()).getResult();
 
 
-        Contract c = mapper.toEntity(req);
+        Contract c = contractMapper.toEntity(req);
         c.setTenantSigned(false);
         c.setLandlordSigned(false);
         c.setMonthlyRent(property.getMonthlyRent());
@@ -87,7 +86,6 @@ public class ContractService {
         c.setUpdatedAt(Instant.now());
         c.setStatus(ContractStatus.DRAFT);
 
-        // ✅ Generate PREVIEW PDF (bản xem trước)
         String previewHtml = templateService.buildPreviewContractHtml(c);
         String fileName = "contract-preview-" +
                 (c.getBookingId() != null ? c.getBookingId() : System.currentTimeMillis()) + ".pdf";
@@ -103,7 +101,7 @@ public class ContractService {
                 + "|" + url + "|" + System.currentTimeMillis();
         c.setSignatureToken(signatureService.sign(payload));
 
-        Contract saved = repo.save(c);
+        Contract saved = contractRepository.save(c);
         cacheService.put(cacheKey(saved.getId()), saved, CACHE_TTL);
 
         createDepositBill(saved);
@@ -113,7 +111,7 @@ public class ContractService {
         log.info("Created contract PREVIEW for bookingId={}, contractId={}",
                 saved.getBookingId(), saved.getId());
 
-        return mapper.toResponse(saved);
+        return contractMapper.toResponse(saved);
     }
 
     private void createDepositBill(Contract contract) {
@@ -135,11 +133,11 @@ public class ContractService {
             // Gọi Billing Service để tạo bill
             billingClient.createBill(billRequest);
 
-            log.info("✅ Auto-created deposit bill for contract: {}, amount: {}",
+            log.info("Auto-created deposit bill for contract: {}, amount: {}",
                     contract.getId(), contract.getRentalDeposit());
 
         } catch (Exception e) {
-            log.error("❌ Failed to auto-create deposit bill for contract: {}",
+            log.error("Failed to auto-create deposit bill for contract: {}",
                     contract.getId(), e);
             // Không throw exception để không làm gián đoạn việc tạo contract
         }
@@ -147,22 +145,20 @@ public class ContractService {
 
     public Optional<ContractResponse> getById(String id) {
         Optional<Contract> cached = cacheService.get(cacheKey(id), Contract.class);
-        if (cached.isPresent()) return cached.map(mapper::toResponse);
-        return repo.findById(id).map(c -> {
+        if (cached.isPresent())
+            return cached.map(contractMapper::toResponse);
+        return contractRepository.findById(id).map(c -> {
             cacheService.put(cacheKey(id), c, CACHE_TTL);
-            return mapper.toResponse(c);
+            return contractMapper.toResponse(c);
         });
     }
     public List<Contract> getContractsByLandlord(String landlordId) {
-        return repo.findByLandlordId(landlordId);
+        return contractRepository.findByLandlordId(landlordId);
     }
 
     public List<Contract> getContractsByTenant(String tenantId) {
-        return repo.findByTenantId(tenantId);
+        return contractRepository.findByTenantId(tenantId);
     }
-    /**
-     * Tenant ký hợp đồng
-     */
     @Transactional
     public ContractResponse tenantSign(String id, String signaturePayload) {
         String lockKey = "lock:contract:" + id;
@@ -170,14 +166,13 @@ public class ContractService {
         if (token == null) throw new AppException(ErrorCode.RESOURCE_LOCKED);
 
         try {
-            Contract c = repo.findById(id)
+            Contract c = contractRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
             if (c.isTenantSigned()) throw new AppException(ErrorCode.ALREADY_SIGNED);
 
             c.setTenantSigned(true);
             c.setUpdatedAt(Instant.now());
 
-            // ✅ Check if both signed -> regenerate FINAL PDF
             if (c.isLandlordSigned()) {
                 c.setStatus(ContractStatus.PENDING_PAYMENT);
                 regenerateFinalPdf(c);
@@ -187,22 +182,19 @@ public class ContractService {
                 c.setStatus(ContractStatus.PENDING_SIGNATURE);
             }
 
-            repo.save(c);
+            contractRepository.save(c);
             cacheService.put(cacheKey(id), c, CACHE_TTL);
             ContractEvent event = buildEvent(c);
             event.setSignedBy("TENANT");
             kafkaTemplate.send("contract.signed", event);
             log.info("Tenant signed contract contractId={}", c.getId());
 
-            return mapper.toResponse(c);
+            return contractMapper.toResponse(c);
         } finally {
             lockService.releaseLock(lockKey, token);
         }
     }
 
-    /**
-     * Landlord ký hợp đồng
-     */
     @Transactional
     public ContractResponse landlordSign(String id, String signaturePayload) {
         String lockKey = "lock:contract:" + id;
@@ -210,14 +202,13 @@ public class ContractService {
         if (token == null) throw new AppException(ErrorCode.RESOURCE_LOCKED);
 
         try {
-            Contract c = repo.findById(id)
+            Contract c = contractRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
             if (c.isLandlordSigned()) throw new AppException(ErrorCode.ALREADY_SIGNED);
 
             c.setLandlordSigned(true);
             c.setUpdatedAt(Instant.now());
 
-            // ✅ Check if both signed -> regenerate FINAL PDF
             if (c.isTenantSigned()) {
                 c.setStatus(ContractStatus.PENDING_PAYMENT);
                 regenerateFinalPdf(c);
@@ -227,27 +218,24 @@ public class ContractService {
                 c.setStatus(ContractStatus.PENDING_SIGNATURE);
             }
 
-            repo.save(c);
+            contractRepository.save(c);
             cacheService.put(cacheKey(id), c, CACHE_TTL);
             ContractEvent event = buildEvent(c);
             event.setSignedBy("LANDLORD");
             kafkaTemplate.send("contract.signed", event);
             log.info("Landlord signed contract contractId={}", c.getId());
 
-            return mapper.toResponse(c);
+            return contractMapper.toResponse(c);
         } finally {
             lockService.releaseLock(lockKey, token);
         }
     }
 
-    /**
-     * Payment completed listener
-     */
     @Transactional
     public void onPaymentCompleted(PaymentCompletedEvent evt) {
         if (evt == null || evt.getBookingId() == null) return;
 
-        repo.findByBookingId(evt.getBookingId()).ifPresent(contract -> {
+        contractRepository.findByBookingId(evt.getBookingId()).ifPresent(contract -> {
             try {
                 markPaymentCompleted(contract.getId());
             } catch (Exception e) {
@@ -263,7 +251,7 @@ public class ContractService {
         if (token == null) throw new AppException(ErrorCode.RESOURCE_LOCKED);
 
         try {
-            Contract contract = repo.findById(contractId)
+            Contract contract = contractRepository.findById(contractId)
                     .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
 
             if (contract.getStatus() != ContractStatus.PENDING_PAYMENT) {
@@ -281,51 +269,51 @@ public class ContractService {
                         contract.getPropertyId(), e);
             }
 
-            Contract saved = repo.save(contract);
+            Contract saved = contractRepository.save(contract);
             cacheService.put(cacheKey(contractId), saved, CACHE_TTL);
 
             // Publish event
             kafkaTemplate.send("contract.activated", buildEvent(saved));
             log.info("Contract activated after payment for contractId={}", contractId);
 
-            return mapper.toResponse(saved);
+            return contractMapper.toResponse(saved);
         } finally {
             lockService.releaseLock(lockKey, token);
         }
     }
 
     public ContractResponse pause(String id, String reason) {
-        Contract contract = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        Contract contract = contractRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
         contract.setStatus(ContractStatus.PAUSED);
         contract.setUpdatedAt(Instant.now());
-        return mapper.toResponse(repo.save(contract));
+        return contractMapper.toResponse(contractRepository.save(contract));
     }
 
     public ContractResponse resume(String id) {
-        Contract contract = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        Contract contract = contractRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
         contract.setStatus(ContractStatus.ACTIVE);
         contract.setUpdatedAt(Instant.now());
-        return mapper.toResponse(repo.save(contract));
+        return contractMapper.toResponse(contractRepository.save(contract));
     }
 
     public ContractResponse terminate(String id, String reason) {
-        Contract contract = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        Contract contract = contractRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
         contract.setStatus(ContractStatus.TERMINATED);
         contract.setUpdatedAt(Instant.now());
         propertyClient.markAsAvailable(contract.getPropertyId());
-        Contract saved = repo.save(contract);
+        Contract saved = contractRepository.save(contract);
         kafkaTemplate.send("contract.terminated", buildEvent(saved));
-        return mapper.toResponse(saved);
+        return contractMapper.toResponse(saved);
     }
 
     @Scheduled(cron = "0 0 2 * * *") // Daily at 2 AM
     public void expireContracts() {
         Instant now = Instant.now();
 
-        List<Contract> expiring = repo.findByStatusAndEndDateBefore(
+        List<Contract> expiring = contractRepository.findByStatusAndEndDateBefore(
                 ContractStatus.ACTIVE,
                 now
         );
@@ -335,15 +323,15 @@ public class ContractService {
             contract.setEndDate(now);
             contract.setUpdatedAt(now);
 
-            Contract saved = repo.save(contract);
+            Contract saved = contractRepository.save(contract);
 
             kafkaTemplate.send("contract.expired", buildEvent(saved));
         }
     }
 
     public ContractResponse renew(String id, ContractRequest renewalRequest) {
-        Contract oldContract = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Property not found: " + id));
+        Contract oldContract = contractRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
 
         if (oldContract.getStatus() != ContractStatus.EXPIRED) {
             throw new AppException(ErrorCode.INVALID_CONTRACT_STATUS,
@@ -354,7 +342,7 @@ public class ContractService {
         // Mark old as RENEWED
         oldContract.setStatus(ContractStatus.RENEWED);
         oldContract.setUpdatedAt(Instant.now());
-        repo.save(oldContract);
+        contractRepository.save(oldContract);
 
         // Create new contract
         ContractResponse newContract = create(renewalRequest);
@@ -362,9 +350,6 @@ public class ContractService {
         return newContract;
     }
 
-    /**
-     * ✅ Regenerate FINAL PDF khi cả 2 bên đã ký
-     */
     private void regenerateFinalPdf(Contract contract) {
         try {
             String finalHtml = templateService.buildFinalContractHtml(contract);
@@ -389,17 +374,17 @@ public class ContractService {
         }
     }
     public List<ContractResponse> getContractsAsLandlord(String userId) {
-        List<Contract> contracts = repo.findByLandlordId(userId);
+        List<Contract> contracts = contractRepository.findByLandlordId(userId);
         return contracts.stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(contractMapper::toResponse)
+                .toList();
     }
 
     public List<ContractResponse> getContractsAsTenant(String userId) {
-        List<Contract> contracts = repo.findByTenantId(userId);
+        List<Contract> contracts = contractRepository.findByTenantId(userId);
         return contracts.stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(contractMapper::toResponse)
+                .toList();
     }
 
     private String cacheKey(String id) {
@@ -458,7 +443,7 @@ public class ContractService {
     @Transactional
     public OTPResponse requestTenantOTP(String contractId, String tenantId) {
         // Get contract
-        Contract contract = repo.findById(contractId)
+        Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
 
         // Verify user is tenant
@@ -479,7 +464,7 @@ public class ContractService {
         String email = profileResponse.getResult().getEmail();
 
         // Delete old OTP
-        oTPVerificationRepository.deleteByContractIdAndUserId(contractId, tenantId);
+        otpVerificationRepository.deleteByContractIdAndUserId(contractId, tenantId);
 
         // Generate new OTP
         String otpCode = generateOTP();
@@ -496,7 +481,7 @@ public class ContractService {
                 .createdAt(Instant.now())
                 .build();
 
-        oTPVerificationRepository.save(otp);
+        otpVerificationRepository.save(otp);
 
         // Send email
         emailService.sendOTPEmail(email, otpCode, "tenant");
@@ -510,13 +495,10 @@ public class ContractService {
                 .build();
     }
 
-    /**
-     * Request OTP for landlord signing
-     */
     @Transactional
     public OTPResponse requestLandlordOTP(String contractId, String landlordId) {
         // Get contract
-        Contract contract = repo.findById(contractId)
+        Contract contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
 
         // Verify user is landlord
@@ -537,7 +519,7 @@ public class ContractService {
         String email = profileResponse.getResult().getEmail();
 
         // Delete old OTP
-        oTPVerificationRepository.deleteByContractIdAndUserId(contractId, landlordId);
+        otpVerificationRepository.deleteByContractIdAndUserId(contractId, landlordId);
 
         // Generate new OTP
         String otpCode = generateOTP();
@@ -554,7 +536,7 @@ public class ContractService {
                 .createdAt(Instant.now())
                 .build();
 
-        oTPVerificationRepository.save(otp);
+        otpVerificationRepository.save(otp);
 
         // Send email
         emailService.sendOTPEmail(email, otpCode, "landlord");
@@ -568,15 +550,12 @@ public class ContractService {
                 .build();
     }
 
-    /**
-     * Tenant signs contract with OTP verification
-     */
     @Transactional
     public ContractResponse tenantSignWithOTP(String contractId, OTPSignRequest req) {
         String tenantId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // Verify OTP
-        OTPVerification otp = oTPVerificationRepository.findByContractIdAndUserIdAndPurposeAndVerifiedFalseAndExpiresAtAfter(
+        OTPVerification otp = otpVerificationRepository.findByContractIdAndUserIdAndPurposeAndVerifiedFalseAndExpiresAtAfter(
                 contractId,
                 tenantId,
                 "TENANT_SIGN",
@@ -590,21 +569,18 @@ public class ContractService {
 
         // Mark OTP as verified
         otp.setVerified(true);
-        oTPVerificationRepository.save(otp);
+        otpVerificationRepository.save(otp);
 
         // Sign contract (use existing logic)
         return tenantSign(contractId, null);
     }
 
-    /**
-     * Landlord signs contract with OTP verification
-     */
     @Transactional
     public ContractResponse landlordSignWithOTP(String contractId, OTPSignRequest req) {
         String landlordId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // Verify OTP
-        OTPVerification otp = oTPVerificationRepository.findByContractIdAndUserIdAndPurposeAndVerifiedFalseAndExpiresAtAfter(
+        OTPVerification otp = otpVerificationRepository.findByContractIdAndUserIdAndPurposeAndVerifiedFalseAndExpiresAtAfter(
                 contractId,
                 landlordId,
                 "LANDLORD_SIGN",
@@ -618,15 +594,12 @@ public class ContractService {
 
         // Mark OTP as verified
         otp.setVerified(true);
-        oTPVerificationRepository.save(otp);
+        otpVerificationRepository.save(otp);
 
         // Sign contract (use existing logic)
         return landlordSign(contractId, null);
     }
 
-    /**
-     * Generate 6-digit OTP
-     */
     private String generateOTP() {
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000);

@@ -16,23 +16,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("conversations")
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConversationController {
     ConversationService conversationService;
 
     @PostMapping("/create")
-    ApiResponse<ConversationResponse> createConversation(@RequestBody @Valid ConversationRequest request) {
-        return ApiResponse.<ConversationResponse>builder()
-                .result(conversationService.create(request))
-                .build();
+    public ApiResponse<ConversationResponse> createConversation(@RequestBody @Valid ConversationRequest request) {
+        return ApiResponse.success(conversationService.create(request), "Created conversation successfully");
     }
 
     @GetMapping("/my-conversations")
-    ApiResponse<List<ConversationResponse>> myConversations() {
-        return ApiResponse.<List<ConversationResponse>>builder()
-                .result(conversationService.myConversations())
-                .build();
+    public ApiResponse<List<ConversationResponse>> myConversations() {
+        return ApiResponse.success(conversationService.myConversations(), "Fetched conversations successfully");
     }
 }
