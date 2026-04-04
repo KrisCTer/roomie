@@ -1,5 +1,5 @@
 import React from "react";
-import { X, CheckCircle, PenTool } from "lucide-react";
+import { X, CheckCircle, PenTool, AlertTriangle } from "lucide-react";
 
 const SignModal = ({ show, onClose, onContinue }) => {
   if (!show) return null;
@@ -8,8 +8,9 @@ const SignModal = ({ show, onClose, onContinue }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-900">
-            ✍️ Xác nhận việc ký kết hợp đồng
+          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <PenTool className="w-5 h-5 text-blue-600" />
+            Xác nhận việc ký kết hợp đồng
           </h3>
           <button
             onClick={onClose}
@@ -21,11 +22,14 @@ const SignModal = ({ show, onClose, onContinue }) => {
 
         <div className="mb-6">
           <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-4">
-            <p className="text-sm text-blue-800">
-              ⚠️ Bạn sắp ký hợp đồng thuê nhà điện tử. Sau khi ký, bạn sẽ bị
-              ràng buộc về mặt pháp lý bởi tất cả các điều khoản và điều kiện
-              được nêu trong thỏa thuận này.
-            </p>
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-800">
+                Bạn sắp ký hợp đồng thuê nhà điện tử. Sau khi ký, bạn sẽ bị ràng
+                buộc về mặt pháp lý bởi tất cả các điều khoản và điều kiện được
+                nêu trong thỏa thuận này.
+              </p>
+            </div>
           </div>
 
           <div className="space-y-3 text-sm">
