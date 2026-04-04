@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllProperties } from "../../../../services/propertyService";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { getAllProperties, searchNearbyProperties } from "../../../../services/propertyService";
 import {
   DEFAULT_FILTERS,
   DEFAULT_SEARCH_CRITERIA,
@@ -26,6 +26,9 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
 
   const [searchCriteria, setSearchCriteria] = useState(DEFAULT_SEARCH_CRITERIA);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  // Distance map: propertyId -> distanceKm (populated in nearby mode)
+  const distanceMapRef = useRef(new Map());
 
   const itemsPerPage = 20;
 
@@ -54,27 +57,59 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
     }
   }, [searchParams]);
 
+  // Load properties - switches between normal and nearby mode
   const loadProperties = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      distanceMapRef.current.clear();
 
-      const response = await getAllProperties({ page: 0, size: 200 });
+      if (filters.nearbyEnabled && filters.nearbyLat && filters.nearbyLng) {
+        // Nearby mode: call geo_distance API
+        const response = await searchNearbyProperties({
+          lat: filters.nearbyLat,
+          lng: filters.nearbyLng,
+          radiusKm: filters.nearbyRadiusKm,
+          page: 0,
+          size: 200,
+        });
 
-      const fetchedProperties =
-        response?.result?.content ||
-        response?.data?.result?.content ||
-        response?.result ||
-        [];
+        const nearbyResults =
+          response?.result || response?.data?.result || [];
 
-      setAllProperties(fetchedProperties);
+        // Extract properties and build distance map
+        const properties = nearbyResults.map((item) => {
+          const prop = item.property;
+          if (prop && item.distanceKm != null) {
+            distanceMapRef.current.set(prop.propertyId, item.distanceKm);
+          }
+          return prop;
+        }).filter(Boolean);
+
+        setAllProperties(properties);
+
+        // Center map on user location
+        setMapCenter({ lat: filters.nearbyLat, lng: filters.nearbyLng });
+        setInitialZoom(14);
+      } else {
+        // Normal mode
+        const response = await getAllProperties({ page: 0, size: 200 });
+
+        const fetchedProperties =
+          response?.result?.content ||
+          response?.data?.result?.content ||
+          response?.result ||
+          [];
+
+        setAllProperties(fetchedProperties);
+      }
     } catch (err) {
       console.error("Failed to load properties:", err);
       setError(t("propertySearch.loadError"));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [t, filters.nearbyEnabled, filters.nearbyLat, filters.nearbyLng, filters.nearbyRadiusKm]);
 
   useEffect(() => {
     loadProperties();
@@ -131,6 +166,12 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
   }, [allProperties, filters, searchCriteria]);
 
   useEffect(() => {
+    // In nearby mode, skip map bounds filtering (results are already geo-filtered)
+    if (filters.nearbyEnabled) {
+      setDisplayedProperties(baseFilteredProperties);
+      return;
+    }
+
     if (!mapBounds) {
       setDisplayedProperties(baseFilteredProperties);
       return;
@@ -155,7 +196,7 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
 
     setDisplayedProperties(boundsFiltered);
     setCurrentPage(1);
-  }, [baseFilteredProperties, mapBounds]);
+  }, [baseFilteredProperties, mapBounds, filters.nearbyEnabled]);
 
   const filterCount = useMemo(() => getActiveFilterCount(filters), [filters]);
 
@@ -189,7 +230,7 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
     : baseFilteredProperties;
 
   const waitingForMapSync =
-    isDesktop && !loading && !error && !mapInitialBoundsReady;
+    isDesktop && !loading && !error && !mapInitialBoundsReady && !filters.nearbyEnabled;
   const effectiveDisplayedProperties = waitingForMapSync
     ? []
     : displayedProperties;
@@ -232,7 +273,13 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
     handlePropertyClick,
     handleBoundsChange,
     handleMapInitialBoundsReady,
+    distanceMap: distanceMapRef.current,
+    nearbyEnabled: filters.nearbyEnabled,
+    nearbyLat: filters.nearbyLat,
+    nearbyLng: filters.nearbyLng,
+    nearbyRadiusKm: filters.nearbyRadiusKm,
   };
 };
 
 export default usePropertySearchData;
+

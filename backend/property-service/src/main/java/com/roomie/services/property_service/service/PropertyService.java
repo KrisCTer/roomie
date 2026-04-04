@@ -1,5 +1,7 @@
 package com.roomie.services.property_service.service;
 
+import co.elastic.clients.elasticsearch._types.GeoDistanceType;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.*;
 import com.roomie.services.property_service.entity.Owner;
@@ -21,13 +23,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,17 +45,15 @@ public class PropertyService {
 
     PropertyRepository propertyRepository;
     PropertySearchRepository searchRepository;
-    PropertyMapper mapper;
+    PropertyMapper propertyMapper;
     ProfileClient profileClient;
     FavoriteService favoriteService;
     PropertyLabelService propertyLabelService;
+    ElasticsearchOperations elasticsearchOperations;
 
-    // ============================================================
-    // CREATE PROPERTY
-    // ============================================================
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
-        Property entity = mapper.toEntity(request);
+        Property entity = propertyMapper.toEntity(request);
         String userId = getCurrentUserId();
         Owner owner = fetchOwnerProfile(userId);
 
@@ -62,12 +68,9 @@ public class PropertyService {
 
         index(saved);
 
-        return mapper.toResponse(saved);
+        return propertyMapper.toResponse(saved);
     }
 
-    // ============================================================
-    // UPDATE PROPERTY (PATCH STYLE)
-    // ============================================================
     @CacheEvict(value = "properties", key = "#id")
     public PropertyResponse update(String id, PropertyRequest request) {
 
@@ -81,7 +84,7 @@ public class PropertyService {
 
         index(saved);
 
-        return mapper.toResponse(saved);
+        return propertyMapper.toResponse(saved);
     }
 
     private void updatePropertyFields(Property p, PropertyRequest r) {
@@ -98,9 +101,6 @@ public class PropertyService {
         if (r.getGarages() != null) p.setGarages(r.getGarages());
     }
 
-    // ============================================================
-    // DELETE PROPERTY
-    // ============================================================
     @CacheEvict(value = "properties", key = "#id")
     public void delete(String id) {
 
@@ -111,13 +111,9 @@ public class PropertyService {
         searchRepository.deleteById(id);
     }
 
-    // ============================================================
-    // BASIC GETTERS
-    // ============================================================
-//    @Cacheable(value = "properties", key = "#id")
     public PropertyResponse getById(String id) {
         Property property = findPropertyOrThrow(id);
-        PropertyResponse response = mapper.toResponse(property);
+        PropertyResponse response = propertyMapper.toResponse(property);
 
         // Add favorite count and status if user is authenticated
         try {
@@ -138,29 +134,29 @@ public class PropertyService {
     public List<PropertyResponse> findAll(int page, int size) {
         return propertyRepository.findAll(PageRequest.of(page, size))
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
     public List<PropertyResponse> findByStatus(ApprovalStatus status) {
         return propertyRepository.findByStatus(status)
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
     public List<PropertyResponse> findByPriceRange(BigDecimal min, BigDecimal max) {
         return propertyRepository.findByMonthlyRentBetween(min, max)
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
     public List<PropertyResponse> findByProvince(String province) {
         return propertyRepository.findByAddress_ProvinceIgnoreCase(province)
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
     public List<PropertyResponse> getMyProperties() {
@@ -169,13 +165,10 @@ public class PropertyService {
 
         return propertyRepository.findAllByOwner_OwnerId(userId)
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
-    // ============================================================
-    // SEARCH FULLTEXT
-    // ============================================================
     public List<PropertyResponse> searchFullText(String q) {
 
         List<PropertyDocument> docs =
@@ -189,12 +182,57 @@ public class PropertyService {
                         .createdAt(d.getCreatedAt())
                         .updatedAt(d.getUpdatedAt())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    // ============================================================
-    // INDEXING
-    // ============================================================
+    public List<NearbyPropertyResponse> searchNearby(double lat, double lng, double radiusKm, int page, int size) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.bool(b -> b
+                        .filter(f -> f.geoDistance(gd -> gd
+                                .field("location")
+                                .location(loc -> loc.latlon(ll -> ll.lat(lat).lon(lng)))
+                                .distance(radiusKm + "km")
+                                .distanceType(GeoDistanceType.Arc)
+                        ))
+                ))
+                .withSort(s -> s.geoDistance(g -> g
+                        .field("location")
+                        .location(loc -> loc.latlon(ll -> ll.lat(lat).lon(lng)))
+                        .order(SortOrder.Asc)
+                        .unit(co.elastic.clients.elasticsearch._types.DistanceUnit.Kilometers)
+                ))
+                .withPageable(PageRequest.of(page, size))
+                .build();
+
+        SearchHits<PropertyDocument> searchHits = elasticsearchOperations.search(query, PropertyDocument.class);
+
+        List<NearbyPropertyResponse> results = new ArrayList<>();
+
+        for (SearchHit<PropertyDocument> hit : searchHits.getSearchHits()) {
+            PropertyDocument doc = hit.getContent();
+
+            Double distanceKm = null;
+            if (!hit.getSortValues().isEmpty()) {
+                Object sortVal = hit.getSortValues().get(0);
+                if (sortVal instanceof Number) {
+                    distanceKm = Math.round(((Number) sortVal).doubleValue() * 100.0) / 100.0;
+                }
+            }
+
+            Optional<Property> propertyOpt = propertyRepository.findById(doc.getPropertyId());
+            if (propertyOpt.isEmpty()) continue;
+
+            PropertyResponse response = propertyMapper.toResponse(propertyOpt.get());
+
+            results.add(NearbyPropertyResponse.builder()
+                    .property(response)
+                    .distanceKm(distanceKm)
+                    .build());
+        }
+
+        return results;
+    }
+
     public void reindexAll() {
 
         searchRepository.deleteAll();
@@ -204,7 +242,7 @@ public class PropertyService {
 
     private void index(Property p) {
         try {
-            PropertyDocument doc = mapper.toDocument(p);
+            PropertyDocument doc = propertyMapper.toDocument(p);
             doc.setPropertyId(p.getPropertyId());
             doc.setCreatedAt(p.getCreatedAt());
             doc.setUpdatedAt(p.getUpdatedAt());
@@ -214,9 +252,6 @@ public class PropertyService {
         }
     }
 
-    // ============================================================
-    // PUBLISH / APPROVE / REJECT
-    // ============================================================
     public PropertyResponse publish(String id) {
 
         Property property = findPropertyOrThrow(id);
@@ -230,7 +265,7 @@ public class PropertyService {
         property.setUpdatedAt(Instant.now());
         propertyRepository.save(property);
 
-        return mapper.toResponse(property);
+        return propertyMapper.toResponse(property);
     }
 
     public PropertyResponse approve(String id) {
@@ -250,7 +285,7 @@ public class PropertyService {
 
         index(property);
 
-        return mapper.toResponse(property);
+        return propertyMapper.toResponse(property);
     }
 
     public PropertyResponse reject(String id) {
@@ -267,12 +302,9 @@ public class PropertyService {
 
         index(property);
 
-        return mapper.toResponse(property);
+        return propertyMapper.toResponse(property);
     }
 
-    // ============================================================
-    // RENTED / AVAILABLE / DEACTIVATE
-    // ============================================================
     public void markAsRented(String id) {
 
         Property property = findPropertyOrThrow(id);
@@ -319,30 +351,23 @@ public class PropertyService {
         searchRepository.deleteById(id);
     }
 
-    // ============================================================
-    // PUBLIC PROPERTIES
-    // ============================================================
     public List<PropertyResponse> getAllPublicProperties() {
-
         return propertyRepository.findByStatusAndPropertyStatus(
                         ApprovalStatus.ACTIVE,
                         PropertyStatus.AVAILABLE)
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
     public List<PropertyResponse> getPropertiesByOwner(String ownerId) {
 
         return propertyRepository.findByOwner_OwnerId(ownerId)
                 .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+                .map(propertyMapper::toResponse)
+                .toList();
     }
 
-    // ============================================================
-    // HELPER METHODS
-    // ============================================================
     private Property findPropertyOrThrow(String id) {
         return propertyRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PROPERTY_NOT_FOUND));

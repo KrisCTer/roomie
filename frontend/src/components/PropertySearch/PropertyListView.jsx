@@ -1,7 +1,7 @@
 // src/components/PropertySearch/PropertyListView.jsx
 import React from "react";
 import { Box, Typography, Pagination, Stack } from "@mui/material";
-import { BedDouble, Bath, Ruler, MapPin, ArrowUpRight } from "lucide-react";
+import { BedDouble, Bath, Ruler, MapPin, ArrowUpRight, Navigation } from "lucide-react";
 
 const PropertyListView = ({
   properties,
@@ -11,6 +11,8 @@ const PropertyListView = ({
   onPageChange,
   onPropertyHover,
   onPropertyClick,
+  distanceMap,
+  nearbyEnabled,
 }) => {
   // Initial loading skeleton
   if (loading) {
@@ -122,6 +124,7 @@ const PropertyListView = ({
             property.mediaList?.[0]?.url ||
             "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1100";
           const location = `${property.address?.district || ""}, ${property.address?.province || ""}`;
+          const distance = nearbyEnabled && distanceMap ? distanceMap.get(property.propertyId) : null;
 
           return (
             <Box
@@ -197,6 +200,27 @@ const PropertyListView = ({
                 >
                   <MapPin size={14} />
                   <span className="search-line-clamp-1">{location}</span>
+                  {distance != null && (
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 3,
+                        marginLeft: 6,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        backgroundColor: "#ECFDF5",
+                        color: "#065F46",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        whiteSpace: "nowrap",
+                        border: "1px solid #A7F3D0",
+                      }}
+                    >
+                      <Navigation size={10} />
+                      {distance}km
+                    </span>
+                  )}
                 </Typography>
 
                 <Stack direction="row" spacing={0.8} sx={{ mt: 1.2 }}>

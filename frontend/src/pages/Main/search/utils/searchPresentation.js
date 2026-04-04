@@ -23,6 +23,10 @@ export const DEFAULT_FILTERS = {
   propertyTypes: [],
   bedrooms: 0,
   bathrooms: 0,
+  nearbyEnabled: false,
+  nearbyLat: null,
+  nearbyLng: null,
+  nearbyRadiusKm: 5,
 };
 
 export const getActiveFilterCount = (filters) => {
@@ -34,6 +38,7 @@ export const getActiveFilterCount = (filters) => {
   if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 50000000) {
     count += 1;
   }
+  if (filters.nearbyEnabled) count += 1;
 
   return count;
 };

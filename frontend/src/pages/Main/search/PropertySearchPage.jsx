@@ -52,6 +52,11 @@ const PropertySearchPage = () => {
     handlePropertyClick,
     handleBoundsChange,
     handleMapInitialBoundsReady,
+    distanceMap,
+    nearbyEnabled,
+    nearbyLat,
+    nearbyLng,
+    nearbyRadiusKm,
   } = usePropertySearchData({ searchParams, t, isDesktop, navigate });
 
   return (
@@ -118,6 +123,11 @@ const PropertySearchPage = () => {
         onInitialBoundsReady={handleMapInitialBoundsReady}
         initialCenter={mapCenter}
         initialZoom={initialZoom}
+        nearbyEnabled={nearbyEnabled}
+        nearbyLat={nearbyLat}
+        nearbyLng={nearbyLng}
+        nearbyRadiusKm={nearbyRadiusKm}
+        distanceMap={distanceMap}
       />
 
       <EditorialFooter description="Search mới đồng bộ visual với Home: map-list split, filter rõ ràng, và flow mobile tối ưu cho thao tác một tay." />

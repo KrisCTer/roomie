@@ -25,6 +25,11 @@ const SearchContentSection = ({
   onInitialBoundsReady,
   initialCenter,
   initialZoom,
+  nearbyEnabled,
+  nearbyLat,
+  nearbyLng,
+  nearbyRadiusKm,
+  distanceMap,
 }) => {
   return (
     <Box
@@ -65,7 +70,7 @@ const SearchContentSection = ({
                   color: "#7A6D61",
                 }}
               >
-                DISCOVERY LIST
+                {nearbyEnabled ? "NEARBY RESULTS" : "DISCOVERY LIST"}
               </Typography>
             </Stack>
 
@@ -96,6 +101,8 @@ const SearchContentSection = ({
               onPageChange={onPageChange}
               onPropertyHover={onPropertyHover}
               onPropertyClick={onPropertyClick}
+              distanceMap={distanceMap}
+              nearbyEnabled={nearbyEnabled}
             />
           </Container>
         </Box>
@@ -115,7 +122,7 @@ const SearchContentSection = ({
         >
           <Box className="search-map-badge">
             <MapIcon size={14} />
-            <span>{mapBounds ? "Đang theo vùng bản đồ" : "Toàn vùng"}</span>
+            <span>{nearbyEnabled ? `Quanh day ${nearbyRadiusKm}km` : mapBounds ? "Đang theo vùng bản đồ" : "Toàn vùng"}</span>
             <SlidersHorizontal size={14} />
           </Box>
 
@@ -127,6 +134,10 @@ const SearchContentSection = ({
             onInitialBoundsReady={onInitialBoundsReady}
             initialCenter={initialCenter}
             initialZoom={initialZoom}
+            nearbyEnabled={nearbyEnabled}
+            nearbyLat={nearbyLat}
+            nearbyLng={nearbyLng}
+            nearbyRadiusKm={nearbyRadiusKm}
           />
         </Box>
       )}
