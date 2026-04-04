@@ -11,12 +11,14 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { updateIdCard, getUserProfile } from "../../services/userService";
+import { updateIdCard } from "../../services/userService";
 import CameraModal from "../../components/Profile/CameraModal";
+import { useUser } from "../../contexts/UserContext";
 
 const IdentityVerification = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { refreshUser, user, loading: userLoading } = useUser();
 
   const [currentStep, setCurrentStep] = useState("intro");
   const [selectedMethod, setSelectedMethod] = useState(null);
@@ -27,24 +29,12 @@ const IdentityVerification = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  // Check if user is already verified
+  // If user is already verified, leave verification page.
   useEffect(() => {
-    checkVerificationStatus();
-  }, []);
-
-  const checkVerificationStatus = async () => {
-    try {
-      const res = await getUserProfile();
-      const userData = res?.data?.result || res?.result;
-
-      // Nếu đã có idCard number thì đã xác thực rồi
-      if (userData?.idCardNumber) {
-        navigate("/profile");
-      }
-    } catch (err) {
-      console.error("Check verification error:", err);
+    if (!userLoading && user?.idCardNumber) {
+      navigate("/profile", { replace: true });
     }
-  };
+  }, [userLoading, user, navigate]);
 
   const handleMethodSelect = (method) => {
     setSelectedMethod(method);
@@ -52,7 +42,7 @@ const IdentityVerification = () => {
     if (method === "webcam") {
       setCurrentStep("tips");
     } else if (method === "upload") {
-      document.getElementById("file-upload")?.click();
+      return;
     } else if (method === "mobile") {
       setError("Mobile app feature coming soon!");
     }
@@ -68,15 +58,13 @@ const IdentityVerification = () => {
       const res = await updateIdCard(file);
       const result = res?.data?.result || res?.result;
 
-      if (result) {
-        setCapturedImage(URL.createObjectURL(file));
-        setSuccess("✅ ID card uploaded successfully!");
-
-        // Redirect to profile after 2 seconds
-        setTimeout(() => {
-          navigate("/profile");
-        }, 2000);
+      if (!result) {
+        throw new Error("Upload completed but server returned no profile data.");
       }
+
+      setCapturedImage(URL.createObjectURL(file));
+      await refreshUser();
+      setSuccess("✅ ID card uploaded successfully!");
     } catch (err) {
       console.error("Upload error:", err);
       setError("❌ Failed to upload ID card. Please try again.");
@@ -286,6 +274,18 @@ const IdentityVerification = () => {
                 </div>
               </div>
             )}
+
+            {success && !loading && (
+              <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg max-w-xl mx-auto text-center">
+                <p className="text-green-700 dark:text-green-400">{success}</p>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="mt-4 inline-flex items-center justify-center px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  Đi tới hồ sơ
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -378,6 +378,12 @@ const IdentityVerification = () => {
             ) : success ? (
               <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <p className="text-green-700 dark:text-green-400">{success}</p>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="mt-4 inline-flex items-center justify-center px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  Đi tới hồ sơ
+                </button>
               </div>
             ) : null}
           </div>
