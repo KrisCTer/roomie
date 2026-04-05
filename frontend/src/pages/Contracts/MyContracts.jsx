@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 /* aria-label */
 // web-app/src/pages/Contracts/MyContracts.jsx
 import React, { useState, useEffect } from "react";
@@ -10,15 +10,17 @@ import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import { useRole } from "../../contexts/RoleContext";
 import { useRefresh } from "../../contexts/RefreshContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 // Import custom components
-import StatsCard from "../../components/Contracts/StatsCard.jsx";
-import ContractsList from "../../components/Contracts/ContractsList.jsx";
-import LoadingState from "../../components/Contracts/LoadingState.jsx";
-import EmptyState from "../../components/Contracts/EmptyState.jsx";
+import StatsCard from "../../components/domain/contract/StatsCard.jsx";
+import ContractsList from "../../components/domain/contract/ContractsList.jsx";
+import LoadingState from "../../components/domain/contract/LoadingState.jsx";
+import EmptyState from "../../components/domain/contract/EmptyState.jsx";
 
 // Import custom hook
-import { useContractOperations } from "../../hooks/useContractOperations.js";
+import { useContractOperations } from "../../hooks/contract/useContractOperations.js";
 
 const MyContracts = () => {
   // Layout state
@@ -56,7 +58,7 @@ const MyContracts = () => {
   }, [registerRefreshCallback, unregisterRefreshCallback, refetch]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="home-v2 home-shell-bg min-h-screen">
       {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
@@ -108,13 +110,14 @@ const MyContracts = () => {
         )}
 
         {/* Content */}
-        <div className="p-6">
+        <div className="w-full px-4 pb-8 md:px-8">
           {/* Loading State */}
           {loading ? (
             <LoadingState />
           ) : (
             <>
               {/* Statistics */}
+              <div className="apple-glass-panel p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <StatsCard
                   icon={FileText}
@@ -145,20 +148,23 @@ const MyContracts = () => {
                   textColor="text-gray-600"
                 />
               </div>
+              </div>
 
               {/* Contracts List */}
-              {currentContracts.length > 0 ? (
-                <ContractsList
-                  contracts={currentContracts}
-                  role={activeTab}
-                  onContractClick={handleContractClick}
-                  propertyCache={propertyCache}
-                  userCache={userCache}
-                  currentUserId={currentUserId}
-                />
-              ) : (
-                <EmptyState activeTab={activeTab} />
-              )}
+              <div className="apple-glass-panel p-6">
+                {currentContracts.length > 0 ? (
+                  <ContractsList
+                    contracts={currentContracts}
+                    role={activeTab}
+                    onContractClick={handleContractClick}
+                    propertyCache={propertyCache}
+                    userCache={userCache}
+                    currentUserId={currentUserId}
+                  />
+                ) : (
+                  <EmptyState activeTab={activeTab} />
+                )}
+              </div>
             </>
           )}
         </div>
