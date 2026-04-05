@@ -56,5 +56,11 @@ public class InternalPropertyController {
         List<PropertyResponse> listProperty = propertyService.getPropertiesByOwner(ownerId);
         return ApiResponse.success(listProperty,"Owner properties retrieved");
     }
+
+    @PostMapping("/reindex")
+    public ApiResponse<Void> reindex() {
+        propertyService.reindexAll();
+        return ApiResponse.success(null, "Reindex completed");
+    }
 }
 
