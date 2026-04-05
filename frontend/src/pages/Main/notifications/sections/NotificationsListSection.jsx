@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
-import NotificationItem from "../../../../components/Notification/NotificationItem";
+import NotificationItem from "../../../../components/domain/notification/NotificationItem";
 
 const NotificationsListSkeleton = () => {
   return (

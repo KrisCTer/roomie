@@ -8,7 +8,7 @@ import {
   MapPin,
   Share2,
 } from "lucide-react";
-import { useFavorite } from "../../../../hooks/useFavorite";
+import { useFavorite } from "../../../../hooks/common/useFavorite";
 
 const HomePropertyCard = ({ property, onCardClick }) => {
   const {

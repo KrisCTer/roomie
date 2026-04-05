@@ -10,7 +10,6 @@ import {
   ChevronDown,
   ChevronUp,
   // Home Safety Icons
-  Smoke,
   AlertTriangle,
   Flame,
   Lock,
@@ -21,7 +20,6 @@ import {
   // Kitchen Icons
   Refrigerator,
   Microwave,
-  ChefHat,
   Droplets,
   Coffee,
   // Other Icons
@@ -29,14 +27,14 @@ import {
   Monitor,
   Car,
   Dumbbell,
-  TreePine,
-  Banknote,
+  Leaf,
+  Building2,
 } from "lucide-react";
 
 // Icon mapping for amenities
 const amenityIconMap = {
   // Home Safety
-  "Máy dò khói": <Smoke className="w-5 h-5" />,
+  "Máy dò khói": <AlertTriangle className="w-5 h-5" />,
   "Máy dò khí CO": <AlertTriangle className="w-5 h-5" />,
   "Bình chữa cháy": <Flame className="w-5 h-5" />,
   "Hệ thống an ninh": <Shield className="w-5 h-5" />,
@@ -50,7 +48,7 @@ const amenityIconMap = {
   // Kitchen
   "Tủ lạnh": <Refrigerator className="w-5 h-5" />,
   "Lò vi sóng": <Microwave className="w-5 h-5" />,
-  "Lò nướng": <ChefHat className="w-5 h-5" />,
+  "Lò nướng": <UtensilsCrossed className="w-5 h-5" />,
   "Máy rửa bát": <Droplets className="w-5 h-5" />,
   "Máy pha cà phê": <Coffee className="w-5 h-5" />,
   // Others
@@ -59,8 +57,8 @@ const amenityIconMap = {
   "Bãi đỗ xe": <Car className="w-5 h-5" />,
   "Phòng tập gym": <Dumbbell className="w-5 h-5" />,
   "Hồ bơi": <Droplets className="w-5 h-5" />,
-  "Vườn": <TreePine className="w-5 h-5" />,
-  "Ban công": <Banknote className="w-5 h-5" />,
+  "Vườn": <Leaf className="w-5 h-5" />,
+  "Ban công": <Building2 className="w-5 h-5" />,
 };
 
 const getAmenityIcon = (amenityName) => {

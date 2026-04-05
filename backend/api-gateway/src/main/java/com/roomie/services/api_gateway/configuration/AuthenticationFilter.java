@@ -40,9 +40,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/identity/users/register",
             "/notification/email/send",
             "/file/media/download/.*",
-            "/property/properties",           // GET list properties
-            "/property/[^/]+",     // GET /properties/{id}
-            "/property/properties/search.*",  // GET /properties/search?q=...
+            "/property/properties", // GET list properties
+            "/property/[^/]+", // GET /properties/{id}
+            "/property/properties/search.*", // GET /properties/search?q=...
             "/property/properties/by-price.*", // GET /properties/by-price?min=...&max=...
             "/property/properties/by-province.*", // GET /properties/by-province?province=...
             "/identity/oauth2/*",
@@ -81,12 +81,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         return -1;
     }
 
-    private boolean isPublicEndpoint(ServerHttpRequest request){
+    private boolean isPublicEndpoint(ServerHttpRequest request) {
         return Arrays.stream(publicEndpoints)
                 .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 
-    Mono<Void> unauthenticated(ServerHttpResponse response){
+    Mono<Void> unauthenticated(ServerHttpResponse response) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(1401)
                 .message("Unauthenticated")

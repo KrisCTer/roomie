@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { updateIdCard } from "../../services/userService";
-import CameraModal from "../../components/Profile/CameraModal";
+import CameraModal from "../../components/domain/profile/CameraModal";
 import { useUser } from "../../contexts/UserContext";
 
 const IdentityVerification = () => {

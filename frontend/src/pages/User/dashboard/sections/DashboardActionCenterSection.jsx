@@ -122,7 +122,7 @@ const DashboardActionCenterSection = ({
                     onClick={() =>
                       setDismissedIds((prev) => [...prev, item.id])
                     }
-                    className="rounded-lg p-1 text-[#9CA3AF] hover:bg-[#F3F4F6] hover:text-[#4B5563]"
+                    className="rounded-lg p-1 home-text-muted hover:bg-white/60 hover:home-text-primary"
                     title="Ẩn tác vụ"
                   >
                     <X className="h-4 w-4" />

@@ -5,13 +5,18 @@ import { Ban, PauseCircle, RefreshCw, Search } from "lucide-react";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar";
 import Header from "../../components/layout/layoutUser/Header";
 import Footer from "../../components/layout/layoutUser/Footer";
+import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import { useDialog } from "../../contexts/DialogContext";
 
 import {
   adminGetUsers,
   adminSuspendUser,
   adminBanUser,
 } from "../../services/adminUserService";
+
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 /* =========================
    Helpers
@@ -30,14 +35,18 @@ const getStatus = (u) =>
 
 const isAdminUser = (u) => u?.username?.toLowerCase() === "admin";
 
-const badgeClass = (status) => {
+const statusConfig = {
+  BAN: { tone: "home-tone-danger" },
+  SUSPEND: { tone: "home-tone-warning" },
+  ACTIVE: { tone: "home-tone-success" },
+};
+
+const getStatusTone = (status) => {
   const s = String(status).toUpperCase();
-  if (s.includes("BAN")) return "bg-red-500/15 text-red-300 border-red-500/30";
-  if (s.includes("SUSPEND"))
-    return "bg-yellow-500/15 text-yellow-200 border-yellow-500/30";
-  if (s.includes("ACTIVE"))
-    return "bg-green-500/15 text-green-200 border-green-500/30";
-  return "bg-gray-500/15 text-gray-300 border-gray-500/30";
+  for (const [key, config] of Object.entries(statusConfig)) {
+    if (s.includes(key)) return config.tone;
+  }
+  return "home-tone-info";
 };
 
 const AdminUsers = () => {
@@ -49,12 +58,12 @@ const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [q, setQ] = useState("");
   const { t } = useTranslation();
+  const { showToast, showConfirm } = useDialog();
+
   const loadUsers = async () => {
     try {
       setLoading(true);
       const res = await adminGetUsers();
-
-      // ✅ ẨN user admin
       const list = unwrapList(res).filter((u) => !isAdminUser(u));
       setUsers(list);
     } catch (e) {
@@ -84,8 +93,14 @@ const AdminUsers = () => {
   const handleSuspend = async (u) => {
     const id = getUserId(u);
     if (!id) return;
-    if (!window.confirm(t("admin.confirmSuspend", { name: u?.username ?? id })))
-      return;
+    const confirmed = await showConfirm({
+      title: t("admin.suspend"),
+      message: t("admin.confirmSuspend", { name: u?.username ?? id }),
+      confirmText: t("admin.suspend"),
+      cancelText: t("common.cancel", "Hủy"),
+      type: "warning",
+    });
+    if (!confirmed) return;
 
     try {
       setActionLoadingId(id);
@@ -93,7 +108,7 @@ const AdminUsers = () => {
       await loadUsers();
     } catch (e) {
       console.error("Suspend failed:", e);
-      alert(t("admin.suspendFailed"));
+      showToast(t("admin.suspendFailed"), "error");
     } finally {
       setActionLoadingId(null);
     }
@@ -102,8 +117,14 @@ const AdminUsers = () => {
   const handleBan = async (u) => {
     const id = getUserId(u);
     if (!id) return;
-    if (!window.confirm(t("admin.confirmBan", { name: u?.username ?? id })))
-      return;
+    const confirmed = await showConfirm({
+      title: t("admin.ban"),
+      message: t("admin.confirmBan", { name: u?.username ?? id }),
+      confirmText: t("admin.ban"),
+      cancelText: t("common.cancel", "Hủy"),
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       setActionLoadingId(id);
@@ -111,14 +132,14 @@ const AdminUsers = () => {
       await loadUsers();
     } catch (e) {
       console.error("Ban failed:", e);
-      alert(t("admin.banFailed"));
+      showToast(t("admin.banFailed"), "error");
     } finally {
       setActionLoadingId(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="home-v2 home-shell-bg min-h-screen">
       <AdminSidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -127,165 +148,155 @@ const AdminUsers = () => {
       />
 
       <div
-        className={`transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
+        className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        {/* ✅ HEADER */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <PageTitle
+          title={t("admin.userManagement")}
+          subtitle={t("admin.userManagementDesc")}
+        />
 
-        <div className="p-6">
-          {/* Page top actions */}
-          <div className="flex items-center justify-end mb-6">
+        <main className="w-full px-4 pb-8 md:px-8">
+          {/* Top bar */}
+          <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 home-text-muted" />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={t("admin.searchUsers")}
+                  className="home-input pl-9 w-full"
+                />
+              </div>
+              <div className="apple-glass-pill rounded-full px-3 py-1.5 text-xs font-semibold home-text-muted">
+                {t("admin.total")}: <span className="home-text-primary">{filtered.length}</span>
+              </div>
+            </div>
+
             <button
               onClick={loadUsers}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center gap-2"
+              className="apple-glass-pill flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold home-text-accent hover:bg-white"
               disabled={loading}
               type="button"
             >
-              <RefreshCw
-                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
               {t("common.refresh")}
             </button>
           </div>
 
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">{t("admin.userManagement")}</h1>
-            <p className="text-sm text-gray-400">
-              {t("admin.userManagementDesc")}
-            </p>
-          </div>
+          {/* User List */}
+          <section className="apple-glass-panel no-hover rounded-2xl p-6">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
+                  >
+                    <div className="w-10 h-10 rounded-full" style={{ background: "var(--home-surface-soft)" }} />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 rounded w-2/4" style={{ background: "var(--home-surface-soft)" }} />
+                      <div className="h-3 rounded w-1/3" style={{ background: "var(--home-surface-soft)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="apple-glass-soft home-text-muted rounded-2xl border-dashed p-8 text-center">
+                {t("admin.noUsers")}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {/* Header */}
+                <div className="apple-glass-soft rounded-xl px-4 py-3 hidden md:grid md:grid-cols-12 text-xs font-semibold home-text-muted uppercase tracking-wider">
+                  <span className="col-span-1">#</span>
+                  <span className="col-span-3">{t("auth.username")}</span>
+                  <span className="col-span-3">{t("auth.email")}</span>
+                  <span className="col-span-2">{t("common.status")}</span>
+                  <span className="col-span-3">{t("common.actions")}</span>
+                </div>
 
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 w-full max-w-md">
-              <Search className="w-4 h-4 text-gray-400" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder={t("admin.searchUsers")}
-                className="bg-transparent outline-none text-sm w-full"
-              />
-            </div>
-            <div className="text-sm text-gray-400">
-              {t("admin.total")}:{" "}
-              <span className="text-white">{filtered.length}</span>
-            </div>
-          </div>
+                {/* Rows */}
+                {filtered.map((u, idx) => {
+                  const id = getUserId(u);
+                  const status = getStatus(u);
+                  const busy = actionLoadingId === id;
+                  const statusTone = getStatusTone(status);
 
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-            <div className="overflow-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-900/80 border-b border-slate-800">
-                  <tr className="text-left">
-                    <th className="px-4 py-3">#</th>
-                    <th className="px-4 py-3">{t("auth.username")}</th>
-                    <th className="px-4 py-3">{t("auth.email")}</th>
-                    <th className="px-4 py-3">{t("common.status")}</th>
-                    <th className="px-4 py-3">{t("common.actions")}</th>
-                  </tr>
-                </thead>
+                  return (
+                    <div
+                      key={id ?? idx}
+                      className="apple-glass-table-row rounded-xl px-4 py-3.5 grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-0 items-center"
+                    >
+                      <span className="col-span-1 home-text-muted text-sm hidden md:block">
+                        {idx + 1}
+                      </span>
 
-                <tbody>
-                  {loading && (
-                    <tr>
-                      <td className="px-4 py-6 text-gray-400" colSpan={5}>
-                        {t("common.loading")}
-                      </td>
-                    </tr>
-                  )}
+                      <div className="col-span-3">
+                        <p className="home-text-primary font-semibold">{u?.username}</p>
+                        <p className="text-xs home-text-muted truncate">{id}</p>
+                      </div>
 
-                  {!loading && filtered.length === 0 && (
-                    <tr>
-                      <td className="px-4 py-6 text-gray-400" colSpan={5}>
-                        {t("admin.noUsers")}
-                      </td>
-                    </tr>
-                  )}
+                      <span className="col-span-3 home-text-muted truncate">
+                        {u?.email ?? "-"}
+                      </span>
 
-                  {!loading &&
-                    filtered.map((u, idx) => {
-                      const id = getUserId(u);
-                      const status = getStatus(u);
-                      const busy = actionLoadingId === id;
-
-                      return (
-                        <tr
-                          key={id ?? idx}
-                          className="border-b border-slate-800 hover:bg-slate-800/40"
+                      <span className="col-span-2">
+                        <span
+                          className={`${statusTone} rounded-full border px-2.5 py-1 text-xs font-semibold`}
                         >
-                          <td className="px-4 py-3 text-gray-400">{idx + 1}</td>
+                          {status}
+                        </span>
+                      </span>
 
-                          <td className="px-4 py-3">
-                            <div className="font-medium">{u?.username}</div>
-                            <div className="text-xs text-gray-400">{id}</div>
-                          </td>
+                      <div className="col-span-3 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSuspend(u)}
+                          disabled={busy}
+                          className={`apple-glass-pill flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                            busy
+                              ? "opacity-40 cursor-not-allowed"
+                              : "text-amber-700 hover:bg-amber-50"
+                          }`}
+                        >
+                          <PauseCircle className="w-3.5 h-3.5" />
+                          {t("admin.suspend")}
+                        </button>
 
-                          <td className="px-4 py-3">{u?.email ?? "-"}</td>
+                        <button
+                          type="button"
+                          onClick={() => handleBan(u)}
+                          disabled={busy}
+                          className={`apple-glass-pill flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                            busy
+                              ? "opacity-40 cursor-not-allowed"
+                              : "text-red-600 hover:bg-red-50"
+                          }`}
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                          {t("admin.ban")}
+                        </button>
 
-                          <td className="px-4 py-3">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs ${badgeClass(
-                                status
-                              )}`}
-                            >
-                              {status}
-                            </span>
-                          </td>
+                        {busy && (
+                          <span className="text-xs home-text-muted">
+                            {t("common.processing")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </main>
 
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleSuspend(u)}
-                                disabled={busy}
-                                className={`px-3 py-2 rounded-lg flex items-center gap-2 border ${
-                                  busy
-                                    ? "opacity-40 cursor-not-allowed border-slate-700"
-                                    : "border-yellow-500/30 hover:bg-yellow-500/10 text-yellow-200"
-                                }`}
-                              >
-                                <PauseCircle className="w-4 h-4" />
-                                {t("admin.suspend")}
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleBan(u)}
-                                disabled={busy}
-                                className={`px-3 py-2 rounded-lg flex items-center gap-2 border ${
-                                  busy
-                                    ? "opacity-40 cursor-not-allowed border-slate-700"
-                                    : "border-red-500/30 hover:bg-red-500/10 text-red-300"
-                                }`}
-                              >
-                                <Ban className="w-4 h-4" />
-                                {t("admin.ban")}
-                              </button>
-
-                              {busy && (
-                                <span className="text-xs text-gray-400">
-                                  {t("common.processing")}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* ✅ FOOTER */}
-          <Footer />
-        </div>
+        <Footer />
       </div>
     </div>
   );
 };
 
 export default AdminUsers;
-
-

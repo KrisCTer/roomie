@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNotificationContext } from "../../../../contexts/NotificationContext";
 import notificationService from "../../../../services/notificationService";
+import { useDialog } from "../../../../contexts/DialogContext";
 
 const DEFAULT_TYPE_OPTIONS = [
   { value: "all", label: "Tất cả loại" },
@@ -45,6 +46,7 @@ const useNotificationCenterData = () => {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const { showConfirm } = useDialog();
 
   const loadStats = async () => {
     try {
@@ -121,9 +123,14 @@ const useNotificationCenterData = () => {
   };
 
   const handleDeleteAllRead = async () => {
-    if (!window.confirm("Bạn có chắc muốn xóa tất cả thông báo đã đọc?")) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      title: "Xóa thông báo",
+      message: "Bạn có chắc muốn xóa tất cả thông báo đã đọc?",
+      confirmText: "Xóa tất cả",
+      cancelText: "Hủy",
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       setRefreshing(true);

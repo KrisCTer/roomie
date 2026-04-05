@@ -3,6 +3,7 @@ import {
   forgotPassword as forgotPasswordApi,
   resetPassword as resetPasswordApi,
 } from "../../../../services/authService";
+import { useDialog } from "../../../../contexts/DialogContext";
 
 const useForgotPasswordFlow = ({ t }) => {
   const [email, setEmail] = useState("");
@@ -10,21 +11,22 @@ const useForgotPasswordFlow = ({ t }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { showToast } = useDialog();
 
   const handleRequestReset = async (event) => {
     event.preventDefault();
 
     if (!email) {
-      window.alert(t("auth.fillAll"));
+      showToast(t("auth.fillAll"), "warning");
       return;
     }
 
     try {
       setLoading(true);
       await forgotPasswordApi({ email });
-      window.alert(t("auth.otpSent"));
+      showToast(t("auth.otpSent"), "success");
     } catch (error) {
-      window.alert(error?.response?.data?.message || t("auth.otpSent"));
+      showToast(error?.response?.data?.message || t("auth.otpSent"), "info");
     } finally {
       setLoading(false);
     }
@@ -34,21 +36,21 @@ const useForgotPasswordFlow = ({ t }) => {
     event.preventDefault();
 
     if (!token || !newPassword || !confirmPassword) {
-      window.alert(t("auth.fillAll"));
+      showToast(t("auth.fillAll"), "warning");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      window.alert(t("auth.passwordNotMatch"));
+      showToast(t("auth.passwordNotMatch"), "warning");
       return;
     }
 
     try {
       setLoading(true);
       await resetPasswordApi({ token, newPassword });
-      window.alert(t("auth.passwordChanged"));
+      showToast(t("auth.passwordChanged"), "success");
     } catch (error) {
-      window.alert(error?.response?.data?.message || t("auth.changePassword"));
+      showToast(error?.response?.data?.message || t("auth.changePassword"), "error");
     } finally {
       setLoading(false);
     }
