@@ -2,8 +2,10 @@ package com.roomie.services.property_service.controller;
 
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.ApiResponse;
+import com.roomie.services.property_service.dto.response.DirectionsResponse;
 import com.roomie.services.property_service.dto.response.NearbyPropertyResponse;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
+import com.roomie.services.property_service.service.DirectionsService;
 import com.roomie.services.property_service.service.PropertyService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -21,6 +23,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PropertyController {
     PropertyService propertyService;
+    DirectionsService directionsService;
 
     @PostMapping
     public ApiResponse<PropertyResponse> createProperty(@RequestBody @Valid PropertyRequest request) {
@@ -80,6 +83,17 @@ public class PropertyController {
         return ApiResponse.success(
                 propertyService.searchNearby(lat, lng, radiusKm, page, size),
                 "Nearby properties fetched successfully");
+    }
+
+    @GetMapping("/directions")
+    public ApiResponse<DirectionsResponse> getDirections(
+            @RequestParam Double originLat,
+            @RequestParam Double originLng,
+            @RequestParam Double destLat,
+            @RequestParam Double destLng) {
+        return ApiResponse.success(
+                directionsService.getDirections(originLat, originLng, destLat, destLng),
+                "Directions fetched successfully");
     }
 
     @PostMapping("/{id}/publish")
