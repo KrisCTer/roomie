@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { usePropertyOperations } from "../../../../hooks/usePropertyOperations";
+import { usePropertyOperations } from "../../../../hooks/property/usePropertyOperations";
 import { useRefresh } from "../../../../contexts/RefreshContext";
 
 const ITEMS_PER_PAGE = 10;

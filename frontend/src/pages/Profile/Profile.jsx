@@ -9,6 +9,8 @@ import PageTitle from "../../components/common/PageTitle.jsx";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import { useTranslation } from "react-i18next";
 import { useRefresh } from "../../contexts/RefreshContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 import {
   User,
   Settings,
@@ -22,13 +24,13 @@ import {
 } from "lucide-react";
 
 // Import custom components
-import ProfileOverview from "../../components/Profile/ProfileOverview.jsx";
-import EditProfileForm from "../../components/Profile/EditProfileForm.jsx";
-import AccountSettings from "../../components/Profile/AccountSettings.jsx";
-import ProfileSkeleton from "../../components/Profile/ProfileSkeleton.jsx";
+import ProfileOverview from "../../components/domain/profile/ProfileOverview.jsx";
+import EditProfileForm from "../../components/domain/profile/EditProfileForm.jsx";
+import AccountSettings from "../../components/domain/profile/AccountSettings.jsx";
+import ProfileSkeleton from "../../components/domain/profile/ProfileSkeleton.jsx";
 
 // Import custom hook
-import { useProfileOperations } from "../../hooks/useProfileOperations.js";
+import { useProfileOperations } from "../../hooks/profile/useProfileOperations.js";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -118,7 +120,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#FAFAFA]">
+    <div className="home-v2 home-shell-bg min-h-screen">
       {isAdmin ? (
         <AdminSidebar
           activeMenu={activeMenu}
@@ -144,7 +146,7 @@ const Profile = () => {
           subtitle={t("profile.subtitle")}
         />
 
-        <div className="px-10 py-8 w-full max-w-7xl mx-auto">
+        <div className="w-full px-4 pb-8 md:px-8 max-w-7xl mx-auto">
           {(error || success) && (
             <div className="mb-6 space-y-3">
               {error && (
@@ -188,7 +190,7 @@ const Profile = () => {
           ) : (
             <>
               {/* Profile Header Card */}
-              <div className="bg-white rounded-3xl border border-[#EFE6DA] shadow-[0_16px_40px_rgba(17,24,39,0.06)] p-8 mb-6">
+              <div className="apple-glass-panel p-8 mb-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   {/* Avatar Section */}
                   <div className="relative group">
@@ -275,8 +277,8 @@ const Profile = () => {
               </div>
 
               {/* Tabs Navigation */}
-              <div className="bg-white rounded-2xl border border-[#EFE6DA] shadow-sm mb-6 overflow-hidden">
-                <div className="flex border-b border-[#EFE6DA]">
+              <div className="apple-glass-panel mb-6 overflow-hidden">
+                <div className="flex border-b border-[#EBDCC8]">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
@@ -295,7 +297,7 @@ const Profile = () => {
               </div>
 
               {/* Tab Content */}
-              <div className="bg-white rounded-2xl border border-[#EFE6DA] shadow-sm p-8">
+              <div className="apple-glass-panel p-8">
                 {activeTab === "overview" && (
                   <ProfileOverview
                     formData={formData}

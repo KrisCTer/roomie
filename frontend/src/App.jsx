@@ -3,8 +3,8 @@ import { CssBaseline } from "@mui/material";
 
 import AppProviders from "./components/AppProviders";
 import AppRoutes from "./routes/AppRoutes";
-import NotificationToast from "./components/Notification/NotificationToast";
-import ChatBox from "./components/ChatBox/ChatBox";
+import NotificationToast from "./components/domain/notification/NotificationToast";
+import ChatBox from "./components/domain/chat/ChatBox";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 
 import "./i18n/i18n";

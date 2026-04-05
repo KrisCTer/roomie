@@ -8,11 +8,13 @@ import FavoritesGridSection from "./sections/FavoritesGridSection";
 import FavoritesLoadingSection from "./sections/FavoritesLoadingSection";
 import "../../../styles/home-redesign.css";
 import "../../../styles/favorites-redesign.css";
+import { useDialog } from "../../../contexts/DialogContext";
 
 const FavoritesPage = () => {
   const navigate = useNavigate();
   const { favorites, loading, removing, removeFavoriteById } =
     useFavoritesData();
+  const { showToast, showConfirm } = useDialog();
 
   useEffect(() => {
     const items = document.querySelectorAll(".reveal-item");
@@ -42,12 +44,18 @@ const FavoritesPage = () => {
   };
 
   const handleRemove = async (propertyId) => {
-    const confirmed = window.confirm("Remove this property from favorites?");
+    const confirmed = await showConfirm({
+      title: "Bỏ yêu thích",
+      message: "Bạn muốn bỏ bất động sản này khỏi danh sách yêu thích?",
+      confirmText: "Bỏ yêu thích",
+      cancelText: "Hủy",
+      type: "warning",
+    });
     if (!confirmed) return;
 
     const result = await removeFavoriteById(propertyId);
     if (!result.success) {
-      window.alert("Failed to remove favorite");
+      showToast("Không thể bỏ yêu thích", "error");
     }
   };
 

@@ -22,19 +22,23 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  const currentRole = (user?.role || activeRole || "").toLowerCase();
+  const currentRole = (user?.role || "").toLowerCase();
+  const viewRole = (activeRole || "").toLowerCase();
+  const storedUsername = (localStorage.getItem("username") || "").toLowerCase();
   const isAdmin =
-    currentRole === "admin" || user?.username?.toLowerCase() === "admin";
+    currentRole === "admin" ||
+    user?.username?.toLowerCase() === "admin" ||
+    storedUsername === "admin";
 
-  if (isAdmin && allowedRoles.includes("admin")) {
+  // Admin can access everything
+  if (isAdmin) {
     return children;
   }
 
-  if (isAdmin) {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
+  // Map frontend view roles (tenant/landlord) to system role (user)
+  const effectiveRole = currentRole || (["tenant", "landlord"].includes(viewRole) ? "user" : viewRole);
 
-  if (allowedRoles.includes(currentRole)) {
+  if (allowedRoles.includes(effectiveRole)) {
     return children;
   }
 

@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { setToken } from "../services/localStorageService";
+import { useDialog } from "../contexts/DialogContext";
 
 export default function OAuth2Callback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { showToast } = useDialog();
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -14,7 +16,7 @@ export default function OAuth2Callback() {
 
     if (error) {
       console.error("OAuth2 error:", error);
-      alert("Login failed: " + error);
+      showToast("Login failed: " + error, "error");
       navigate("/login");
       return;
     }

@@ -6,8 +6,8 @@ import VerificationGuard from "../components/common/VerificationGuard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 /* ================= AUTH (lazy) ================= */
-const Login = lazy(() => import("../pages/Login"));
-const Register = lazy(() => import("../pages/Register"));
+const Login = lazy(() => import("../pages/auth/login/LoginPage"));
+const Register = lazy(() => import("../pages/auth/register/RegisterPage"));
 const ForgotPassword = lazy(
   () => import("../pages/auth/forgot-password/ForgotPasswordPage"),
 );
@@ -17,16 +17,16 @@ const IdentityVerification = lazy(
 );
 
 /* ================= MAIN / PUBLIC (lazy) ================= */
-const Home = lazy(() => import("../pages/Main/Home"));
-const PropertyDetail = lazy(() => import("../pages/Main/PropertyDetail"));
-const PropertySearch = lazy(() => import("../pages/Main/PropertySearch"));
-const UserProfile = lazy(() => import("../pages/Main/UserProfile"));
-const MyFavorites = lazy(() => import("../pages/Main/MyFavorites"));
+const Home = lazy(() => import("../pages/Main/home/HomePage"));
+const PropertyDetail = lazy(() => import("../pages/Main/property-detail/PropertyDetailPage"));
+const PropertySearch = lazy(() => import("../pages/Main/search/PropertySearchPage"));
+const UserProfile = lazy(() => import("../pages/Main/user-profile/UserProfilePage"));
+const MyFavorites = lazy(() => import("../pages/Main/favorites/FavoritesPage"));
 
 /* ================= USER (lazy) ================= */
 const Profile = lazy(() => import("../pages/Profile/Profile"));
 const Message = lazy(() => import("../pages/Message/Message"));
-const Dashboard = lazy(() => import("../pages/User/Dashboard"));
+const Dashboard = lazy(() => import("../pages/User/dashboard/DashboardPage"));
 const MyBookings = lazy(() => import("../pages/Booking/MyBookings"));
 const MyContracts = lazy(() => import("../pages/Contracts/MyContracts"));
 const ContractSigning = lazy(
@@ -37,17 +37,16 @@ const UnifiedBillsPage = lazy(
 );
 const BillDetail = lazy(() => import("../pages/Billing/BillDetail"));
 const PaymentResult = lazy(() => import("../pages/Billing/PaymentResult"));
-const NotificationCenter = lazy(() => import("../pages/NotificationCenter"));
+const NotificationCenter = lazy(() => import("../pages/Main/notifications/NotificationsPage"));
 
 /* ================= LANDLORD (lazy) ================= */
-const AddProperty = lazy(() => import("../pages/Property/AddProperty"));
-const MyProperties = lazy(() => import("../pages/Property/MyProperties"));
+const AddProperty = lazy(() => import("../pages/Property/add-property/AddPropertyPage"));
+const MyProperties = lazy(() => import("../pages/Property/my-properties/MyPropertiesPage"));
 const UtilityConfigPage = lazy(
   () => import("../pages/Billing/UtilityConfigPage"),
 );
 
 /* ================= ADMIN (lazy) ================= */
-const Admin = lazy(() => import("../pages/User/Admin"));
 const AdminProperties = lazy(() => import("../pages/Admin/AdminProperties"));
 const AdminUsers = lazy(() => import("../pages/Admin/AdminUsers"));
 const AdminDashboard = lazy(() => import("../pages/Admin/AdminDashboard"));
@@ -84,7 +83,7 @@ const AppRoutes = () => {
         <Route
           path="/identity-verification"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord", "admin"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <IdentityVerification />
             </RoleProtectedRoute>
           }
@@ -93,7 +92,7 @@ const AppRoutes = () => {
         <Route
           path="/profile"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord", "admin"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <Profile />
               </VerificationGuard>
@@ -104,7 +103,7 @@ const AppRoutes = () => {
         <Route
           path="/message"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord", "admin"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <Message />
               </VerificationGuard>
@@ -115,17 +114,17 @@ const AppRoutes = () => {
         <Route
           path="/notifications"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord", "admin"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <NotificationCenter />
             </RoleProtectedRoute>
           }
         />
 
-        {/* ================= TENANT + LANDLORD ================= */}
+        {/* ================= USER ================= */}
         <Route
           path="/dashboard"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <Dashboard />
               </VerificationGuard>
@@ -136,7 +135,7 @@ const AppRoutes = () => {
         <Route
           path="/my-bookings"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <MyBookings />
               </VerificationGuard>
@@ -147,7 +146,7 @@ const AppRoutes = () => {
         <Route
           path="/my-contracts"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <MyContracts />
               </VerificationGuard>
@@ -158,7 +157,7 @@ const AppRoutes = () => {
         <Route
           path="/contract-signing/:id"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <ContractSigning />
               </VerificationGuard>
@@ -169,7 +168,7 @@ const AppRoutes = () => {
         <Route
           path="/unified-bills"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <UnifiedBillsPage />
               </VerificationGuard>
@@ -180,7 +179,7 @@ const AppRoutes = () => {
         <Route
           path="/bill-detail/:id"
           element={
-            <RoleProtectedRoute allowedRoles={["tenant", "landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <BillDetail />
               </VerificationGuard>
@@ -188,11 +187,11 @@ const AppRoutes = () => {
           }
         />
 
-        {/* ================= LANDLORD ONLY ================= */}
+        {/* ================= USER (PROPERTY MGMT) ================= */}
         <Route
           path="/add-property"
           element={
-            <RoleProtectedRoute allowedRoles={["landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <AddProperty />
               </VerificationGuard>
@@ -203,7 +202,7 @@ const AppRoutes = () => {
         <Route
           path="/my-properties"
           element={
-            <RoleProtectedRoute allowedRoles={["landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <MyProperties />
               </VerificationGuard>
@@ -214,7 +213,7 @@ const AppRoutes = () => {
         <Route
           path="/utility-config"
           element={
-            <RoleProtectedRoute allowedRoles={["landlord"]}>
+            <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
                 <UtilityConfigPage />
               </VerificationGuard>

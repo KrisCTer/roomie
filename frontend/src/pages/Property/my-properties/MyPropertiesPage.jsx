@@ -5,10 +5,11 @@ import Header from "../../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../../components/common/PageTitle.jsx";
 import AlertMessage from "../../../components/common/AlertMessage";
-import BookingsModal from "../../../components/Property/BookingsModal";
-import PublishPropertyModal from "../../../components/Property/PublishPropertyModal";
+import BookingsModal from "../../../components/domain/property/BookingsModal";
+import PublishPropertyModal from "../../../components/domain/property/PublishPropertyModal";
 import useMyPropertiesPageState from "./hooks/useMyPropertiesPageState";
 import MyPropertiesMainSection from "./sections/MyPropertiesMainSection";
+import "../../../styles/apple-glass-dashboard.css";
 import "../../../styles/home-redesign.css";
 
 const MyPropertiesPage = () => {

@@ -132,28 +132,70 @@
 }
 
 .home-glass-card {
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.82) 0%,
-    rgba(255, 255, 255, 0.7) 48%,
-    rgba(255, 255, 255, 0.56) 100%
-  );
-  -webkit-backdrop-filter: blur(16px) saturate(168%);
-  backdrop-filter: blur(16px) saturate(168%);
+  position: relative;
+  border-radius: 22px;
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 55%),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.10) 48%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
   box-shadow:
-    0 14px 34px rgba(35, 32, 28, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+    0 8px 32px rgba(35, 32, 28, 0.06),
+    0 2px 8px rgba(35, 32, 28, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    filter 0.2s ease;
+  will-change: transform;
+}
+
+/* Specular highlight on glass card */
+.home-glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.08) 8%,
+    transparent 30%
+  );
+  mask-image: linear-gradient(black 0%, transparent 40%);
+  -webkit-mask-image: linear-gradient(black 0%, transparent 40%);
+}
+
+.home-glass-card:hover {
+  filter: brightness(1.04);
+  transform: translateY(-2px) scale(1.005);
+}
+
+.home-glass-card:active {
+  transform: scale(0.97);
+  filter: brightness(0.98);
+  transition-duration: 0.1s;
 }
 
 .home-glass-soft {
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  background: rgba(255, 255, 255, 0.64);
-  -webkit-backdrop-filter: blur(12px) saturate(162%);
-  backdrop-filter: blur(12px) saturate(162%);
+  border-radius: 18px;
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 50%),
+    rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  backdrop-filter: blur(24px) saturate(165%);
   box-shadow:
-    0 8px 22px rgba(35, 32, 28, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    0 4px 16px rgba(35, 32, 28, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .home-headline {

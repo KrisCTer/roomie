@@ -1,6 +1,6 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import InfoRow from "../../../components/Property/InfoRow";
+import InfoRow from "../../../components/domain/property/InfoRow";
 import { useTranslation } from "react-i18next";
 const Step4Review = ({ propertyData, uploadedImages, isEditMode }) => {
   const { t } = useTranslation();

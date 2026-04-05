@@ -5,12 +5,14 @@ import { getPropertyById } from "../../../../services/propertyService";
 import { createConversation } from "../../../../services/chatService";
 import { createBooking } from "../../../../services/bookingService";
 import { getUserInfo } from "../../../../services/localStorageService";
-import { useFavorite } from "../../../../hooks/useFavorite";
+import { useFavorite } from "../../../../hooks/common/useFavorite";
+import { useDialog } from "../../../../contexts/DialogContext";
 
 const usePropertyDetailData = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showToast } = useDialog();
 
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,13 +78,13 @@ const usePropertyDetailData = () => {
     try {
       const currentUser = getUserInfo();
       if (!currentUser) {
-        window.alert(t("propertyDetail.loginToChat"));
+        showToast(t("propertyDetail.loginToChat"), "warning");
         navigate("/login");
         return;
       }
 
       if (currentUser.userId === property.owner?.ownerId) {
-        window.alert(t("propertyDetail.cannotChatSelf"));
+        showToast(t("propertyDetail.cannotChatSelf"), "warning");
         return;
       }
 
@@ -107,7 +109,7 @@ const usePropertyDetailData = () => {
       });
     } catch (error) {
       console.error("Error creating conversation:", error);
-      window.alert(t("propertyDetail.chatError"));
+      showToast(t("propertyDetail.chatError"), "error");
     } finally {
       setContactingOwner(false);
     }
@@ -117,13 +119,13 @@ const usePropertyDetailData = () => {
     try {
       const currentUser = getUserInfo();
       if (!currentUser) {
-        window.alert(t("propertyDetail.loginToBook"));
+        showToast(t("propertyDetail.loginToBook"), "warning");
         navigate("/login");
         return;
       }
 
       if (!leaseStart || !leaseEnd) {
-        window.alert(t("propertyDetail.selectDates"));
+        showToast(t("propertyDetail.selectDates"), "warning");
         return;
       }
 
@@ -131,13 +133,13 @@ const usePropertyDetailData = () => {
       const endDate = new Date(leaseEnd);
 
       if (startDate >= endDate) {
-        window.alert(t("propertyDetail.invalidDateRange"));
+        showToast(t("propertyDetail.invalidDateRange"), "warning");
         return;
       }
 
       const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
       if (daysDiff < 30) {
-        window.alert(t("propertyDetail.minLease"));
+        showToast(t("propertyDetail.minLease"), "warning");
         return;
       }
 
@@ -153,13 +155,12 @@ const usePropertyDetailData = () => {
 
       if (response?.success) {
         const booking = response.result;
-        window.alert(
-          `${t("propertyDetail.bookingSuccessTitle")}\n\n` +
-            `${t("propertyDetail.bookingRef")}: ${booking.bookingReference || booking.id}\n` +
-            `${t("propertyDetail.bookingStatus")}: ${booking.status}\n` +
-            `${t("propertyDetail.bookingDuration")}: ${leaseDuration} tháng\n` +
-            `${t("propertyDetail.estimatedCost")}: ${estimatedCost.toLocaleString()}đ\n\n` +
-            t("propertyDetail.waitForApproval"),
+        showToast(
+          `${t("propertyDetail.bookingSuccessTitle")} - ` +
+            `${t("propertyDetail.bookingRef")}: ${booking.bookingReference || booking.id} | ` +
+            `${t("propertyDetail.bookingDuration")}: ${leaseDuration} tháng`,
+          "success",
+          6000,
         );
 
         navigate("/my-bookings", {
@@ -174,11 +175,11 @@ const usePropertyDetailData = () => {
     } catch (error) {
       console.error("Error creating booking:", error);
       if (error.response?.data?.message) {
-        window.alert(`Lỗi: ${error.response.data.message}`);
+        showToast(`Lỗi: ${error.response.data.message}`, "error");
       } else if (error.message) {
-        window.alert(`Lỗi: ${error.message}`);
+        showToast(`Lỗi: ${error.message}`, "error");
       } else {
-        window.alert("Không thể tạo đặt thuê. Vui lòng thử lại sau.");
+        showToast("Không thể tạo đặt thuê. Vui lòng thử lại sau.", "error");
       }
     } finally {
       setBookingLoading(false);

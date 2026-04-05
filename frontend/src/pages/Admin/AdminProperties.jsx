@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
+import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -15,6 +16,9 @@ import {
 } from "../../services/adminPropertyService";
 
 import { Eye, Check, X } from "lucide-react";
+
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 const safeJson = (v) => {
   try {
@@ -126,7 +130,6 @@ const AdminProperties = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
-  // CHỈ HIỆN PENDING
   const pendingProperties = useMemo(() => {
     return properties.filter((p) => getStatus(p) === "PENDING");
   }, [properties]);
@@ -136,7 +139,6 @@ const AdminProperties = () => {
   const handleApprove = async (id) => {
     try {
       await adminApproveProperty(id);
-      // remove khỏi UI ngay (vì không còn pending)
       setProperties((prev) =>
         prev.filter((p) => (p?.propertyId || p?.id || p?._id) !== id)
       );
@@ -159,7 +161,7 @@ const AdminProperties = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-900">
+    <div className="home-v2 home-shell-bg min-h-screen">
       <AdminSidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -168,49 +170,53 @@ const AdminProperties = () => {
       />
 
       <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
+        className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <PageTitle
+          title={t("admin.pendingProperties")}
+          subtitle="Duyệt hoặc từ chối bất động sản đang chờ phê duyệt."
+        />
 
-        <main className="p-8 w-full">
-          <h1 className="text-3xl font-bold text-white mb-6">
-            {t("admin.pendingProperties")}
-          </h1>
-
-          <div className="bg-slate-800 rounded-2xl p-6">
+        <main className="w-full px-4 pb-8 md:px-8">
+          <section className="apple-glass-panel no-hover rounded-2xl p-6">
             {!isAdmin ? (
-              <p className="text-slate-200">{t("admin.unauthorized")}</p>
+              <p className="home-text-muted">{t("admin.unauthorized")}</p>
             ) : loading ? (
-              <p className="text-slate-200">{t("common.loading")}</p>
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
+                  >
+                    <div className="w-24 h-16 rounded-xl" style={{ background: "var(--home-surface-soft)" }} />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 rounded w-3/4" style={{ background: "var(--home-surface-soft)" }} />
+                      <div className="h-3 rounded w-1/2" style={{ background: "var(--home-surface-soft)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : pendingProperties.length === 0 ? (
-              <p className="text-slate-200">{t("admin.noPendingProperties")}</p>
+              <div className="apple-glass-soft home-text-muted rounded-2xl border-dashed p-8 text-center">
+                {t("admin.noPendingProperties")}
+              </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {pendingProperties.map((p) => {
                   const id = p?.propertyId || p?.id || p?._id;
                   const img = pickImage(p);
-
                   const title = p?.title ?? t("common.noData");
-                  const created =
-                    p?.createdAt ??
-                    p?.createdDate ??
-                    p?.postedAt ??
-                    p?.updatedAt;
-                  const price =
-                    p?.monthlyRent ??
-                    p?.price ??
-                    p?.rentalPrice ??
-                    p?.monthlyPrice;
+                  const created = p?.createdAt ?? p?.createdDate ?? p?.postedAt ?? p?.updatedAt;
+                  const price = p?.monthlyRent ?? p?.price ?? p?.rentalPrice ?? p?.monthlyPrice;
 
                   return (
                     <div
                       key={id}
-                      className="bg-slate-900/50 border border-slate-700 rounded-2xl p-4 flex items-center gap-4"
+                      className="apple-glass-table-row flex items-center gap-4 rounded-2xl p-4"
                     >
                       {/* Thumbnail */}
-                      <div className="w-24 h-16 rounded-xl overflow-hidden bg-slate-700 flex-shrink-0">
+                      <div className="w-24 h-16 rounded-xl overflow-hidden apple-glass-soft flex-shrink-0">
                         <img
                           src={img}
                           alt={title}
@@ -225,34 +231,28 @@ const AdminProperties = () => {
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3">
-                          <div className="text-white font-semibold text-lg truncate">
+                          <span className="home-text-primary font-semibold text-lg truncate">
                             {title}
-                          </div>
-
-                          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-orange-500 text-white">
-                            {t("admin.waitingApproval")}
                           </span>
-
-                          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-600 text-white">
-                            {t("admin.inactive")}
+                          <span className="home-tone-warning rounded-full border px-3 py-1 text-xs font-semibold">
+                            {t("admin.waitingApproval")}
                           </span>
                         </div>
 
-                        <div className="mt-1 text-slate-200 text-sm flex items-center gap-4">
-                          <span>{fmtDate(created)}</span>
-                          <span className="text-sky-400 font-semibold">
-                            {fmtMoney(price)}{" "}
-                            {t("common.currency", { defaultValue: "VND" })}
+                        <div className="mt-1 text-sm flex items-center gap-4">
+                          <span className="home-text-muted">{fmtDate(created)}</span>
+                          <span className="home-text-accent font-semibold">
+                            {fmtMoney(price)} {t("common.currency", { defaultValue: "VND" })}
                           </span>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => handleView(id)}
-                          className="h-10 w-10 rounded-xl border border-slate-600 bg-slate-900/40 hover:bg-slate-900 flex items-center justify-center text-slate-200"
+                          className="apple-glass-pill h-10 w-10 rounded-xl flex items-center justify-center home-text-muted hover:home-text-primary hover:bg-white"
                           title={t("common.view")}
                         >
                           <Eye size={18} />
@@ -261,7 +261,7 @@ const AdminProperties = () => {
                         <button
                           type="button"
                           onClick={() => handleApprove(id)}
-                          className="h-10 w-10 rounded-xl border border-emerald-500/60 bg-slate-900/40 hover:bg-slate-900 flex items-center justify-center text-emerald-400"
+                          className="apple-glass-pill h-10 w-10 rounded-xl flex items-center justify-center text-emerald-600 hover:bg-emerald-50"
                           title={t("admin.approve")}
                         >
                           <Check size={18} />
@@ -270,7 +270,7 @@ const AdminProperties = () => {
                         <button
                           type="button"
                           onClick={() => handleReject(id)}
-                          className="h-10 w-10 rounded-xl border border-red-500/60 bg-slate-900/40 hover:bg-slate-900 flex items-center justify-center text-red-400"
+                          className="apple-glass-pill h-10 w-10 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-50"
                           title={t("admin.reject")}
                         >
                           <X size={18} />
@@ -281,7 +281,7 @@ const AdminProperties = () => {
                 })}
               </div>
             )}
-          </div>
+          </section>
         </main>
 
         <Footer />
@@ -291,5 +291,3 @@ const AdminProperties = () => {
 };
 
 export default AdminProperties;
-
-

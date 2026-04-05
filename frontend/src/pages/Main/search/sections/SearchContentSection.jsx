@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { Compass, Map as MapIcon, SlidersHorizontal } from "lucide-react";
-import PropertyListView from "../../../../components/PropertySearch/PropertyListView";
-import PropertyMapView from "../../../../components/PropertySearch/PropertyMapView";
+import PropertyListView from "../../../../components/domain/property/PropertyListView";
+import PropertyMapView from "../../../../components/domain/property/PropertyMapView";
 
 const SearchContentSection = ({
   showListPanel,

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { register as registerApi } from "../../../../services/authService";
+import { useDialog } from "../../../../contexts/DialogContext";
 
 const useRegisterForm = ({ navigate, t }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useDialog();
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -24,22 +26,22 @@ const useRegisterForm = ({ navigate, t }) => {
     const { username, email, password, confirm, firstName, lastName, phoneNumber } = form;
 
     if (!username || !email || !password || !firstName || !lastName || !phoneNumber) {
-      window.alert(t("auth.fillAll"));
+      showToast(t("auth.fillAll"), "warning");
       return;
     }
 
     if (password !== confirm) {
-      window.alert(t("auth.passwordNotMatch"));
+      showToast(t("auth.passwordNotMatch"), "warning");
       return;
     }
 
     try {
       setLoading(true);
       await registerApi({ username, email, password, firstName, lastName, phoneNumber });
-      window.alert(t("auth.registerSuccess"));
+      showToast(t("auth.registerSuccess"), "success");
       navigate("/login");
     } catch (error) {
-      window.alert(error?.response?.data?.message || t("auth.registerFailed"));
+      showToast(error?.response?.data?.message || t("auth.registerFailed"), "error");
     } finally {
       setLoading(false);
     }
