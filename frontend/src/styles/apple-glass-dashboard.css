@@ -1,67 +1,497 @@
+/* =============================================================
+   🍎 Liquid Glass Design System v2.1 — Apple iOS 26 / visionOS
+   Roomie Dashboard — TRUE TRANSPARENCY Edition
+   =============================================================
+
+   LAYER MODEL:
+     L1 — blurred background content (via backdrop-filter)
+     L2 — glass surface (this CSS) — LOW OPACITY = see-through
+     L3 — vibrancy layer (text + icons)
+     L4 — specular/gloss highlight (::before pseudo)
+   ============================================================= */
+
+/* ===========================
+   § BASE GLASS PANEL
+   TRUE iOS 26 transparency — background MUST show through
+   =========================== */
 .apple-glass-panel {
   position: relative;
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.46);
-  background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.62) 0%,
-    rgba(255, 255, 255, 0.42) 48%,
-    rgba(255, 255, 255, 0.28) 100%
-  );
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 22px;
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.15) 0%, transparent 60%),
+    linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.10) 48%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
   box-shadow:
-    0 16px 40px rgba(15, 23, 42, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.28);
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.25s ease,
+    background 0.25s ease;
+  will-change: transform;
 }
 
+/* Warm palette override inside home-v2 */
 .home-v2 .apple-glass-panel {
-  border: 1px solid rgba(255, 255, 255, 0.56);
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    0 16px 40px rgba(35, 32, 28, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.28);
+    0 8px 32px rgba(35, 32, 28, 0.06),
+    0 2px 8px rgba(35, 32, 28, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
 }
 
+/* L4 — Specular / gloss highlight (top-edge light catch) */
 .apple-glass-panel::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.15) 35%,
-    rgba(255, 255, 255, 0) 60%
-  );
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.08) 8%,
+      transparent 30%
+    );
+  mask-image: linear-gradient(black 0%, transparent 40%);
+  -webkit-mask-image: linear-gradient(black 0%, transparent 40%);
 }
 
+/* HOVER + PRESS — ONLY when .interactive is applied (e.g. stat cards) */
+.apple-glass-panel.interactive {
+  cursor: pointer;
+}
+
+.apple-glass-panel.interactive:hover {
+  filter: brightness(1.06);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 14px 44px rgba(0, 0, 0, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.home-v2 .apple-glass-panel.interactive:hover {
+  box-shadow:
+    0 14px 44px rgba(35, 32, 28, 0.10),
+    0 4px 14px rgba(35, 32, 28, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* PRESS — spring squish bounce (stats only) */
+.apple-glass-panel.interactive:active {
+  transform: scale(0.94);
+  filter: brightness(0.96);
+  transition-duration: 0.08s;
+}
+
+/* ===========================
+   § GLASS ITEM (stat cards, list items)
+   =========================== */
 .apple-glass-item {
-  border: 1px solid rgba(255, 255, 255, 0.58);
+  position: relative;
+  border-radius: 16px;
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.12) 0%, transparent 55%),
+    linear-gradient(
+      130deg,
+      rgba(255, 255, 255, 0.16),
+      rgba(255, 255, 255, 0.08)
+    );
+  -webkit-backdrop-filter: blur(28px) saturate(175%);
+  backdrop-filter: blur(28px) saturate(175%);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    filter 0.2s ease;
+  will-change: transform;
+}
+
+.apple-glass-item:hover {
+  filter: brightness(1.04);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.09),
+    0 3px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.apple-glass-item:active {
+  transform: scale(0.97);
+  filter: brightness(0.98);
+  transition-duration: 0.1s;
+}
+
+/* ===========================
+   § GLASS PILL (chips, tags, badges)
+   =========================== */
+.apple-glass-pill {
+  position: relative;
+  border-radius: 999px;
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition:
+    background 0.2s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.apple-glass-pill:hover {
+  background: rgba(255, 255, 255, 0.25);
+  filter: brightness(1.04);
+  transform: scale(1.02);
+}
+
+.apple-glass-pill:active {
+  transform: scale(0.95);
+  transition-duration: 0.1s;
+}
+
+/* ===========================
+   § GLASS SOFT (subtle panels, filters bar)
+   =========================== */
+.apple-glass-soft {
+  border-radius: 18px;
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 50%),
+    rgba(255, 255, 255, 0.10);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  backdrop-filter: blur(24px) saturate(165%);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ===========================
+   § TINTED GLASS VARIANTS
+   HSL-based color tints — truly transparent with color shift
+   =========================== */
+
+.apple-glass-tinted-green {
+  border: 0.5px solid rgba(52, 199, 89, 0.15);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(52,199,89,0.1) 0%, transparent 55%),
+    linear-gradient(
+      140deg,
+      rgba(52, 199, 89, 0.12) 0%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  backdrop-filter: blur(32px) saturate(175%);
+  box-shadow:
+    0 8px 28px rgba(52, 199, 89, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.apple-glass-tinted-blue {
+  border: 0.5px solid rgba(0, 122, 255, 0.15);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0,122,255,0.08) 0%, transparent 55%),
+    linear-gradient(
+      140deg,
+      rgba(0, 122, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  backdrop-filter: blur(32px) saturate(175%);
+  box-shadow:
+    0 8px 28px rgba(0, 122, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.apple-glass-tinted-orange {
+  border: 0.5px solid rgba(255, 149, 0, 0.15);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,149,0,0.08) 0%, transparent 55%),
+    linear-gradient(
+      140deg,
+      rgba(255, 149, 0, 0.10) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  backdrop-filter: blur(32px) saturate(175%);
+  box-shadow:
+    0 8px 28px rgba(255, 149, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.apple-glass-tinted-teal {
+  border: 0.5px solid rgba(0, 199, 190, 0.15);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0,199,190,0.08) 0%, transparent 55%),
+    linear-gradient(
+      140deg,
+      rgba(0, 199, 190, 0.10) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  backdrop-filter: blur(32px) saturate(175%);
+  box-shadow:
+    0 8px 28px rgba(0, 199, 190, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Tinted hover — lift + spring */
+.apple-glass-tinted-green:hover,
+.apple-glass-tinted-blue:hover,
+.apple-glass-tinted-orange:hover,
+.apple-glass-tinted-teal:hover {
+  filter: brightness(1.06);
+  transform: translateY(-2px) scale(1.008);
+}
+
+.apple-glass-tinted-green:active,
+.apple-glass-tinted-blue:active,
+.apple-glass-tinted-orange:active,
+.apple-glass-tinted-teal:active {
+  transform: scale(0.97);
+  filter: brightness(0.98);
+  transition-duration: 0.1s;
+}
+
+/* ===========================
+   § TABLE ROW GLASS (admin tables, data grids)
+   =========================== */
+.apple-glass-table-row {
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
   background: linear-gradient(
     130deg,
-    rgba(255, 255, 255, 0.75),
-    rgba(255, 255, 255, 0.58)
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.06)
   );
-  -webkit-backdrop-filter: blur(18px) saturate(175%);
-  backdrop-filter: blur(18px) saturate(175%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
   box-shadow:
-    0 10px 24px rgba(15, 23, 42, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62);
+    0 2px 10px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+  will-change: transform;
 }
 
-.apple-glass-pill {
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  background: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: blur(16px) saturate(170%);
-  backdrop-filter: blur(16px) saturate(170%);
+.apple-glass-table-row:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-.apple-glass-soft {
-  border: 1px solid rgba(255, 255, 255, 0.52);
-  background: rgba(255, 255, 255, 0.46);
-  -webkit-backdrop-filter: blur(16px) saturate(165%);
-  backdrop-filter: blur(16px) saturate(165%);
+/* ===========================
+   § VIBRANCY TEXT — L3 layer
+   Text on glass with subtle depth
+   =========================== */
+.glass-text-primary {
+  color: #1d1d1f;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.glass-text-secondary {
+  color: rgba(29, 29, 31, 0.62);
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.04);
+}
+
+.glass-text-vibrancy {
+  color: #1d1d1f;
+  mix-blend-mode: multiply;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* On dark glass surfaces (sidebar, dark cards) — light text */
+.glass-text-light {
+  color: #f5f5f7;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.glass-text-light-secondary {
+  color: rgba(245, 245, 247, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ===========================
+   § GLASS BUTTON
+   Pill-shaped interactive glass element
+   =========================== */
+.apple-glass-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #1d1d1f;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.2s ease,
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.apple-glass-btn:hover {
+  filter: brightness(1.06);
+  transform: scale(1.03);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.apple-glass-btn:active {
+  transform: scale(0.95);
+  filter: brightness(0.96);
+  transition-duration: 0.1s;
+}
+
+/* Accent variant (warm/orange CTA) */
+.apple-glass-btn-accent {
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.18) 0%, transparent 50%),
+    linear-gradient(135deg, #d89a5b 0%, #b8682f 100%);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 4px 18px rgba(184, 104, 47, 0.25),
+    0 2px 6px rgba(184, 104, 47, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.apple-glass-btn-accent:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 6px 24px rgba(184, 104, 47, 0.3),
+    0 3px 8px rgba(184, 104, 47, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* ===========================
+   § GLASS INPUT
+   Form inputs with glass surface
+   =========================== */
+.apple-glass-input {
+  border-radius: 12px;
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  padding: 0.625rem 1rem;
+  color: #1d1d1f;
+  font-size: 0.875rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.apple-glass-input:focus {
+  border-color: rgba(216, 154, 91, 0.4);
+  box-shadow:
+    0 0 0 3px rgba(216, 154, 91, 0.12),
+    inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.apple-glass-input::placeholder {
+  color: rgba(29, 29, 31, 0.35);
+}
+
+/* ===========================
+   § GLASS DIVIDER
+   =========================== */
+.apple-glass-divider {
+  border: none;
+  height: 0.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 20%,
+    rgba(255, 255, 255, 0.35) 80%,
+    transparent 100%
+  );
+  margin: 1rem 0;
+}
+
+/* ===========================
+   § ACCESSIBILITY — Reduced motion
+   =========================== */
+@media (prefers-reduced-motion: reduce) {
+  .apple-glass-panel,
+  .apple-glass-panel:hover,
+  .apple-glass-panel:active,
+  .apple-glass-item,
+  .apple-glass-item:hover,
+  .apple-glass-item:active,
+  .apple-glass-pill,
+  .apple-glass-pill:hover,
+  .apple-glass-pill:active,
+  .apple-glass-btn,
+  .apple-glass-btn:hover,
+  .apple-glass-btn:active,
+  .apple-glass-tinted-green,
+  .apple-glass-tinted-green:hover,
+  .apple-glass-tinted-blue,
+  .apple-glass-tinted-blue:hover,
+  .apple-glass-tinted-orange,
+  .apple-glass-tinted-orange:hover,
+  .apple-glass-tinted-teal,
+  .apple-glass-tinted-teal:hover,
+  .apple-glass-table-row,
+  .apple-glass-table-row:hover {
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
+
+/* ===========================
+   § PERFORMANCE — Low-power fallback
+   =========================== */
+@media (prefers-reduced-transparency: reduce) {
+  .apple-glass-panel,
+  .apple-glass-item,
+  .apple-glass-pill,
+  .apple-glass-soft,
+  .apple-glass-btn {
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(120%);
+    background: rgba(255, 255, 255, 0.75);
+  }
 }
