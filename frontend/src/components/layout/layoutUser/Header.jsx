@@ -33,7 +33,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useRole } from "../../../contexts/RoleContext";
 import { useRefresh } from "../../../contexts/RefreshContext";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
-import NotificationDropdown from "../../Notification/NotificationDropdown";
+import NotificationDropdown from "../../domain/notification/NotificationDropdown";
 import { useState, useMemo } from "react";
 import { removeToken } from "../../../services/localStorageService";
 import { useUser } from "../../../contexts/UserContext";

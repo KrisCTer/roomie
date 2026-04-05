@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // src/components/Home/PropertyCard.jsx
 import React from "react";
 import {
@@ -21,7 +21,8 @@ import {
   Share2,
   ArrowRight,
 } from "lucide-react";
-import { useFavorite } from "../../../hooks/useFavorite";
+import { useFavorite } from "../../../hooks/common/useFavorite";
+import { useDialog } from "../../../contexts/DialogContext";
 
 const PropertyCard = ({ property, onClick }) => {
   const { id, image, title, location, price, bedrooms, bathrooms, size, type } =
@@ -34,6 +35,7 @@ const PropertyCard = ({ property, onClick }) => {
     isLoading: favoriteLoading,
     handleToggleFavorite,
   } = useFavorite(id);
+  const { showToast } = useDialog();
 
   // Share handler
   const handleShare = async (e) => {
@@ -50,7 +52,7 @@ const PropertyCard = ({ property, onClick }) => {
         });
       } else {
         await navigator.clipboard.writeText(url);
-        alert("Đã sao chép liên kết!");
+        showToast("Đã sao chép liên kết!", "success");
       }
     } catch (error) {
       console.error("Error sharing:", error);

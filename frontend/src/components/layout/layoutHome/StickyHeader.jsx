@@ -39,7 +39,7 @@ import {
   isAuthenticated,
   removeToken,
 } from "../../../services/localStorageService";
-import SearchFilters from "../../PropertySearch/SearchFilters";
+import SearchFilters from "../../domain/property/SearchFilters";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
 import { getMyFavorites } from "../../../services/favoriteService";
 import {

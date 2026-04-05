@@ -31,17 +31,22 @@ export const UserProvider = ({ children }) => {
       const res = await getMyProfile();
       const profile = res?.result || res?.data?.result;
       if (profile) {
-        setUser(profile);
+        // Merge: keep role from cached (JWT) if profile doesn't have it
+        const merged = { ...cached, ...profile };
+        if (!merged.role && cached?.role) merged.role = cached.role;
+        setUser(merged);
+        return merged;
       }
 
-      return profile ?? null;
+      // Profile API returned no data, keep cached (JWT-derived) user
+      return cached ?? null;
     } catch (e) {
       if (e?.response?.status === 401) {
         removeToken();
         removeUserProfile();
         setUser(null);
       }
-
+      // For non-401 errors (404, 500), keep cached user
       return null;
     } finally {
       setLoading(false);
