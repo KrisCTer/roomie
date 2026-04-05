@@ -1,5 +1,5 @@
 import React from "react";
-import ImageUploader from "../../../components/Property/ImageUploader";
+import ImageUploader from "../../../components/domain/property/ImageUploader";
 import { useTranslation } from "react-i18next";
 const Step3Amenities = ({
   propertyData,
@@ -27,7 +27,7 @@ const Step3Amenities = ({
               type="checkbox"
               checked={propertyData[category].includes(item)}
               onChange={() => onAmenityToggle(category, item)}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-[#CC6F4A]"
             />
             <span className="text-sm">
               {/* {t(`propertyForm.step3.amenities.${item}`)} */}

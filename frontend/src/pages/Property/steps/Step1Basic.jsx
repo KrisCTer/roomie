@@ -23,7 +23,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
             value={propertyData.title}
             onChange={onInputChange}
             placeholder={t("propertyForm.step1.titlePlaceholder")}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
           />
         </div>
 
@@ -38,7 +38,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
             onChange={onInputChange}
             placeholder={t("propertyForm.step1.descriptionPlaceholder")}
             rows="6"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
           />
         </div>
 
@@ -52,7 +52,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
               name="propertyType"
               value={propertyData.propertyType}
               onChange={onInputChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
             >
               <option value="ROOM">{t("propertyForm.step1.types.ROOM")}</option>
               <option value="DORMITORY">
@@ -87,7 +87,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
               name="propertyStatus"
               value={propertyData.propertyStatus}
               onChange={onInputChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
             >
               <option value="AVAILABLE">Available</option>
               <option value="PENDING">Pending</option>
@@ -108,7 +108,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.size}
                 onChange={onInputChange}
                 placeholder="0"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
@@ -128,7 +128,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.monthlyRent}
                 onChange={onInputChange}
                 placeholder="0.00"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
@@ -145,7 +145,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.rentalDeposit}
                 onChange={onInputChange}
                 placeholder="0.00"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
@@ -158,7 +158,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
               name="propertyLabel"
               value={propertyData.propertyLabel}
               onChange={onInputChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
             >
               <option value="NONE">None</option>
               <option value="HOT">Hot</option>
@@ -181,7 +181,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.bedrooms}
                 onChange={onInputChange}
                 placeholder="0"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
@@ -198,7 +198,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.bathrooms}
                 onChange={onInputChange}
                 placeholder="0"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
@@ -215,7 +215,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.garages}
                 onChange={onInputChange}
                 placeholder="0"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
@@ -232,7 +232,7 @@ const Step1Basic = ({ propertyData, onInputChange }) => {
                 value={propertyData.rooms}
                 onChange={onInputChange}
                 placeholder="0"
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
               />
             </div>
           </div>
