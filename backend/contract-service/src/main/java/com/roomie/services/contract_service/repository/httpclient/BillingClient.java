@@ -1,6 +1,5 @@
 package com.roomie.services.contract_service.repository.httpclient;
 
-import com.roomie.services.contract_service.configuration.AuthenticationRequestInterceptor;
 import com.roomie.services.contract_service.configuration.FeignMultipartConfig;
 import com.roomie.services.contract_service.dto.request.BillRequest;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
@@ -11,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "billing-service",
-        configuration = {FeignMultipartConfig.class, AuthenticationRequestInterceptor.class})
+        configuration = {FeignMultipartConfig.class})
 public interface  BillingClient {
     @PostMapping(value="/internal/bills", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<ApiResponse<BillResponse>> createBill(@RequestBody BillRequest request);
@@ -33,3 +32,4 @@ public interface  BillingClient {
 //            @PathVariable String contractId
 //    );
 }
+

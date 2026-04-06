@@ -18,16 +18,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +40,6 @@ public class UserProfileService {
     IdentityClient  identityClient;
     IDCardQRService idCardQRService;
 
-    // 1. TẠO PROFILE TỪ CCCD (QR CODE) – TỰ ĐỘNG ĐIỀN THÔNG TIN
     public UserProfileResponse updateProfileFromIDCard(MultipartFile idCardImage) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String userId = auth.getName();
@@ -121,21 +117,17 @@ public class UserProfileService {
         return userProfileMapper.toUserProfileResponse(saved);
     }
 
-    // 2. TẠO PROFILE THỦ CÔNG (dành cho admin hoặc fallback)
     public UserProfileResponse createProfile(ProfileCreationRequest request) {
 
-        // 🔥 1. Không sử dụng SecurityContext trong trường hợp đăng ký
         if (request.getUserId() == null) {
             throw new AppException(ErrorCode.USER_ID_REQUIRED);
         }
 
-        // 🔥 2. Không cho tạo trùng profile
         userProfileRepository.findByUserId(request.getUserId())
                 .ifPresent(p -> {
                     throw new AppException(ErrorCode.PROFILE_ALREADY_EXISTS);
                 });
 
-        // 🔥 3. Mapping dữ liệu
         UserProfile profile = userProfileMapper.toUserProfile(request);
 
         profile.setUserId(request.getUserId());
@@ -143,15 +135,11 @@ public class UserProfileService {
         profile.setCreatedAt(LocalDateTime.now());
         profile.setUpdatedAt(LocalDateTime.now());
 
-        // 🔥 4. Lưu profile
         profile = userProfileRepository.save(profile);
 
-        // 🔥 5. Trả về DTO
         return userProfileMapper.toUserProfileResponse(profile);
     }
 
-    // 3. CẬP NHẬT PROFILE
-//    @CachePut(value = "profile", key = "#userId")
     public UserProfileResponse updateMyProfile(UpdateProfileRequest request) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserProfile profile = getOrCreateProfileForCurrentUser(userId);
@@ -168,23 +156,18 @@ public class UserProfileService {
     }
 
 
-    // 4. LẤY THÔNG TIN PROFILE
-//    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getMyProfile() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         UserProfile profile = getOrCreateProfileForCurrentUser(userId);
         return userProfileMapper.toUserProfileResponse(profile);
     }
 
-//    @Cacheable(value = "profile", key = "#userId")
     public UserProfileResponse getByUserId(String userId) {
         return userProfileRepository.findByUserId(userId)
                 .map(userProfileMapper::toUserProfileResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
     }
 
-    // 5. UPLOAD AVATAR
-//    @CachePut(value = "profile", key = "#userId")
     public UserProfileResponse updateAvatar(MultipartFile file) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -207,8 +190,6 @@ public class UserProfileService {
     }
 
 
-    // 6. TÌM KIẾM USER (dành cho chat, đặt phòng...)
-//    @Cacheable(value = "userSearch", key = "#query", cacheManager = "cacheManager")
     public List<UserProfileResponse> search(SearchUserRequest request) {
         String keyword = Optional.ofNullable(request.getKeyword()).orElse("").trim();
 

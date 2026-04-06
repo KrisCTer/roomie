@@ -17,6 +17,8 @@ public enum ErrorCode {
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     PROFILE_ALREADY_EXISTS(1009, "Profile already exists", HttpStatus.CONFLICT),
     PROFILE_NOT_FOUND(10010, "Profile not found", HttpStatus.NOT_FOUND),
+    PAYMENT_NOT_FOUND(3001, "Payment not found", HttpStatus.NOT_FOUND),
+    UNSUPPORTED_PAYMENT_METHOD(3002, "Unsupported payment method", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

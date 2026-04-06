@@ -39,7 +39,7 @@ import {
   isAuthenticated,
   removeToken,
 } from "../../../services/localStorageService";
-import SearchFilters from "../../PropertySearch/SearchFilters";
+import SearchFilters from "../../domain/property/SearchFilters";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
 import { getMyFavorites } from "../../../services/favoriteService";
 import {
@@ -231,12 +231,10 @@ const StickyHeader = ({
   };
 
   const handleDashboardClick = () => {
-    const username = getUsername().toLowerCase();
-    if (username === "admin") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/dashboard");
-    }
+    const isAdmin =
+      user?.role?.toLowerCase() === "admin" ||
+      getUsername().toLowerCase() === "admin";
+    navigate(isAdmin ? "/admin/dashboard" : "/dashboard");
   };
 
   // Search handlers
@@ -285,7 +283,9 @@ const StickyHeader = ({
   };
 
   const username = getUsername();
-  const isAdmin = username?.toLowerCase() === "admin";
+  const isAdmin =
+    user?.role?.toLowerCase() === "admin" ||
+    username?.toLowerCase() === "admin";
   const currentLanguage = i18n.language || "en";
 
   return (

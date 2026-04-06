@@ -5,9 +5,12 @@ import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
-import UtilityConfigModal from "../../components/Billing/UtilityConfigModal";
+import UtilityConfigModal from "../../components/domain/billing/UtilityConfigModal";
 import { useTranslation } from "react-i18next";
 import { useRefresh } from "../../contexts/RefreshContext";
+import { useDialog } from "../../contexts/DialogContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 import {
   getMyUtilities,
@@ -31,6 +34,7 @@ const UtilityConfigPage = () => {
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const { t } = useTranslation();
+  const { showToast, showConfirm } = useDialog();
 
   // ✅ Refresh context
   const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
@@ -90,10 +94,10 @@ const UtilityConfigPage = () => {
     try {
       if (selectedConfig) {
         await updateUtilityConfig(selectedConfig.id, formData);
-        alert(t("utility.updateSuccess"));
+        showToast(t("utility.updateSuccess"), "success");
       } else {
         await createUtilityConfig(formData);
-        alert(t("utility.createSuccess"));
+        showToast(t("utility.createSuccess"), "success");
       }
       loadData();
       setShowModal(false);
@@ -104,27 +108,41 @@ const UtilityConfigPage = () => {
   };
 
   const handleDeactivate = async (id) => {
-    if (window.confirm(t("utility.confirmDeactivate"))) {
+    const confirmed = await showConfirm({
+      title: t("utility.deactivate"),
+      message: t("utility.confirmDeactivate"),
+      confirmText: t("utility.deactivate"),
+      cancelText: t("common.cancel", "Hủy"),
+      type: "warning",
+    });
+    if (confirmed) {
       try {
         await deactivateUtilityConfig(id);
-        alert(t("utility.deactivateSuccess"));
+        showToast(t("utility.deactivateSuccess"), "success");
         loadData();
       } catch (error) {
         console.error("Error deactivating config:", error);
-        alert(t("utility.deactivateFailed"));
+        showToast(t("utility.deactivateFailed"), "error");
       }
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm(t("utility.confirmDelete"))) {
+    const confirmed = await showConfirm({
+      title: t("utility.delete"),
+      message: t("utility.confirmDelete"),
+      confirmText: t("utility.delete"),
+      cancelText: t("common.cancel", "Hủy"),
+      type: "danger",
+    });
+    if (confirmed) {
       try {
         await deleteUtilityConfig(id);
-        alert(t("utility.deleteSuccess"));
+        showToast(t("utility.deleteSuccess"), "success");
         loadData();
       } catch (error) {
         console.error("Error deleting config:", error);
-        alert(t("utility.deleteFailed"));
+        showToast(t("utility.deleteFailed"), "error");
       }
     }
   };
@@ -134,7 +152,7 @@ const UtilityConfigPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="home-v2 home-shell-bg min-h-screen">
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -152,10 +170,10 @@ const UtilityConfigPage = () => {
           subtitle={t("utility.utilitySubtitle")}
         />
 
-        <main className="p-6">
+        <main className="w-full px-4 pb-8 md:px-8">
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="apple-glass-panel p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Settings className="w-6 h-6 text-blue-600" />
@@ -171,7 +189,7 @@ const UtilityConfigPage = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="apple-glass-panel p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <Power className="w-6 h-6 text-green-600" />
@@ -187,7 +205,7 @@ const UtilityConfigPage = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="apple-glass-panel p-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
                   <Settings className="w-6 h-6 text-teal-600" />
@@ -208,7 +226,7 @@ const UtilityConfigPage = () => {
           <div className="space-y-6">
             {loading ? (
               <div className="text-center py-12">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <div className="w-8 h-8 border-4 border-[#CC6F4A] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
                 <p className="text-gray-600">{t("common.loading")}</p>
               </div>
             ) : properties.length === 0 ? (
@@ -222,10 +240,10 @@ const UtilityConfigPage = () => {
                 return (
                   <div
                     key={property.propertyId}
-                    className="bg-white rounded-xl shadow-sm overflow-hidden"
+                    className="apple-glass-panel overflow-hidden"
                   >
                     {/* Property Header */}
-                    <div className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4">
+                    <div className="bg-gradient-to-r from-[#CC6F4A] to-[#B5604B] px-6 py-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="text-xl font-bold text-white">

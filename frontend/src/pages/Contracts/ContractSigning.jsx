@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 /* aria-label */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,18 +8,20 @@ import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 // Import custom components
-import OTPModal from "../../components/Contracts/signing/OTPModal.jsx";
-import SignModal from "../../components/Contracts/signing/SignModal.jsx";
-import PropertyInfoCard from "../../components/Contracts/signing/PropertyInfoCard.jsx";
-import PaymentTermsCard from "../../components/Contracts/signing/PaymentTermsCard.jsx";
-import PDFViewer from "../../components/Contracts/signing/PDFViewer.jsx";
-import SignatureStatusCard from "../../components/Contracts/signing/SignatureStatusCard.jsx";
-import ActionsCard from "../../components/Contracts/signing/ActionsCard.jsx";
-import ContractInfoCard from "../../components/Contracts/signing/ContractInfoCard.jsx";
+import OTPModal from "../../components/domain/contract/signing/OTPModal.jsx";
+import SignModal from "../../components/domain/contract/signing/SignModal.jsx";
+import PropertyInfoCard from "../../components/domain/contract/signing/PropertyInfoCard.jsx";
+import PaymentTermsCard from "../../components/domain/contract/signing/PaymentTermsCard.jsx";
+import PDFViewer from "../../components/domain/contract/signing/PDFViewer.jsx";
+import SignatureStatusCard from "../../components/domain/contract/signing/SignatureStatusCard.jsx";
+import ActionsCard from "../../components/domain/contract/signing/ActionsCard.jsx";
+import ContractInfoCard from "../../components/domain/contract/signing/ContractInfoCard.jsx";
 
 // Import custom hook
-import { useContractSigning } from "../../hooks/useContractSigning.js";
+import { useContractSigning } from "../../hooks/contract/useContractSigning.js";
 
 // Import utilities
 import { getStatusConfig } from "../../utils/statusConfig.js";
@@ -70,7 +72,7 @@ const ContractSigning = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="home-v2 home-shell-bg min-h-screen">
         <Sidebar
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
@@ -85,7 +87,7 @@ const ContractSigning = () => {
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="w-16 h-16 border-4 border-[#CC6F4A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600">{t("contract.loading")}</p>
             </div>
           </div>
@@ -97,7 +99,7 @@ const ContractSigning = () => {
   // Error state
   if (!contract) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="home-v2 home-shell-bg min-h-screen">
         <Sidebar
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
@@ -119,7 +121,7 @@ const ContractSigning = () => {
               </h2>
               <button
                 onClick={() => navigate("/my-contracts")}
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="mt-4 px-6 py-2 bg-[#CC6F4A] text-white rounded-lg hover:bg-[#B5604B]"
               >
                 {t("contract.backToList")}
               </button>
@@ -142,7 +144,7 @@ const ContractSigning = () => {
   const pdfUrl = contract.pdfUrl;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="home-v2 home-shell-bg min-h-screen">
       {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
@@ -163,7 +165,7 @@ const ContractSigning = () => {
           subtitle={t("contract.signingSubtitle")}
         />
 
-        <main className="p-6">
+        <main className="w-full px-4 pb-8 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
@@ -182,7 +184,7 @@ const ContractSigning = () => {
             {/* Right Column */}
             <div className="space-y-6">
               {/* Contract Status */}
-              <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+              <div className="apple-glass-panel p-4">
                 <div
                   className={`${statusConfig.bg} ${statusConfig.text}
                   w-full px-4 py-3 rounded-lg

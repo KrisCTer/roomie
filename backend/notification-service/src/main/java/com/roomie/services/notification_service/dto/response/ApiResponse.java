@@ -25,10 +25,10 @@ public class ApiResponse<T> {
                 .message(message)
                 .build();
     }
-    public static <T> ApiResponse<T> error(String message, int code) {
+    public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
                 .success(false)
-                .code(code)
+                .code(2000)
                 .message(message)
                 .build();
     }

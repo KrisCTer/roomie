@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 /* aria-label */
 // web-app/src/pages/Billing/UnifiedBillsPage.jsx
 import React, { useState, useEffect } from "react";
@@ -11,19 +11,21 @@ import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import { useRole } from "../../contexts/RoleContext";
 import { useRefresh } from "../../contexts/RefreshContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 // Import custom components
-import LandlordStats from "../../components/Billing/LandlordStats";
-import TenantStats from "../../components/Billing/TenantStats";
-import BillFilters from "../../components/Billing/BillFilters";
-import LandlordBillTable from "../../components/Billing/LandlordBillTable";
-import TenantBillCards from "../../components/Billing/TenantBillCards";
-import BillsEmptyState from "../../components/Billing/BillsEmptyState";
-import BillsLoadingState from "../../components/Billing/BillsLoadingState";
-import CreateBillModal from "../../components/Billing/CreateBillModal";
+import LandlordStats from "../../components/domain/billing/LandlordStats";
+import TenantStats from "../../components/domain/billing/TenantStats";
+import BillFilters from "../../components/domain/billing/BillFilters";
+import LandlordBillTable from "../../components/domain/billing/LandlordBillTable";
+import TenantBillCards from "../../components/domain/billing/TenantBillCards";
+import BillsEmptyState from "../../components/domain/billing/BillsEmptyState";
+import BillsLoadingState from "../../components/domain/billing/BillsLoadingState";
+import CreateBillModal from "../../components/domain/billing/CreateBillModal";
 
 // Import custom hook
-import { useBillOperations } from "../../hooks/useBillOperations";
+import { useBillOperations } from "../../hooks/billing/useBillOperations";
 
 const UnifiedBillsPage = () => {
   const navigate = useNavigate();
@@ -104,7 +106,7 @@ const UnifiedBillsPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="home-v2 home-shell-bg min-h-screen">
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -123,7 +125,7 @@ const UnifiedBillsPage = () => {
           subtitle={t("bill.billManagementSubtitle")}
         />
 
-        <main className="p-6">
+        <main className="w-full px-4 pb-8 md:px-8">
           {/* Stats */}
           {activeRole === "landlord" ? (
             <LandlordStats stats={stats.landlord} />
@@ -148,12 +150,12 @@ const UnifiedBillsPage = () => {
           />
 
           {/* Bills List */}
-          <div className="bg-white rounded-xl shadow-sm">
+          <div className="apple-glass-panel">
             {/* List header with actions */}
-            <div className="p-6 border-b">
+            <div className="p-6 border-b border-[#EBDCC8]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-xl font-bold text-[#2B2A28]">
                     {t("bill.billsList")} ({filteredBills.length})
                   </h2>
                 </div>
@@ -177,7 +179,7 @@ const UnifiedBillsPage = () => {
                   {activeTab === "landlord" && (
                     <button
                       onClick={handleCreateBill}
-                      className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md font-medium"
+                      className="flex items-center gap-2 px-6 py-3 bg-[#CC6F4A] text-white rounded-lg hover:bg-[#B5604B] transition shadow-md font-medium"
                     >
                       <Plus className="w-5 h-5" />
                       {t("bill.createBill")}

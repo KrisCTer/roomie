@@ -22,16 +22,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ChatController {
 
     ChatService chatService;
     ConversationService conversationService;
 
-    /**
-     * Send message and get AI response
-     */
     @PostMapping
     public ApiResponse<ChatResponse> chat(@Valid @RequestBody ChatRequest request) {
         String userId = getCurrentUserId();
@@ -42,9 +39,6 @@ public class ChatController {
         return ApiResponse.success(response, "Message sent successfully");
     }
 
-    /**
-     * Get user's conversations
-     */
     @GetMapping("/conversations")
     public ApiResponse<Page<ConversationResponse>> getConversations(
             @RequestParam(defaultValue = "0") int page,
@@ -58,9 +52,6 @@ public class ChatController {
         return ApiResponse.success(conversations, "Conversations retrieved successfully");
     }
 
-    /**
-     * Get single conversation
-     */
     @GetMapping("/conversations/{id}")
     public ApiResponse<ConversationResponse> getConversation(@PathVariable String id) {
         String userId = getCurrentUserId();
@@ -70,9 +61,6 @@ public class ChatController {
         return ApiResponse.success(conversation, "Conversation retrieved successfully");
     }
 
-    /**
-     * Get conversation messages
-     */
     @GetMapping("/conversations/{id}/messages")
     public ApiResponse<List<Message>> getMessages(@PathVariable String id) {
         String userId = getCurrentUserId();
@@ -82,9 +70,6 @@ public class ChatController {
         return ApiResponse.success(messages, "Messages retrieved successfully");
     }
 
-    /**
-     * Update conversation title
-     */
     @PutMapping("/conversations/{id}/title")
     public ApiResponse<ConversationResponse> updateTitle(
             @PathVariable String id,
@@ -99,9 +84,6 @@ public class ChatController {
         return ApiResponse.success(conversation, "Title updated successfully");
     }
 
-    /**
-     * Delete conversation
-     */
     @DeleteMapping("/conversations/{id}")
     public ApiResponse<Void> deleteConversation(@PathVariable String id) {
         String userId = getCurrentUserId();
@@ -110,8 +92,6 @@ public class ChatController {
 
         return ApiResponse.success(null, "Conversation deleted successfully");
     }
-
-    // Helper method
     private String getCurrentUserId() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }

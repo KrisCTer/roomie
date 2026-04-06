@@ -1,7 +1,7 @@
 package com.roomie.services.identity_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.roomie.services.identity_service.dto.request.ApiResponse;
+import com.roomie.services.identity_service.dto.response.ApiResponse;
 import com.roomie.services.identity_service.exception.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

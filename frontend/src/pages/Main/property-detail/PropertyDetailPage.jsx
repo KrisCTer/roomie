@@ -2,12 +2,15 @@ import React from "react";
 import { Container } from "@mui/material";
 import EditorialHeader from "../../../components/layout/layoutHome/EditorialHeader";
 import EditorialFooter from "../../../components/layout/layoutHome/EditorialFooter";
-import PropertyHeader from "../../../components/PropertyDetail/PropertyHeader";
-import ImageGallery from "../../../components/PropertyDetail/ImageGallery";
-import PropertyOverview from "../../../components/PropertyDetail/PropertyOverview";
-import PropertyInfo from "../../../components/PropertyDetail/PropertyInfo";
-import OwnerContact from "../../../components/PropertyDetail/OwnerContact";
-import BookingCard from "../../../components/PropertyDetail/BookingCard";
+import PropertyHeader from "../../../components/domain/property/PropertyHeader";
+import ImageGallery from "../../../components/domain/property/ImageGallery";
+import PropertyOverview from "../../../components/domain/property/PropertyOverview";
+import PropertyDescription from "../../../components/domain/property/PropertyDescription";
+import PropertyAmenities from "../../../components/domain/property/PropertyAmenities";
+import PropertyLocation from "../../../components/domain/property/PropertyLocation";
+import PropertyInfo from "../../../components/domain/property/PropertyInfo";
+import OwnerContact from "../../../components/domain/property/OwnerContact";
+import BookingCard from "../../../components/domain/property/BookingCard";
 import PropertyDetailLoadingSection from "./sections/PropertyDetailLoadingSection";
 import PropertyDetailNotFoundSection from "./sections/PropertyDetailNotFoundSection";
 import PropertyDetailMetaSection from "./sections/PropertyDetailMetaSection";
@@ -63,6 +66,9 @@ const PropertyDetailPage = () => {
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
             <PropertyOverview property={property} />
+            <PropertyDescription description={property.description} />
+            <PropertyAmenities amenities={property.amenities} />
+            <PropertyLocation address={property.address} />
             <PropertyInfo property={property} />
           </div>
 

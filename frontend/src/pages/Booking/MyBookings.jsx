@@ -8,15 +8,17 @@ import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import { useRole } from "../../contexts/RoleContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 // Import custom components
-import BookingFilters from "../../components/Booking/BookingFilters.jsx";
-import BookingsList from "../../components/Booking/BookingsList.jsx";
-import BookingsPagination from "../../components/Booking/BookingsPagination.jsx";
-import BookingDetailModal from "../../components/Booking/BookingDetailModal.jsx";
+import BookingFilters from "../../components/domain/booking/BookingFilters.jsx";
+import BookingsList from "../../components/domain/booking/BookingsList.jsx";
+import BookingsPagination from "../../components/domain/booking/BookingsPagination.jsx";
+import BookingDetailModal from "../../components/domain/booking/BookingDetailModal.jsx";
 
 // Import custom hook
-import { useBookingOperations } from "../../hooks/useBookingOperations.js";
+import { useBookingOperations } from "../../hooks/booking/useBookingOperations.jsx";
 
 const MyBookings = () => {
   // Layout state
@@ -60,7 +62,7 @@ const MyBookings = () => {
   ).length;
 
   return (
-    <div className="flex min-h-screen bg-[#FAFAFA]">
+    <div className="home-v2 home-shell-bg min-h-screen">
       {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
@@ -83,9 +85,9 @@ const MyBookings = () => {
           subtitle={t("booking.myBookingsSubtitle")}
         />
 
-        <main className="p-8 w-full">
-          <div className="bg-white border border-[#EFE6DA] rounded-2xl shadow-sm p-6 mb-6">
-            <div className="mb-6 rounded-2xl border border-[#F0E5D8] bg-gradient-to-r from-[#FFF8EE] to-[#FFFCF8] px-4 py-3 flex flex-wrap items-center gap-3 text-sm">
+        <main className="w-full px-4 pb-8 md:px-8">
+          <div className="apple-glass-panel p-6 mb-6">
+            <div className="mb-6 rounded-2xl border border-[#EBDCC8] bg-gradient-to-r from-[#FFF8EE] to-[#FFFCF8] px-4 py-3 flex flex-wrap items-center gap-3 text-sm">
               <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
                 Tổng booking: {bookings.length}
               </span>
@@ -108,7 +110,7 @@ const MyBookings = () => {
             />
 
             {/* Bookings List */}
-            <div className="bg-white rounded-xl border border-[#EFE6DA] shadow-sm">
+            <div className="apple-glass-panel">
               <BookingsList
                 bookings={transformedBookings}
                 loading={loading}

@@ -6,6 +6,9 @@ import { NotificationProvider } from "../contexts/NotificationContext";
 import { RoleProvider } from "../contexts/RoleContext";
 import { UserProvider } from "../contexts/UserContext";
 import { RefreshProvider } from "../contexts/RefreshContext";
+import { DialogProvider } from "../contexts/DialogContext";
+import ToastContainer from "./common/ToastContainer";
+import ConfirmDialog from "./common/ConfirmDialog";
 
 const AppProviders = ({ children }) => (
   <StyledEngineProvider injectFirst>
@@ -16,7 +19,11 @@ const AppProviders = ({ children }) => (
           <RoleProvider>
             <UserProvider>
               <RefreshProvider>
-                {children}
+                <DialogProvider>
+                  {children}
+                  <ToastContainer />
+                  <ConfirmDialog />
+                </DialogProvider>
               </RefreshProvider>
             </UserProvider>
           </RoleProvider>

@@ -33,7 +33,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Enhanced Billing Service V2
@@ -58,15 +57,6 @@ public class EnhancedBillingService {
     BillCalculationService calculationService;
     KafkaTemplate<String, Object> kafkaTemplate;
 
-    // ==================== CREATE WITH AUTO-LOAD ====================
-
-    /**
-     * Smart Bill Creation:
-     * 1. Check if bill exists for the month
-     * 2. Auto-load utility configuration
-     * 3. Auto-inherit previous meter readings
-     * 4. Guide user on what to input
-     */
     @Transactional
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
     public BillResponse createOrUpdateBill(BillRequest request) {
@@ -94,9 +84,6 @@ public class EnhancedBillingService {
         }
     }
 
-    /**
-     * Create new bill with auto-loaded data
-     */
     private BillResponse createNewBill(
             BillRequest request,
             ContractResponse contract,
@@ -160,9 +147,6 @@ public class EnhancedBillingService {
         return billMapper.toResponse(saved);
     }
 
-    /**
-     * Update existing bill - only allow updating meter readings
-     */
     private BillResponse updateExistingBill(
             Bill existingBill,
             BillRequest request,
@@ -201,11 +185,6 @@ public class EnhancedBillingService {
         return billMapper.toResponse(saved);
     }
 
-    // ==================== METER READING HELPERS ====================
-
-    /**
-     * Get previous meter readings from history
-     */
     private MeterReadings getPreviousReadingsFromHistory(String contractId) {
         Optional<MeterReading> lastReading = meterReadingRepository
                 .findFirstByContractIdOrderByReadingMonthDesc(contractId);
@@ -225,9 +204,6 @@ public class EnhancedBillingService {
         }
     }
 
-    /**
-     * Save meter reading to history
-     */
     private void saveMeterReadingHistory(Bill bill, MeterReadings previousReadings) {
         MeterReading reading = MeterReading.builder()
                 .propertyId(bill.getPropertyId())
@@ -245,9 +221,6 @@ public class EnhancedBillingService {
         log.debug("Meter reading history saved for bill: {}", bill.getId());
     }
 
-    /**
-     * Update meter reading history
-     */
     private void updateMeterReadingHistory(Bill bill, MeterReadings previousReadings) {
         Optional<MeterReading> existing = meterReadingRepository.findByBillId(bill.getId());
 
@@ -261,8 +234,6 @@ public class EnhancedBillingService {
             log.debug("Meter reading history updated for bill: {}", bill.getId());
         }
     }
-
-    // ==================== STATE TRANSITIONS ====================
 
     @Transactional
     @CacheEvict(value = {"bill", "bill_by_contract"}, key = "#billId")
@@ -308,8 +279,6 @@ public class EnhancedBillingService {
         return billMapper.toResponse(saved);
     }
 
-    // ==================== QUERIES ====================
-
     public BillResponse getBill(String id) {
         log.debug("Fetching bill: {}", id);
         return billMapper.toResponse(getBillEntity(id));
@@ -319,15 +288,14 @@ public class EnhancedBillingService {
         log.debug("Fetching all bills");
         return billRepository.findAll().stream()
                 .map(billMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-//    @Cacheable(value = "bill_by_contract", key = "#contractId")
     public List<BillResponse> getByContract(String contractId) {
         log.debug("Fetching bills for contract: {}", contractId);
         return billRepository.findByContractId(contractId).stream()
                 .map(billMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<BillResponse> getMyLandlordBills() {
@@ -336,7 +304,7 @@ public class EnhancedBillingService {
 
         return billRepository.findByLandlordId(userId).stream()
                 .map(billMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<BillResponse> getMyTenantBills() {
@@ -345,10 +313,8 @@ public class EnhancedBillingService {
 
         return billRepository.findByTenantId(userId).stream()
                 .map(billMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
-
-    // ==================== DELETE ====================
 
     @Transactional
     @CacheEvict(value = {"bill", "bill_by_contract"}, allEntries = true)
@@ -370,8 +336,6 @@ public class EnhancedBillingService {
 
         log.info("Bill deleted successfully: {}", id);
     }
-
-    // ==================== SCHEDULED TASKS ====================
 
     @Scheduled(cron = "${billing.overdue-check-cron:0 0 3 * * *}")
     public void markOverdueBills() {
@@ -398,8 +362,6 @@ public class EnhancedBillingService {
 
         log.info("Marked {} bills as OVERDUE", overdueBills.size());
     }
-
-    // ==================== PRIVATE HELPERS ====================
 
     private ContractResponse fetchContractSafely(String contractId) {
         try {

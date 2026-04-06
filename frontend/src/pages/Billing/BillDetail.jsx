@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 /* aria-label */
 import React, { useState } from "react";
 import {
@@ -13,18 +13,20 @@ import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
 import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 // Import components
-import PropertyInfoCard from "../../components/Billing/PropertyInfoCard";
-import BillBreakdown from "../../components/Billing/BillBreakdown";
-import BillDetailInfo from "../../components/Billing/BillDetailInfo";
-// import BillActions from "../../components/Billing/BillActions";
-import PaymentModal from "../../components/Billing/PaymentModal";
-import StatusBanner from "../../components/Billing/StatusBanner";
-import BillActions from "../../components/Billing/BillActionsEnhanced";
+import PropertyInfoCard from "../../components/domain/billing/PropertyInfoCard";
+import BillBreakdown from "../../components/domain/billing/BillBreakdown";
+import BillDetailInfo from "../../components/domain/billing/BillDetailInfo";
+// import BillActions from "../../components/domain/billing/BillActions";
+import PaymentModal from "../../components/domain/billing/PaymentModal";
+import StatusBanner from "../../components/domain/billing/StatusBanner";
+import BillActions from "../../components/domain/billing/BillActionsEnhanced";
 
 // Import hook
-import { useBillDetail } from "../../hooks/useBillDetail";
+import { useBillDetail } from "../../hooks/billing/useBillDetail";
 
 // Import helpers
 import { getStatusConfig } from "../../utils/billDetailHelpers";
@@ -60,7 +62,7 @@ const BillDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="home-v2 home-shell-bg min-h-screen">
         <Sidebar
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
@@ -74,7 +76,7 @@ const BillDetail = () => {
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
-              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="w-16 h-16 border-4 border-[#CC6F4A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600">{t("bill.loadingBill")}</p>
             </div>
           </div>
@@ -86,7 +88,7 @@ const BillDetail = () => {
   // Not found state
   if (!bill) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="home-v2 home-shell-bg min-h-screen">
         <Sidebar
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
@@ -105,7 +107,7 @@ const BillDetail = () => {
               </h2>
               <button
                 onClick={goBack}
-                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="mt-4 px-6 py-2 bg-[#CC6F4A] text-white rounded-lg hover:bg-[#B5604B]"
               >
                 {t("bill.backToList")}
               </button>
@@ -124,7 +126,7 @@ const BillDetail = () => {
   const canPay = bill.status === "PENDING" || bill.status === "OVERDUE";
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="home-v2 home-shell-bg min-h-screen">
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -142,7 +144,7 @@ const BillDetail = () => {
           subtitle={t("bill.billSubtitle")}
         />
 
-        <main className="p-6">
+        <main className="w-full px-4 pb-8 md:px-8">
           {/* Status Banner */}
           <StatusBanner bill={bill} isOverdue={isOverdue} isPaid={isPaid} />
 
@@ -156,7 +158,7 @@ const BillDetail = () => {
 
             {/* Right Column */}
             <div className="space-y-6">
-              <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+              <div className="apple-glass-panel p-4">
                 <div
                   className={`${statusConfig.bg} ${statusConfig.text}
                   w-full px-4 py-3 rounded-lg

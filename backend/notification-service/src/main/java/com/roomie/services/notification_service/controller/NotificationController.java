@@ -19,128 +19,74 @@ import java.util.List;
 @RestController
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationController {
-
     NotificationService notificationService;
 
-    /**
-     * Lấy danh sách thông báo của user
-     */
     @GetMapping
     public ApiResponse<Page<NotificationResponse>> getNotifications(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Boolean unreadOnly,
-            @ModelAttribute NotificationFilterRequest filter
-    ) {
+            @ModelAttribute NotificationFilterRequest filter) {
         String userId = getCurrentUserId();
-
         if (filter == null) {
             filter = new NotificationFilterRequest();
         }
         filter.setUnreadOnly(unreadOnly);
-
-        Page<NotificationResponse> notifications =
-                notificationService.getUserNotifications(userId, page, size, filter);
-
-        return ApiResponse.success(notifications, "Notifications retrieved successfully");
+        return ApiResponse.success(notificationService.getUserNotifications(userId, page, size, filter), "Notifications retrieved successfully");
     }
 
-    /**
-     * Lấy chi tiết một notification
-     */
     @GetMapping("/{id}")
     public ApiResponse<NotificationResponse> getNotification(@PathVariable String id) {
-        String userId = getCurrentUserId();
-        NotificationResponse notification = notificationService.getById(id, userId);
-        return ApiResponse.success(notification, "Notification retrieved successfully");
+        return ApiResponse.success(notificationService.getById(id, getCurrentUserId()), "Notification retrieved successfully");
     }
 
-    /**
-     * Đếm số thông báo chưa đọc
-     */
     @GetMapping("/unread-count")
     public ApiResponse<Long> getUnreadCount() {
-        String userId = getCurrentUserId();
-        long count = notificationService.countUnread(userId);
-        return ApiResponse.success(count, "Unread count retrieved successfully");
+        return ApiResponse.success(notificationService.countUnread(getCurrentUserId()), "Unread count retrieved successfully");
     }
 
-    /**
-     * Lấy thống kê notifications
-     */
     @GetMapping("/stats")
     public ApiResponse<NotificationStatsResponse> getStats() {
-        String userId = getCurrentUserId();
-        NotificationStatsResponse stats = notificationService.getStats(userId);
-        return ApiResponse.success(stats, "Statistics retrieved successfully");
+        return ApiResponse.success(notificationService.getStats(getCurrentUserId()), "Statistics retrieved successfully");
     }
 
-    /**
-     * Đánh dấu một notification đã đọc
-     */
     @PutMapping("/{id}/read")
     public ApiResponse<NotificationResponse> markAsRead(@PathVariable String id) {
-        String userId = getCurrentUserId();
-        NotificationResponse notification = notificationService.markAsRead(id, userId);
-        return ApiResponse.success(notification, "Notification marked as read");
+        return ApiResponse.success(notificationService.markAsRead(id, getCurrentUserId()), "Notification marked as read");
     }
 
-    /**
-     * Đánh dấu nhiều notifications đã đọc
-     */
     @PutMapping("/read-multiple")
     public ApiResponse<Void> markMultipleAsRead(@RequestBody List<String> ids) {
-        String userId = getCurrentUserId();
-        notificationService.markMultipleAsRead(ids, userId);
+        notificationService.markMultipleAsRead(ids, getCurrentUserId());
         return ApiResponse.success(null, "Notifications marked as read");
     }
 
-    /**
-     * Đánh dấu tất cả đã đọc
-     */
     @PutMapping("/read-all")
     public ApiResponse<Void> markAllAsRead() {
-        String userId = getCurrentUserId();
-        notificationService.markAllAsRead(userId);
+        notificationService.markAllAsRead(getCurrentUserId());
         return ApiResponse.success(null, "All notifications marked as read");
     }
 
-    /**
-     * Xóa một notification
-     */
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteNotification(@PathVariable String id) {
-        String userId = getCurrentUserId();
-        notificationService.deleteNotification(id, userId);
+        notificationService.deleteNotification(id, getCurrentUserId());
         return ApiResponse.success(null, "Notification deleted successfully");
     }
 
-    /**
-     * Xóa tất cả notifications đã đọc
-     */
     @DeleteMapping("/read")
     public ApiResponse<Void> deleteAllRead() {
-        String userId = getCurrentUserId();
-        notificationService.deleteAllRead(userId);
+        notificationService.deleteAllRead(getCurrentUserId());
         return ApiResponse.success(null, "All read notifications deleted");
     }
 
-    /**
-     * [INTERNAL] Tạo notification mới
-     * API này chỉ dành cho internal services
-     */
     @PostMapping("/internal/create")
-    public ApiResponse<NotificationResponse> createNotification(
-            @RequestBody CreateNotificationRequest request
-    ) {
-        NotificationResponse notification = notificationService.createNotification(request);
-        return ApiResponse.success(notification, "Notification created successfully");
+    public ApiResponse<NotificationResponse> createNotification(@RequestBody CreateNotificationRequest request) {
+        return ApiResponse.success(notificationService.createNotification(request), "Notification created successfully");
     }
 
-    // Helper method
     private String getCurrentUserId() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }

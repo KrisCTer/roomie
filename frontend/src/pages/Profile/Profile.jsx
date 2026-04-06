@@ -9,6 +9,8 @@ import PageTitle from "../../components/common/PageTitle.jsx";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import { useTranslation } from "react-i18next";
 import { useRefresh } from "../../contexts/RefreshContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 import {
   User,
   Settings,
@@ -17,16 +19,18 @@ import {
   CheckCircle,
   Mail,
   Eye,
+  AlertCircle,
+  X,
 } from "lucide-react";
 
 // Import custom components
-import ProfileOverview from "../../components/Profile/ProfileOverview.jsx";
-import EditProfileForm from "../../components/Profile/EditProfileForm.jsx";
-import AccountSettings from "../../components/Profile/AccountSettings.jsx";
-import ProfileSkeleton from "../../components/Profile/ProfileSkeleton.jsx";
+import ProfileOverview from "../../components/domain/profile/ProfileOverview.jsx";
+import EditProfileForm from "../../components/domain/profile/EditProfileForm.jsx";
+import AccountSettings from "../../components/domain/profile/AccountSettings.jsx";
+import ProfileSkeleton from "../../components/domain/profile/ProfileSkeleton.jsx";
 
 // Import custom hook
-import { useProfileOperations } from "../../hooks/useProfileOperations.js";
+import { useProfileOperations } from "../../hooks/profile/useProfileOperations.js";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -46,6 +50,13 @@ const Profile = () => {
     handleSubmitProfile,
     handleAvatarUpload,
     handlePasswordUpdate,
+    handleDeleteAccount,
+    updatingPassword,
+    deletingAccount,
+    error,
+    success,
+    setError,
+    setSuccess,
     refetchProfile,
   } = useProfileOperations();
 
@@ -65,6 +76,24 @@ const Profile = () => {
       }
     }
   }, [loading, formData, navigate]);
+
+  useEffect(() => {
+    if (!error && !success) return;
+
+    const timer = setTimeout(() => {
+      setError(null);
+      setSuccess(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [error, success, setError, setSuccess]);
+
+  const onDeleteAccount = async () => {
+    const deleted = await handleDeleteAccount();
+    if (deleted) {
+      navigate("/login", { replace: true });
+    }
+  };
 
   const isAdmin = useMemo(() => {
     const lsUsername = (localStorage.getItem("username") || "").toLowerCase();
@@ -91,7 +120,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#FAFAFA]">
+    <div className="home-v2 home-shell-bg min-h-screen">
       {isAdmin ? (
         <AdminSidebar
           activeMenu={activeMenu}
@@ -117,13 +146,51 @@ const Profile = () => {
           subtitle={t("profile.subtitle")}
         />
 
-        <div className="px-10 py-8 w-full max-w-7xl mx-auto">
+        <div className="w-full px-4 pb-8 md:px-8 max-w-7xl mx-auto">
+          {(error || success) && (
+            <div className="mb-6 space-y-3">
+              {error && (
+                <div className="flex items-start justify-between gap-3 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-900">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                    <p className="text-sm font-medium">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setError(null)}
+                    className="text-red-700 hover:text-red-900"
+                    aria-label="Dismiss error"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {success && (
+                <div className="flex items-start justify-between gap-3 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-900">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                    <p className="text-sm font-medium">{success}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSuccess(null)}
+                    className="text-green-700 hover:text-green-900"
+                    aria-label="Dismiss success"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {loading ? (
             <ProfileSkeleton />
           ) : (
             <>
               {/* Profile Header Card */}
-              <div className="bg-white rounded-3xl border border-[#EFE6DA] shadow-[0_16px_40px_rgba(17,24,39,0.06)] p-8 mb-6">
+              <div className="apple-glass-panel p-8 mb-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                   {/* Avatar Section */}
                   <div className="relative group">
@@ -210,8 +277,8 @@ const Profile = () => {
               </div>
 
               {/* Tabs Navigation */}
-              <div className="bg-white rounded-2xl border border-[#EFE6DA] shadow-sm mb-6 overflow-hidden">
-                <div className="flex border-b border-[#EFE6DA]">
+              <div className="apple-glass-panel mb-6 overflow-hidden">
+                <div className="flex border-b border-[#EBDCC8]">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
@@ -230,7 +297,7 @@ const Profile = () => {
               </div>
 
               {/* Tab Content */}
-              <div className="bg-white rounded-2xl border border-[#EFE6DA] shadow-sm p-8">
+              <div className="apple-glass-panel p-8">
                 {activeTab === "overview" && (
                   <ProfileOverview
                     formData={formData}
@@ -253,6 +320,9 @@ const Profile = () => {
                     onChange={handlePasswordChange}
                     onSubmit={handlePasswordUpdate}
                     formData={formData}
+                    onDeleteAccount={onDeleteAccount}
+                    updatingPassword={updatingPassword}
+                    deletingAccount={deletingAccount}
                   />
                 )}
               </div>

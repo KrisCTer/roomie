@@ -11,6 +11,13 @@ const AlertMessage = ({ type = "error", message, onClose }) => {
       icon: "✔",
       title: "Success",
     },
+    warning: {
+      bg: "bg-amber-50",
+      border: "border-amber-400",
+      text: "text-amber-700",
+      icon: "⚠",
+      title: "Warning",
+    },
     error: {
       bg: "bg-red-50",
       border: "border-red-400",
@@ -20,7 +27,7 @@ const AlertMessage = ({ type = "error", message, onClose }) => {
     },
   };
 
-  const c = config[type];
+  const c = config[type] || config.error;
 
   return (
     <div

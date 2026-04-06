@@ -43,10 +43,27 @@ export const getCompleteUserInfo = () => {
   if (!jwt) return null;
 
   const profile = getUserProfile() || {};
+  const storedUsername = localStorage.getItem("username") || "";
+
+  // Extract role from JWT scope (Spring Security: "ROLE_ADMIN ROLE_USER")
+  const scope = jwt.scope || jwt.authorities || "";
+  let jwtRole = "";
+  if (typeof scope === "string") {
+    const match = scope.match(/ROLE_(\w+)/);
+    if (match) jwtRole = match[1].toLowerCase();
+  } else if (Array.isArray(scope)) {
+    const roleEntry = scope.find((s) => s.startsWith("ROLE_"));
+    if (roleEntry) jwtRole = roleEntry.replace("ROLE_", "").toLowerCase();
+  }
+
+  const role =
+    profile.role ?? profile.roles?.[0] ?? profile.userRole ?? jwtRole ?? "";
 
   return {
     userId: jwt.sub,
-    username: profile.username ?? `user_${jwt.sub.substring(0, 8)}`,
+    username:
+      profile.username || storedUsername || `user_${jwt.sub.substring(0, 8)}`,
+    role,
     firstName: profile.firstName ?? "",
     lastName: profile.lastName ?? "",
     avatar: profile.avatar ?? "",

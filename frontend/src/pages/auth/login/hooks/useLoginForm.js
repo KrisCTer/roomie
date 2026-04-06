@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { login as loginApi } from "../../../../services/authService";
+import { useDialog } from "../../../../contexts/DialogContext";
 
 const useLoginForm = ({ navigate, t }) => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { showToast } = useDialog();
 
   const handleChange = (event) => {
     setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }));
@@ -17,9 +19,14 @@ const useLoginForm = ({ navigate, t }) => {
       const res = await loginApi(form.username, form.password);
       localStorage.setItem("access_token", res.result.token);
       localStorage.setItem("username", form.username);
+      const user = res?.result?.user ?? res?.user;
+      const role = (user?.role || "").toLowerCase();
+      const isAdmin =
+        role === "admin" || form.username.toLowerCase() === "admin";
+
       navigate("/home");
     } catch (error) {
-      window.alert(t("auth.loginError"));
+      showToast(t("auth.loginError"), "error");
     } finally {
       setLoading(false);
     }

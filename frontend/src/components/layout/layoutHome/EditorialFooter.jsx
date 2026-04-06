@@ -1,10 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { getCompleteUserInfo } from "../../../services/localStorageService";
 
 const EditorialFooter = ({
   description = "Roomie search & discovery experience with section-based IA, interactive cards, and mobile-first browsing.",
 }) => {
   const navigate = useNavigate();
+  const user = getCompleteUserInfo();
+  const isAdmin =
+    user?.role?.toLowerCase() === "admin" ||
+    user?.username?.toLowerCase() === "admin";
+  const dashboardPath = isAdmin ? "/admin/dashboard" : "/dashboard";
 
   return (
     <footer className="border-t border-[var(--home-border)] bg-[var(--home-charcoal)] py-10 text-[var(--home-surface)]">
@@ -33,7 +39,7 @@ const EditorialFooter = ({
             </button>
             <button
               type="button"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate(dashboardPath)}
               className="home-footer-link"
             >
               Dashboard

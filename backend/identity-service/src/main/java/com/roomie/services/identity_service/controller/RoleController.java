@@ -1,6 +1,6 @@
 package com.roomie.services.identity_service.controller;
 
-import com.roomie.services.identity_service.dto.request.ApiResponse;
+import com.roomie.services.identity_service.dto.response.ApiResponse;
 import com.roomie.services.identity_service.dto.request.RoleRequest;
 import com.roomie.services.identity_service.dto.response.RoleResponse;
 import com.roomie.services.identity_service.service.RoleService;
@@ -15,28 +15,24 @@ import java.util.List;
 @RestController
 @RequestMapping("/roles")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleController {
     RoleService roleService;
 
     @PostMapping
-    ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
-        return ApiResponse.<RoleResponse>builder()
-                .result(roleService.create(request))
-                .build();
+    public ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
+        return ApiResponse.success(roleService.create(request), "Role created successfully");
     }
 
     @GetMapping
-    ApiResponse<List<RoleResponse>> getAll() {
-        return ApiResponse.<List<RoleResponse>>builder()
-                .result(roleService.getAll())
-                .build();
+    public ApiResponse<List<RoleResponse>> getAll() {
+        return ApiResponse.success(roleService.getAll(), "Fetched all roles");
     }
 
     @DeleteMapping("/{role}")
-    ApiResponse<Void> delete(@PathVariable String role) {
+    public ApiResponse<Void> delete(@PathVariable String role) {
         roleService.delete(role);
-        return ApiResponse.<Void>builder().build();
+        return ApiResponse.success(null, "Role deleted successfully");
     }
 }

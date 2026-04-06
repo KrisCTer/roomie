@@ -1,4 +1,4 @@
-﻿/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
+/* SEO_META: title="Roomie"; name="description"; property="og:title"; property="og:description"; property="og:type" */
 // web-app/src/pages/Message/Message.jsx
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
@@ -7,14 +7,17 @@ import CallModal from "../../components/layout/layoutUser/CallModal.jsx";
 import { useCall } from "../../contexts/CallContext.jsx";
 import { useTranslation } from "react-i18next";
 import { useRefresh } from "../../contexts/RefreshContext";
+import { useDialog } from "../../contexts/DialogContext";
+import "../../styles/apple-glass-dashboard.css";
+import "../../styles/home-redesign.css";
 
 // Import custom components
-import ConversationList from "../../components/Message/ConversationList.jsx";
-import ChatArea from "../../components/Message/ChatArea.jsx";
-import SearchModal from "../../components/Message/SearchModal.jsx";
+import ConversationList from "../../components/domain/chat/ConversationList.jsx";
+import ChatArea from "../../components/domain/chat/ChatArea.jsx";
+import SearchModal from "../../components/domain/chat/SearchModal.jsx";
 
 // Import custom hook
-import { useChatOperations } from "../../hooks/useChatOperations.js";
+import { useChatOperations } from "../../hooks/chat/useChatOperations.js";
 
 // Import utilities
 import { formatTime, formatMessageTime } from "../../utils/chatHelpers.js";
@@ -25,6 +28,7 @@ const Message = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Message");
   const { t } = useTranslation();
+  const { showToast } = useDialog();
 
   // Call context
   const { startCall, callState } = useCall();
@@ -75,12 +79,12 @@ const Message = () => {
   // Handle voice call
   const handleVoiceCall = () => {
     if (!selectedConversation) {
-      alert(t("message.selectConversation"));
+      showToast(t("message.selectConversation"), "warning");
       return;
     }
 
     if (!currentUser) {
-      alert(t("message.userNotLoaded"));
+      showToast(t("message.userNotLoaded"), "warning");
       return;
     }
 
@@ -90,7 +94,7 @@ const Message = () => {
     );
 
     if (!remotePeer) {
-      alert(t("message.recipientNotFound"));
+      showToast(t("message.recipientNotFound"), "warning");
       return;
     }
 
@@ -104,12 +108,12 @@ const Message = () => {
   // Handle video call
   const handleVideoCall = () => {
     if (!selectedConversation) {
-      alert(t("message.selectConversation"));
+      showToast(t("message.selectConversation"), "warning");
       return;
     }
 
     if (!currentUser) {
-      alert(t("message.userNotLoaded"));
+      showToast(t("message.userNotLoaded"), "warning");
       return;
     }
 
@@ -119,7 +123,7 @@ const Message = () => {
     );
 
     if (!remotePeer) {
-      alert(t("message.recipientNotFound"));
+      showToast(t("message.recipientNotFound"), "warning");
       return;
     }
 
@@ -131,7 +135,7 @@ const Message = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="home-v2 home-shell-bg min-h-screen">
       <Sidebar
         activeMenu={activeMenu}
         setActiveMenu={setActiveMenu}
@@ -145,8 +149,8 @@ const Message = () => {
       >
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <main className="flex-1">
-          <div className="h-[calc(100vh-73px)] flex">
+        <main className="flex-1 px-4 pb-4 md:px-8">
+          <div className="apple-glass-panel overflow-hidden h-[calc(100vh-73px)] flex">
             <ConversationList
               conversations={conversations}
               selectedConversation={selectedConversation}
@@ -160,7 +164,7 @@ const Message = () => {
               formatTime={formatTime}
             />
 
-            <div className="flex-1 flex flex-col bg-white">
+            <div className="flex-1 flex flex-col">
               <ChatArea
                 selectedConversation={selectedConversation}
                 messages={messages}

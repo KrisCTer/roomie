@@ -2,32 +2,47 @@
 import { Navigate } from "react-router-dom";
 import { useRole } from "../../contexts/RoleContext";
 import { useUser } from "../../contexts/UserContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const RoleProtectedRoute = ({ children, allowedRoles }) => {
-  // const { activeRole } = useRole();
-
-  // if (!allowedRoles.includes(activeRole)) {
-  //   return <Navigate to="/dashboard" replace />;
-  // }
-
-  // return children;
   const { activeRole } = useRole();
-  const { user } = useUser();
+  const { user, loading } = useUser();
 
+  // Only block while loading if user state is still unknown.
+  if (loading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner message="Đang xác thực..." />
+      </div>
+    );
+  }
+
+  // Protected routes always require login.
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const currentRole = (user?.role || "").toLowerCase();
+  const viewRole = (activeRole || "").toLowerCase();
+  const storedUsername = (localStorage.getItem("username") || "").toLowerCase();
   const isAdmin =
-    user?.role === "admin" || user?.username?.toLowerCase() === "admin";
+    currentRole === "admin" ||
+    user?.username?.toLowerCase() === "admin" ||
+    storedUsername === "admin";
 
-  // ✅ Admin luôn được phép vào route admin
-  if (isAdmin && allowedRoles.includes("admin")) {
+  // Admin can access everything
+  if (isAdmin) {
     return children;
   }
 
-  // ✅ User thường
-  if (allowedRoles.includes(activeRole)) {
+  // Map frontend view roles (tenant/landlord) to system role (user)
+  const effectiveRole = currentRole || (["tenant", "landlord"].includes(viewRole) ? "user" : viewRole);
+
+  if (allowedRoles.includes(effectiveRole)) {
     return children;
   }
 
-  return <Navigate to="/dashboard" replace />;
+  return <Navigate to="/" replace />;
 };
 
 export default RoleProtectedRoute;

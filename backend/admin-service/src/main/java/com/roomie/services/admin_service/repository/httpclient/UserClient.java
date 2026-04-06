@@ -1,8 +1,8 @@
 package com.roomie.services.admin_service.repository.httpclient;
 
-import com.roomie.services.admin_service.configuration.AuthenticationRequestInterceptor;
 import com.roomie.services.admin_service.dto.response.ApiResponse;
 import com.roomie.services.admin_service.dto.response.users.UserResponse;
+import com.roomie.services.admin_service.configuration.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(name = "identity-service",
-        configuration = { AuthenticationRequestInterceptor.class })
+        configuration = { FeignConfiguration.class })
 public interface UserClient {
     @GetMapping(value = "/internal/users", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<List<UserResponse>> getAllUsers();
@@ -30,3 +30,4 @@ public interface UserClient {
     @DeleteMapping(value ="/internal/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<String> deleteUser(@PathVariable("id") String id);
 }
+

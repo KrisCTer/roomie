@@ -1,8 +1,8 @@
 package com.roomie.services.admin_service.repository.httpclient;
 
-import com.roomie.services.admin_service.configuration.AuthenticationRequestInterceptor;
 import com.roomie.services.admin_service.dto.response.ApiResponse;
 import com.roomie.services.admin_service.dto.response.property.PropertyResponse;
+import com.roomie.services.admin_service.configuration.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 @FeignClient(name = "property-service",
-        configuration = { AuthenticationRequestInterceptor.class })
+        configuration = { FeignConfiguration.class })
 public interface PropertyClient {
     @GetMapping("internal/pending")
     ApiResponse<List<PropertyResponse>> getPendingProperties();
@@ -29,3 +29,4 @@ public interface PropertyClient {
     @PutMapping("/internal/{id}")
     ApiResponse<Void> updateProperty(@PathVariable("id") String id, @RequestBody PropertyResponse dto);
 }
+

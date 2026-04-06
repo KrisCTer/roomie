@@ -8,6 +8,7 @@ import useAddPropertyFormState from "./hooks/useAddPropertyFormState";
 import AddPropertyLoadingSkeleton from "./sections/AddPropertyLoadingSkeleton";
 import AddPropertyProgressSection from "./sections/AddPropertyProgressSection";
 import AddPropertyFormSection from "./sections/AddPropertyFormSection";
+import "../../../styles/apple-glass-dashboard.css";
 import "../../../styles/home-redesign.css";
 
 const AddPropertyPage = () => {
