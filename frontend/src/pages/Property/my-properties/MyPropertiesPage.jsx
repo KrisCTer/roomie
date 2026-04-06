@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import Sidebar from "../../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../../components/common/PageTitle.jsx";
 import AlertMessage from "../../../components/common/AlertMessage";
 import BookingsModal from "../../../components/domain/property/BookingsModal";
 import PublishPropertyModal from "../../../components/domain/property/PublishPropertyModal";
@@ -51,6 +50,7 @@ const MyPropertiesPage = () => {
     handleCreateContract,
     handleCloseModal,
     setAlert,
+    refetch,
   } = useMyPropertiesPageState();
 
   return (
@@ -64,11 +64,11 @@ const MyPropertiesPage = () => {
       <div
         className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-        <PageTitle
-          title={t("property.myProperties")}
-          subtitle={t("property.myProperties")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("property.myProperties")}
+          pageSubtitle="Quản lý danh sách phòng, trạng thái đăng và lượt đặt chỗ"
         />
 
         <main className="w-full px-4 pb-8 pt-6 md:px-8">
@@ -100,6 +100,7 @@ const MyPropertiesPage = () => {
             emptyDescription={t("property.noPropertiesDesc")}
             clearFiltersLabel={t("common.clearFilters")}
             quickStats={quickStats}
+            onRefresh={refetch}
           />
         </main>
 
