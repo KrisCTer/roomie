@@ -3,6 +3,8 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 import { formatDate, formatDateTime } from "../../../utils/billDetailHelpers";
 
 const StatusBanner = ({ bill, isOverdue, isPaid }) => {
+  const paidTime = bill?.paidAt || bill?.updatedAt || bill?.lastModifiedAt;
+
   if (isOverdue) {
     return (
       <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-6">
@@ -31,9 +33,15 @@ const StatusBanner = ({ bill, isOverdue, isPaid }) => {
             <h3 className="font-semibold text-green-800 mb-1">
               ĐÃ THANH TOÁN THÀNH CÔNG
             </h3>
-            <p className="text-sm text-green-700">
-              Hóa đơn đã được thanh toán vào lúc {formatDateTime(bill.paidAt)}
-            </p>
+            {paidTime ? (
+              <p className="text-sm text-green-700">
+                Hóa đơn đã được thanh toán vào lúc {formatDateTime(paidTime)}
+              </p>
+            ) : (
+              <p className="text-sm text-green-700">
+                Hóa đơn đã được thanh toán thành công.
+              </p>
+            )}
           </div>
         </div>
       </div>

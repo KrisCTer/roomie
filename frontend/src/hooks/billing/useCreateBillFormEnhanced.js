@@ -29,10 +29,18 @@ const getNextMonth = (dateString) => {
  * - Auto-increments billing month from previous bill
  * - Smart form initialization
  */
-export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess) => {
+export const useCreateBillFormEnhanced = (
+  bill,
+  properties,
+  contracts,
+  onSuccess,
+  initialPropertyId = ""
+) => {
   const [loading, setLoading] = useState(false);
   const { showToast } = useDialog();
-  const [selectedProperty, setSelectedProperty] = useState(bill?.contractId ? "" : "");
+  const [selectedProperty, setSelectedProperty] = useState(
+    bill?.contractId ? "" : initialPropertyId
+  );
   const [selectedContract, setSelectedContract] = useState(bill?.contractId || "");
   const [previousBill, setPreviousBill] = useState(null);
   const [utilityConfig, setUtilityConfig] = useState(null);
@@ -113,6 +121,22 @@ export const useCreateBillFormEnhanced = (bill, properties, contracts, onSuccess
       });
     }
   }, [bill, contracts]);
+
+  // Initialize with preselected property in create mode
+  useEffect(() => {
+    if (!bill && initialPropertyId) {
+      setSelectedProperty(initialPropertyId);
+
+      const property = properties.find((p) => p.propertyId === initialPropertyId);
+      if (property) {
+        setFormData((prev) => ({
+          ...prev,
+          monthlyRent: property.monthlyRent || 0,
+          rentalDeposit: property.rentalDeposit || 0,
+        }));
+      }
+    }
+  }, [bill, initialPropertyId, properties]);
 
   // Load utility config and previous bill when contract changes
   useEffect(() => {
