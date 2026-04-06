@@ -7,6 +7,7 @@ import {
 import { uploadFile } from "../../../../services/fileService.js";
 import { loadGoogleMaps } from "../../../../utils/googleMapsLoader.js";
 import { useRefresh } from "../../../../contexts/RefreshContext";
+import { toggle3dVisibility } from "../../../../services/propertyService.js";
 
 const REVIEW_IMAGES_PER_PAGE = 8;
 
@@ -57,6 +58,7 @@ const useAddPropertyFormState = () => {
   const [propertyData, setPropertyData] = useState(getInitialPropertyData);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [coverImage, setCoverImage] = useState(null);
   const [reviewImagePage, setReviewImagePage] = useState(1);
 
   const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
@@ -166,7 +168,16 @@ const useAddPropertyFormState = () => {
         bedroom: property.amenities?.bedroom || [],
         kitchen: property.amenities?.kitchen || [],
         others: property.amenities?.others || [],
+        model3dStatus: property.model3dStatus || null,
+        model3dVisible: property.model3dVisible ?? true,
       });
+
+      // Set cover image
+      if (property.coverImageUrl) {
+        setCoverImage({ url: property.coverImageUrl, type: "IMAGE", category: "COVER" });
+      } else {
+        setCoverImage(null);
+      }
 
       if (property.mediaList && property.mediaList.length > 0) {
         setUploadedImages(
@@ -238,6 +249,73 @@ const useAddPropertyFormState = () => {
       location: locationStr,
     }));
   };
+
+  const handleAddressResolved = useCallback(
+    (resolved) => {
+      setPropertyData((prev) => {
+        const updates = { ...prev };
+
+        // Match province from provinces list
+        if (resolved.province) {
+          const matchedProvince = provinces.find(
+            (p) =>
+              p.name === resolved.province ||
+              p.name.includes(resolved.province) ||
+              resolved.province.includes(p.name),
+          );
+          if (matchedProvince) {
+            updates.province = matchedProvince.name;
+          }
+        }
+
+        // Match district from current province districts
+        if (resolved.district && updates.province) {
+          const selectedProvince = provinces.find(
+            (p) => p.name === updates.province,
+          );
+          if (selectedProvince?.districts) {
+            const matchedDistrict = selectedProvince.districts.find(
+              (d) =>
+                d.name === resolved.district ||
+                d.name.includes(resolved.district) ||
+                resolved.district.includes(d.name),
+            );
+            if (matchedDistrict) {
+              updates.district = matchedDistrict.name;
+            }
+          }
+        }
+
+        // Match ward
+        if (resolved.ward && updates.district) {
+          const selectedProvince = provinces.find(
+            (p) => p.name === updates.province,
+          );
+          const selectedDistrict = selectedProvince?.districts?.find(
+            (d) => d.name === updates.district,
+          );
+          if (selectedDistrict?.wards) {
+            const matchedWard = selectedDistrict.wards.find(
+              (w) =>
+                w.name === resolved.ward ||
+                w.name.includes(resolved.ward) ||
+                resolved.ward.includes(w.name),
+            );
+            if (matchedWard) {
+              updates.ward = matchedWard.name;
+            }
+          }
+        }
+
+        if (resolved.street) updates.street = resolved.street;
+        if (resolved.houseNumber) updates.houseNumber = resolved.houseNumber;
+        if (resolved.fullAddress) updates.fullAddress = resolved.fullAddress;
+
+        return updates;
+      });
+    },
+    [provinces],
+  );
 
   const handleAmenityToggle = (category, value) => {
     setPropertyData((prev) => ({
@@ -389,9 +467,11 @@ const useAddPropertyFormState = () => {
           kitchen: propertyData.kitchen,
           others: propertyData.others,
         },
+        coverImageUrl: coverImage?.url || null,
         mediaList: uploadedImages.map((img) => ({
           url: img.url,
           type: img.type,
+          category: img.category || "ROOM",
         })),
       };
 
@@ -419,13 +499,43 @@ const useAddPropertyFormState = () => {
     }
   };
 
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const response = await uploadFile(file);
+      const fileData = response?.result || response?.data || response;
+      setCoverImage({
+        url: fileData?.publicUrl || fileData?.url || URL.createObjectURL(file),
+        type: "IMAGE",
+        category: "COVER",
+      });
+    } catch (err) {
+      console.error("Failed to upload cover image:", err);
+      setError("Failed to upload cover image.");
+    }
+  };
+
+  const removeCoverImage = () => setCoverImage(null);
+
+  const handleToggle3dVisibility = async () => {
+    if (!propertyId) return;
+    try {
+      const newVisible = !propertyData.model3dVisible;
+      await toggle3dVisibility(propertyId, newVisible);
+      setPropertyData((prev) => ({ ...prev, model3dVisible: newVisible }));
+    } catch (err) {
+      console.error("Failed to toggle 3D visibility:", err);
+    }
+  };
+
   const handleNext = () => {
     setError(null);
 
     if (currentStep === 1 && !validateStep1()) return;
     if (currentStep === 2 && !validateStep2()) return;
 
-    setCurrentStep((prev) => Math.min(4, prev + 1));
+    setCurrentStep((prev) => Math.min(5, prev + 1));
   };
 
   const handlePrevious = () => {
@@ -463,6 +573,7 @@ const useAddPropertyFormState = () => {
     setError,
     success,
     isEditMode,
+    propertyId,
     propertyData,
     provinces,
     districts,
@@ -470,19 +581,25 @@ const useAddPropertyFormState = () => {
     mapsLoaded,
     uploadedImages,
     uploadingImages,
+    coverImage,
     currentReviewImages,
     reviewImagePage,
     totalReviewImagePages,
     handleInputChange,
     handleLocationChange,
+    handleAddressResolved,
     handleAmenityToggle,
     handleImageUpload,
     removeImage,
+    handleCoverUpload,
+    removeCoverImage,
+    handleToggle3dVisibility,
     handleNext,
     handlePrevious,
     handleSubmit,
     goToNextReviewImagePage,
     goToPreviousReviewImagePage,
+    refetch,
   };
 };
 

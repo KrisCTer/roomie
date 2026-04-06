@@ -28,14 +28,15 @@ const MyPropertiesMainSection = ({
   emptyDescription,
   clearFiltersLabel,
   quickStats,
+  onRefresh,
 }) => {
   const hasFilters = Boolean(postStatus || propertyStatus || searchTerm);
 
   return (
-    <section className="home-glass-card rounded-2xl p-6">
+    <section className="space-y-5">
       <MyPropertiesQuickStatsSection quickStats={quickStats} />
 
-      <div className="home-glass-soft sticky top-24 z-20 mb-5 rounded-2xl p-4">
+      <div className="home-glass-soft sticky top-24 z-20 rounded-2xl p-4">
         <PropertyFilters
           postStatus={postStatus}
           setPostStatus={setPostStatus}
@@ -66,6 +67,7 @@ const MyPropertiesMainSection = ({
             onViewBookings={handleViewBookings}
             onDelete={handleDelete}
             onPublish={requestPublishProperty}
+            onRefresh={onRefresh}
           />
 
           <Pagination

@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Sidebar from "../../../components/layout/layoutUser/Sidebar";
 import Header from "../../../components/layout/layoutUser/Header";
 import Footer from "../../../components/layout/layoutUser/Footer";
-import PageTitle from "../../../components/common/PageTitle.jsx";
 import QuickActions from "../../../components/domain/dashboard/QuickActions";
 import RecentActivity from "../../../components/domain/dashboard/RecentActivity";
 import LandlordStats from "../../../components/domain/dashboard/LandlordStats";
@@ -21,6 +21,7 @@ import "../../../styles/home-redesign.css";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { activeRole } = useRole();
   const { registerRefreshCallback, unregisterRefreshCallback } = useRefresh();
   const { loading, data, stats, refetch } = useDashboardData(activeRole);
@@ -74,13 +75,18 @@ const DashboardPage = () => {
       <div
         className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title="Bảng điều khiển"
-          subtitle="Quản lý vận hành tenant/landlord theo thời gian thực."
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("sidebar." + activeRole + ".dashboard")}
+          pageSubtitle={
+            activeRole === "landlord"
+              ? "Theo dõi doanh thu, trạng thái tài sản và hoạt động mới nhất"
+              : "Theo dõi đặt chỗ, hóa đơn và hoạt động gần đây"
+          }
         />
 
-        <main className="w-full px-4 pb-8 md:px-8">
+        <main className="w-full px-4 pb-8 pt-4 md:px-8 md:pt-6">
           {loading ? (
             <DashboardLoadingSkeleton />
           ) : (

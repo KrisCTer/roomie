@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,4 +19,5 @@ public class ContractRequest {
     String landlordId;
     Instant startDate;
     Instant endDate;
+    List<String> supplementaryTerms;
 }

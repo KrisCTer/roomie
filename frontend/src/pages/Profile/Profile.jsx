@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../components/common/PageTitle.jsx";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import { useTranslation } from "react-i18next";
 import { useRefresh } from "../../contexts/RefreshContext";
@@ -140,13 +139,14 @@ const Profile = () => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title={t("profile.title")}
-          subtitle={t("profile.subtitle")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("profile.title")}
+          pageSubtitle={t("profile.subtitle")}
         />
 
-        <div className="w-full px-4 pb-8 md:px-8 max-w-7xl mx-auto">
+        <div className="w-full px-4 pb-8 pt-6 md:px-8 max-w-7xl mx-auto">
           {(error || success) && (
             <div className="mb-6 space-y-3">
               {error && (
@@ -225,17 +225,10 @@ const Profile = () => {
                         </span>
                       </div>
                     </label>
-
-                    {/* Verification Badge */}
-                    {formData.idCardNumber && (
-                      <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 shadow-lg">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                    )}
                   </div>
 
                   {/* User Info */}
-                  <div className="flex-1 text-center md:text-left">
+                  <div className="flex-1 text-center md:text-left mt-2 md:mt-4">
                     <h2 className="text-3xl font-bold text-gray-900">
                       {formData.firstName && formData.lastName
                         ? `${formData.firstName} ${formData.lastName}`
@@ -258,12 +251,7 @@ const Profile = () => {
                     {formData?.id && (
                       <button
                         onClick={() => navigate(`/user/${formData.id}`)}
-                        className="flex items-center gap-2 px-4 py-2 
-      bg-orange-50 
-      text-orange-700 
-      rounded-lg 
-      hover:bg-orange-100 
-      transition-colors"
+                        className="mt-5 inline-flex items-center gap-2 self-center md:self-start px-4 py-2 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors"
                       >
                         <Eye size={16} />
                         <span className="text-sm font-medium">

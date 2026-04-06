@@ -24,10 +24,11 @@ export const UserProvider = ({ children }) => {
 
     setLoading(true);
 
-    try {
-      const cached = getCompleteUserInfo();
-      if (cached) setUser(cached);
+    // Always build user from JWT first — this is guaranteed available
+    const cached = getCompleteUserInfo();
+    if (cached) setUser(cached);
 
+    try {
       const res = await getMyProfile();
       const profile = res?.result || res?.data?.result;
       if (profile) {
@@ -41,13 +42,14 @@ export const UserProvider = ({ children }) => {
       // Profile API returned no data, keep cached (JWT-derived) user
       return cached ?? null;
     } catch (e) {
-      if (e?.response?.status === 401) {
+      // Only clear auth if token is truly invalid AND we have no cached data
+      if (e?.response?.status === 401 && !cached) {
         removeToken();
         removeUserProfile();
         setUser(null);
       }
-      // For non-401 errors (404, 500), keep cached user
-      return null;
+      // If we have cached JWT data, keep it — user stays logged in
+      return cached ?? null;
     } finally {
       setLoading(false);
     }

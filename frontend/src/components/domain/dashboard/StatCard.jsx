@@ -10,9 +10,10 @@ const colorMap = {
   indigo: "bg-indigo-100/80 text-indigo-700",
   pink: "bg-pink-100/80 text-pink-700",
   gray: "bg-gray-100/80 text-gray-600",
+  orange: "bg-orange-100/80 text-orange-700",
 };
 
-const StatCard = ({ icon: Icon, label, value, color = "blue", trend, onClick }) => {
+const StatCard = ({ icon: Icon, label, value, color = "blue", trend, subtitle, onClick }) => {
   return (
     <div
       onClick={onClick}
@@ -40,6 +41,9 @@ const StatCard = ({ icon: Icon, label, value, color = "blue", trend, onClick }) 
               </span>
             )}
           </div>
+          {subtitle && (
+            <p className="text-xs home-text-muted mt-1 truncate">{subtitle}</p>
+          )}
         </div>
       </div>
     </div>
@@ -47,3 +51,4 @@ const StatCard = ({ icon: Icon, label, value, color = "blue", trend, onClick }) 
 };
 
 export default StatCard;
+

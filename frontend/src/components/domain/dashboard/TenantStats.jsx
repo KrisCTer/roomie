@@ -11,9 +11,6 @@ import StatCard from "./StatCard";
 const TenantStats = ({ stats, onStatClick }) => {
   return (
     <div>
-      <h2 className="mb-4 text-xl font-bold tracking-tight home-text-primary">
-        KPI cần theo dõi
-      </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard
           icon={CheckIcon}

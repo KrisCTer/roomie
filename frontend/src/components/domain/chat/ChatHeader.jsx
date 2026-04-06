@@ -10,12 +10,28 @@ const ChatHeader = ({
   onVideoCall,
 }) => {
   const displayName = getConversationName(conversation, currentUserId);
+  const otherParticipant = conversation.participants?.find(
+    (p) => (p.userId || p.id) !== currentUserId,
+  );
+  const avatarUrl =
+    conversation.conversationAvatar ||
+    otherParticipant?.avatar ||
+    otherParticipant?.avatarUrl ||
+    "";
 
   return (
     <div className="p-4 border-b flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-          {displayName.charAt(0).toUpperCase()}
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#CC6F4A] flex items-center justify-center text-white font-semibold">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            displayName.charAt(0).toUpperCase()
+          )}
         </div>
         <div>
           <h3 className="font-semibold">{displayName}</h3>

@@ -37,8 +37,10 @@ import NotificationDropdown from "../../domain/notification/NotificationDropdown
 import { useState, useMemo } from "react";
 import { removeToken } from "../../../services/localStorageService";
 import { useUser } from "../../../contexts/UserContext";
+import "../../../styles/apple-glass-dashboard.css";
+import "../../../styles/home-redesign.css";
 
-const Header = ({ sidebarOpen, setSidebarOpen }) => {
+const Header = ({ sidebarOpen, setSidebarOpen, pageTitle, pageSubtitle }) => {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -168,7 +170,6 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
       return "my-contracts";
     if (path.includes("bill")) return "bills";
     if (path.includes("message")) return "messages";
-    if (path.includes("utility-config")) return "utility-config";
     if (path.includes("profile")) return "profile";
     return null;
   };
@@ -181,341 +182,356 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#EBDCC8] bg-[#FFFBF6]/95 shadow-[0_8px_20px_rgba(17,24,39,0.06)] backdrop-blur-sm">
-      <div className="flex items-center justify-between px-4 py-3 md:px-6">
-        {/* Left side - Sidebar toggle + Refresh */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-xl p-2 transition-colors hover:bg-[#F7EBDD]"
-            title="Toggle Sidebar"
-          >
-            {sidebarOpen ? (
-              <X className="w-5 h-5 text-[#2B2A28]" />
-            ) : (
-              <MenuLucide className="w-5 h-5 text-[#2B2A28]" />
-            )}
-          </button>
+    <header className="sticky top-0 z-40 px-3 pt-3 md:px-5 md:pt-4">
+      <div className="home-glass-card relative overflow-hidden rounded-2xl">
+        <div className="relative flex items-start justify-between gap-3 px-3 py-3 md:px-5 md:py-3.5">
+          {/* Left side - Sidebar toggle + Refresh + Optional page heading */}
+          <div className="flex min-w-0 items-center gap-2 md:gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="home-glass-soft rounded-xl p-2 text-[#2B2A28] transition"
+              title="Toggle Sidebar"
+            >
+              {sidebarOpen ? (
+                <X className="w-5 h-5 text-[#2B2A28]" />
+              ) : (
+                <MenuLucide className="w-5 h-5 text-[#2B2A28]" />
+              )}
+            </button>
 
-          {/* Refresh Button */}
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className={`rounded-xl p-2 transition-colors hover:bg-[#F7EBDD] disabled:cursor-not-allowed disabled:opacity-50 ${
-              isRefreshing ? "animate-pulse" : ""
-            }`}
-            title="Refresh Data"
-          >
-            <RefreshCw
-              className={`w-5 h-5 text-[#2B2A28] ${
-                isRefreshing ? "animate-spin" : ""
+            {/* Refresh Button */}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`home-glass-soft rounded-xl p-2 text-[#2B2A28] transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                isRefreshing ? "animate-pulse" : ""
               }`}
-            />
-          </button>
-        </div>
-
-        {/* Right side */}
-        <Stack direction="row" spacing={1} alignItems="center">
-          {/* Notification Bell */}
-          <IconButton
-            onClick={handleOpenNotifications}
-            sx={{
-              color: "#2B2A28",
-              transition: "all 0.2s",
-              "&:hover": {
-                bgcolor: "#F7EBDD",
-                transform: "scale(1.05)",
-              },
-            }}
-          >
-            <Badge
-              badgeContent={unreadCount}
-              color="error"
-              max={99}
-              sx={{
-                "& .MuiBadge-badge": {
-                  fontSize: "0.65rem",
-                  height: 18,
-                  minWidth: 18,
-                  fontWeight: 700,
-                },
-              }}
+              title="Refresh Data"
             >
-              <Bell size={20} />
-            </Badge>
-          </IconButton>
-
-          {/* Notification Dropdown */}
-          <NotificationDropdown
-            anchorEl={notificationAnchor}
-            open={openNotifications}
-            onClose={handleCloseNotifications}
-          />
-
-          {/* User Menu Button */}
-          <Paper
-            elevation={0}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              border: "1px solid",
-              borderColor: "#E6D8C5",
-              bgcolor: "#FFFDF9",
-              borderRadius: 999,
-              px: 1.5,
-              py: 0.5,
-              cursor: "pointer",
-              transition: "all 0.2s",
-              "&:hover": {
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              },
-            }}
-            onClick={handleOpenMenu}
-          >
-            <MenuIcon
-              sx={{ fontSize: 20, color: "grey.700" }}
-              className="dark:text-dark-primary"
-            />
-            {displayUser?.avatar ? (
-              <Avatar
-                src={displayUser.avatar}
-                alt={displayUser.username}
-                sx={{
-                  width: 32,
-                  height: 32,
-                }}
-                imgProps={{
-                  onError: (e) => {
-                    e.target.onerror = null;
-                    e.target.src = "";
-                  },
-                }}
+              <RefreshCw
+                className={`w-5 h-5 text-[#2B2A28] ${
+                  isRefreshing ? "animate-spin" : ""
+                }`}
               />
-            ) : (
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: "primary.main",
-                  fontSize: "0.875rem",
-                  fontWeight: 700,
-                }}
-              >
-                {(
-                  displayUser?.fullName?.[0] ||
-                  displayUser?.username?.[0] ||
-                  "U"
-                ).toUpperCase()}
-              </Avatar>
+            </button>
+
+            {pageTitle && (
+              <div className="ml-1 min-w-0">
+                <p className="truncate text-sm font-semibold leading-tight text-[#2F2A25] md:text-base">
+                  {pageTitle}
+                </p>
+                {pageSubtitle && (
+                  <p className="mt-0.5 line-clamp-1 text-xs text-[#765842] md:text-sm">
+                    {pageSubtitle}
+                  </p>
+                )}
+              </div>
             )}
-          </Paper>
+          </div>
 
-          {/* Enhanced User Menu with Settings */}
-          <Menu
-            anchorEl={anchorEl}
-            open={openMenu}
-            onClose={handleCloseMenu}
-            PaperProps={{
-              elevation: 3,
-              className: "dark:bg-dark-secondary",
-              sx: {
-                mt: 1.5,
-                borderRadius: 2,
-                minWidth: 280,
-                "& .MuiMenuItem-root": {
-                  px: 2,
-                  py: 1.5,
-                  fontSize: "0.875rem",
+          {/* Right side */}
+          <Stack direction="row" spacing={1} alignItems="center">
+            {/* Notification Bell */}
+            <IconButton
+              onClick={handleOpenNotifications}
+              className="apple-glass-pill"
+              sx={{
+                color: "#2B2A28",
+                transition: "all 0.2s",
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.25)",
+                  transform: "scale(1.05)",
                 },
-              },
-            }}
-            transformOrigin={{ horizontal: "right", vertical: "top" }}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-          >
-            <Box
-              sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
-              className="dark:bg-dark-tertiary"
+              }}
             >
-              <Typography
-                variant="caption"
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                max={99}
                 sx={{
-                  fontWeight: 700,
-                  color: "grey.600",
-                  textTransform: "uppercase",
+                  "& .MuiBadge-badge": {
+                    fontSize: "0.65rem",
+                    height: 18,
+                    minWidth: 18,
+                    fontWeight: 700,
+                  },
                 }}
-                className="dark:text-dark-secondary"
               >
-                Vai trò
-              </Typography>
-            </Box>
+                <Bell size={20} />
+              </Badge>
+            </IconButton>
 
-            <MenuItem
-              onClick={() => handleRoleChange("landlord")}
-              selected={activeRole === "landlord"}
-              className="dark:hover:bg-dark-hover"
+            {/* Notification Dropdown */}
+            <NotificationDropdown
+              anchorEl={notificationAnchor}
+              open={openNotifications}
+              onClose={handleCloseNotifications}
+            />
+
+            {/* User Menu Button */}
+            <Paper
+              className="apple-glass-pill"
+              elevation={0}
               sx={{
-                bgcolor:
-                  activeRole === "landlord" ? "primary.light" : "transparent",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                borderRadius: 999,
+                px: 1.5,
+                py: 0.5,
+                cursor: "pointer",
+                transition: "all 0.2s",
+                "&:hover": {
+                  boxShadow: "0 8px 18px rgba(101, 73, 46, 0.16)",
+                  bgcolor: "rgba(255,255,255,0.25)",
+                },
               }}
+              onClick={handleOpenMenu}
             >
-              <ListItemIcon>
-                <Home size={18} className="text-[#CC6F4A]" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Landlord"
-                secondary="Quản lý tài sản, hợp đồng"
-                sx={{
-                  "& .MuiListItemText-secondary": {
-                    fontSize: "0.75rem",
-                  },
-                }}
-              />
-            </MenuItem>
-
-            <MenuItem
-              onClick={() => handleRoleChange("tenant")}
-              selected={activeRole === "tenant"}
-              className="dark:hover:bg-dark-hover"
-              sx={{
-                bgcolor:
-                  activeRole === "tenant" ? "primary.light" : "transparent",
-              }}
-            >
-              <ListItemIcon>
-                <UserCircle size={18} className="text-[#CC6F4A]" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Tenant"
-                secondary="Tìm phòng, quản lý đặt chỗ"
-                sx={{
-                  "& .MuiListItemText-secondary": {
-                    fontSize: "0.75rem",
-                  },
-                }}
-              />
-            </MenuItem>
-
-            <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-            {/* Become a Tenant */}
-            <MenuItem
-              onClick={() => {
-                handleCloseMenu();
-                navigate("/");
-              }}
-              className="dark:hover:bg-dark-hover"
-            >
-              <ListItemIcon>
-                <UserCircle size={18} className="text-blue-600" />
-              </ListItemIcon>
-              <ListItemText
-                primary="Become a Tenant"
-                secondary="Find rooms, manage bookings"
+              <MenuIcon
+                sx={{ fontSize: 20, color: "grey.700" }}
                 className="dark:text-dark-primary"
-                sx={{
-                  "& .MuiListItemText-secondary": {
-                    fontSize: "0.75rem",
-                  },
-                }}
-                classes={{
-                  secondary: "dark:text-dark-secondary",
-                }}
               />
-            </MenuItem>
-
-            <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-            {/* Language Selection */}
-            <Box
-              sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
-              className="dark:bg-dark-tertiary"
-            >
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 700,
-                  color: "grey.600",
-                  textTransform: "uppercase",
-                }}
-                className="dark:text-dark-secondary"
-              >
-                Language / Ngôn ngữ
-              </Typography>
-            </Box>
-            {languages.map((lang) => (
-              <MenuItem
-                key={lang.code}
-                onClick={() => handleLanguageChange(lang.code)}
-                selected={currentLanguage === lang.code}
-                className="dark:hover:bg-dark-hover"
-                sx={{
-                  bgcolor:
-                    currentLanguage === lang.code
-                      ? "primary.light"
-                      : "transparent",
-                }}
-              >
-                <ListItemIcon>
-                  <Globe size={18} className="dark:text-dark-primary" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={lang.label}
-                  className="dark:text-dark-primary"
+              {displayUser?.avatar ? (
+                <Avatar
+                  src={displayUser.avatar}
+                  alt={displayUser.username}
                   sx={{
-                    "& .MuiTypography-root": {
-                      fontWeight: currentLanguage === lang.code ? 600 : 400,
+                    width: 32,
+                    height: 32,
+                  }}
+                  imgProps={{
+                    onError: (e) => {
+                      e.target.onerror = null;
+                      e.target.src = "";
                     },
                   }}
                 />
-                {currentLanguage === lang.code && (
-                  <Typography fontSize="1.25rem" className="ml-2">
-                    {lang.flag}
-                  </Typography>
-                )}
-              </MenuItem>
-            ))}
+              ) : (
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: "primary.main",
+                    fontSize: "0.875rem",
+                    fontWeight: 700,
+                  }}
+                >
+                  {(
+                    displayUser?.fullName?.[0] ||
+                    displayUser?.username?.[0] ||
+                    "U"
+                  ).toUpperCase()}
+                </Avatar>
+              )}
+            </Paper>
 
-            <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-            {/* Theme Toggle */}
-            <MenuItem
-              onClick={handleThemeToggle}
-              className="dark:hover:bg-dark-hover"
-            >
-              <ListItemIcon>
-                {darkMode ? (
-                  <Sun size={18} className="text-yellow-500" />
-                ) : (
-                  <Moon size={18} className="text-indigo-600" />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={darkMode ? "Light mode" : "Dark mode"}
-                className="dark:text-dark-primary"
-              />
-            </MenuItem>
-
-            <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-            {/* Logout */}
-            <MenuItem
-              onClick={handleLogout}
-              sx={{
-                color: "error.main",
+            {/* Enhanced User Menu with Settings */}
+            <Menu
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={handleCloseMenu}
+              PaperProps={{
+                elevation: 3,
+                className: "dark:bg-dark-secondary",
+                sx: {
+                  mt: 1.5,
+                  borderRadius: 2,
+                  minWidth: 280,
+                  "& .MuiMenuItem-root": {
+                    px: 2,
+                    py: 1.5,
+                    fontSize: "0.875rem",
+                  },
+                },
               }}
-              className="dark:hover:bg-dark-hover"
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
-              <ListItemIcon>
-                <LogOut size={18} className="text-red-600" />
-              </ListItemIcon>
-              <ListItemText
-                primary={t("common.logout") || "Logout"}
-                sx={{ color: "error.main" }}
-              />
-            </MenuItem>
-          </Menu>
-        </Stack>
+              <Box
+                sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
+                className="dark:bg-dark-tertiary"
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: "grey.600",
+                    textTransform: "uppercase",
+                  }}
+                  className="dark:text-dark-secondary"
+                >
+                  Vai trò
+                </Typography>
+              </Box>
+
+              <MenuItem
+                onClick={() => handleRoleChange("landlord")}
+                selected={activeRole === "landlord"}
+                className="dark:hover:bg-dark-hover"
+                sx={{
+                  bgcolor:
+                    activeRole === "landlord" ? "primary.light" : "transparent",
+                }}
+              >
+                <ListItemIcon>
+                  <Home size={18} className="text-[#CC6F4A]" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Landlord"
+                  secondary="Quản lý tài sản, hợp đồng"
+                  sx={{
+                    "& .MuiListItemText-secondary": {
+                      fontSize: "0.75rem",
+                    },
+                  }}
+                />
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => handleRoleChange("tenant")}
+                selected={activeRole === "tenant"}
+                className="dark:hover:bg-dark-hover"
+                sx={{
+                  bgcolor:
+                    activeRole === "tenant" ? "primary.light" : "transparent",
+                }}
+              >
+                <ListItemIcon>
+                  <UserCircle size={18} className="text-[#CC6F4A]" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Tenant"
+                  secondary="Tìm phòng, quản lý đặt chỗ"
+                  sx={{
+                    "& .MuiListItemText-secondary": {
+                      fontSize: "0.75rem",
+                    },
+                  }}
+                />
+              </MenuItem>
+
+              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
+
+              {/* Become a Tenant */}
+              <MenuItem
+                onClick={() => {
+                  handleCloseMenu();
+                  navigate("/");
+                }}
+                className="dark:hover:bg-dark-hover"
+              >
+                <ListItemIcon>
+                  <UserCircle size={18} className="text-blue-600" />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Become a Tenant"
+                  secondary="Find rooms, manage bookings"
+                  className="dark:text-dark-primary"
+                  sx={{
+                    "& .MuiListItemText-secondary": {
+                      fontSize: "0.75rem",
+                    },
+                  }}
+                  classes={{
+                    secondary: "dark:text-dark-secondary",
+                  }}
+                />
+              </MenuItem>
+
+              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
+
+              {/* Language Selection */}
+              <Box
+                sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
+                className="dark:bg-dark-tertiary"
+              >
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: "grey.600",
+                    textTransform: "uppercase",
+                  }}
+                  className="dark:text-dark-secondary"
+                >
+                  Language / Ngôn ngữ
+                </Typography>
+              </Box>
+              {languages.map((lang) => (
+                <MenuItem
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  selected={currentLanguage === lang.code}
+                  className="dark:hover:bg-dark-hover"
+                  sx={{
+                    bgcolor:
+                      currentLanguage === lang.code
+                        ? "primary.light"
+                        : "transparent",
+                  }}
+                >
+                  <ListItemIcon>
+                    <Globe size={18} className="dark:text-dark-primary" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={lang.label}
+                    className="dark:text-dark-primary"
+                    sx={{
+                      "& .MuiTypography-root": {
+                        fontWeight: currentLanguage === lang.code ? 600 : 400,
+                      },
+                    }}
+                  />
+                  {currentLanguage === lang.code && (
+                    <Typography fontSize="1.25rem" className="ml-2">
+                      {lang.flag}
+                    </Typography>
+                  )}
+                </MenuItem>
+              ))}
+
+              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
+
+              {/* Theme Toggle */}
+              <MenuItem
+                onClick={handleThemeToggle}
+                className="dark:hover:bg-dark-hover"
+              >
+                <ListItemIcon>
+                  {darkMode ? (
+                    <Sun size={18} className="text-yellow-500" />
+                  ) : (
+                    <Moon size={18} className="text-indigo-600" />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary={darkMode ? "Light mode" : "Dark mode"}
+                  className="dark:text-dark-primary"
+                />
+              </MenuItem>
+
+              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
+
+              {/* Logout */}
+              <MenuItem
+                onClick={handleLogout}
+                sx={{
+                  color: "error.main",
+                }}
+                className="dark:hover:bg-dark-hover"
+              >
+                <ListItemIcon>
+                  <LogOut size={18} className="text-red-600" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t("common.logout") || "Logout"}
+                  sx={{ color: "error.main" }}
+                />
+              </MenuItem>
+            </Menu>
+          </Stack>
+        </div>
       </div>
     </header>
   );

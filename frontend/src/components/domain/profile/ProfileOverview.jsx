@@ -107,18 +107,13 @@ const ProfileOverview = ({ formData, onEditClick }) => {
       {/* Info Sections */}
       <div className="space-y-6">
         {infoSections.map((section, idx) => (
-          <div
-            key={idx}
-            className="border border-gray-200 dark:border-dark-primary rounded-xl p-6"
-          >
+          <div key={idx} className="home-glass-soft rounded-2xl p-6">
             {/* Section Header */}
-            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-200 dark:border-dark-primary">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 dark:text-blue-400">
-                  {section.icon}
-                </span>
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/45">
+              <div className="w-10 h-10 bg-white/60 rounded-lg flex items-center justify-center">
+                <span className="text-[#CC6F4A]">{section.icon}</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary">
+              <h3 className="text-lg font-semibold text-gray-900">
                 {section.title}
               </h3>
             </div>
@@ -128,19 +123,17 @@ const ProfileOverview = ({ formData, onEditClick }) => {
               {section.items.map((item, itemIdx) => (
                 <div
                   key={itemIdx}
-                  className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-dark-tertiary rounded-lg"
+                  className="flex items-start gap-3 p-4 bg-white/45 border border-white/55 rounded-xl"
                 >
-                  <div className="w-8 h-8 bg-white dark:bg-dark-secondary rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-gray-600 dark:text-dark-secondary">
-                      {item.icon}
-                    </span>
+                  <div className="w-8 h-8 bg-white/70 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[#6A5A4D]">{item.icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-500 dark:text-dark-tertiary mb-1">
+                    <p className="text-xs font-medium text-gray-500 mb-1">
                       {item.label}
                     </p>
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-900 dark:text-dark-primary truncate">
+                      <p className="text-sm font-medium text-gray-900 truncate">
                         {item.value}
                       </p>
                       {item.verified && (
@@ -160,40 +153,36 @@ const ProfileOverview = ({ formData, onEditClick }) => {
 
       {/* Account Stats */}
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+        <div className="home-glass-soft rounded-2xl p-6 border border-white/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <span className="text-2xl font-bold text-[#CC6F4A]">
               {formData.idCardNumber ? "100%" : "60%"}
             </span>
-            <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400 opacity-50" />
+            <Shield className="w-8 h-8 text-[#CC6F4A] opacity-50" />
           </div>
-          <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
-            Hoàn thành hồ sơ
-          </p>
+          <p className="text-sm font-medium text-[#4A3E35]">Hoàn thành hồ sơ</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-6 border border-green-200 dark:border-green-800">
+        <div className="home-glass-soft rounded-2xl p-6 border border-white/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <span className="text-2xl font-bold text-green-700">
               {formData.idCardNumber ? "Hoàn thành" : "Chưa xác minh"}
             </span>
-            <CreditCard className="w-8 h-8 text-green-600 dark:text-green-400 opacity-50" />
+            <CreditCard className="w-8 h-8 text-green-700 opacity-50" />
           </div>
-          <p className="text-sm font-medium text-green-900 dark:text-green-300">
+          <p className="text-sm font-medium text-[#4A3E35]">
             Xác minh danh tính
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 rounded-xl p-6 border border-teal-200 dark:border-teal-800">
+        <div className="home-glass-soft rounded-2xl p-6 border border-white/50">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+            <span className="text-2xl font-bold text-[#256B6F]">
               {memberSinceYear}
             </span>
-            <Calendar className="w-8 h-8 text-teal-600 dark:text-teal-400 opacity-50" />
+            <Calendar className="w-8 h-8 text-[#256B6F] opacity-50" />
           </div>
-          <p className="text-sm font-medium text-teal-900 dark:text-teal-300">
-            Thành viên từ
-          </p>
+          <p className="text-sm font-medium text-[#4A3E35]">Thành viên từ</p>
         </div>
       </div>
     </div>

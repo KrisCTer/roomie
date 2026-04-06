@@ -3,7 +3,6 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 import Sidebar from "../../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../../components/common/PageTitle.jsx";
 import useAddPropertyFormState from "./hooks/useAddPropertyFormState";
 import AddPropertyLoadingSkeleton from "./sections/AddPropertyLoadingSkeleton";
 import AddPropertyProgressSection from "./sections/AddPropertyProgressSection";
@@ -23,6 +22,7 @@ const AddPropertyPage = () => {
     setError,
     success,
     isEditMode,
+    propertyId,
     propertyData,
     provinces,
     districts,
@@ -30,18 +30,24 @@ const AddPropertyPage = () => {
     mapsLoaded,
     uploadedImages,
     uploadingImages,
+    coverImage,
     reviewImagePage,
     totalReviewImagePages,
     handleInputChange,
     handleLocationChange,
+    handleAddressResolved,
     handleAmenityToggle,
     handleImageUpload,
     removeImage,
+    handleCoverUpload,
+    removeCoverImage,
+    handleToggle3dVisibility,
     handleNext,
     handlePrevious,
     handleSubmit,
     goToNextReviewImagePage,
     goToPreviousReviewImagePage,
+    refetch,
   } = useAddPropertyFormState();
 
   const isInitialEditLoading = loading && isEditMode && !propertyData.title;
@@ -57,16 +63,16 @@ const AddPropertyPage = () => {
       <div
         className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-        <PageTitle
-          title={
-            isEditMode ? "Chinh sua bat dong san" : "Them bat dong san moi"
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={
+            isEditMode ? "Chỉnh sửa bất động sản" : "Thêm bất động sản mới"
           }
-          subtitle={
+          pageSubtitle={
             isEditMode
-              ? "Cap nhat thong tin bat dong san cua ban"
-              : "Tao danh sach bat dong san moi"
+              ? "Cập nhật thông tin, tiện ích và hình ảnh cho tin đăng"
+              : "Tạo tin đăng mới với thông tin chi tiết và hình ảnh đầy đủ"
           }
         />
 
@@ -111,7 +117,9 @@ const AddPropertyPage = () => {
                 propertyData={propertyData}
                 uploadedImages={uploadedImages}
                 uploadingImages={uploadingImages}
+                coverImage={coverImage}
                 isEditMode={isEditMode}
+                propertyId={propertyId}
                 loading={loading}
                 provinces={provinces}
                 districts={districts}
@@ -123,14 +131,19 @@ const AddPropertyPage = () => {
                 totalReviewImagePages={totalReviewImagePages}
                 onInputChange={handleInputChange}
                 onLocationChange={handleLocationChange}
+                onAddressResolved={handleAddressResolved}
                 onAmenityToggle={handleAmenityToggle}
                 onImageUpload={handleImageUpload}
                 onImageRemove={removeImage}
+                onCoverUpload={handleCoverUpload}
+                onCoverRemove={removeCoverImage}
                 onPrevious={handlePrevious}
                 onNext={handleNext}
                 onSubmit={handleSubmit}
                 onPreviousReviewImagePage={goToPreviousReviewImagePage}
                 onNextReviewImagePage={goToNextReviewImagePage}
+                onToggle3dVisibility={handleToggle3dVisibility}
+                onRefreshProperty={refetch}
               />
             </>
           )}

@@ -74,9 +74,9 @@ billing:
   # Payment Configuration
   payment:
     momo:
-      partnerCode: ${MOMO_PARTNER_CODE:}
-      accessKey: ${MOMO_ACCESS_KEY:}
-      secretKey: ${MOMO_SECRET_KEY:}
+      partnerCode: MOMORZW420251202_TEST
+      accessKey: BeMUhv9rHCRg517u
+      secretKey: nl90qNFWwXrVOkf9uDWsYPUZ4bIr4gTb
       endpoint: ${MOMO_ENDPOINT:https://test-payment.momo.vn/v2/gateway/api/create}
       returnUrl: ${MOMO_RETURN_URL:http://localhost:3000/payment/return}
       notifyUrl: ${MOMO_NOTIFY_URL:http://localhost:8086/billing/webhook/momo}

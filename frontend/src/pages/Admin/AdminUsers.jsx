@@ -5,7 +5,6 @@ import { Ban, PauseCircle, RefreshCw, Search } from "lucide-react";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar";
 import Header from "../../components/layout/layoutUser/Header";
 import Footer from "../../components/layout/layoutUser/Footer";
-import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import { useDialog } from "../../contexts/DialogContext";
 
@@ -14,6 +13,10 @@ import {
   adminSuspendUser,
   adminBanUser,
 } from "../../services/adminUserService";
+import {
+  removeToken,
+  removeUserProfile,
+} from "../../services/localStorageService";
 
 import "../../styles/apple-glass-dashboard.css";
 import "../../styles/home-redesign.css";
@@ -68,6 +71,16 @@ const AdminUsers = () => {
       setUsers(list);
     } catch (e) {
       console.error("Load users failed:", e);
+      if (e?.response?.status === 401) {
+        removeToken();
+        removeUserProfile();
+        showToast(
+          "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+          "warning",
+        );
+        window.location.href = "/login";
+        return;
+      }
       setUsers([]);
     } finally {
       setLoading(false);
@@ -150,10 +163,11 @@ const AdminUsers = () => {
       <div
         className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title={t("admin.userManagement")}
-          subtitle={t("admin.userManagementDesc")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("admin.userManagement")}
+          pageSubtitle={t("admin.userManagementDesc")}
         />
 
         <main className="w-full px-4 pb-8 md:px-8">
@@ -170,7 +184,8 @@ const AdminUsers = () => {
                 />
               </div>
               <div className="apple-glass-pill rounded-full px-3 py-1.5 text-xs font-semibold home-text-muted">
-                {t("admin.total")}: <span className="home-text-primary">{filtered.length}</span>
+                {t("admin.total")}:{" "}
+                <span className="home-text-primary">{filtered.length}</span>
               </div>
             </div>
 
@@ -180,7 +195,9 @@ const AdminUsers = () => {
               disabled={loading}
               type="button"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
               {t("common.refresh")}
             </button>
           </div>
@@ -194,10 +211,19 @@ const AdminUsers = () => {
                     key={i}
                     className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
                   >
-                    <div className="w-10 h-10 rounded-full" style={{ background: "var(--home-surface-soft)" }} />
+                    <div
+                      className="w-10 h-10 rounded-full"
+                      style={{ background: "var(--home-surface-soft)" }}
+                    />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 rounded w-2/4" style={{ background: "var(--home-surface-soft)" }} />
-                      <div className="h-3 rounded w-1/3" style={{ background: "var(--home-surface-soft)" }} />
+                      <div
+                        className="h-4 rounded w-2/4"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
+                      <div
+                        className="h-3 rounded w-1/3"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
                     </div>
                   </div>
                 ))}
@@ -234,7 +260,9 @@ const AdminUsers = () => {
                       </span>
 
                       <div className="col-span-3">
-                        <p className="home-text-primary font-semibold">{u?.username}</p>
+                        <p className="home-text-primary font-semibold">
+                          {u?.username}
+                        </p>
                         <p className="text-xs home-text-muted truncate">{id}</p>
                       </div>
 

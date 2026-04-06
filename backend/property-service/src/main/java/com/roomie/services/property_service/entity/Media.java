@@ -10,5 +10,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Media {
     String url;
-    String type;   // "image" hoặc "video"
+    String type;       // "image" or "video"
+    String category;   // "COVER" or "ROOM" (null = ROOM for backward compat)
 }

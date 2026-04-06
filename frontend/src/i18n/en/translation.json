@@ -15,6 +15,27 @@
   "Search Properties": "Search Properties",
   "Favorites": "Favorites",
   "Logout": "Logout",
+  "sidebar": {
+    "landlord": {
+      "dashboard": "Dashboard",
+      "myProperties": "My Properties",
+      "addProperty": "Add Property",
+      "bookingRequests": "Booking Requests",
+      "contracts": "Contracts",
+      "bills": "Bills",
+      "utilityConfig": "Utility Config",
+      "messages": "Messages",
+      "profile": "Profile"
+    },
+    "tenant": {
+      "dashboard": "Dashboard",
+      "myBookings": "My Bookings",
+      "contracts": "My Contracts",
+      "bills": "Bills",
+      "messages": "Messages",
+      "profile": "Profile"
+    }
+  },
   "common": {
     "home": "Home",
     "properties": "Properties",
@@ -434,7 +455,17 @@
     "cancelConfirm": "Are you sure you want to cancel this booking?",
     "confirmSuccess": "Booking confirmed successfully",
     "cancelSuccess": "Booking cancelled successfully",
-    "myBookingsSubtitle": "Manage your property bookings and lease agreements"
+    "myBookingsSubtitle": "Manage your property bookings and lease agreements",
+    "landlordTitle": "Booking Requests",
+    "landlordSubtitle": "View and manage booking requests from tenants",
+    "tenantTitle": "My Bookings",
+    "tenantSubtitle": "Track your room bookings",
+    "totalBookings": "Total",
+    "pendingCount": "Pending",
+    "confirmedCount": "Confirmed",
+    "cancelledCount": "Cancelled",
+    "activeCount": "Active",
+    "completedCount": "Completed"
   },
   "contract": {
     "myContracts": "My Contracts",
@@ -480,6 +511,10 @@
     "otpDescription": "Enter the OTP sent to your phone",
     "verifyAndSign": "Verify & Sign",
     "myContractsSubtitle": "View and manage your rental contracts",
+    "landlordTitle": "Contract Management",
+    "landlordSubtitle": "Create and manage contracts for tenants",
+    "tenantTitle": "My Contracts",
+    "tenantSubtitle": "View and sign your rental contracts",
 
     "stats": {
       "total": "Total Contracts",
@@ -522,6 +557,10 @@
     "billSubtitle": "View details and manage your bill",
     "billManagement": "Bill Management",
     "billManagementSubtitle": "Create, manage, and track rental bills and payments",
+    "landlordTitle": "Bill Management",
+    "landlordSubtitle": "Create and send bills to tenants",
+    "tenantTitle": "My Bills",
+    "tenantSubtitle": "View and pay your rental bills",
     "billsList": "Bills List",
     "sendBills": "Send Bills",
     "sendCount": "Send {{count}} bill(s)",

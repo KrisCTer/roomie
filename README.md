@@ -84,7 +84,7 @@ mvn -f pom.xml clean install -DskipTests
 Windows:
 
 ```cmd
-infra\scripts\backend-runtime\run-from-jars.bat
+powershell -NoProfile -ExecutionPolicy Bypass -File .\infra\scripts\backend-runtime\run-from-jars.bat
 ```
 
 Optional helpers (works from CMD/PowerShell/Git Bash):

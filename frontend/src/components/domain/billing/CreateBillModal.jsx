@@ -20,6 +20,7 @@ const CreateBillModal = ({
   properties,
   contracts,
   tenants,
+  initialPropertyId,
   onClose,
   onSuccess,
 }) => {
@@ -36,10 +37,16 @@ const CreateBillModal = ({
     handleChange,
     calculateTotal,
     handleSubmit,
-  } = useCreateBillForm(bill, properties, contracts, onSuccess);
+  } = useCreateBillForm(
+    bill,
+    properties,
+    contracts,
+    onSuccess,
+    initialPropertyId,
+  );
 
   const selectedPropertyData = properties.find(
-    (p) => p.propertyId === selectedProperty
+    (p) => p.propertyId === selectedProperty,
   );
 
   const selectedTenant = selectedContract
@@ -308,7 +315,7 @@ const CreateBillModal = ({
                     {formatCurrency(
                       (parseFloat(formData.electricityNew || 0) -
                         parseFloat(formData.electricityOld || 0)) *
-                        parseFloat(formData.electricityUnitPrice || 0)
+                        parseFloat(formData.electricityUnitPrice || 0),
                     )}
                   </div>
                 </div>
@@ -377,7 +384,7 @@ const CreateBillModal = ({
                     {formatCurrency(
                       (parseFloat(formData.waterNew || 0) -
                         parseFloat(formData.waterOld || 0)) *
-                        parseFloat(formData.waterUnitPrice || 0)
+                        parseFloat(formData.waterUnitPrice || 0),
                     )}
                   </div>
                 </div>
@@ -536,4 +543,3 @@ const CreateBillModal = ({
 };
 
 export default CreateBillModal;
-

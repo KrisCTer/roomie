@@ -15,6 +15,27 @@
   "Search Properties": "Tìm kiếm",
   "Favorites": "Yêu thích",
   "Logout": "Đăng xuất",
+  "sidebar": {
+    "landlord": {
+      "dashboard": "Bảng điều khiển",
+      "myProperties": "Bất động sản đã đăng",
+      "addProperty": "Thêm bất động sản",
+      "bookingRequests": "Yêu cầu đặt phòng",
+      "contracts": "Hợp đồng",
+      "bills": "Hóa đơn",
+      "utilityConfig": "Cấu hình tiện ích",
+      "messages": "Tin nhắn",
+      "profile": "Hồ sơ"
+    },
+    "tenant": {
+      "dashboard": "Bảng điều khiển",
+      "myBookings": "Phòng đã đặt",
+      "contracts": "Hợp đồng của tôi",
+      "bills": "Hóa đơn",
+      "messages": "Tin nhắn",
+      "profile": "Hồ sơ"
+    }
+  },
   "common": {
     "home": "Trang chủ",
     "properties": "Nơi lưu trú",
@@ -433,7 +454,17 @@
     "cancelConfirm": "Bạn có chắc muốn hủy đặt thuê này?",
     "confirmSuccess": "Xác nhận đặt thuê thành công",
     "cancelSuccess": "Hủy đặt thuê thành công",
-    "myBookingsSubtitle": "Quản lý các lượt đặt thuê và hợp đồng của bạn"
+    "myBookingsSubtitle": "Quản lý các lượt đặt thuê và hợp đồng của bạn",
+    "landlordTitle": "Yêu cầu đặt phòng",
+    "landlordSubtitle": "Xem và xử lý yêu cầu đặt phòng từ người thuê",
+    "tenantTitle": "Phòng đã đặt",
+    "tenantSubtitle": "Theo dõi các phòng bạn đã đặt thuê",
+    "totalBookings": "Tổng",
+    "pendingCount": "Chờ xử lý",
+    "confirmedCount": "Đã xác nhận",
+    "cancelledCount": "Đã hủy",
+    "activeCount": "Đang hoạt động",
+    "completedCount": "Hoàn thành"
   },
   "contract": {
     "myContracts": "Hợp đồng của tôi",
@@ -479,6 +510,10 @@
     "otpDescription": "Nhập mã OTP đã được gửi tới điện thoại",
     "verifyAndSign": "Xác nhận & ký",
     "myContractsSubtitle": "Xem và quản lý các hợp đồng thuê của bạn",
+    "landlordTitle": "Quản lý hợp đồng",
+    "landlordSubtitle": "Tạo và quản lý hợp đồng cho người thuê",
+    "tenantTitle": "Hợp đồng của tôi",
+    "tenantSubtitle": "Xem và ký các hợp đồng thuê phòng",
 
     "stats": {
       "total": "Tổng hợp đồng",
@@ -521,6 +556,10 @@
     "billSubtitle": "Xem chi tiết và quản lý hóa đơn của bạn",
     "billManagement": "Quản lý hóa đơn",
     "billManagementSubtitle": "Tạo, quản lý và theo dõi hóa đơn thuê nhà",
+    "landlordTitle": "Quản lý hóa đơn",
+    "landlordSubtitle": "Tạo và gửi hóa đơn cho người thuê",
+    "tenantTitle": "Hóa đơn của tôi",
+    "tenantSubtitle": "Xem và thanh toán hóa đơn thuê phòng",
     "billsList": "Danh sách hóa đơn",
     "sendBills": "Gửi hóa đơn",
     "sendCount": "Gửi {{count}} hóa đơn",

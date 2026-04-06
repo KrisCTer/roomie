@@ -1,4 +1,11 @@
 import React from "react";
+import {
+  Bell,
+  BellRing,
+  CalendarDays,
+  CalendarRange,
+} from "lucide-react";
+import StatCard from "../../../../components/domain/dashboard/StatCard.jsx";
 
 const NotificationsStatsSection = ({ stats }) => {
   if (!stats) {
@@ -7,27 +14,33 @@ const NotificationsStatsSection = ({ stats }) => {
 
   return (
     <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <div className="rounded-2xl border border-[#EEE1CE] bg-white p-4">
-        <p className="mb-1 text-sm text-gray-600">Tổng số</p>
-        <p className="text-2xl font-bold text-gray-900">
-          {stats.totalNotifications}
-        </p>
-      </div>
+      <StatCard
+        icon={Bell}
+        label="Tổng số"
+        value={stats.totalNotifications}
+        color="blue"
+      />
 
-      <div className="rounded-2xl border border-[#F6D2D2] bg-[#FFF3F3] p-4">
-        <p className="mb-1 text-sm text-red-600">Chưa đọc</p>
-        <p className="text-2xl font-bold text-red-900">{stats.unreadCount}</p>
-      </div>
+      <StatCard
+        icon={BellRing}
+        label="Chưa đọc"
+        value={stats.unreadCount}
+        color="red"
+      />
 
-      <div className="rounded-2xl border border-[#B8E7C8] bg-[#ECFDF3] p-4">
-        <p className="mb-1 text-sm text-green-600">Hôm nay</p>
-        <p className="text-2xl font-bold text-green-900">{stats.todayCount}</p>
-      </div>
+      <StatCard
+        icon={CalendarDays}
+        label="Hôm nay"
+        value={stats.todayCount}
+        color="green"
+      />
 
-      <div className="rounded-2xl border border-[#CFE7FA] bg-[#EEF8FF] p-4">
-        <p className="mb-1 text-sm text-sky-700">Tuần này</p>
-        <p className="text-2xl font-bold text-sky-900">{stats.thisWeekCount}</p>
-      </div>
+      <StatCard
+        icon={CalendarRange}
+        label="Tuần này"
+        value={stats.thisWeekCount}
+        color="orange"
+      />
     </section>
   );
 };

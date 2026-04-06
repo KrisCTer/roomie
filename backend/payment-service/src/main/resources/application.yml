@@ -49,9 +49,9 @@ vnpay:
   returnUrl: ${VNPAY_RETURN_URL:http://localhost:8087/payment/webhook/vnpay}
 
 momo:
-  partnerCode: ${MOMO_PARTNER_CODE:}
-  accessKey: ${MOMO_ACCESS_KEY:}
-  secretKey: ${MOMO_SECRET_KEY:}
+  partnerCode: MOMORZW420251202_TEST
+  accessKey: BeMUhv9rHCRg517u
+  secretKey: nl90qNFWwXrVOkf9uDWsYPUZ4bIr4gTb
   returnUrl: ${MOMO_RETURN_URL:http://localhost:8087/payment/momo/return}
   notifyUrl: ${MOMO_NOTIFY_URL:http://localhost:8087/payment/webhook/momo}
 app:

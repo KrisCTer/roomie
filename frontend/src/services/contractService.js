@@ -78,6 +78,26 @@ export const resumeContract = (id) =>
 export const terminateContract = (id, reason) =>
   BaseService.post(API.TERMINATE_CONTRACT(id), null, { params: { reason } });
 
+/**
+ * Update supplementary terms for unsigned contract
+ */
+export const updateContractSupplementaryTerms = (id, supplementaryTerms) =>
+  BaseService.put(API.UPDATE_CONTRACT_SUPPLEMENTARY_TERMS(id), {
+    supplementaryTerms,
+  });
+
+/**
+ * Add amendment/addendum entry (supports signed and unsigned contracts)
+ */
+export const addContractAmendment = (id, payload) =>
+  BaseService.post(API.ADD_CONTRACT_AMENDMENT(id), payload);
+
+/**
+ * Approve a pending amendment/addendum
+ */
+export const approveContractAmendment = (id, amendmentId) =>
+  BaseService.post(API.APPROVE_CONTRACT_AMENDMENT(id, amendmentId));
+
 export default {
   createContract,
   getMyContracts,
@@ -91,4 +111,7 @@ export default {
   pauseContract,
   resumeContract,
   terminateContract,
+  updateContractSupplementaryTerms,
+  addContractAmendment,
+  approveContractAmendment,
 };
