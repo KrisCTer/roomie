@@ -47,9 +47,12 @@ public class PropertyResponse {
 
     String coverImageUrl;
 
-    // 3D Model
+    // 3D Model reconstruction
+    /** URL to the 3D model file (GLB/GLTF), null if not yet generated */
     String model3dUrl;
+    /** Reconstruction status: NONE, PROCESSING, COMPLETED, FAILED */
     String model3dStatus;
+    /** Whether the 3D viewer is visible on the property detail page */
     Boolean model3dVisible;
     Instant model3dRequestedAt;
     Instant model3dCompletedAt;

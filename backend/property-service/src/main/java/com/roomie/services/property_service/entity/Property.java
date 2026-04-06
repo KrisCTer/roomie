@@ -51,11 +51,16 @@ public class Property {
 
     ApprovalStatus status;
 
-    // 3D Model reconstruction
+    /** URL to the generated 3D model file (GLB/GLTF format) */
     String model3dUrl;
-    String model3dStatus;       // NONE, PROCESSING, COMPLETED, FAILED
-    Boolean model3dVisible;     // Owner toggle: show 3D on detail page
+    /** Current status of 3D reconstruction: NONE, PROCESSING, COMPLETED, FAILED */
+    String model3dStatus;
+    /** Owner toggle: whether to display 3D viewer on property detail page */
+    @Builder.Default
+    Boolean model3dVisible = false;
+    /** Timestamp when 3D reconstruction was requested */
     Instant model3dRequestedAt;
+    /** Timestamp when 3D reconstruction completed or failed */
     Instant model3dCompletedAt;
 
     Instant createdAt;
