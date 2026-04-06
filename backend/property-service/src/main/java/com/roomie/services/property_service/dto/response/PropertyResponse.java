@@ -45,6 +45,15 @@ public class PropertyResponse {
     Long favoriteCount;
     Boolean isFavorited;
 
+    String coverImageUrl;
+
+    // 3D Model
+    String model3dUrl;
+    String model3dStatus;
+    Boolean model3dVisible;
+    Instant model3dRequestedAt;
+    Instant model3dCompletedAt;
+
     Instant createdAt;
     Instant updatedAt;
 }

@@ -45,9 +45,18 @@ public class Property {
     Amenities amenities;
     List<Media> mediaList;    // Ảnh / video
 
+    String coverImageUrl;      // Ảnh bìa (optional)
+
     Owner owner;               // Thông tin chủ sở hữu hoặc người đăng
 
     ApprovalStatus status;
+
+    // 3D Model reconstruction
+    String model3dUrl;
+    String model3dStatus;       // NONE, PROCESSING, COMPLETED, FAILED
+    Boolean model3dVisible;     // Owner toggle: show 3D on detail page
+    Instant model3dRequestedAt;
+    Instant model3dCompletedAt;
 
     Instant createdAt;
     Instant updatedAt;
