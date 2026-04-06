@@ -1,5 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 
+/**
+ * Model3DViewer - Interactive 3D model viewer using Google's model-viewer.
+ * Renders GLB/GLTF models with camera controls, auto-rotate, and shadow.
+ * @param {{ modelUrl: string, propertyTitle: string }} props
+ */
 const Model3DViewer = ({ modelUrl, propertyTitle }) => {
   const containerRef = useRef(null);
   const [error, setError] = useState(false);
@@ -25,6 +30,9 @@ const Model3DViewer = ({ modelUrl, propertyTitle }) => {
     viewer.setAttribute("interaction-prompt", "auto");
     viewer.setAttribute("camera-orbit", "45deg 55deg 2.5m");
     viewer.setAttribute("field-of-view", "45deg");
+    viewer.setAttribute("loading", "eager");
+    viewer.setAttribute("ar", "");
+    viewer.setAttribute("ar-modes", "webxr scene-viewer quick-look");
     viewer.style.width = "100%";
     viewer.style.height = "500px";
     viewer.style.borderRadius = "16px";
@@ -63,7 +71,14 @@ const Model3DViewer = ({ modelUrl, propertyTitle }) => {
     );
   }
 
-  return <div ref={containerRef} style={{ minHeight: "500px" }} />;
+  return (
+    <div
+      ref={containerRef}
+      role="img"
+      aria-label={`Mô hình 3D - ${propertyTitle || 'Phòng trọ'}`}
+      style={{ minHeight: "500px" }}
+    />
+  );
 };
 
 const errorStyle = {
