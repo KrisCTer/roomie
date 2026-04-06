@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@google/model-viewer": "^4.2.0",
     "@googlemaps/markerclusterer": "^2.6.2",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
@@ -23,6 +24,7 @@
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.555.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-draggable": "^4.5.0",

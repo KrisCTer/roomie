@@ -18,9 +18,15 @@ const IdentityVerification = lazy(
 
 /* ================= MAIN / PUBLIC (lazy) ================= */
 const Home = lazy(() => import("../pages/Main/home/HomePage"));
-const PropertyDetail = lazy(() => import("../pages/Main/property-detail/PropertyDetailPage"));
-const PropertySearch = lazy(() => import("../pages/Main/search/PropertySearchPage"));
-const UserProfile = lazy(() => import("../pages/Main/user-profile/UserProfilePage"));
+const PropertyDetail = lazy(
+  () => import("../pages/Main/property-detail/PropertyDetailPage"),
+);
+const PropertySearch = lazy(
+  () => import("../pages/Main/search/PropertySearchPage"),
+);
+const UserProfile = lazy(
+  () => import("../pages/Main/user-profile/UserProfilePage"),
+);
 const MyFavorites = lazy(() => import("../pages/Main/favorites/FavoritesPage"));
 
 /* ================= USER (lazy) ================= */
@@ -37,13 +43,16 @@ const UnifiedBillsPage = lazy(
 );
 const BillDetail = lazy(() => import("../pages/Billing/BillDetail"));
 const PaymentResult = lazy(() => import("../pages/Billing/PaymentResult"));
-const NotificationCenter = lazy(() => import("../pages/Main/notifications/NotificationsPage"));
+const NotificationCenter = lazy(
+  () => import("../pages/Main/notifications/NotificationsPage"),
+);
 
 /* ================= LANDLORD (lazy) ================= */
-const AddProperty = lazy(() => import("../pages/Property/add-property/AddPropertyPage"));
-const MyProperties = lazy(() => import("../pages/Property/my-properties/MyPropertiesPage"));
-const UtilityConfigPage = lazy(
-  () => import("../pages/Billing/UtilityConfigPage"),
+const AddProperty = lazy(
+  () => import("../pages/Property/add-property/AddPropertyPage"),
+);
+const MyProperties = lazy(
+  () => import("../pages/Property/my-properties/MyPropertiesPage"),
 );
 
 /* ================= ADMIN (lazy) ================= */
@@ -215,7 +224,7 @@ const AppRoutes = () => {
           element={
             <RoleProtectedRoute allowedRoles={["user", "admin"]}>
               <VerificationGuard>
-                <UtilityConfigPage />
+                <Navigate to="/unified-bills" replace />
               </VerificationGuard>
             </RoleProtectedRoute>
           }

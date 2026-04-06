@@ -1,4 +1,4 @@
-﻿// src/components/layout/layoutUser/Sidebar.jsx
+// src/components/layout/layoutUser/Sidebar.jsx
 import React, { useMemo } from "react";
 import {
   Home,
@@ -10,7 +10,6 @@ import {
   Contact,
   BookOpen,
   FileText,
-  Zap,
   DollarSign,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -28,33 +27,74 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const { user } = useUser();
 
   /* =========================
-   * MENU CONFIG
+   * MENU CONFIG (i18n role-based)
    * ========================= */
   const landlordMenuItems = [
-    { icon: BarChart3, label: t("Dashboard"), path: "/dashboard" },
-    { icon: Building, label: t("My Properties"), path: "/my-properties" },
-    { icon: Plus, label: t("Add Property"), path: "/add-property" },
-    { icon: BookOpen, label: t("Bookings"), path: "/my-bookings" },
-    { icon: Contact, label: t("Contracts"), path: "/my-contracts" },
-    { icon: FileText, label: t("Bills"), path: "/unified-bills" },
-    { icon: Zap, label: t("Utility Config"), path: "/utility-config" },
-    { icon: MessageSquare, label: t("Messages"), path: "/message" },
-    { icon: User, label: t("Profile"), path: "/profile" },
+    {
+      icon: BarChart3,
+      label: t("sidebar.landlord.dashboard"),
+      path: "/dashboard",
+    },
+    {
+      icon: Building,
+      label: t("sidebar.landlord.myProperties"),
+      path: "/my-properties",
+    },
+    {
+      icon: Plus,
+      label: t("sidebar.landlord.addProperty"),
+      path: "/add-property",
+    },
+    {
+      icon: BookOpen,
+      label: t("sidebar.landlord.bookingRequests"),
+      path: "/my-bookings",
+    },
+    {
+      icon: Contact,
+      label: t("sidebar.landlord.contracts"),
+      path: "/my-contracts",
+    },
+    {
+      icon: FileText,
+      label: t("sidebar.landlord.bills"),
+      path: "/unified-bills",
+    },
+    {
+      icon: MessageSquare,
+      label: t("sidebar.landlord.messages"),
+      path: "/message",
+    },
+    { icon: User, label: t("sidebar.landlord.profile"), path: "/profile" },
   ];
 
   const tenantMenuItems = [
-    { icon: BarChart3, label: t("Dashboard"), path: "/dashboard" },
-    { icon: BookOpen, label: t("My Bookings"), path: "/my-bookings" },
-    { icon: Contact, label: t("My Contracts"), path: "/my-contracts" },
-    { icon: DollarSign, label: t("My Bills"), path: "/unified-bills" },
-    { icon: MessageSquare, label: t("Messages"), path: "/message" },
-    { icon: User, label: t("Profile"), path: "/profile" },
+    {
+      icon: BarChart3,
+      label: t("sidebar.tenant.dashboard"),
+      path: "/dashboard",
+    },
+    { icon: Home, label: t("sidebar.tenant.myBookings"), path: "/my-bookings" },
+    {
+      icon: Contact,
+      label: t("sidebar.tenant.contracts"),
+      path: "/my-contracts",
+    },
+    {
+      icon: DollarSign,
+      label: t("sidebar.tenant.bills"),
+      path: "/unified-bills",
+    },
+    {
+      icon: MessageSquare,
+      label: t("sidebar.tenant.messages"),
+      path: "/message",
+    },
+    { icon: User, label: t("sidebar.tenant.profile"), path: "/profile" },
   ];
 
   const menuItems = useMemo(() => {
-    const roleItems =
-      activeRole === "landlord" ? landlordMenuItems : tenantMenuItems;
-    return [...roleItems];
+    return activeRole === "landlord" ? landlordMenuItems : tenantMenuItems;
   }, [activeRole, t]);
 
   /* =========================
@@ -105,13 +145,18 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
       displayUser?.fullName?.[0] || displayUser?.username?.[0] || "U";
 
     return (
-      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-teal-600 rounded-full flex items-center justify-center">
+      <div className="w-10 h-10 bg-gradient-to-br from-[#CC6F4A] to-[#A85A3A] rounded-full flex items-center justify-center">
         <span className="text-white font-bold text-sm">
           {initial.toUpperCase()}
         </span>
       </div>
     );
   };
+
+  const roleBadge =
+    activeRole === "landlord"
+      ? { label: t("dashboard.landlordRole"), color: "bg-[#CC6F4A]" }
+      : { label: t("dashboard.tenantRole"), color: "bg-emerald-600" };
 
   /* =========================
    * RENDER
@@ -134,9 +179,16 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
           </div>
         </div>
 
-        {/* Profile */}
+        {/* Profile + Role Badge */}
         <div className="mb-6 rounded-2xl border border-[#4A433A] bg-[#2F2A24]/70 p-3.5">
-          <p className="mb-3 text-xs text-[#C9B6A2]">Profile</p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-[#C9B6A2]">Profile</p>
+            <span
+              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full text-white ${roleBadge.color}`}
+            >
+              {roleBadge.label}
+            </span>
+          </div>
 
           <div className="flex items-center gap-3">
             {renderAvatar()}
@@ -156,7 +208,7 @@ const Sidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
         <nav className="flex-1 space-y-1.5 overflow-hidden">
           {menuItems.map((item) => (
             <button
-              key={item.label}
+              key={item.path}
               onClick={() => handleNavigation(item)}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors ${
                 isActive(item.path)

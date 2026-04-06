@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 // web-app/src/components/common/VerificationGuard.jsx
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
