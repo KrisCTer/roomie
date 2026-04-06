@@ -2,16 +2,16 @@
 import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
-const isAuthError = (e) => {
+const shouldFallback = (e) => {
   const status = e?.response?.status;
-  return status === 401 || status === 403;
+  return status === 404 || status === 405;
 };
 
 const doRequest = async (primaryFn, fallbackFn) => {
   try {
     return await primaryFn();
   } catch (e) {
-    if (isAuthError(e) && fallbackFn) return await fallbackFn();
+    if (shouldFallback(e) && fallbackFn) return await fallbackFn();
     throw e;
   }
 };
@@ -19,7 +19,7 @@ const doRequest = async (primaryFn, fallbackFn) => {
 export const adminGetUsers = () =>
   doRequest(
     () => BaseService.get(API.ADMIN_GET_ALL_USERS),
-    () => BaseService.get(API.INTERNAL_GET_ALL_USERS)
+    () => BaseService.get(API.GET_ALL_USERS)
   );
 
 export const adminSuspendUser = (userId) => {

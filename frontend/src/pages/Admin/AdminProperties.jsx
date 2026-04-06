@@ -6,8 +6,12 @@ import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
+import { useDialog } from "../../contexts/DialogContext";
+import {
+  removeToken,
+  removeUserProfile,
+} from "../../services/localStorageService";
 
 import {
   adminGetAllProperties,
@@ -53,10 +57,10 @@ const normalizeList = (res) => {
   const list = Array.isArray(res)
     ? res
     : Array.isArray(res?.data)
-    ? res.data
-    : Array.isArray(res?.result)
-    ? res.result
-    : [];
+      ? res.data
+      : Array.isArray(res?.result)
+        ? res.result
+        : [];
 
   return list.map((p) => ({
     ...p,
@@ -88,13 +92,14 @@ const fmtDate = (d) => {
 
 const pickImage = (p) => {
   const m = p?.mediaList?.[0];
-  if (!m) return "https://via.placeholder.com/120x90?text=No+Image";
+  if (!m)
+    return "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400";
   if (typeof m === "string") return m;
   return (
     m?.url ||
     m?.link ||
     m?.path ||
-    "https://via.placeholder.com/120x90?text=No+Image"
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400"
   );
 };
 
@@ -110,6 +115,7 @@ const AdminProperties = () => {
   const username = useMemo(() => resolveUsername(), []);
   const isAdmin = String(username).toLowerCase() === "admin";
   const { t } = useTranslation();
+  const { showToast } = useDialog();
 
   const loadAll = async () => {
     try {
@@ -118,6 +124,16 @@ const AdminProperties = () => {
       setProperties(normalizeList(res));
     } catch (e) {
       console.error("Load properties failed:", e);
+      if (e?.response?.status === 401) {
+        removeToken();
+        removeUserProfile();
+        showToast(
+          "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+          "warning",
+        );
+        window.location.href = "/login";
+        return;
+      }
       setProperties([]);
     } finally {
       setLoading(false);
@@ -140,7 +156,7 @@ const AdminProperties = () => {
     try {
       await adminApproveProperty(id);
       setProperties((prev) =>
-        prev.filter((p) => (p?.propertyId || p?.id || p?._id) !== id)
+        prev.filter((p) => (p?.propertyId || p?.id || p?._id) !== id),
       );
     } catch (e) {
       console.error("Approve failed:", e);
@@ -152,7 +168,7 @@ const AdminProperties = () => {
     try {
       await adminRejectProperty(id);
       setProperties((prev) =>
-        prev.filter((p) => (p?.propertyId || p?.id || p?._id) !== id)
+        prev.filter((p) => (p?.propertyId || p?.id || p?._id) !== id),
       );
     } catch (e) {
       console.error("Reject failed:", e);
@@ -172,10 +188,11 @@ const AdminProperties = () => {
       <div
         className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title={t("admin.pendingProperties")}
-          subtitle="Duyệt hoặc từ chối bất động sản đang chờ phê duyệt."
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("admin.pendingProperties")}
+          pageSubtitle="Duyệt hoặc từ chối bất động sản đang chờ phê duyệt."
         />
 
         <main className="w-full px-4 pb-8 md:px-8">
@@ -189,10 +206,19 @@ const AdminProperties = () => {
                     key={i}
                     className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
                   >
-                    <div className="w-24 h-16 rounded-xl" style={{ background: "var(--home-surface-soft)" }} />
+                    <div
+                      className="w-24 h-16 rounded-xl"
+                      style={{ background: "var(--home-surface-soft)" }}
+                    />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 rounded w-3/4" style={{ background: "var(--home-surface-soft)" }} />
-                      <div className="h-3 rounded w-1/2" style={{ background: "var(--home-surface-soft)" }} />
+                      <div
+                        className="h-4 rounded w-3/4"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
+                      <div
+                        className="h-3 rounded w-1/2"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
                     </div>
                   </div>
                 ))}
@@ -207,8 +233,16 @@ const AdminProperties = () => {
                   const id = p?.propertyId || p?.id || p?._id;
                   const img = pickImage(p);
                   const title = p?.title ?? t("common.noData");
-                  const created = p?.createdAt ?? p?.createdDate ?? p?.postedAt ?? p?.updatedAt;
-                  const price = p?.monthlyRent ?? p?.price ?? p?.rentalPrice ?? p?.monthlyPrice;
+                  const created =
+                    p?.createdAt ??
+                    p?.createdDate ??
+                    p?.postedAt ??
+                    p?.updatedAt;
+                  const price =
+                    p?.monthlyRent ??
+                    p?.price ??
+                    p?.rentalPrice ??
+                    p?.monthlyPrice;
 
                   return (
                     <div
@@ -223,7 +257,7 @@ const AdminProperties = () => {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.src =
-                              "https://via.placeholder.com/120x90?text=No+Image";
+                              "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400";
                           }}
                         />
                       </div>
@@ -240,9 +274,12 @@ const AdminProperties = () => {
                         </div>
 
                         <div className="mt-1 text-sm flex items-center gap-4">
-                          <span className="home-text-muted">{fmtDate(created)}</span>
+                          <span className="home-text-muted">
+                            {fmtDate(created)}
+                          </span>
                           <span className="home-text-accent font-semibold">
-                            {fmtMoney(price)} {t("common.currency", { defaultValue: "VND" })}
+                            {fmtMoney(price)}{" "}
+                            {t("common.currency", { defaultValue: "VND" })}
                           </span>
                         </div>
                       </div>
