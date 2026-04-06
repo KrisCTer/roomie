@@ -15,14 +15,14 @@ const ConversationList = ({
   formatTime,
 }) => {
   return (
-    <div className="w-full md:w-96 bg-white border-r flex flex-col">
+    <div className="w-full md:w-96 border-r border-white/45 bg-white/18 backdrop-blur-md flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border-white/45">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold">Messages</h2>
+          <h2 className="text-xl font-bold text-[#2B2A28]">Messages</h2>
           <button
             onClick={onOpenSearch}
-            className="p-2 hover:bg-gray-100 rounded-full transition"
+            className="home-glass-soft p-2 hover:bg-white/50 rounded-full transition"
           >
             <Search className="w-5 h-5" />
           </button>
@@ -30,11 +30,11 @@ const ConversationList = ({
 
         {/* Property Context Banner */}
         {propertyContext && (
-          <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mb-3 p-3 bg-white/45 border border-white/60 rounded-lg">
             <div className="flex items-start gap-2">
-              <HomeIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <HomeIcon className="w-4 h-4 text-[#CC6F4A] mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-blue-600 font-medium mb-1">
+                <p className="text-xs text-[#CC6F4A] font-medium mb-1">
                   Về bất động sản:
                 </p>
                 <p className="text-sm font-semibold text-gray-900 truncate">
@@ -42,7 +42,7 @@ const ConversationList = ({
                 </p>
                 <button
                   onClick={onRemovePropertyContext}
-                  className="text-xs text-blue-600 hover:underline mt-1"
+                  className="text-xs text-[#CC6F4A] hover:underline mt-1"
                 >
                   Xóa ngữ cảnh
                 </button>
@@ -74,13 +74,13 @@ const ConversationList = ({
           </div>
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-            <div className="text-gray-400 mb-2">
+            <div className="text-[#CC6F4A] mb-2">
               <Send className="w-12 h-12" />
             </div>
             <p className="text-gray-600 mb-4">Chưa có cuộc trò chuyện nào</p>
             <button
               onClick={onOpenSearch}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-[#CC6F4A] text-white rounded-lg hover:bg-[#B5604B] transition"
             >
               Bắt đầu trò chuyện
             </button>

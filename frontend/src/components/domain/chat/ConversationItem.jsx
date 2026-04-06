@@ -1,4 +1,5 @@
 import React from "react";
+import { getAttachmentPreviewText } from "../../../utils/chatAttachmentHelpers";
 
 const ConversationItem = ({
   conversation,
@@ -8,7 +9,7 @@ const ConversationItem = ({
   currentUserId,
 }) => {
   const otherParticipant = conversation.participants?.find(
-    (p) => (p.userId || p.id) !== currentUserId
+    (p) => (p.userId || p.id) !== currentUserId,
   );
 
   const displayName =
@@ -17,26 +18,41 @@ const ConversationItem = ({
     otherParticipant?.fullName ||
     otherParticipant?.username ||
     "Unknown User";
+  const avatarUrl =
+    conversation.conversationAvatar ||
+    otherParticipant?.avatar ||
+    otherParticipant?.avatarUrl ||
+    "";
 
   const lastMsg = conversation.lastMessage;
-  const lastMsgText = lastMsg?.message || lastMsg?.content || "No messages yet";
+  const lastMsgText = getAttachmentPreviewText(
+    lastMsg?.message || lastMsg?.content || "",
+  );
   const lastMsgTime = formatTime(
     conversation.lastMessageTime ||
       lastMsg?.createdDate ||
       lastMsg?.createdAt ||
-      lastMsg?.timestamp
+      lastMsg?.timestamp,
   );
 
   return (
     <div
       onClick={onClick}
-      className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition ${
-        selected ? "bg-blue-50" : ""
+      className={`p-4 border-b border-white/35 cursor-pointer hover:bg-white/35 transition ${
+        selected ? "bg-white/55" : ""
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
-          {displayName.charAt(0).toUpperCase()}
+        <div className="w-12 h-12 rounded-full overflow-hidden bg-[#CC6F4A] flex items-center justify-center text-white font-semibold flex-shrink-0">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            displayName.charAt(0).toUpperCase()
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
