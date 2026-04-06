@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { Compass, Map as MapIcon, SlidersHorizontal } from "lucide-react";
-import PropertyListView from "../../../../components/PropertySearch/PropertyListView";
-import PropertyMapView from "../../../../components/PropertySearch/PropertyMapView";
+import PropertyListView from "../../../../components/domain/property/PropertyListView";
+import PropertyMapView from "../../../../components/domain/property/PropertyMapView";
 
 const SearchContentSection = ({
   showListPanel,
@@ -18,6 +18,7 @@ const SearchContentSection = ({
   onPageChange,
   onPropertyHover,
   onPropertyClick,
+  onDirections,
   mapBounds,
   mapProperties,
   hoveredPropertyId,
@@ -30,6 +31,8 @@ const SearchContentSection = ({
   nearbyLng,
   nearbyRadiusKm,
   distanceMap,
+  directionsTarget,
+  onClearDirections,
 }) => {
   return (
     <Box
@@ -101,6 +104,9 @@ const SearchContentSection = ({
               onPageChange={onPageChange}
               onPropertyHover={onPropertyHover}
               onPropertyClick={onPropertyClick}
+              onDirections={onDirections}
+              onClearDirections={onClearDirections}
+              directionsTarget={directionsTarget}
               distanceMap={distanceMap}
               nearbyEnabled={nearbyEnabled}
             />
@@ -138,6 +144,8 @@ const SearchContentSection = ({
             nearbyLat={nearbyLat}
             nearbyLng={nearbyLng}
             nearbyRadiusKm={nearbyRadiusKm}
+            directionsTarget={directionsTarget}
+            onClearDirections={onClearDirections}
           />
         </Box>
       )}

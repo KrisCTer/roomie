@@ -1,6 +1,6 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import GoogleMapPicker from "../../../components/Property/GoogleMapPicker";
+import GoogleMapPicker from "../../../components/domain/property/GoogleMapPicker";
 import { useTranslation } from "react-i18next";
 
 const Step2Location = ({
@@ -11,6 +11,7 @@ const Step2Location = ({
   wards,
   mapsLoaded,
   onLocationChange,
+  onAddressResolved,
   error,
   setError,
 }) => {
@@ -27,6 +28,7 @@ const Step2Location = ({
           mapsLoaded={mapsLoaded}
           location={propertyData.location}
           onLocationChange={onLocationChange}
+          onAddressResolved={onAddressResolved}
           error={error}
           setError={setError}
         />
@@ -44,7 +46,7 @@ const Step2Location = ({
               value={propertyData.province}
               onChange={onInputChange}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
             >
               <option value="">{t("propertyForm.step2.selectProvince")}</option>
               {provinces?.map((prov) => (
@@ -67,7 +69,7 @@ const Step2Location = ({
               onChange={onInputChange}
               disabled={!propertyData.province}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                         focus:outline-none focus:ring-2 focus:ring-[#CC6F4A] disabled:bg-gray-100"
             >
               <option value="">{t("propertyForm.step2.selectDistrict")}</option>
               {districts?.map((dist) => (
@@ -92,7 +94,7 @@ const Step2Location = ({
               onChange={onInputChange}
               disabled={!propertyData.district}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                         focus:outline-none focus:ring-2 focus:ring-[#CC6F4A] disabled:bg-gray-100"
             >
               <option value="">{t("propertyForm.step2.selectWard")}</option>
               {wards?.map((ward) => (
@@ -115,7 +117,7 @@ const Step2Location = ({
               onChange={onInputChange}
               placeholder={t("propertyForm.step2.streetPlaceholder")}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
             />
           </div>
         </div>
@@ -132,7 +134,7 @@ const Step2Location = ({
             onChange={onInputChange}
             placeholder={t("propertyForm.step2.houseNumberPlaceholder")}
             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       focus:outline-none focus:ring-2 focus:ring-[#CC6F4A]"
           />
         </div>
 
@@ -153,7 +155,7 @@ const Step2Location = ({
               placeholder={t("propertyForm.step2.fullAddressPlaceholder")}
               rows="2"
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                         focus:outline-none focus:ring-2 focus:ring-[#CC6F4A] bg-gray-50"
             />
           </div>
 

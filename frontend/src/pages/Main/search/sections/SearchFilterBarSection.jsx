@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Button, Chip, Container, Stack } from "@mui/material";
-import { Filter, Grid2X2, Map as MapIcon } from "lucide-react";
+import { Grid2X2, Map as MapIcon } from "lucide-react";
 
 const SearchFilterBarSection = ({
   isDesktop,
@@ -10,6 +10,10 @@ const SearchFilterBarSection = ({
   setMobileView,
   onOpenFilters,
 }) => {
+  if (isDesktop) {
+    return null;
+  }
+
   return (
     <Box
       sx={{
@@ -31,7 +35,6 @@ const SearchFilterBarSection = ({
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             <Button
               onClick={onOpenFilters}
-              startIcon={<Filter size={16} />}
               variant="outlined"
               sx={{
                 borderRadius: 999,

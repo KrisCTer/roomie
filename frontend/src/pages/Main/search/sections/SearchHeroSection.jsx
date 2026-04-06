@@ -9,6 +9,8 @@ const SearchHeroSection = ({
   baseCount,
   visibleCount,
   mapBounds,
+  filterCount,
+  onOpenFilters,
 }) => {
   return (
     <Box
@@ -40,6 +42,22 @@ const SearchHeroSection = ({
           </Box>
 
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Button
+              onClick={onOpenFilters}
+              variant="outlined"
+              sx={{
+                borderRadius: 999,
+                minHeight: 36,
+                textTransform: "none",
+                borderColor: "#DCC8B1",
+                color: "#1F2937",
+                fontWeight: 700,
+                bgcolor: "#FFF",
+                px: 1.8,
+              }}
+            >
+              {`Bộ lọc${filterCount > 0 ? ` (${filterCount})` : ""}`}
+            </Button>
             <Chip label={`${baseCount} ứng viên`} className="search-chip" />
             <Chip label={`${visibleCount} hiển thị`} className="search-chip" />
             <Chip

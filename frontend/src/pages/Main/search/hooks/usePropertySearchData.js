@@ -7,6 +7,32 @@ import {
   getActiveFilterCount,
 } from "../utils/searchPresentation";
 
+const AVAILABLE_STATUSES = new Set(["AVAILABLE", "PUBLISHED", "VACANT", "ACTIVE"]);
+
+const isPropertyAvailable = (property) => {
+  const status = (
+    property?.propertyStatus ||
+    property?.status ||
+    ""
+  )
+    .toString()
+    .toUpperCase();
+
+  if (status) {
+    return AVAILABLE_STATUSES.has(status);
+  }
+
+  if (typeof property?.isAvailable === "boolean") {
+    return property.isAvailable;
+  }
+
+  if (typeof property?.isRented === "boolean") {
+    return !property.isRented;
+  }
+
+  return true;
+};
+
 const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
   const [allProperties, setAllProperties] = useState([]);
   const [baseFilteredProperties, setBaseFilteredProperties] = useState([]);
@@ -84,7 +110,7 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
             distanceMapRef.current.set(prop.propertyId, item.distanceKm);
           }
           return prop;
-        }).filter(Boolean);
+        }).filter(Boolean).filter(isPropertyAvailable);
 
         setAllProperties(properties);
 
@@ -101,7 +127,7 @@ const usePropertySearchData = ({ searchParams, t, isDesktop, navigate }) => {
           response?.result ||
           [];
 
-        setAllProperties(fetchedProperties);
+        setAllProperties(fetchedProperties.filter(isPropertyAvailable));
       }
     } catch (err) {
       console.error("Failed to load properties:", err);
