@@ -15,6 +15,8 @@ const LandlordBillTable = ({
   onEdit,
   onSend,
   onDelete,
+  hidePropertyColumn = false,
+  glassStyle = false,
 }) => {
   const getPropertyForBill = (bill) => {
     const contract = contracts.find((c) => c.id === bill.contractId);
@@ -31,11 +33,15 @@ const LandlordBillTable = ({
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-gray-50">
+        <thead
+          className={glassStyle ? "bg-white/45 backdrop-blur-sm" : "bg-gray-50"}
+        >
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Property
-            </th>
+            {!hidePropertyColumn && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Property
+              </th>
+            )}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               Tenant
             </th>
@@ -64,21 +70,30 @@ const LandlordBillTable = ({
             const tenant = getTenantForBill(bill);
 
             return (
-              <tr key={bill.id} className="hover:bg-gray-50 transition">
+              <tr
+                key={bill.id}
+                className={
+                  glassStyle
+                    ? "hover:bg-white/35 transition"
+                    : "hover:bg-gray-50 transition"
+                }
+              >
                 {/* Property */}
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <Home className="w-4 h-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {property?.title || "N/A"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {property?.address?.district || ""}
-                      </p>
+                {!hidePropertyColumn && (
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <Home className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {property?.title || "N/A"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {property?.address?.district || ""}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
+                )}
 
                 {/* Tenant */}
                 <td className="px-6 py-4">

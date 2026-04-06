@@ -14,40 +14,41 @@ const TenantStats = ({ stats }) => {
   return (
     <>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard
           icon={FileText}
           label="Tổng hóa đơn"
           value={stats.total}
-          bgColor="bg-blue-100"
-          textColor="text-blue-600"
+          color="blue"
         />
         <StatsCard
           icon={Clock}
           label="Đang chờ thanh toán"
           value={stats.pending}
-          bgColor="bg-yellow-100"
-          textColor="text-yellow-600"
+          color="yellow"
         />
         <StatsCard
           icon={CheckCircle}
           label="Đã thanh toán"
           value={stats.paid}
-          bgColor="bg-green-100"
-          textColor="text-green-600"
+          color="green"
         />
         <StatsCard
           icon={AlertCircle}
           label="Quá hạn"
           value={stats.overdue}
-          bgColor="bg-red-100"
-          textColor="text-red-600"
+          color="red"
         />
       </div>
 
       {/* Pending Payment Banner */}
       {stats.totalPending > 0 && (
-        <div className="apple-glass-panel rounded-2xl p-6 mb-6" style={{ background: 'linear-gradient(135deg, #e8845a 0%, #cc5533 100%)' }}>
+        <div
+          className="apple-glass-panel rounded-2xl p-6 mt-5"
+          style={{
+            background: "linear-gradient(135deg, #e8845a 0%, #cc5533 100%)",
+          }}
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white/70 mb-2">Tổng số tiền phải trả</p>
@@ -66,5 +67,3 @@ const TenantStats = ({ stats }) => {
 };
 
 export default TenantStats;
-
-

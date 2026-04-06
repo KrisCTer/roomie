@@ -14,46 +14,46 @@ const LandlordStats = ({ stats }) => {
   return (
     <>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <StatsCard
           icon={FileText}
           label="Tổng hóa đơn"
           value={stats.total}
-          bgColor="bg-blue-100"
-          textColor="text-blue-600"
+          color="blue"
         />
         <StatsCard
           icon={FileText}
           label="Bản nháp"
           value={stats.draft}
-          bgColor="bg-gray-100"
-          textColor="text-gray-600"
+          color="gray"
         />
         <StatsCard
           icon={Clock}
           label="Đang chờ thanh toán"
           value={stats.pending}
-          bgColor="bg-yellow-100"
-          textColor="text-yellow-600"
+          color="yellow"
         />
         <StatsCard
           icon={CheckCircle}
           label="Đã thanh toán"
           value={stats.paid}
-          bgColor="bg-green-100"
-          textColor="text-green-600"
+          color="green"
         />
         <StatsCard
           icon={AlertCircle}
           label="Quá hạn"
           value={stats.overdue}
-          bgColor="bg-red-100"
-          textColor="text-red-600"
+          color="red"
         />
       </div>
 
       {/* Revenue Banner */}
-      <div className="apple-glass-panel rounded-2xl p-6 mb-6" style={{ background: 'linear-gradient(135deg, #d89a5b 0%, #b8682f 100%)' }}>
+      <div
+        className="apple-glass-panel rounded-2xl p-6 mt-5"
+        style={{
+          background: "linear-gradient(135deg, #d89a5b 0%, #b8682f 100%)",
+        }}
+      >
         <div className="flex items-center justify-between">
           <div>
             <p className="text-white/70 mb-2">Tổng doanh thu</p>
@@ -71,5 +71,3 @@ const LandlordStats = ({ stats }) => {
 };
 
 export default LandlordStats;
-
-

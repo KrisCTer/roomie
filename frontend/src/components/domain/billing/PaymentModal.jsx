@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   CreditCard,
   Smartphone,
@@ -8,7 +8,12 @@ import {
   ArrowLeft,
   ShieldCheck,
   Info,
+  ExternalLink,
+  QrCode,
+  Copy,
+  Check,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   formatCurrency,
   getPaymentMethods,
@@ -21,9 +26,19 @@ const PaymentModal = ({
   onClose,
   onPay,
   paying,
+  momoPaymentUrl,
+  paymentCompleted,
 }) => {
   const [step, setStep] = useState(1);
+  const [copied, setCopied] = useState(false);
   const paymentMethods = getPaymentMethods();
+
+  // Auto-advance to QR step when momoPaymentUrl is received
+  useEffect(() => {
+    if (momoPaymentUrl && selectedMethod === "MOMO") {
+      setStep(3);
+    }
+  }, [momoPaymentUrl, selectedMethod]);
 
   const getIcon = (methodId) => {
     const icons = {
@@ -41,8 +56,137 @@ const PaymentModal = ({
   };
 
   const handleBack = () => {
-    setStep(1);
+    if (step === 3) setStep(2);
+    else setStep(1);
   };
+
+  const handleCopyUrl = async () => {
+    if (momoPaymentUrl) {
+      await navigator.clipboard.writeText(momoPaymentUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleOpenMoMo = () => {
+    if (momoPaymentUrl) {
+      window.open(momoPaymentUrl, "_blank");
+    }
+  };
+
+  // Step 3: MoMo QR Code Display
+  const renderMoMoQRStep = () => (
+    <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
+      {/* QR Code Card */}
+      <div className="text-center">
+        {paymentCompleted ? (
+          /* Success State */
+          <div className="py-6 animate-in fade-in zoom-in duration-500">
+            <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle className="w-12 h-12 text-green-500" />
+            </div>
+            <h3 className="text-xl font-bold text-green-700 mb-2">
+              Thanh toán thành công!
+            </h3>
+            <p className="text-sm text-slate-500">
+              Hóa đơn đã được thanh toán qua MoMo
+            </p>
+          </div>
+        ) : (
+          /* Waiting State */
+          <>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#fdf2f8] rounded-full mb-4">
+              <div className="w-2 h-2 bg-[#A50064] rounded-full animate-pulse" />
+              <span className="text-sm font-semibold text-[#A50064]">
+                Đang chờ thanh toán
+              </span>
+            </div>
+
+            {/* QR Container */}
+            <div className="relative mx-auto w-fit">
+              <div className="bg-white p-4 rounded-3xl shadow-lg border-2 border-[#fbcfe8]">
+                <QRCodeSVG
+                  value={momoPaymentUrl}
+                  size={200}
+                  level="M"
+                  includeMargin={false}
+                  bgColor="#FFFFFF"
+                  fgColor="#1a1a1a"
+                />
+              </div>
+              {/* MoMo badge */}
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#A50064] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
+                MoMo
+              </div>
+            </div>
+          </>
+        )}
+
+        {!paymentCompleted && (
+          <p className="mt-6 text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
+            Mở app <span className="font-bold text-[#A50064]">MoMo</span> →{" "}
+            <span className="font-semibold">Quét mã</span> → Xác nhận thanh toán
+          </p>
+        )}
+      </div>
+
+      {/* Amount Badge */}
+      <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Số tiền
+          </p>
+          <p className="text-xl font-bold text-slate-900">
+            {formatCurrency(bill.totalAmount)}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-slate-400">Mã HĐ</p>
+          <p className="text-sm font-mono font-semibold text-slate-600">
+            #{bill.id.slice(-8).toUpperCase()}
+          </p>
+        </div>
+      </div>
+
+      {/* Action Buttons - only show when not completed */}
+      {!paymentCompleted && (
+        <div className="space-y-3">
+          <button
+            onClick={handleOpenMoMo}
+            className="w-full py-3.5 bg-[#A50064] text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-pink-200"
+          >
+            <ExternalLink className="w-5 h-5" />
+            Mở trang MoMo
+          </button>
+
+          <button
+            onClick={handleCopyUrl}
+            className="w-full py-3 border-2 border-slate-100 text-slate-600 font-semibold rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-50 transition-all"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 text-green-500" />
+                <span className="text-green-600">Đã sao chép!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Sao chép link thanh toán
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Back button */}
+      <button
+        onClick={onClose}
+        className="w-full py-3 text-slate-400 text-sm hover:text-slate-600 transition-colors"
+      >
+        Đóng
+      </button>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-300">
@@ -51,20 +195,36 @@ const PaymentModal = ({
         <div className="px-8 pt-8 pb-4 flex justify-between items-center bg-white">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 leading-tight">
-              {step === 1 ? "Phương thức thanh toán" : "Xác nhận thanh toán"}
+              {step === 1
+                ? "Phương thức thanh toán"
+                : step === 2
+                ? "Xác nhận thanh toán"
+                : "Quét mã QR"}
             </h2>
             <p className="text-slate-500 text-sm mt-1">
               {step === 1
                 ? "Chọn cách thức thanh toán phù hợp với bạn"
-                : "Vui lòng kiểm tra lại thông tin giao dịch"}
+                : step === 2
+                ? "Vui lòng kiểm tra lại thông tin giao dịch"
+                : "Quét mã bên dưới bằng app MoMo để thanh toán"}
             </p>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -143,17 +303,26 @@ const PaymentModal = ({
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-          ) : (
+          ) : step === 2 ? (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               {/* Method Detail Card */}
               <div className="text-center py-4 px-6 rounded-3xl bg-slate-50 border border-slate-100 relative overflow-hidden">
-                 <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-10 ${currentMethod?.iconColor?.replace('text-', 'bg-')}`}></div>
-                
+                <div
+                  className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-10 ${currentMethod?.iconColor?.replace(
+                    "text-",
+                    "bg-"
+                  )}`}
+                ></div>
+
                 <div className="flex justify-center mb-4">
-                  <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg bg-white`}>
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg bg-white">
                     {(() => {
-                        const Icon = getIcon(currentMethod.id);
-                        return <Icon className={`w-10 h-10 ${currentMethod.iconColor}`} />;
+                      const Icon = getIcon(currentMethod.id);
+                      return (
+                        <Icon
+                          className={`w-10 h-10 ${currentMethod.iconColor}`}
+                        />
+                      );
                     })()}
                   </div>
                 </div>
@@ -161,7 +330,10 @@ const PaymentModal = ({
                   Thanh toán qua {currentMethod.name}
                 </h3>
                 <p className="text-slate-500 text-sm mt-1 max-w-xs mx-auto">
-                   Mã hoá đơn: <span className="font-semibold text-slate-700">#{bill.id.slice(-8).toUpperCase()}</span>
+                  Mã hoá đơn:{" "}
+                  <span className="font-semibold text-slate-700">
+                    #{bill.id.slice(-8).toUpperCase()}
+                  </span>
                 </p>
               </div>
 
@@ -169,12 +341,16 @@ const PaymentModal = ({
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-slate-600">
                   <span className="text-sm">Tổng số tiền</span>
-                  <span className="font-semibold text-slate-900">{formatCurrency(bill.totalAmount)}</span>
+                  <span className="font-semibold text-slate-900">
+                    {formatCurrency(bill.totalAmount)}
+                  </span>
                 </div>
-                 <div className="h-px bg-slate-100 my-2"></div>
+                <div className="h-px bg-slate-100 my-2"></div>
                 <div className="flex justify-between items-center font-bold text-lg text-slate-900">
                   <span>Cần thanh toán</span>
-                  <span className="text-blue-600">{formatCurrency(bill.totalAmount)}</span>
+                  <span className="text-blue-600">
+                    {formatCurrency(bill.totalAmount)}
+                  </span>
                 </div>
               </div>
 
@@ -206,13 +382,25 @@ const PaymentModal = ({
                     </>
                   ) : (
                     <>
-                      Thanh toán ngay
-                      <ArrowRight className="w-5 h-5" />
+                      {selectedMethod === "MOMO" ? (
+                        <>
+                          <ExternalLink className="w-5 h-5" />
+                          Mở trang MoMo
+                        </>
+                      ) : (
+                        <>
+                          Thanh toán ngay
+                          <ArrowRight className="w-5 h-5" />
+                        </>
+                      )}
                     </>
                   )}
                 </button>
               </div>
             </div>
+          ) : (
+            // Step 3: MoMo QR Code
+            renderMoMoQRStep()
           )}
         </div>
       </div>
@@ -221,5 +409,3 @@ const PaymentModal = ({
 };
 
 export default PaymentModal;
-
-

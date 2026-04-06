@@ -7,7 +7,7 @@ import {
   previewBillPdf,
   sendBill 
 } from "../../services/billingService";
-import { createPayment } from "../../services/paymentService";
+import { createPayment, getPayment } from "../../services/paymentService";
 import { getContract } from "../../services/contractService";
 import { getPropertyById } from "../../services/propertyService";
 import { getUserProfile } from "../../services/userService";
@@ -96,6 +96,40 @@ export const useBillDetail = () => {
     }
   };
 
+  const [momoPaymentUrl, setMomoPaymentUrl] = useState(null);
+  const [momoPaymentId, setMomoPaymentId] = useState(null);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+
+  // Poll payment status when QR is showing
+  useEffect(() => {
+    if (!momoPaymentId || !momoPaymentUrl || paymentCompleted) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await getPayment(momoPaymentId);
+        if (res?.success && res?.result) {
+          const status = res.result.status;
+          if (status === "COMPLETED") {
+            setPaymentCompleted(true);
+            clearInterval(interval);
+            showToast("Thanh toán thành công! 🎉", "success");
+            setTimeout(() => {
+              setShowPaymentModal(false);
+              setMomoPaymentUrl(null);
+              setMomoPaymentId(null);
+              setPaymentCompleted(false);
+              loadBillData();
+            }, 2500);
+          }
+        }
+      } catch (err) {
+        // Silently ignore polling errors
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [momoPaymentId, momoPaymentUrl, paymentCompleted]);
+
   const handlePayment = async () => {
     if (!selectedPaymentMethod) {
       showToast("Vui lòng chọn phương thức thanh toán!", "warning");
@@ -120,11 +154,7 @@ export const useBillDetail = () => {
       if (paymentRes?.success && paymentRes?.result) {
         const payment = paymentRes.result;
 
-        // For VNPAY or MOMO, redirect to payment gateway
-        if (
-          selectedPaymentMethod === "VNPAY" ||
-          selectedPaymentMethod === "MOMO"
-        ) {
+        if (selectedPaymentMethod === "MOMO" || selectedPaymentMethod === "VNPAY") {
           const redirectUrl = payment.paymentUrl || payment.payUrl;
           if (redirectUrl) {
             window.location.href = redirectUrl;
@@ -132,7 +162,7 @@ export const useBillDetail = () => {
             showToast("Không thể tạo link thanh toán!", "error");
           }
         }
-        // For CASH, mark as paid directly
+        // For CASH
         else if (selectedPaymentMethod === "CASH") {
           showToast("Vui lòng thanh toán tiền mặt trực tiếp cho chủ nhà.", "info");
           setShowPaymentModal(false);
@@ -400,10 +430,13 @@ export const useBillDetail = () => {
     // Modal states
     showPaymentModal,
     selectedPaymentMethod,
+    momoPaymentUrl,
+    paymentCompleted,
 
     // Setters
     setShowPaymentModal,
     setSelectedPaymentMethod,
+    setMomoPaymentUrl,
 
     // Handlers
     handlePayment,

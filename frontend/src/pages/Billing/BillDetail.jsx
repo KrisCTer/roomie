@@ -11,7 +11,6 @@ import {
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import "../../styles/apple-glass-dashboard.css";
 import "../../styles/home-redesign.css";
@@ -53,8 +52,11 @@ const BillDetail = () => {
     paying,
     showPaymentModal,
     selectedPaymentMethod,
+    momoPaymentUrl,
+    paymentCompleted,
     setShowPaymentModal,
     setSelectedPaymentMethod,
+    setMomoPaymentUrl,
     handlePayment,
     goBack,
   } = useBillDetail();
@@ -138,13 +140,14 @@ const BillDetail = () => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title={t("bill.billDetails")}
-          subtitle={t("bill.billSubtitle")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("bill.billDetails")}
+          pageSubtitle={t("bill.billSubtitle")}
         />
 
-        <main className="w-full px-4 pb-8 md:px-8">
+        <main className="w-full px-4 pb-8 pt-4 md:px-8">
           {/* Status Banner */}
           <StatusBanner bill={bill} isOverdue={isOverdue} isPaid={isPaid} />
 
@@ -195,9 +198,14 @@ const BillDetail = () => {
           bill={bill}
           selectedMethod={selectedPaymentMethod}
           setSelectedMethod={setSelectedPaymentMethod}
-          onClose={() => setShowPaymentModal(false)}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setMomoPaymentUrl(null);
+          }}
           onPay={handlePayment}
           paying={paying}
+          momoPaymentUrl={momoPaymentUrl}
+          paymentCompleted={paymentCompleted}
         />
       )}
     </div>
@@ -205,5 +213,3 @@ const BillDetail = () => {
 };
 
 export default BillDetail;
-
-
