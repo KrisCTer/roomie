@@ -11,6 +11,8 @@ import PropertyLocation from "../../../components/domain/property/PropertyLocati
 import PropertyInfo from "../../../components/domain/property/PropertyInfo";
 import OwnerContact from "../../../components/domain/property/OwnerContact";
 import BookingCard from "../../../components/domain/property/BookingCard";
+import Model3DSection from "../../../components/domain/property/Model3DSection";
+
 import PropertyDetailLoadingSection from "./sections/PropertyDetailLoadingSection";
 import PropertyDetailNotFoundSection from "./sections/PropertyDetailNotFoundSection";
 import PropertyDetailMetaSection from "./sections/PropertyDetailMetaSection";
@@ -62,6 +64,9 @@ const PropertyDetailPage = () => {
         />
 
         <ImageGallery images={images} title={property.title} />
+
+        {/* 3D Model Section — viewer only */}
+        <Model3DSection property={property} />
 
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
