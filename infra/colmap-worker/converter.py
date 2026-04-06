@@ -1,6 +1,12 @@
 """
-Point cloud / Mesh to GLB converter.
+Point cloud / Mesh to GLB converter for Roomie 3D property models.
 Creates a proper mesh from COLMAP point clouds using Open3D surface reconstruction.
+
+Reconstruction methods (priority order):
+  1. Poisson Surface Reconstruction (best quality, needs normals)
+  2. Ball Pivoting Algorithm (good for sparse/noisy clouds)
+  3. Delaunay Triangulation (scipy fallback)
+  4. Convex Hull (last resort)
 """
 
 import logging
