@@ -1,7 +1,15 @@
 """
-COLMAP reconstruction pipeline.
+COLMAP 3D reconstruction pipeline for Roomie property visualization.
 Runs SfM + (optional Dense reconstruction) + Meshing + GLB export.
 Falls back to sparse-only when CUDA is not available.
+
+Pipeline steps:
+  1. Feature extraction (SIFT)
+  2. Feature matching (Exhaustive or VocabTree)
+  3. Sparse reconstruction (SfM Mapper)
+  4a. [CUDA] Dense reconstruction (PatchMatch + Fusion)
+  4b. [CPU]  Sparse PLY export
+  5. Mesh generation + GLB conversion (Open3D)
 """
 
 import os
@@ -27,6 +35,8 @@ logger.info(f"CUDA available for COLMAP: {CUDA_AVAILABLE}")
 
 
 class ColmapPipeline:
+    """Orchestrates end-to-end 3D reconstruction from uploaded property images."""
+
     def __init__(self, workspace_dir):
         self.workspace = workspace_dir
         self.database_path = os.path.join(workspace_dir, "database.db")
@@ -35,6 +45,17 @@ class ColmapPipeline:
         self.mesh_dir = os.path.join(workspace_dir, "mesh")
 
     def run(self, images_dir):
+        """Execute the full reconstruction pipeline.
+
+        Args:
+            images_dir: Path to directory containing input images.
+
+        Returns:
+            str: Path to the generated GLB model file.
+
+        Raises:
+            RuntimeError: If SfM fails or point cloud is insufficient.
+        """
         os.makedirs(self.sparse_dir, exist_ok=True)
         os.makedirs(self.dense_dir, exist_ok=True)
         os.makedirs(self.mesh_dir, exist_ok=True)
