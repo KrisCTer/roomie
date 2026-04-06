@@ -8,8 +8,10 @@ const ChangePasswordForm = ({ passwords, onChange, onSubmit, loading }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-6">Thay đổi mật khẩu</h2>
+    <div className="home-glass-soft rounded-2xl p-5 border border-white/55">
+      <h2 className="text-xl font-bold text-[#2B2A28] mb-6">
+        Thay đổi mật khẩu
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <PasswordField
@@ -44,9 +46,9 @@ const ChangePasswordForm = ({ passwords, onChange, onSubmit, loading }) => {
         type="button"
         disabled={loading}
         onClick={onSubmit}
-        className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+        className="mt-6 bg-[#CC6F4A] text-white px-8 py-3 rounded-xl hover:bg-[#B5604B] transition disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {loading ? "Đang cập nhật..." : "Update Password"}
+        {loading ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
       </button>
     </div>
   );
