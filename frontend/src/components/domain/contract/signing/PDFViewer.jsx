@@ -5,19 +5,19 @@ const PDFViewer = ({ pdfUrl }) => {
   if (!pdfUrl) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <FileText className="w-6 h-6 text-blue-600" />
+    <div className="home-glass-card rounded-2xl p-6 border border-white/55">
+      <h2 className="text-xl font-bold text-[#2B2A28] mb-4 flex items-center gap-2">
+        <FileText className="w-6 h-6 text-[#CC6F4A]" />
         Xem trước hợp đồng
       </h2>
 
-      <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-white/70 rounded-xl overflow-hidden bg-white/45">
         <iframe
           src={pdfUrl}
           width="100%"
           height="600px"
           title="Contract PDF"
-          className="bg-gray-50"
+          className="bg-white"
         />
       </div>
 
@@ -26,7 +26,7 @@ const PDFViewer = ({ pdfUrl }) => {
           href={pdfUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white/70 text-[#3C3935] rounded-xl border border-white/70 hover:bg-white/85 transition-colors font-medium"
         >
           <Eye className="w-5 h-5" />
           Xem toàn màn hình
@@ -35,7 +35,7 @@ const PDFViewer = ({ pdfUrl }) => {
         <a
           href={pdfUrl}
           download
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#CC6F4A] text-white rounded-xl hover:bg-[#B55D3D] transition-colors font-medium shadow-[0_8px_18px_rgba(204,111,74,0.3)]"
         >
           <Download className="w-5 h-5" />
           Tải xuống PDF

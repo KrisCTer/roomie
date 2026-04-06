@@ -1,6 +1,6 @@
 ﻿/* aria-label */
 import React from "react";
-import { DollarSign, Calendar } from "lucide-react";
+import { DollarSign, Calendar, Wallet, Landmark } from "lucide-react";
 
 const PaymentTermsCard = ({
   property,
@@ -11,39 +11,45 @@ const PaymentTermsCard = ({
   if (!property || !contract) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <DollarSign className="w-6 h-6 text-blue-600" />
+    <div className="home-glass-card rounded-2xl p-6 border border-white/55">
+      <h2 className="text-xl font-bold text-[#2B2A28] mb-4 flex items-center gap-2">
+        <DollarSign className="w-6 h-6 text-[#CC6F4A]" />
         Điều khoản thanh toán
       </h2>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <p className="text-sm text-gray-600 mb-1">Tiền thuê hàng tháng</p>
-          <p className="text-2xl font-bold text-blue-600">
+        <div className="p-4 bg-white/55 rounded-xl border border-white/70">
+          <p className="text-sm text-[#6E675F] mb-1 flex items-center gap-1.5">
+            <Wallet className="w-4 h-4 text-[#CC6F4A]" />
+            Tiền thuê hàng tháng
+          </p>
+          <p className="text-2xl font-bold text-[#CC6F4A]">
             {formatCurrency(property.monthlyRent)}
           </p>
         </div>
 
-        <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-          <p className="text-sm text-gray-600 mb-1">Tiền đặt cọc</p>
-          <p className="text-2xl font-bold text-green-600">
+        <div className="p-4 bg-white/55 rounded-xl border border-white/70">
+          <p className="text-sm text-[#6E675F] mb-1 flex items-center gap-1.5">
+            <Landmark className="w-4 h-4 text-[#CC6F4A]" />
+            Tiền đặt cọc
+          </p>
+          <p className="text-2xl font-bold text-[#2B2A28]">
             {formatCurrency(property.rentalDeposit)}
           </p>
         </div>
 
-        <div>
-          <p className="text-sm text-gray-600">Ngày bắt đầu</p>
-          <p className="font-medium text-gray-900 flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+        <div className="rounded-xl border border-white/70 bg-white/45 p-3">
+          <p className="text-sm text-[#6E675F]">Ngày bắt đầu</p>
+          <p className="font-medium text-[#2B2A28] flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#CC6F4A]" />
             {formatDate(contract.startDate)}
           </p>
         </div>
 
-        <div>
-          <p className="text-sm text-gray-600">Ngày kết thúc</p>
-          <p className="font-medium text-gray-900 flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+        <div className="rounded-xl border border-white/70 bg-white/45 p-3">
+          <p className="text-sm text-[#6E675F]">Ngày kết thúc</p>
+          <p className="font-medium text-[#2B2A28] flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#CC6F4A]" />
             {formatDate(contract.endDate)}
           </p>
         </div>
@@ -53,5 +59,3 @@ const PaymentTermsCard = ({
 };
 
 export default PaymentTermsCard;
-
-

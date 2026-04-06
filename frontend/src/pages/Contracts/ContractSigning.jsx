@@ -6,7 +6,6 @@ import { AlertCircle } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import "../../styles/apple-glass-dashboard.css";
 import "../../styles/home-redesign.css";
@@ -19,6 +18,7 @@ import PDFViewer from "../../components/domain/contract/signing/PDFViewer.jsx";
 import SignatureStatusCard from "../../components/domain/contract/signing/SignatureStatusCard.jsx";
 import ActionsCard from "../../components/domain/contract/signing/ActionsCard.jsx";
 import ContractInfoCard from "../../components/domain/contract/signing/ContractInfoCard.jsx";
+import AmendmentTermsCard from "../../components/domain/contract/signing/AmendmentTermsCard.jsx";
 
 // Import custom hook
 import { useContractSigning } from "../../hooks/contract/useContractSigning.js";
@@ -63,6 +63,9 @@ const ContractSigning = () => {
     handleOpenSignModal,
     handleContinueToOTP,
     handleCloseSignModal,
+    handleUpdateSupplementaryTerms,
+    handleAddAmendment,
+    handleApproveAmendment,
     formatCurrency,
     formatDate,
     formatDateTime,
@@ -159,17 +162,20 @@ const ContractSigning = () => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title={t("contract.signingTitle")}
-          subtitle={t("contract.signingSubtitle")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("contract.signingTitle")}
+          pageSubtitle={t("contract.signingSubtitle")}
         />
 
         <main className="w-full px-4 pb-8 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
-              <PropertyInfoCard property={property} />
+              <div className="mt-2 md:mt-3">
+                <PropertyInfoCard property={property} />
+              </div>
 
               <PaymentTermsCard
                 property={property}
@@ -179,12 +185,19 @@ const ContractSigning = () => {
               />
 
               <PDFViewer pdfUrl={pdfUrl} />
+
+              <AmendmentTermsCard
+                contract={contract}
+                onAddAmendment={handleAddAmendment}
+                onApproveAmendment={handleApproveAmendment}
+                formatDateTime={formatDateTime}
+              />
             </div>
 
             {/* Right Column */}
             <div className="space-y-6">
               {/* Contract Status */}
-              <div className="apple-glass-panel p-4">
+              <div className="apple-glass-panel p-4 mt-2 md:mt-3">
                 <div
                   className={`${statusConfig.bg} ${statusConfig.text}
                   w-full px-4 py-3 rounded-lg
@@ -249,5 +262,3 @@ const ContractSigning = () => {
 };
 
 export default ContractSigning;
-
-

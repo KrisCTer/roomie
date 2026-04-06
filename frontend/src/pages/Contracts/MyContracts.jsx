@@ -6,7 +6,6 @@ import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../components/common/PageTitle.jsx";
 import { useTranslation } from "react-i18next";
 import { useRole } from "../../contexts/RoleContext";
 import { useRefresh } from "../../contexts/RefreshContext";
@@ -15,6 +14,7 @@ import "../../styles/home-redesign.css";
 
 // Import custom components
 import StatsCard from "../../components/domain/contract/StatsCard.jsx";
+import ContractFilters from "../../components/domain/contract/ContractFilters.jsx";
 import ContractsList from "../../components/domain/contract/ContractsList.jsx";
 import LoadingState from "../../components/domain/contract/LoadingState.jsx";
 import EmptyState from "../../components/domain/contract/EmptyState.jsx";
@@ -26,6 +26,8 @@ const MyContracts = () => {
   // Layout state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Contracts");
+  const [contractStatus, setContractStatus] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const { t } = useTranslation();
 
   // Contexts
@@ -57,6 +59,26 @@ const MyContracts = () => {
     };
   }, [registerRefreshCallback, unregisterRefreshCallback, refetch]);
 
+  // Filter contracts based on status and search term
+  const filteredContracts = currentContracts.filter((contract) => {
+    const statusMatch = !contractStatus || contract.status === contractStatus;
+
+    const searchLower = searchTerm.toLowerCase();
+    const propertyData = propertyCache[contract.propertyId];
+    const tenantData = userCache[contract.tenantId];
+    const landlordData = userCache[contract.landlordId];
+
+    const searchMatch =
+      !searchTerm ||
+      propertyData?.address?.toLowerCase().includes(searchLower) ||
+      propertyData?.title?.toLowerCase().includes(searchLower) ||
+      tenantData?.fullName?.toLowerCase().includes(searchLower) ||
+      landlordData?.fullName?.toLowerCase().includes(searchLower) ||
+      contract.id?.toLowerCase().includes(searchLower);
+
+    return statusMatch && searchMatch;
+  });
+
   return (
     <div className="home-v2 home-shell-bg min-h-screen">
       {/* Sidebar */}
@@ -74,11 +96,19 @@ const MyContracts = () => {
         }`}
       >
         {/* Header */}
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-        <PageTitle
-          title={t("contract.myContracts")}
-          subtitle={t("contract.myContractsSubtitle")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={
+            activeRole === "landlord"
+              ? t("contract.landlordTitle")
+              : t("contract.tenantTitle")
+          }
+          pageSubtitle={
+            activeRole === "landlord"
+              ? t("contract.landlordSubtitle")
+              : t("contract.tenantSubtitle")
+          }
         />
 
         {/* Toast Notification */}
@@ -110,64 +140,65 @@ const MyContracts = () => {
         )}
 
         {/* Content */}
-        <div className="w-full px-4 pb-8 md:px-8">
-          {/* Loading State */}
+        <main className="w-full px-4 pb-8 pt-6 md:px-8">
           {loading ? (
             <LoadingState />
           ) : (
-            <>
-              {/* Statistics */}
-              <div className="apple-glass-panel p-6 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <section className="space-y-5">
+              {/* Statistics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <StatsCard
                   icon={FileText}
                   label={t("contract.stats.total")}
                   value={stats.total}
-                  bgColor="bg-blue-100"
-                  textColor="text-blue-600"
+                  color="blue"
                 />
                 <StatsCard
                   icon={CheckCircle}
                   label={t("contract.stats.active")}
                   value={stats.active}
-                  bgColor="bg-green-100"
-                  textColor="text-green-600"
+                  color="green"
                 />
                 <StatsCard
                   icon={Clock}
                   label={t("contract.stats.pending")}
                   value={stats.pending}
-                  bgColor="bg-yellow-100"
-                  textColor="text-yellow-600"
+                  color="yellow"
                 />
                 <StatsCard
                   icon={AlertCircle}
                   label={t("contract.stats.expired")}
                   value={stats.expired}
-                  bgColor="bg-gray-100"
-                  textColor="text-gray-600"
+                  color="gray"
                 />
               </div>
+
+              {/* Filters */}
+              <div className="home-glass-soft sticky top-24 z-20 rounded-2xl p-4">
+                <ContractFilters
+                  contractStatus={contractStatus}
+                  onStatusChange={setContractStatus}
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                />
               </div>
 
               {/* Contracts List */}
-              <div className="apple-glass-panel p-6">
-                {currentContracts.length > 0 ? (
-                  <ContractsList
-                    contracts={currentContracts}
-                    role={activeTab}
-                    onContractClick={handleContractClick}
-                    propertyCache={propertyCache}
-                    userCache={userCache}
-                    currentUserId={currentUserId}
-                  />
-                ) : (
-                  <EmptyState activeTab={activeTab} />
-                )}
-              </div>
-            </>
+              {filteredContracts.length > 0 ? (
+                <ContractsList
+                  contracts={filteredContracts}
+                  role={activeTab}
+                  onContractClick={handleContractClick}
+                  propertyCache={propertyCache}
+                  userCache={userCache}
+                  currentUserId={currentUserId}
+                />
+              ) : (
+                <EmptyState activeTab={activeTab} />
+              )}
+            </section>
           )}
-        </div>
+        </main>
 
         <Footer />
       </div>
@@ -176,5 +207,3 @@ const MyContracts = () => {
 };
 
 export default MyContracts;
-
-

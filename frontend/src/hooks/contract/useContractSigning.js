@@ -6,6 +6,9 @@ import {
   landlordSignContract,
   requestLandlordOTP,
   requestTenantOTP,
+  updateContractSupplementaryTerms,
+  addContractAmendment,
+  approveContractAmendment,
 } from "../../services/contractService";
 import { getPropertyById } from "../../services/propertyService";
 import { getUserInfo } from "../../services/localStorageService";
@@ -366,6 +369,66 @@ export const useContractSigning = () => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const handleUpdateSupplementaryTerms = async (terms) => {
+    if (!contract?.id) return;
+
+    try {
+      const response = await updateContractSupplementaryTerms(contract.id, terms);
+      if (response?.success) {
+        showToast("Đã cập nhật điều khoản phụ", "success");
+        await fetchContractData();
+      } else {
+        showToast(response?.message || "Không thể cập nhật điều khoản phụ", "error");
+      }
+    } catch (error) {
+      console.error("❌ Error updating supplementary terms:", error);
+      showToast(
+        error?.response?.data?.message || "Không thể cập nhật điều khoản phụ",
+        "error"
+      );
+    }
+  };
+
+  const handleAddAmendment = async (payload) => {
+    if (!contract?.id) return;
+
+    try {
+      const response = await addContractAmendment(contract.id, payload);
+      if (response?.success) {
+        showToast("Đã thêm nội dung sửa đổi/bổ sung", "success");
+        await fetchContractData();
+      } else {
+        showToast(response?.message || "Không thể thêm sửa đổi/bổ sung", "error");
+      }
+    } catch (error) {
+      console.error("❌ Error adding amendment:", error);
+      showToast(
+        error?.response?.data?.message || "Không thể thêm sửa đổi/bổ sung",
+        "error"
+      );
+    }
+  };
+
+  const handleApproveAmendment = async (amendmentId) => {
+    if (!contract?.id || !amendmentId) return;
+
+    try {
+      const response = await approveContractAmendment(contract.id, amendmentId);
+      if (response?.success) {
+        showToast("Đã xác nhận phụ lục", "success");
+        await fetchContractData();
+      } else {
+        showToast(response?.message || "Không thể xác nhận phụ lục", "error");
+      }
+    } catch (error) {
+      console.error("❌ Error approving amendment:", error);
+      showToast(
+        error?.response?.data?.message || "Không thể xác nhận phụ lục",
+        "error"
+      );
+    }
+  };
+
   return {
     // State
     contract,
@@ -399,6 +462,9 @@ export const useContractSigning = () => {
     handleOpenSignModal,
     handleContinueToOTP,
     handleCloseSignModal,
+    handleUpdateSupplementaryTerms,
+    handleAddAmendment,
+    handleApproveAmendment,
 
     // Format functions
     formatCurrency,
