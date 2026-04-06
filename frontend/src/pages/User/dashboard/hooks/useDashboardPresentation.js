@@ -28,6 +28,24 @@ const useDashboardPresentation = ({ data, activeRole }) => {
     return `${days} ngày trước`;
   };
 
+  const getEntityPrefix = (entity, keys) => {
+    const found = keys
+      .map((key) => entity?.[key])
+      .find((value) => value !== null && value !== undefined && `${value}`.trim() !== "");
+    return found ? String(found).slice(0, 8) : "N/A";
+  };
+
+  const normalizeBillStatus = (status) => {
+    const upper = (status || "").toUpperCase();
+    if (upper === "UNPAID") return "PENDING";
+    return upper || "UNKNOWN";
+  };
+
+  const isUnpaidLike = (status) => {
+    const upper = (status || "").toUpperCase();
+    return ["UNPAID", "PENDING", "OVERDUE"].includes(upper);
+  };
+
   const allActivities = useMemo(() => {
     const activities = [];
 
@@ -63,10 +81,12 @@ const useDashboardPresentation = ({ data, activeRole }) => {
       });
 
       data.bills.forEach((bill) => {
+        const billPrefix = getEntityPrefix(bill, ["billId", "id"]);
+        const billStatus = normalizeBillStatus(bill.status);
         activities.push({
           type: "payment",
-          title: `Bill #${bill.billId?.substring(0, 8)}`,
-          description: `${bill.totalAmount?.toLocaleString()}đ - ${bill.status}`,
+          title: `Bill #${billPrefix}`,
+          description: `${(bill.totalAmount || 0).toLocaleString()}đ - ${billStatus}`,
           time: formatTime(bill.createdAt),
           createdAt: bill.createdAt,
         });
@@ -113,13 +133,13 @@ const useDashboardPresentation = ({ data, activeRole }) => {
         }));
 
       const unpaidBills = (data.bills || [])
-        .filter((bill) => (bill.status || "").toUpperCase() === "UNPAID")
+        .filter((bill) => isUnpaidLike(bill.status))
         .map((bill) => ({
           id: bill.billId || bill.id,
           type: "payment",
-          title: `Hóa đơn ${(bill.billId || bill.id || "").toString().slice(0, 8)}`,
+          title: `Hóa đơn ${getEntityPrefix(bill, ["billId", "id"])}`,
           subtitle: `${(bill.totalAmount || 0).toLocaleString()}đ cần theo dõi`,
-          status: "UNPAID",
+          status: normalizeBillStatus(bill.status),
           route: "/my-bills?status=unpaid",
           cta: "Xem hóa đơn",
           createdAt: bill.createdAt,
@@ -161,13 +181,13 @@ const useDashboardPresentation = ({ data, activeRole }) => {
       }));
 
     const unpaidBills = (data.bills || [])
-      .filter((bill) => (bill.status || "").toUpperCase() === "UNPAID")
+      .filter((bill) => isUnpaidLike(bill.status))
       .map((bill) => ({
         id: bill.billId || bill.id,
         type: "payment",
-        title: `Hóa đơn ${(bill.billId || bill.id || "").toString().slice(0, 8)}`,
+        title: `Hóa đơn ${getEntityPrefix(bill, ["billId", "id"])}`,
         subtitle: `${(bill.totalAmount || 0).toLocaleString()}đ chưa thanh toán`,
-        status: "UNPAID",
+        status: normalizeBillStatus(bill.status),
         route: "/my-bills?status=unpaid",
         cta: "Thanh toán",
         createdAt: bill.createdAt,
