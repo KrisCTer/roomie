@@ -60,13 +60,13 @@ const NotificationItem = ({
   const getPriorityColor = (priority) => {
     switch (priority) {
       case "URGENT":
-        return "bg-rose-100 border-rose-300 text-rose-800";
+        return "bg-[#FEF2F2] border-[#FECACA] text-[#991B1B]";
       case "HIGH":
-        return "bg-amber-100 border-amber-300 text-amber-800";
+        return "bg-[#FFF4E8] border-[#F5D9C4] text-[#9A3412]";
       case "NORMAL":
-        return "bg-sky-100 border-sky-300 text-sky-800";
+        return "bg-[#EFF6FF] border-[#D7E4FF] text-[#1D4ED8]";
       default:
-        return "bg-stone-100 border-stone-300 text-stone-800";
+        return "bg-[#F3F4F6] border-[#D1D5DB] text-[#4B5563]";
     }
   };
 
@@ -86,8 +86,13 @@ const NotificationItem = ({
     <div
       onClick={handleClick}
       className={`
-        p-4 border-b border-[#F3ECE2] hover:bg-[#FAF6EF] cursor-pointer transition-colors
-        ${!notification.isRead ? "bg-[#FFF4E8]" : "bg-white"}
+        cursor-pointer rounded-[24px] border p-4 md:p-5 transition-all duration-200
+        hover:-translate-y-0.5 hover:border-[#B45309] hover:ring-2 hover:ring-[#CC6F4A]/30 hover:shadow-[0_18px_40px_rgba(98,60,26,0.14)]
+        ${
+          !notification.isRead
+            ? "border-[#F2D8BE] bg-gradient-to-br from-[#FFF9F2] via-[#FFF4E8] to-[#FFEEDF]"
+            : "border-[#E8D8C7] bg-gradient-to-br from-white via-[#FFFDF8] to-[#FFF6ED]"
+        }
       `}
     >
       <div className="flex items-start gap-3">
@@ -100,7 +105,7 @@ const NotificationItem = ({
               className="w-10 h-10 rounded-full"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-[#F3E8D9] flex items-center justify-center">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#F0DECB] bg-white/90 shadow-sm">
               {getTypeIcon(notification.type)}
             </div>
           )}
@@ -110,10 +115,10 @@ const NotificationItem = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-[#1F2937]">
                 {notification.title}
               </p>
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+              <p className="mt-1 line-clamp-2 text-sm text-[#6B7280]">
                 {notification.shortMessage || notification.message}
               </p>
             </div>
@@ -122,15 +127,15 @@ const NotificationItem = ({
             <button
               onClick={handleDelete}
               aria-label="Delete notification"
-              className="flex-shrink-0 ml-2 p-1 rounded-lg hover:bg-[#F3ECE2] text-gray-400 hover:text-gray-600"
+              className="ml-2 flex-shrink-0 rounded-lg p-1 text-[#9CA3AF] transition hover:bg-white/70 hover:text-[#6B7280]"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs text-gray-500">
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-[#8A837A]">
               {getTimeAgo(notification.createdAt)}
             </span>
 
@@ -146,7 +151,7 @@ const NotificationItem = ({
             )}
 
             {!notification.isRead && (
-              <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+              <span className="h-2.5 w-2.5 rounded-full bg-[#CC6F4A]"></span>
             )}
           </div>
         </div>

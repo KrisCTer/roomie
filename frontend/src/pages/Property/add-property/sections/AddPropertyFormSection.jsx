@@ -3,6 +3,7 @@ import { Building } from "lucide-react";
 import Step1Basic from "../../steps/Step1Basic.jsx";
 import Step2Location from "../../steps/Step2Location.jsx";
 import Step3Amenities from "../../steps/Step3Amenities.jsx";
+import Step4Media from "../../steps/Step4Media.jsx";
 import Step4Review from "../../steps/Step4Review.jsx";
 import {
   homeSafetyOptions,
@@ -16,7 +17,9 @@ const AddPropertyFormSection = ({
   propertyData,
   uploadedImages,
   uploadingImages,
+  coverImage,
   isEditMode,
+  propertyId,
   loading,
   provinces,
   districts,
@@ -28,14 +31,19 @@ const AddPropertyFormSection = ({
   totalReviewImagePages,
   onInputChange,
   onLocationChange,
+  onAddressResolved,
   onAmenityToggle,
   onImageUpload,
   onImageRemove,
+  onCoverUpload,
+  onCoverRemove,
   onPrevious,
   onNext,
   onSubmit,
   onPreviousReviewImagePage,
   onNextReviewImagePage,
+  onToggle3dVisibility,
+  onRefreshProperty,
 }) => {
   return (
     <section>
@@ -52,6 +60,7 @@ const AddPropertyFormSection = ({
           wards={wards}
           mapsLoaded={mapsLoaded}
           onLocationChange={onLocationChange}
+          onAddressResolved={onAddressResolved}
           error={error}
           setError={setError}
         />
@@ -61,10 +70,6 @@ const AddPropertyFormSection = ({
         <Step3Amenities
           propertyData={propertyData}
           onAmenityToggle={onAmenityToggle}
-          uploadedImages={uploadedImages}
-          uploadingImages={uploadingImages}
-          onImageUpload={onImageUpload}
-          onImageRemove={onImageRemove}
           homeSafetyOptions={homeSafetyOptions}
           bedroomOptions={bedroomOptions}
           kitchenOptions={kitchenOptions}
@@ -73,6 +78,24 @@ const AddPropertyFormSection = ({
       )}
 
       {currentStep === 4 && (
+        <Step4Media
+          coverImage={coverImage}
+          uploadedImages={uploadedImages}
+          uploadingImages={uploadingImages}
+          isEditMode={isEditMode}
+          propertyId={propertyId}
+          model3dStatus={propertyData.model3dStatus}
+          model3dVisible={propertyData.model3dVisible}
+          onCoverUpload={onCoverUpload}
+          onCoverRemove={onCoverRemove}
+          onImageUpload={onImageUpload}
+          onImageRemove={onImageRemove}
+          onToggle3dVisibility={onToggle3dVisibility}
+          onRefreshProperty={onRefreshProperty}
+        />
+      )}
+
+      {currentStep === 5 && (
         <>
           <Step4Review
             propertyData={propertyData}
@@ -119,15 +142,15 @@ const AddPropertyFormSection = ({
               : "bg-slate-200 text-slate-700 hover:bg-slate-300"
           }`}
         >
-          Truoc
+          Trước
         </button>
 
-        {currentStep < 4 ? (
+        {currentStep < 5 ? (
           <button
             onClick={onNext}
             className="home-btn-accent px-6 py-3 text-sm font-medium md:text-base"
           >
-            Tiep theo
+            Tiếp theo
           </button>
         ) : (
           <button
@@ -138,12 +161,12 @@ const AddPropertyFormSection = ({
             {loading ? (
               <>
                 <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                {isEditMode ? "Updating..." : "Submitting..."}
+                {isEditMode ? "Đang cập nhật..." : "Đang gửi..."}
               </>
             ) : (
               <>
                 <Building className="h-5 w-5" />
-                {isEditMode ? "Cap nhat bat dong san" : "Gui bat dong san"}
+                {isEditMode ? "Cập nhật bất động sản" : "Gửi bất động sản"}
               </>
             )}
           </button>

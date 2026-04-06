@@ -28,7 +28,7 @@ const BookingCard = ({
   const handleEndChange = onLeaseEndChange || setLeaseEnd;
   const handleBooking = onBooking || onBook;
   const today = new Date().toISOString().split("T")[0];
-  const isAvailable = property.propertyStatus === "AVAILABLE";
+  const isAvailable = property?.propertyStatus === "AVAILABLE";
   const formatCurrency = (amount) =>
     Math.round(Number(amount || 0)).toLocaleString("vi-VN");
 

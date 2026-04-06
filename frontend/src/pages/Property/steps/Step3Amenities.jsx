@@ -1,13 +1,8 @@
 import React from "react";
-import ImageUploader from "../../../components/domain/property/ImageUploader";
 import { useTranslation } from "react-i18next";
 const Step3Amenities = ({
   propertyData,
   onAmenityToggle,
-  uploadedImages,
-  uploadingImages,
-  onImageUpload,
-  onImageRemove,
   homeSafetyOptions,
   bedroomOptions,
   kitchenOptions,
@@ -17,7 +12,6 @@ const Step3Amenities = ({
   const renderAmenitySection = (title, category, options) => (
     <div>
       <h3 className="font-semibold mb-3">
-        {/* {t(`propertyForm.step3.sections.${title}`)} */}
         {title}
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -30,7 +24,6 @@ const Step3Amenities = ({
               className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-[#CC6F4A]"
             />
             <span className="text-sm">
-              {/* {t(`propertyForm.step3.amenities.${item}`)} */}
               {item}
             </span>
           </label>
@@ -52,19 +45,6 @@ const Step3Amenities = ({
           {renderAmenitySection("Kitchen", "kitchen", kitchenOptions)}
           {renderAmenitySection("Others", "others", otherOptions)}
         </div>
-      </div>
-
-      <div className="home-glass-card rounded-xl p-6">
-        <h2 className="text-xl font-bold mb-6">
-          {t("propertyForm.step3.mediaTitle")}
-        </h2>
-
-        <ImageUploader
-          uploadedImages={uploadedImages}
-          uploadingImages={uploadingImages}
-          onImageUpload={onImageUpload}
-          onImageRemove={onImageRemove}
-        />
       </div>
     </div>
   );

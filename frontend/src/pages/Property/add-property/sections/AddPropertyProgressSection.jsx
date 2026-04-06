@@ -1,18 +1,19 @@
 import React from "react";
 
 const stepLabels = [
-  "Thong tin co ban",
-  "Vi tri",
-  "Chi tiet & Media",
-  "Danh gia & Hoan tat",
+  "Thông tin",
+  "Vị trí",
+  "Tiện ích",
+  "Ảnh & Media",
+  "Xem lại",
 ];
 
 const AddPropertyProgressSection = ({ currentStep }) => {
   return (
     <section className="home-glass-card mb-6 rounded-3xl p-6">
       <div className="relative mb-4">
-        <div className="relative z-10 grid grid-cols-4">
-          {[1, 2, 3, 4].map((step) => (
+        <div className="relative z-10 grid grid-cols-5">
+          {[1, 2, 3, 4, 5].map((step) => (
             <div key={step} className="flex justify-center">
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
@@ -27,18 +28,18 @@ const AddPropertyProgressSection = ({ currentStep }) => {
           ))}
         </div>
 
-        <div className="absolute left-[12.5%] right-[12.5%] top-5 h-1 rounded-full bg-slate-200" />
+        <div className="absolute left-[10%] right-[10%] top-5 h-1 rounded-full bg-slate-200" />
 
         <div
-          className="absolute left-[12.5%] top-5 h-1 rounded-full transition-all duration-300"
+          className="absolute left-[10%] top-5 h-1 rounded-full transition-all duration-300"
           style={{
-            width: `${((currentStep - 1) / 3) * 75}%`,
+            width: `${((currentStep - 1) / 4) * 80}%`,
             backgroundColor: "var(--home-accent-strong)",
           }}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-y-2 text-center text-xs font-medium text-slate-600 md:grid-cols-4 md:text-sm">
+      <div className="grid grid-cols-5 gap-y-2 text-center text-xs font-medium text-slate-600 md:text-sm">
         {stepLabels.map((label, index) => (
           <span
             key={label}

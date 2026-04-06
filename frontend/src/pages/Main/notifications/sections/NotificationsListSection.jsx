@@ -8,7 +8,7 @@ const NotificationsListSkeleton = () => {
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={`notification-skeleton-${index}`}
-          className="animate-pulse rounded-2xl border border-[#F2E9DE] bg-[#FFFCF8] p-4"
+          className="animate-pulse rounded-[24px] border border-[#EEDFD0] bg-gradient-to-br from-white via-[#FFFDF8] to-[#FFF6ED] p-4"
         >
           <div className="mb-2 h-4 w-1/3 rounded bg-[#EDE2D4]" />
           <div className="mb-2 h-3 w-4/5 rounded bg-[#EDE2D4]" />
@@ -53,13 +53,13 @@ const NotificationsListSection = ({
   }, [hasMore, loadingInitial, refreshing, loadingMore, onLoadMore]);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-[#EFE6DA] bg-white shadow-sm">
+    <section className="overflow-hidden rounded-[28px] border border-[#E8D8C7] bg-gradient-to-br from-white via-[#FFFDF8] to-[#FFF3E8] p-3 shadow-[0_14px_34px_rgba(98,60,26,0.08)]">
       {(loadingInitial || refreshing) && <NotificationsListSkeleton />}
 
       {!loadingInitial && !refreshing && notifications.length === 0 ? (
         <div className="p-12 text-center">
-          <Bell className="mx-auto mb-4 h-16 w-16 text-gray-300" />
-          <p className="text-gray-500">Không có thông báo nào</p>
+          <Bell className="mx-auto mb-4 h-16 w-16 text-[#D4B89B]" />
+          <p className="text-[#7B736A]">Không có thông báo nào</p>
         </div>
       ) : null}
 
@@ -77,7 +77,7 @@ const NotificationsListSection = ({
           <div ref={loadMoreRef} className="h-8" />
 
           {loadingMore && (
-            <div className="border-t border-[#F3ECE2] px-4 py-4 text-center text-sm text-gray-500">
+            <div className="border-t border-[#F3ECE2] px-4 py-4 text-center text-sm text-[#7B736A]">
               Đang tải thêm thông báo...
             </div>
           )}
