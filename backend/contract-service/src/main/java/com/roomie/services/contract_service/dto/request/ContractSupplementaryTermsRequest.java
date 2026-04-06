@@ -3,8 +3,6 @@ package com.roomie.services.contract_service.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -12,12 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ContractRequest {
-    String bookingId;
-    String propertyId;
-    String tenantId;
-    String landlordId;
-    Instant startDate;
-    Instant endDate;
+public class ContractSupplementaryTermsRequest {
     List<String> supplementaryTerms;
 }

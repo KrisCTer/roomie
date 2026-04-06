@@ -1,11 +1,13 @@
 package com.roomie.services.contract_service.dto.response;
 
 import com.roomie.services.contract_service.enums.ContractStatus;
+import com.roomie.services.contract_service.entity.ContractAmendment;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,6 +28,8 @@ public class ContractResponse {
     boolean tenantSigned;
     boolean landlordSigned;
     String pdfUrl;
+    List<String> supplementaryTerms;
+    List<ContractAmendment> amendments;
     Instant createdAt;
     Instant updatedAt;
 }

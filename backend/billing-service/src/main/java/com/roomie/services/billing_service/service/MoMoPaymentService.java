@@ -67,8 +67,9 @@ public class MoMoPaymentService {
      */
     public MoMoPaymentResponse createPaymentQR(String billId, long amount, String orderInfo) {
         try {
-            String requestId = billId;
-            String orderId = billId;
+            String suffix = "_" + System.currentTimeMillis();
+            String requestId = billId + suffix;
+            String orderId = billId + suffix;
             String requestType = "captureWallet";
             String extraData = "";
 

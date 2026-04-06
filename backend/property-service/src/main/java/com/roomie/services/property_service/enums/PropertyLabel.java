@@ -1,8 +1,8 @@
 package com.roomie.services.property_service.enums;
 
 public enum PropertyLabel {
-    HOT,            // Hot
-    NEW,            // Mới đăng
-    RECOMMENDED,    // Gợi ý
-    NONE            // Không gắn nhãn
+    HOT, // Hot theo lượt truy cập nhiều
+    NEW, // Mới đăng vừa mới đăng
+    RECOMMENDED, // Gợi ý gần đây khoảng 5km
+    NONE // Không gắn nhãn
 }

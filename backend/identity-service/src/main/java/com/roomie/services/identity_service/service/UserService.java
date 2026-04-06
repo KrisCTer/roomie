@@ -56,7 +56,9 @@ public class UserService {
         roleNames.forEach(roleName -> {
             roleRepository.findById(String.valueOf(roleName))
                     .ifPresentOrElse(roles::add,
-                            () -> { throw new AppException(ErrorCode.ROLE_NOT_FOUND); });
+                            () -> {
+                                throw new AppException(ErrorCode.ROLE_NOT_FOUND);
+                            });
         });
         user.setRoles(roles);
         user.setEmailVerified(false);
@@ -65,7 +67,7 @@ public class UserService {
 
         try {
             user = userRepository.save(user);
-        } catch (DataIntegrityViolationException exception){
+        } catch (DataIntegrityViolationException exception) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
@@ -118,22 +120,26 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
     public List<UserResponse> getUsers() {
         log.info("In method get Users");
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(
                 userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public void suspendUser(String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.setIsActive(false);
         userRepository.save(user);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public void banUser(String userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
