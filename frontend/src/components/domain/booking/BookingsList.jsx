@@ -37,7 +37,7 @@ const BookingsList = ({
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-4">
       {bookings.map((booking) => (
         <BookingCard key={booking.id} booking={booking} isOwner={isOwner} />
       ))}

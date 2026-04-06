@@ -2,10 +2,16 @@
 /* aria-label */
 // web-app/src/pages/Booking/MyBookings.jsx
 import React, { useState } from "react";
+import {
+  List as ListIcon,
+  Clock as ClockIcon,
+  CheckCircle2 as CheckCircleIcon,
+  XCircle as XCircleIcon,
+} from "lucide-react";
 import Sidebar from "../../components/layout/layoutUser/Sidebar.jsx";
 import Header from "../../components/layout/layoutUser/Header.jsx";
 import Footer from "../../components/layout/layoutUser/Footer.jsx";
-import PageTitle from "../../components/common/PageTitle.jsx";
+import StatCard from "../../components/domain/dashboard/StatCard.jsx";
 import { useTranslation } from "react-i18next";
 import { useRole } from "../../contexts/RoleContext";
 import "../../styles/apple-glass-dashboard.css";
@@ -78,58 +84,124 @@ const MyBookings = () => {
         }`}
       >
         {/* ✅ Header without role props (handled in Header component) */}
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-        <PageTitle
-          title={t("booking.myBookings")}
-          subtitle={t("booking.myBookingsSubtitle")}
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={
+            activeRole === "landlord"
+              ? t("booking.landlordTitle")
+              : t("booking.tenantTitle")
+          }
+          pageSubtitle={
+            activeRole === "landlord"
+              ? t("booking.landlordSubtitle")
+              : t("booking.tenantSubtitle")
+          }
         />
 
-        <main className="w-full px-4 pb-8 md:px-8">
-          <div className="apple-glass-panel p-6 mb-6">
-            <div className="mb-6 rounded-2xl border border-[#EBDCC8] bg-gradient-to-r from-[#FFF8EE] to-[#FFFCF8] px-4 py-3 flex flex-wrap items-center gap-3 text-sm">
-              <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
-                Tổng booking: {bookings.length}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
-                Vai trò chủ nhà: {ownerCount}
-              </span>
-              <span className="inline-flex items-center rounded-full bg-white border border-[#ECDDC8] px-3 py-1 font-semibold text-gray-700">
-                Vai trò người thuê: {tenantCount}
-              </span>
-            </div>
-
-            {/* ❌ Remove ViewModeToggle - Role toggle is now in Header */}
-
-            {/* Filters */}
-            <BookingFilters
-              bookingStatus={bookingStatus}
-              onStatusChange={setBookingStatus}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-
-            {/* Bookings List */}
-            <div className="apple-glass-panel">
-              <BookingsList
-                bookings={transformedBookings}
-                loading={loading}
-                viewMode={viewMode}
-                isOwner={activeRole === "landlord"}
-                bookingStatus={bookingStatus}
-                searchTerm={searchTerm}
-              />
-
-              {/* Pagination */}
-              {!loading && bookings.length > 0 && (
-                <BookingsPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
+        <main className="w-full px-4 pb-8 pt-6 md:px-8">
+          <section className="space-y-5">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              {activeRole === "landlord" ? (
+                <>
+                  <StatCard
+                    icon={ListIcon}
+                    label={t("booking.totalBookings")}
+                    value={bookings.length}
+                    color="blue"
+                  />
+                  <StatCard
+                    icon={ClockIcon}
+                    label={t("booking.pendingCount")}
+                    value={
+                      bookings.filter(
+                        (b) => b.status === "PENDING" || b.status === "ACTIVE",
+                      ).length
+                    }
+                    color="yellow"
+                  />
+                  <StatCard
+                    icon={CheckCircleIcon}
+                    label={t("booking.confirmedCount")}
+                    value={
+                      bookings.filter((b) => b.status === "CONFIRMED").length
+                    }
+                    color="green"
+                  />
+                  <StatCard
+                    icon={XCircleIcon}
+                    label={t("booking.cancelledCount")}
+                    value={
+                      bookings.filter((b) => b.status === "CANCELLED").length
+                    }
+                    color="red"
+                  />
+                </>
+              ) : (
+                <>
+                  <StatCard
+                    icon={ListIcon}
+                    label={t("booking.totalBookings")}
+                    value={bookings.length}
+                    color="blue"
+                  />
+                  <StatCard
+                    icon={ClockIcon}
+                    label={t("booking.activeCount")}
+                    value={
+                      bookings.filter(
+                        (b) => b.status === "ACTIVE" || b.status === "PENDING",
+                      ).length
+                    }
+                    color="yellow"
+                  />
+                  <StatCard
+                    icon={CheckCircleIcon}
+                    label={t("booking.completedCount")}
+                    value={
+                      bookings.filter((b) => b.status === "COMPLETED").length
+                    }
+                    color="green"
+                  />
+                  <StatCard
+                    icon={XCircleIcon}
+                    label={t("booking.cancelledCount")}
+                    value={
+                      bookings.filter((b) => b.status === "CANCELLED").length
+                    }
+                    color="red"
+                  />
+                </>
               )}
             </div>
-          </div>
+
+            <div className="home-glass-soft sticky top-24 z-20 rounded-2xl p-4">
+              <BookingFilters
+                bookingStatus={bookingStatus}
+                onStatusChange={setBookingStatus}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
+            </div>
+
+            <BookingsList
+              bookings={transformedBookings}
+              loading={loading}
+              viewMode={viewMode}
+              isOwner={activeRole === "landlord"}
+              bookingStatus={bookingStatus}
+              searchTerm={searchTerm}
+            />
+
+            {!loading && bookings.length > 0 && (
+              <BookingsPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </section>
         </main>
 
         <Footer />

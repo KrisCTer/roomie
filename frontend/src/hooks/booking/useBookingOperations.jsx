@@ -11,7 +11,7 @@ import {
 import { getUserInfo } from "../../services/localStorageService";
 import { useDialog } from "../../contexts/DialogContext";
 
-export const useBookingOperations = () => {
+export const useBookingOperations = (activeRole) => {
   const navigate = useNavigate();
   const { showToast, showConfirm } = useDialog();
   const [bookings, setBookings] = useState([]);
@@ -21,8 +21,10 @@ export const useBookingOperations = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [viewMode, setViewMode] = useState("OWNER");
   const [currentUserId, setCurrentUserId] = useState(null);
+
+  // viewMode derived from activeRole
+  const viewMode = activeRole === "landlord" ? "OWNER" : "TENANT";
 
   // Get current user info
   useEffect(() => {
@@ -32,17 +34,17 @@ export const useBookingOperations = () => {
     }
   }, []);
 
-  // Fetch bookings when filters change
+  // Fetch bookings when filters or role change
   useEffect(() => {
     fetchBookings();
-  }, [bookingStatus, searchTerm, currentPage, viewMode]);
+  }, [bookingStatus, searchTerm, currentPage, activeRole]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
 
       const response =
-        viewMode === "OWNER" ? await getOwnerBookings() : await getMyBookings();
+        activeRole === "landlord" ? await getOwnerBookings() : await getMyBookings();
 
 
       if (response && response.success && response.result) {
@@ -236,7 +238,6 @@ export const useBookingOperations = () => {
     setBookingStatus,
     setSearchTerm,
     setCurrentPage,
-    setViewMode,
 
     // Handlers
     handleCancelBooking,
