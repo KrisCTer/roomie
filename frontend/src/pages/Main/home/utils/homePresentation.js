@@ -49,6 +49,7 @@ export const transformToCardData = (property, t) => {
     id: property.propertyId || property.id,
     title: property.title || t("home.untitled"),
     image,
+    label: property.propertyLabel || "NONE",
     price,
     location:
       [district, province].filter(Boolean).join(", ") ||
@@ -60,5 +61,6 @@ export const transformToCardData = (property, t) => {
     displayType: property.propertyType
       ? t(`home.propertyType.${property.propertyType}`)
       : null,
+    coordinateLocation: property.address?.location || null,
   };
 };
