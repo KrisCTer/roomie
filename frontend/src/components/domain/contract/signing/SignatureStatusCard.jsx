@@ -4,9 +4,9 @@ import { Shield, CheckCircle, Clock } from "lucide-react";
 
 const SignatureStatusCard = ({ contract }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <Shield className="w-6 h-6 text-blue-600" />
+    <div className="home-glass-card rounded-2xl p-6 border border-white/55">
+      <h2 className="text-xl font-bold text-[#2B2A28] mb-4 flex items-center gap-2">
+        <Shield className="w-6 h-6 text-[#CC6F4A]" />
         Trạng thái chữ ký
       </h2>
 
@@ -15,24 +15,24 @@ const SignatureStatusCard = ({ contract }) => {
         <div
           className={`p-4 rounded-lg border-2 ${
             contract.landlordSigned
-              ? "bg-green-50 border-green-300"
-              : "bg-gray-50 border-gray-200"
+              ? "bg-emerald-500/10 border-emerald-500/35"
+              : "bg-white/55 border-white/70"
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-900">Chủ nhà</span>
+            <span className="font-semibold text-[#2B2A28]">Chủ nhà</span>
             {contract.landlordSigned ? (
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <CheckCircle className="w-6 h-6 text-emerald-600" />
             ) : (
-              <Clock className="w-6 h-6 text-gray-400" />
+              <Clock className="w-6 h-6 text-[#9C958B]" />
             )}
           </div>
           <p
             className={`text-sm ${
-              contract.landlordSigned ? "text-green-700" : "text-gray-600"
+              contract.landlordSigned ? "text-emerald-700" : "text-[#6E675F]"
             }`}
           >
-            {contract.landlordSigned ? "✓ Đã ký" : "Chưa ký"}
+            {contract.landlordSigned ? "Đã ký" : "Chưa ký"}
           </p>
         </div>
 
@@ -40,31 +40,31 @@ const SignatureStatusCard = ({ contract }) => {
         <div
           className={`p-4 rounded-lg border-2 ${
             contract.tenantSigned
-              ? "bg-green-50 border-green-300"
-              : "bg-gray-50 border-gray-200"
+              ? "bg-emerald-500/10 border-emerald-500/35"
+              : "bg-white/55 border-white/70"
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-900">Người thuê</span>
+            <span className="font-semibold text-[#2B2A28]">Người thuê</span>
             {contract.tenantSigned ? (
-              <CheckCircle className="w-6 h-6 text-green-600" />
+              <CheckCircle className="w-6 h-6 text-emerald-600" />
             ) : (
-              <Clock className="w-6 h-6 text-gray-400" />
+              <Clock className="w-6 h-6 text-[#9C958B]" />
             )}
           </div>
           <p
             className={`text-sm ${
-              contract.tenantSigned ? "text-green-700" : "text-gray-600"
+              contract.tenantSigned ? "text-emerald-700" : "text-[#6E675F]"
             }`}
           >
-            {contract.tenantSigned ? "✓ Đã ký" : "Chưa ký"}
+            {contract.tenantSigned ? "Đã ký" : "Chưa ký"}
           </p>
         </div>
 
         {/* Both signed */}
         {contract.landlordSigned && contract.tenantSigned && (
-          <div className="p-4 bg-green-100 border-2 border-green-400 rounded-lg">
-            <div className="flex items-center gap-2 text-green-800">
+          <div className="p-4 bg-emerald-500/12 border border-emerald-500/35 rounded-xl">
+            <div className="flex items-center gap-2 text-emerald-800">
               <CheckCircle className="w-5 h-5" />
               <span className="font-semibold">Cả hai bên đã ký hợp đồng</span>
             </div>
@@ -76,5 +76,3 @@ const SignatureStatusCard = ({ contract }) => {
 };
 
 export default SignatureStatusCard;
-
-
