@@ -29,7 +29,8 @@ const Model3DSection = ({ property }) => {
           </div>
           <p style={processingTextStyle}>Đang tạo mô hình 3D...</p>
           <p style={processingSubtextStyle}>
-            Quá trình này có thể mất 5-30 phút tùy thuộc vào số lượng ảnh.
+            Quá trình tái tạo 3D có thể mất 5-30 phút tùy thuộc vào số lượng
+            và chất lượng ảnh. Bạn có thể rời khỏi trang và quay lại sau.
           </p>
         </div>
         <style>{spinnerCSS}</style>
