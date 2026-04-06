@@ -12,6 +12,8 @@ import { getUserInfo } from "../../services/localStorageService";
 import { useSocket } from "../../contexts/SocketContext";
 import { scrollToBottom as scrollHelper } from "../../utils/chatHelpers";
 import { useDialog } from "../../contexts/DialogContext";
+import { uploadFile } from "../../services/fileService";
+import { createAttachmentMessage } from "../../utils/chatAttachmentHelpers";
 
 export const useChatOperations = () => {
   const location = useLocation();
@@ -147,23 +149,64 @@ export const useChatOperations = () => {
 
   // Send message
   const handleSendMessage = useCallback(
-    async (e) => {
+    async (e, options = {}) => {
       e.preventDefault();
-      if (!newMessage.trim() || !selectedConversation) return;
+      const attachments = options.attachments || [];
+      if ((!newMessage.trim() && attachments.length === 0) || !selectedConversation) {
+        return false;
+      }
 
       if (!currentUser) {
         showToast("Vui lòng đăng nhập để gửi tin nhắn", "warning");
-        return;
+        return false;
       }
 
       const convId =
         selectedConversation.conversationId || selectedConversation.id;
 
+      let chatPayloadMessage = newMessage.trim();
+
+      if (attachments.length > 0) {
+        try {
+          const uploadedAttachments = await Promise.all(
+            attachments.map(async (item) => {
+              const response = await uploadFile(item.file, {
+                entityType: "CHAT_MESSAGE",
+                entityId: convId,
+              });
+
+              const fileData = response?.result || response?.data || response;
+              return {
+                name: item.file.name,
+                mimeType: item.file.type,
+                size: item.file.size,
+                isImage: item.file.type.startsWith("image/"),
+                fileId: fileData?.fileId || fileData?.id,
+                url: fileData?.publicUrl || fileData?.url,
+              };
+            })
+          );
+
+          if (uploadedAttachments.some((file) => !file.url)) {
+            throw new Error("Missing uploaded file URL");
+          }
+
+          chatPayloadMessage = createAttachmentMessage({
+            text: newMessage.trim(),
+            attachments: uploadedAttachments,
+          });
+        } catch (error) {
+          console.error("❌ Error uploading attachments:", error);
+          showToast("Không thể tải tệp lên. Vui lòng thử lại.", "error");
+          return false;
+        }
+      }
+
       // Create optimistic message
       const tempMessage = {
         id: `temp-${Date.now()}`,
         conversationId: convId,
-        message: newMessage.trim(),
+        message: chatPayloadMessage,
         me: true,
         sender: {
           userId: currentUser.userId,
@@ -226,12 +269,15 @@ export const useChatOperations = () => {
             }
           }, 500);
         }
+
+        return true;
       } catch (error) {
         console.error("❌ Error sending message:", error);
 
         // Remove optimistic message on error
         setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
         showToast("Không thể gửi tin nhắn. Vui lòng thử lại.", "error");
+        return false;
       } finally {
         setSending(false);
       }

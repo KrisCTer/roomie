@@ -51,32 +51,43 @@ const SearchModal = ({
                   : "Nhập tên để tìm kiếm"}
               </p>
             ) : (
-              searchResults.map((user) => (
-                <div
-                  key={user.userId || user.id}
-                  className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                      {(user.fullName || user.username || "U")
-                        .charAt(0)
-                        .toUpperCase()}
+              searchResults.map((user) =>
+                (() => {
+                  const displayName = user.fullName || user.username || "U";
+                  const avatarUrl = user.avatar || user.avatarUrl || "";
+
+                  return (
+                    <div
+                      key={user.userId || user.id}
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-[#CC6F4A] flex items-center justify-center text-white font-semibold">
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={displayName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            displayName.charAt(0).toUpperCase()
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{displayName}</p>
+                          <p className="text-sm text-gray-500">{user.email}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => onCreate(user.userId || user.id)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
+                      >
+                        Nhắn tin
+                      </button>
                     </div>
-                    <div>
-                      <p className="font-semibold">
-                        {user.fullName || user.username}
-                      </p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => onCreate(user.userId || user.id)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"
-                  >
-                    Nhắn tin
-                  </button>
-                </div>
-              ))
+                  );
+                })(),
+              )
             )}
           </div>
         </div>

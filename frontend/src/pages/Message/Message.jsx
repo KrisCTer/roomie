@@ -90,7 +90,7 @@ const Message = () => {
 
     const remotePeer = findRemotePeer(
       selectedConversation.participants,
-      currentUser.userId || currentUser.id || currentUser.sub
+      currentUser.userId || currentUser.id || currentUser.sub,
     );
 
     if (!remotePeer) {
@@ -101,7 +101,7 @@ const Message = () => {
     startCall(
       selectedConversation.id || selectedConversation.conversationId,
       remotePeer,
-      "voice"
+      "voice",
     );
   };
 
@@ -119,7 +119,7 @@ const Message = () => {
 
     const remotePeer = findRemotePeer(
       selectedConversation.participants,
-      currentUser.userId || currentUser.id || currentUser.sub
+      currentUser.userId || currentUser.id || currentUser.sub,
     );
 
     if (!remotePeer) {
@@ -130,7 +130,7 @@ const Message = () => {
     startCall(
       selectedConversation.id || selectedConversation.conversationId,
       remotePeer,
-      "video"
+      "video",
     );
   };
 
@@ -147,10 +147,15 @@ const Message = () => {
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle={t("sidebar.landlord.messages", "Messages")}
+          pageSubtitle="Quản lý cuộc trò chuyện và phản hồi nhanh"
+        />
 
-        <main className="flex-1 px-4 pb-4 md:px-8">
-          <div className="apple-glass-panel overflow-hidden h-[calc(100vh-73px)] flex">
+        <main className="flex-1 px-4 pb-4 pt-6 md:px-8">
+          <div className="home-glass-card overflow-hidden rounded-2xl h-[calc(100vh-150px)] flex">
             <ConversationList
               conversations={conversations}
               selectedConversation={selectedConversation}
@@ -206,5 +211,3 @@ const Message = () => {
 };
 
 export default Message;
-
-
