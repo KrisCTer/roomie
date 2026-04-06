@@ -6,9 +6,6 @@ import StatCard from "./StatCard";
 const LandlordStats = ({ stats, onStatClick }) => {
   return (
     <div>
-      <h2 className="mb-4 text-xl font-bold home-text-primary">
-        KPI vận hành chính
-      </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
         <StatCard
           icon={Home}

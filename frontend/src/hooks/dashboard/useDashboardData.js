@@ -117,6 +117,9 @@ const useDashboardData = (activeRole) => {
 
   // Calculate landlord stats
   const calculateLandlordStats = (properties, bookings, contracts, bills) => {
+    const isUnpaidLike = (status) =>
+      ["UNPAID", "PENDING", "OVERDUE"].includes((status || "").toUpperCase());
+
     const totalProperties = properties.length;
     const pendingProperties = properties.filter(p => 
       ["DRAFT", "PENDING"].includes((p.status || p.propertyStatus || "").toUpperCase())
@@ -134,7 +137,7 @@ const useDashboardData = (activeRole) => {
     const pendingContracts = contracts.filter(c => c.status === "PENDING").length;
     const expiredContracts = contracts.filter(c => c.status === "EXPIRED" || c.status === "TERMINATED").length;
     
-    const unpaidBills = bills.filter(b => b.status === "UNPAID").length;
+    const unpaidBills = bills.filter(b => isUnpaidLike(b.status)).length;
     const paidBills = bills.filter(b => b.status === "PAID").length;
     const totalBillAmount = bills.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
     
@@ -156,6 +159,9 @@ const useDashboardData = (activeRole) => {
 
   // Calculate tenant stats
   const calculateTenantStats = (bookings, contracts, bills) => {
+    const isUnpaidLike = (status) =>
+      ["UNPAID", "PENDING", "OVERDUE"].includes((status || "").toUpperCase());
+
     const activeBookings = bookings.filter(b => b.status === "CONFIRMED").length;
     const pendingBookings = bookings.filter(b => b.status === "PENDING").length;
     const completedBookings = bookings.filter(b => b.status === "COMPLETED").length;
@@ -164,7 +170,7 @@ const useDashboardData = (activeRole) => {
     const pendingContracts = contracts.filter(c => c.status === "PENDING").length;
     const expiredContracts = contracts.filter(c => c.status === "EXPIRED" || c.status === "TERMINATED").length;
     
-    const unpaidBills = bills.filter(b => b.status === "UNPAID").length;
+    const unpaidBills = bills.filter(b => isUnpaidLike(b.status)).length;
     const paidBills = bills.filter(b => b.status === "PAID").length;
     const totalBillAmount = bills.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
     

@@ -24,6 +24,7 @@ import {
   LineChartIcon,
   Zap,
 } from "lucide-react";
+import StatCard from "./StatCard";
 
 const RevenueChartRecharts = ({ bills = [], loading }) => {
   const [timeRange, setTimeRange] = useState("6months");
@@ -290,41 +291,6 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
     { key: "composed", icon: DollarSign, title: "Mixed Chart" },
   ];
 
-  const statCards = [
-    {
-      label: "Tổng doanh thu",
-      value: `${stats.totalRevenue.toFixed(1)}M`,
-      sub: `Trung bình: ${chartData.length > 0 ? (stats.totalRevenue / chartData.length).toFixed(1) : 0}M/tháng`,
-      icon: DollarSign,
-      tint: "apple-glass-tinted-green",
-      textColor: "text-green-600",
-    },
-    {
-      label: "Thuê",
-      value: `${stats.totalRent.toFixed(1)}M`,
-      sub: `${stats.totalRevenue > 0 ? ((stats.totalRent / stats.totalRevenue) * 100).toFixed(0) : 0}% tổng`,
-      icon: TrendingUp,
-      tint: "apple-glass-tinted-blue",
-      textColor: "text-blue-600",
-    },
-    {
-      label: "Tiện ích",
-      value: `${stats.totalUtilities.toFixed(1)}M`,
-      sub: `${stats.totalRevenue > 0 ? ((stats.totalUtilities / stats.totalRevenue) * 100).toFixed(0) : 0}% tổng`,
-      icon: Zap,
-      tint: "apple-glass-tinted-orange",
-      textColor: "text-orange-600",
-    },
-    {
-      label: "Tăng trưởng",
-      value: `${stats.growthRate > 0 ? "+" : ""}${stats.growthRate}%`,
-      sub: "so với tháng trước",
-      icon: Calendar,
-      tint: "apple-glass-tinted-teal",
-      textColor: "text-teal-600",
-      trend: stats.growthRate,
-    },
-  ];
 
   return (
     <div className="apple-glass-panel no-hover rounded-2xl p-6">
@@ -387,28 +353,37 @@ const RevenueChartRecharts = ({ bills = [], loading }) => {
         </ResponsiveContainer>
       </div>
 
-      {/* Statistics — Tinted Glass Cards */}
+      {/* Statistics — Unified StatCards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, i) => {
-          const Icon = card.icon;
-          return (
-            <div key={i} className={`${card.tint} rounded-xl p-4 transition-all duration-200`}>
-              <div className="flex items-center gap-2 mb-2">
-                <Icon className={`w-4 h-4 ${card.textColor}`} />
-                <span className="text-xs home-text-muted">{card.label}</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <p className={`text-2xl font-bold ${card.textColor}`}>{card.value}</p>
-                {card.trend !== undefined && (
-                  card.trend > 0
-                    ? <TrendingUp className="w-4 h-4 text-green-600" />
-                    : <TrendingDown className="w-4 h-4 text-red-600" />
-                )}
-              </div>
-              <p className="text-xs home-text-muted mt-1">{card.sub}</p>
-            </div>
-          );
-        })}
+        <StatCard
+          icon={DollarSign}
+          label="Tổng doanh thu"
+          value={`${stats.totalRevenue.toFixed(1)}M`}
+          color="green"
+          subtitle={`Trung bình: ${chartData.length > 0 ? (stats.totalRevenue / chartData.length).toFixed(1) : 0}M/tháng`}
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Thuê"
+          value={`${stats.totalRent.toFixed(1)}M`}
+          color="blue"
+          subtitle={`${stats.totalRevenue > 0 ? ((stats.totalRent / stats.totalRevenue) * 100).toFixed(0) : 0}% tổng`}
+        />
+        <StatCard
+          icon={Zap}
+          label="Tiện ích"
+          value={`${stats.totalUtilities.toFixed(1)}M`}
+          color="orange"
+          subtitle={`${stats.totalRevenue > 0 ? ((stats.totalUtilities / stats.totalRevenue) * 100).toFixed(0) : 0}% tổng`}
+        />
+        <StatCard
+          icon={Calendar}
+          label="Tăng trưởng"
+          value={`${stats.growthRate > 0 ? "+" : ""}${stats.growthRate}%`}
+          color="teal"
+          trend={stats.growthRate !== 0 ? { type: stats.growthRate > 0 ? "up" : "down", value: "" } : undefined}
+          subtitle="so với tháng trước"
+        />
       </div>
     </div>
   );
