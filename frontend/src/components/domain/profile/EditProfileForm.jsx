@@ -1,15 +1,17 @@
 // web-app/src/components/Profile/EditProfileForm.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Save, X, Calendar, MapPin } from "lucide-react";
+import { Save, X, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { TextField, MenuItem } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
 const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
   const { t } = useTranslation();
-  const dobRef = useRef(null);
   const isComposingAddressRef = useRef(false);
 
-  // Display date state
-  const [displayDob, setDisplayDob] = useState("");
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -30,17 +32,6 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
       .replace(/\s+/g, " ")
       .trim();
 
-  // Format date for display (dd/MM/yyyy)
-  const formatDateForDisplay = (dateStr) => {
-    if (!dateStr) return "";
-    try {
-      const [year, month, day] = dateStr.split("-");
-      return `${day}/${month}/${year}`;
-    } catch (error) {
-      return "";
-    }
-  };
-
   // Format date for input (yyyy-MM-dd)
   const formatDateForInput = (dateStr) => {
     if (!dateStr) return "";
@@ -57,13 +48,48 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
     }
   };
 
-  // Update display when formData changes
-  useEffect(() => {
-    if (formData.dob) {
-      const inputFormat = formatDateForInput(formData.dob);
-      setDisplayDob(formatDateForDisplay(inputFormat));
-    }
-  }, [formData.dob]);
+  const fieldSx = {
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "12px",
+      backgroundColor: "rgba(255,255,255,0.65)",
+      "& fieldset": {
+        borderColor: "#E9DECF",
+      },
+      "&:hover fieldset": {
+        borderColor: "#D7B899",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#CC6F4A",
+      },
+    },
+    "& .MuiInputBase-input": {
+      color: "#1F2937",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+    },
+  };
+
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        borderRadius: "12px",
+        border: "1px solid #E9DECF",
+        backgroundColor: "rgba(255,255,255,0.94)",
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 16px 28px rgba(70, 54, 41, 0.12)",
+        "& .MuiMenuItem-root": {
+          fontSize: "0.95rem",
+        },
+        "& .MuiMenuItem-root.Mui-selected": {
+          backgroundColor: "rgba(204,111,74,0.16)",
+        },
+        "& .MuiMenuItem-root.Mui-selected:hover": {
+          backgroundColor: "rgba(204,111,74,0.22)",
+        },
+      },
+    },
+  };
 
   useEffect(() => {
     fetch("https://provinces.open-api.vn/api/?depth=3")
@@ -146,7 +172,8 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
         normalizeAddressName(item.name) === normalizeAddressName(districtName),
     );
     const ward = (district?.wards || []).find(
-      (item) => normalizeAddressName(item.name) === normalizeAddressName(wardName),
+      (item) =>
+        normalizeAddressName(item.name) === normalizeAddressName(wardName),
     );
 
     if (!district || !ward) {
@@ -178,10 +205,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
         .split(",")
         .map((part) => part.trim())
         .filter(Boolean)
-        .filter(
-          (part) =>
-            !hierarchyParts.includes(normalizeAddressName(part)),
-        );
+        .filter((part) => !hierarchyParts.includes(normalizeAddressName(part)));
 
       detailValue = detailParts.join(", ");
     }
@@ -218,19 +242,16 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
     onSubmit(e);
   };
 
-  const handleDateChange = (e) => {
-    const dateValue = e.target.value; // yyyy-MM-dd format
+  const handleDateChange = (value) => {
+    const dateValue =
+      value && value.isValid() ? value.format("YYYY-MM-DD") : "";
 
-    // Update the actual form data
     onChange({
       target: {
         name: "dob",
         value: dateValue,
       },
     });
-
-    // Update display
-    setDisplayDob(formatDateForDisplay(dateValue));
   };
 
   const handleProvinceChange = (e) => {
@@ -254,14 +275,14 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
           <button
             type="button"
             onClick={onCancel}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-tertiary text-gray-700 dark:text-dark-primary rounded-lg hover:bg-gray-200 dark:hover:bg-dark-hover transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white/55 border border-white/70 text-[#5D5148] rounded-xl hover:bg-white/70 transition-colors"
           >
             <X size={16} />
             <span className="text-sm font-medium">Hủy</span>
           </button>
           <button
             type="submit"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#CC6F4A] text-white rounded-xl hover:bg-[#B5604B] transition-colors"
           >
             <Save size={16} />
             <span className="text-sm font-medium">Lưu thay đổi</span>
@@ -272,13 +293,13 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
       {/* Form Fields */}
       <div className="space-y-6">
         {/* Personal Information */}
-        <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary mb-4">
+        <div className="home-glass-soft rounded-2xl p-6 border border-white/55">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Thông tin cá nhân
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Tên
               </label>
               <input
@@ -286,13 +307,13 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
                 name="firstName"
                 value={formData.firstName || ""}
                 onChange={onChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-[#E9DECF] bg-white/65 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
                 placeholder="Enter first name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Họ
               </label>
               <input
@@ -300,66 +321,81 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
                 name="lastName"
                 value={formData.lastName || ""}
                 onChange={onChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-[#E9DECF] bg-white/65 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
                 placeholder="Enter last name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Giới tính
               </label>
-              <select
+              <TextField
+                select
+                fullWidth
                 name="gender"
                 value={formData.gender || ""}
                 onChange={onChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                size="small"
+                sx={fieldSx}
+                SelectProps={{ MenuProps: menuProps }}
               >
-                <option value="">Select gender</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
-                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-              </select>
+                <MenuItem value="">Select gender</MenuItem>
+                <MenuItem value="MALE">Male</MenuItem>
+                <MenuItem value="FEMALE">Female</MenuItem>
+                <MenuItem value="OTHER">Other</MenuItem>
+                <MenuItem value="PREFER_NOT_TO_SAY">Prefer not to say</MenuItem>
+              </TextField>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Ngày sinh
               </label>
-              <div
-                className="relative cursor-pointer"
-                onClick={() => dobRef.current?.showPicker?.()}
-              >
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 z-10 pointer-events-none" />
-                <input
-                  type="text"
-                  value={displayDob}
-                  readOnly
-                  placeholder="dd/MM/yyyy"
-                  className="w-full pl-11 pr-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary cursor-pointer hover:border-blue-500 focus:border-blue-500 focus:outline-none transition-colors"
-                />
-                <input
-                  ref={dobRef}
-                  type="date"
-                  max={new Date().toISOString().split("T")[0]}
-                  value={formatDateForInput(formData.dob) || ""}
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={
+                    formData.dob
+                      ? dayjs(formatDateForInput(formData.dob))
+                      : null
+                  }
                   onChange={handleDateChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  format="DD/MM/YYYY"
+                  maxDate={dayjs()}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: "small",
+                      sx: fieldSx,
+                      inputProps: {
+                        placeholder: "dd/MM/yyyy",
+                      },
+                    },
+                    popper: {
+                      sx: {
+                        "& .MuiPaper-root": {
+                          borderRadius: "14px",
+                          border: "1px solid #E9DECF",
+                          backgroundColor: "rgba(255,255,255,0.94)",
+                          backdropFilter: "blur(12px)",
+                        },
+                      },
+                    },
+                  }}
                 />
-              </div>
+              </LocalizationProvider>
             </div>
           </div>
         </div>
 
         {/* Contact Information */}
-        <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary mb-4">
+        <div className="home-glass-soft rounded-2xl p-6 border border-white/55">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Thông tin liên hệ
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Email
               </label>
               <input
@@ -367,13 +403,13 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
                 name="email"
                 value={formData.email || ""}
                 onChange={onChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-[#E9DECF] bg-white/65 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
                 placeholder="Enter email"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Số điện thoại
               </label>
               <input
@@ -381,64 +417,76 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
                 name="phoneNumber"
                 value={formData.phoneNumber || ""}
                 onChange={onChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                className="w-full px-4 py-2.5 border border-[#E9DECF] bg-white/65 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
                 placeholder="Enter phone number"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-dark-secondary mb-2">
+              <label className="block text-sm font-medium text-[#5D5148] mb-2">
                 Địa chỉ
               </label>
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <select
+                  <TextField
+                    select
+                    fullWidth
                     value={selectedProvince}
                     onChange={handleProvinceChange}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                    size="small"
+                    sx={fieldSx}
+                    SelectProps={{ MenuProps: menuProps }}
                   >
-                    <option value="">Chọn Tỉnh/Thành</option>
+                    <MenuItem value="">Chọn Tỉnh/Thành</MenuItem>
                     {provinces.map((province) => (
-                      <option key={province.code} value={province.name}>
+                      <MenuItem key={province.code} value={province.name}>
                         {province.name}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </select>
+                  </TextField>
 
-                  <select
+                  <TextField
+                    select
+                    fullWidth
                     value={selectedDistrict}
                     onChange={handleDistrictChange}
                     disabled={!selectedProvince}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                    size="small"
+                    sx={fieldSx}
+                    SelectProps={{ MenuProps: menuProps }}
                   >
-                    <option value="">Chọn Quận/Huyện</option>
+                    <MenuItem value="">Chọn Quận/Huyện</MenuItem>
                     {districts.map((district) => (
-                      <option key={district.code} value={district.name}>
+                      <MenuItem key={district.code} value={district.name}>
                         {district.name}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </select>
+                  </TextField>
 
-                  <select
+                  <TextField
+                    select
+                    fullWidth
                     value={selectedWard}
                     onChange={(e) => setSelectedWard(e.target.value)}
                     disabled={!selectedDistrict}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
+                    size="small"
+                    sx={fieldSx}
+                    SelectProps={{ MenuProps: menuProps }}
                   >
-                    <option value="">Chọn Phường/Xã</option>
+                    <MenuItem value="">Chọn Phường/Xã</MenuItem>
                     {wards.map((ward) => (
-                      <option key={ward.code} value={ward.name}>
+                      <MenuItem key={ward.code} value={ward.name}>
                         {ward.name}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </select>
+                  </TextField>
                 </div>
 
                 <input
                   type="text"
                   value={addressDetail}
                   onChange={(e) => setAddressDetail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-white dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-[#E9DECF] bg-white/65 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
                   placeholder="Số nhà, tên đường"
                 />
 
@@ -449,7 +497,7 @@ const EditProfileForm = ({ formData, onChange, onSubmit, onCancel }) => {
                     name="currentAddress"
                     value={formData.currentAddress || ""}
                     readOnly
-                    className="w-full pl-11 pr-4 py-2 border border-gray-300 dark:border-dark-primary rounded-lg bg-gray-50 dark:bg-dark-tertiary text-gray-900 dark:text-dark-primary"
+                    className="w-full pl-11 pr-4 py-2.5 border border-[#E9DECF] bg-white/55 rounded-xl text-gray-900"
                     placeholder="Địa chỉ đầy đủ sẽ hiển thị tại đây"
                   />
                 </div>

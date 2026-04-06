@@ -18,16 +18,16 @@ const AccountSettings = ({
       {/* Security Section */}
       <div className="space-y-6">
         {/* Change Password */}
-        <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
+        <div className="home-glass-soft rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="w-10 h-10 bg-white/65 rounded-lg flex items-center justify-center">
+              <Lock className="w-5 h-5 text-[#CC6F4A]" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Thay đổi mật khẩu
               </h3>
-              <p className="text-sm text-gray-600 dark:text-dark-secondary">
+              <p className="text-sm text-gray-600">
                 Cập nhật mật khẩu của bạn thường xuyên để giữ an toàn cho tài
                 khoản
               </p>
@@ -43,54 +43,50 @@ const AccountSettings = ({
         </div>
 
         {/* Account Info */}
-        <div className="border border-gray-200 dark:border-dark-primary rounded-xl p-6">
+        <div className="home-glass-soft rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
-              <Shield className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <div className="w-10 h-10 bg-white/65 rounded-lg flex items-center justify-center">
+              <Shield className="w-5 h-5 text-[#256B6F]" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-primary">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Thông tin tài khoản
               </h3>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-tertiary rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-white/50 border border-white/55 rounded-xl">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-dark-primary">
+                <p className="text-sm font-medium text-gray-900">
                   Tên đăng nhập
                 </p>
-                <p className="text-sm text-gray-600 dark:text-dark-secondary">
-                  {formData.username}
-                </p>
+                <p className="text-sm text-gray-600">{formData.username}</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-tertiary rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-white/50 border border-white/55 rounded-xl">
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-dark-primary">
+                <p className="text-sm font-medium text-gray-900">
                   Trạng thái tài khoản
                 </p>
-                <p className="text-sm text-green-600 dark:text-green-400">
-                  Hoạt động
-                </p>
+                <p className="text-sm text-green-700">Hoạt động</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Danger Zone */}
-        <div className="border-2 border-red-200 dark:border-red-800 rounded-xl p-6 bg-red-50 dark:bg-red-900/10">
+        <div className="home-glass-soft rounded-2xl p-6 border border-red-200/70 bg-red-50/35">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-              <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+            <div className="w-10 h-10 bg-white/60 rounded-lg flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-red-900 dark:text-red-400">
+              <h3 className="text-lg font-semibold text-red-900">
                 Vùng nguy hiểm
               </h3>
-              <p className="text-sm text-red-700 dark:text-red-500">
+              <p className="text-sm text-red-700">
                 Hành động không thể hoàn tác
               </p>
             </div>
