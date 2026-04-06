@@ -51,6 +51,10 @@ property:
   image-max-size: 10MB
   google-maps-api-key: ${GOOGLE_MAPS_API_KEY:}
 
+n8n:
+  webhook:
+    url: ${N8N_WEBHOOK_URL:http://localhost:5678/webhook/3d-reconstruct}
+
 app:
   services:
     profile: http://localhost:8082/profile

@@ -2,8 +2,10 @@ package com.roomie.services.property_service.service;
 
 import co.elastic.clients.elasticsearch._types.GeoDistanceType;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import com.roomie.services.property_service.dto.request.Model3dCallbackRequest;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.*;
+import com.roomie.services.property_service.entity.Media;
 import com.roomie.services.property_service.entity.Owner;
 import com.roomie.services.property_service.entity.Property;
 import com.roomie.services.property_service.entity.PropertyDocument;
@@ -19,7 +21,9 @@ import com.roomie.services.property_service.repository.httpclient.ProfileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
@@ -29,11 +33,13 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -50,6 +56,11 @@ public class PropertyService {
     FavoriteService favoriteService;
     PropertyLabelService propertyLabelService;
     ElasticsearchOperations elasticsearchOperations;
+    GeocodingService geocodingService;
+
+    @NonFinal
+    @Value("${colmap.worker.url:http://100.96.78.62:5000/reconstruct}")
+    String colmapWorkerUrl;
 
     @CacheEvict(value = "properties", allEntries = true)
     public PropertyResponse create(PropertyRequest request) {
@@ -186,6 +197,12 @@ public class PropertyService {
     }
 
     public List<NearbyPropertyResponse> searchNearby(double lat, double lng, double radiusKm, int page, int size) {
+        // Use MongoDB-based calculation (reliable, always has latest data)
+        log.info("Nearby search: lat={}, lng={}, radius={}km", lat, lng, radiusKm);
+        return searchNearbyMongo(lat, lng, radiusKm, page, size);
+    }
+
+    private List<NearbyPropertyResponse> searchNearbyES(double lat, double lng, double radiusKm, int page, int size) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.bool(b -> b
                         .filter(f -> f.geoDistance(gd -> gd
@@ -233,6 +250,52 @@ public class PropertyService {
         return results;
     }
 
+    private List<NearbyPropertyResponse> searchNearbyMongo(double lat, double lng, double radiusKm, int page, int size) {
+        List<Property> allProperties = propertyRepository.findByStatusAndPropertyStatus(
+                ApprovalStatus.ACTIVE, PropertyStatus.AVAILABLE);
+
+        List<NearbyPropertyResponse> results = new ArrayList<>();
+
+        for (Property p : allProperties) {
+            if (p.getAddress() == null || p.getAddress().getLocation() == null) continue;
+
+            String loc = p.getAddress().getLocation().trim();
+            String[] parts = loc.split(",");
+            if (parts.length != 2) continue;
+
+            try {
+                double pLat = Double.parseDouble(parts[0].trim());
+                double pLng = Double.parseDouble(parts[1].trim());
+                double distance = haversine(lat, lng, pLat, pLng);
+
+                if (distance <= radiusKm) {
+                    results.add(NearbyPropertyResponse.builder()
+                            .property(propertyMapper.toResponse(p))
+                            .distanceKm(Math.round(distance * 100.0) / 100.0)
+                            .build());
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+
+        results.sort((a, b) -> Double.compare(
+                a.getDistanceKm() != null ? a.getDistanceKm() : Double.MAX_VALUE,
+                b.getDistanceKm() != null ? b.getDistanceKm() : Double.MAX_VALUE));
+
+        int start = Math.min(page * size, results.size());
+        int end = Math.min(start + size, results.size());
+        return results.subList(start, end);
+    }
+
+    private static double haversine(double lat1, double lon1, double lat2, double lon2) {
+        double R = 6371.0; // Earth radius in km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
     public void reindexAll() {
 
         searchRepository.deleteAll();
@@ -242,6 +305,26 @@ public class PropertyService {
 
     private void index(Property p) {
         try {
+            // Auto-geocode if location is missing
+            if (p.getAddress() != null && (p.getAddress().getLocation() == null || p.getAddress().getLocation().isBlank())) {
+                String addressText = p.getAddress().getFullAddress();
+                if (addressText == null || addressText.isBlank()) {
+                    addressText = String.join(", ",
+                            p.getAddress().getHouseNumber() != null ? p.getAddress().getHouseNumber() : "",
+                            p.getAddress().getStreet() != null ? p.getAddress().getStreet() : "",
+                            p.getAddress().getWard() != null ? p.getAddress().getWard() : "",
+                            p.getAddress().getDistrict() != null ? p.getAddress().getDistrict() : "",
+                            p.getAddress().getProvince() != null ? p.getAddress().getProvince() : ""
+                    ).replaceAll("^[, ]+|[, ]+$", "");
+                }
+                String location = geocodingService.geocode(addressText);
+                if (location != null) {
+                    p.getAddress().setLocation(location);
+                    propertyRepository.save(p);
+                    log.info("Auto-geocoded property {} → {}", p.getPropertyId(), location);
+                }
+            }
+
             PropertyDocument doc = propertyMapper.toDocument(p);
             doc.setPropertyId(p.getPropertyId());
             doc.setCreatedAt(p.getCreatedAt());
@@ -418,5 +501,97 @@ public class PropertyService {
                 .iterator()
                 .next()
                 .getAuthority();
+    }
+
+    // ===== 3D Model Reconstruction =====
+
+    public PropertyResponse requestModel3d(String propertyId) {
+        Property property = findPropertyOrThrow(propertyId);
+        checkOwner(property);
+
+        // Validate image count
+        long imageCount = property.getMediaList() != null
+                ? property.getMediaList().stream().filter(m -> "image".equalsIgnoreCase(m.getType())).count()
+                : 0;
+        if (imageCount < 8) {
+            throw new AppException(ErrorCode.INSUFFICIENT_IMAGES);
+        }
+
+        // Block duplicate requests
+        if ("PROCESSING".equals(property.getModel3dStatus())) {
+            throw new AppException(ErrorCode.MODEL3D_ALREADY_PROCESSING);
+        }
+
+        // Set processing state
+        property.setModel3dStatus("PROCESSING");
+        property.setModel3dRequestedAt(Instant.now());
+        property.setModel3dCompletedAt(null);
+        property.setModel3dUrl(null);
+        propertyRepository.save(property);
+
+        // Collect image URLs
+        List<String> imageUrls = property.getMediaList().stream()
+                .filter(m -> "image".equalsIgnoreCase(m.getType()))
+                .map(Media::getUrl)
+                .toList();
+
+        // Trigger n8n workflow async
+        triggerN8nWorkflow(propertyId, imageUrls);
+
+        return propertyMapper.toResponse(property);
+    }
+
+    public void handleModel3dCallback(Model3dCallbackRequest request) {
+        Property property = findPropertyOrThrow(request.getPropertyId());
+
+        if ("COMPLETED".equals(request.getStatus())) {
+            property.setModel3dStatus("COMPLETED");
+            property.setModel3dUrl(request.getModel3dUrl());
+            property.setModel3dVisible(true);
+            property.setModel3dCompletedAt(Instant.now());
+            log.info("3D model completed for property: {}", request.getPropertyId());
+        } else {
+            property.setModel3dStatus("FAILED");
+            property.setModel3dCompletedAt(Instant.now());
+            log.error("3D model failed for property: {} - {}", request.getPropertyId(), request.getErrorMessage());
+        }
+
+        propertyRepository.save(property);
+    }
+
+    private void triggerN8nWorkflow(String propertyId, List<String> imageUrls) {
+        try {
+            WebClient.create()
+                    .post()
+                    .uri(colmapWorkerUrl)
+                    .bodyValue(Map.of(
+                            "propertyId", propertyId,
+                            "imageUrls", imageUrls
+                    ))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .subscribe(
+                            res -> log.info("COLMAP worker triggered for property: {}", propertyId),
+                            err -> log.error("Failed to trigger COLMAP worker: {}", err.getMessage())
+                    );
+        } catch (Exception e) {
+            log.error("Error triggering COLMAP worker", e);
+            throw new AppException(ErrorCode.MODEL3D_WORKFLOW_ERROR);
+        }
+    }
+
+    public PropertyResponse toggleModel3dVisibility(String propertyId, boolean visible) {
+        Property property = findPropertyOrThrow(propertyId);
+        checkOwner(property);
+        property.setModel3dVisible(visible);
+        propertyRepository.save(property);
+        return propertyMapper.toResponse(property);
+    }
+
+    public void updatePropertyStatus(String propertyId, String status) {
+        Property property = findPropertyOrThrow(propertyId);
+        property.setPropertyStatus(PropertyStatus.valueOf(status));
+        propertyRepository.save(property);
+        log.info("Property {} status updated to {}", propertyId, status);
     }
 }
