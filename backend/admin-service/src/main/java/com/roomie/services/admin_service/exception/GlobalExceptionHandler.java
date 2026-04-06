@@ -1,8 +1,10 @@
 package com.roomie.services.admin_service.exception;
 
 import com.roomie.services.admin_service.dto.response.ApiResponse;
+import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,15 +20,40 @@ public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
 
+    @ExceptionHandler(value = FeignException.class)
+    ResponseEntity<ApiResponse> handlingFeignException(FeignException exception) {
+        log.error("Feign exception: ", exception);
+
+        int statusCode = exception.status();
+        HttpStatus status = HttpStatus.resolve(statusCode);
+        if (status == null) {
+            status = HttpStatus.BAD_GATEWAY;
+        }
+
+        ApiResponse apiResponse = new ApiResponse();
+        if (status == HttpStatus.UNAUTHORIZED) {
+            apiResponse.setCode(ErrorCode.UNAUTHENTICATED.getCode());
+            apiResponse.setMessage(ErrorCode.UNAUTHENTICATED.getMessage());
+        } else if (status == HttpStatus.FORBIDDEN) {
+            apiResponse.setCode(ErrorCode.UNAUTHORIZED.getCode());
+            apiResponse.setMessage(ErrorCode.UNAUTHORIZED.getMessage());
+        } else {
+            apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+            apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        }
+
+        return ResponseEntity.status(status).body(apiResponse);
+    }
+
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+    ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception) {
         log.error("Exception: ", exception);
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
     }
 
     @ExceptionHandler(value = AppException.class)
@@ -60,8 +87,8 @@ public class GlobalExceptionHandler {
         try {
             errorCode = ErrorCode.valueOf(enumKey);
 
-            var constraintViolation =
-                    exception.getBindingResult().getAllErrors().getFirst().unwrap(ConstraintViolation.class);
+            var constraintViolation = exception.getBindingResult().getAllErrors().getFirst()
+                    .unwrap(ConstraintViolation.class);
 
             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
 

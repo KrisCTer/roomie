@@ -1,6 +1,8 @@
 package com.roomie.services.contract_service.controller;
 
 import com.roomie.services.contract_service.dto.request.ContractRequest;
+import com.roomie.services.contract_service.dto.request.ContractAmendmentRequest;
+import com.roomie.services.contract_service.dto.request.ContractSupplementaryTermsRequest;
 import com.roomie.services.contract_service.dto.request.OTPSignRequest;
 import com.roomie.services.contract_service.dto.response.ApiResponse;
 import com.roomie.services.contract_service.dto.response.ContractResponse;
@@ -60,7 +62,8 @@ public class ContractController {
     }
 
     @PostMapping("/{id}/sign/tenant")
-    public ApiResponse<ContractResponse> tenantSign(@PathVariable String id, @RequestBody(required = false) String payload) {
+    public ApiResponse<ContractResponse> tenantSign(@PathVariable String id,
+            @RequestBody(required = false) String payload) {
         return ApiResponse.success(contractService.tenantSign(id, payload), "Tenant signed contract successfully");
     }
 
@@ -70,7 +73,8 @@ public class ContractController {
     }
 
     @PostMapping("/{id}/sign/landlord")
-    public ApiResponse<ContractResponse> landlordSign(@PathVariable String id, @RequestBody(required = false) String payload) {
+    public ApiResponse<ContractResponse> landlordSign(@PathVariable String id,
+            @RequestBody(required = false) String payload) {
         return ApiResponse.success(contractService.landlordSign(id, payload), "Landlord signed contract successfully");
     }
 
@@ -95,13 +99,13 @@ public class ContractController {
                 contract.isLandlordSigned(),
                 contract.isTenantSigned() && contract.isLandlordSigned(),
                 contract.getStatus().toString(),
-                contract.getPdfUrl()
-        );
+                contract.getPdfUrl());
         return ApiResponse.success(status, "Fetched signature status successfully");
     }
 
     @PostMapping("/{id}/pause")
-    public ApiResponse<ContractResponse> pauseContract(@PathVariable String id, @RequestParam(required = false) String reason) {
+    public ApiResponse<ContractResponse> pauseContract(@PathVariable String id,
+            @RequestParam(required = false) String reason) {
         return ApiResponse.success(contractService.pause(id, reason), "Contract paused successfully");
     }
 
@@ -111,25 +115,56 @@ public class ContractController {
     }
 
     @PostMapping("/{id}/terminate")
-    public ApiResponse<ContractResponse> terminateContract(@PathVariable String id, @RequestParam(required = false) String reason) {
+    public ApiResponse<ContractResponse> terminateContract(@PathVariable String id,
+            @RequestParam(required = false) String reason) {
         return ApiResponse.success(contractService.terminate(id, reason), "Contract terminated successfully");
     }
 
     @PostMapping("/{id}/request-otp/tenant")
     public ApiResponse<OTPResponse> requestTenantOTP(@PathVariable String id) {
         String tenantId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ApiResponse.success(contractService.requestTenantOTP(id, tenantId), "OTP sent to your email successfully");
+        return ApiResponse.success(contractService.requestTenantOTP(id, tenantId),
+                "OTP sent to your email successfully");
     }
 
     @PostMapping("/{id}/request-otp/landlord")
     public ApiResponse<OTPResponse> requestLandlordOTP(@PathVariable String id) {
         String landlordId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return ApiResponse.success(contractService.requestLandlordOTP(id, landlordId), "OTP sent to your email successfully");
+        return ApiResponse.success(contractService.requestLandlordOTP(id, landlordId),
+                "OTP sent to your email successfully");
     }
 
     @PutMapping("/{id}/payment-completed")
     public ApiResponse<ContractResponse> onPaymentCompleted(@PathVariable String id) {
-        return ApiResponse.success(contractService.markPaymentCompleted(id), "Contract activated after payment successfully");
+        return ApiResponse.success(contractService.markPaymentCompleted(id),
+                "Contract activated after payment successfully");
+    }
+
+    @PutMapping("/{id}/supplementary-terms")
+    public ApiResponse<ContractResponse> updateSupplementaryTerms(
+            @PathVariable String id,
+            @RequestBody ContractSupplementaryTermsRequest request) {
+        return ApiResponse.success(
+                contractService.updateSupplementaryTerms(id, request),
+                "Updated supplementary terms successfully");
+    }
+
+    @PostMapping("/{id}/amendments")
+    public ApiResponse<ContractResponse> addAmendment(
+            @PathVariable String id,
+            @RequestBody ContractAmendmentRequest request) {
+        return ApiResponse.success(
+                contractService.addAmendment(id, request),
+                "Added contract amendment successfully");
+    }
+
+    @PostMapping("/{id}/amendments/{amendmentId}/approve")
+    public ApiResponse<ContractResponse> approveAmendment(
+            @PathVariable String id,
+            @PathVariable String amendmentId) {
+        return ApiResponse.success(
+                contractService.approveAmendment(id, amendmentId),
+                "Approved contract amendment successfully");
     }
 
     private record SignatureStatus(
@@ -137,8 +172,9 @@ public class ContractController {
             boolean landlordSigned,
             boolean bothSigned,
             String contractStatus,
-            String pdfUrl
-    ) {}
+            String pdfUrl) {
+    }
 
-    private record PdfInfo(String pdfUrl) {}
+    private record PdfInfo(String pdfUrl) {
+    }
 }

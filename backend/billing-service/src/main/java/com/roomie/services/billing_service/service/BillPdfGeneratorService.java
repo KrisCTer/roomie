@@ -41,12 +41,64 @@ public class BillPdfGeneratorService {
     @Value("${billing.payment.bank.name:ROOMIE TECHNOLOGIES LTD}")
     private String bankAccountName;
 
-    private static final Font FONT_TITLE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24, BaseColor.DARK_GRAY);
-    private static final Font FONT_HEADER = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK);
-    private static final Font FONT_SUBHEADER = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.DARK_GRAY);
-    private static final Font FONT_NORMAL = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);
-    private static final Font FONT_SMALL = FontFactory.getFont(FontFactory.HELVETICA, 8, BaseColor.GRAY);
-    private static final Font FONT_TOTAL = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLUE);
+    // Unicode fonts for Vietnamese support
+    private static BaseFont BASE_FONT;
+    private static BaseFont BASE_FONT_BOLD;
+
+    static {
+        try {
+            // Try Arial first (Windows), then DejaVu Sans (Linux), then fallback
+            String[] fontPaths = {
+                    "c:/windows/fonts/arial.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+            };
+            String[] boldFontPaths = {
+                    "c:/windows/fonts/arialbd.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+            };
+
+            BASE_FONT = createBaseFont(fontPaths);
+            BASE_FONT_BOLD = createBaseFont(boldFontPaths);
+
+            if (BASE_FONT_BOLD == null) BASE_FONT_BOLD = BASE_FONT;
+
+        } catch (Exception e) {
+            // Ultimate fallback to Helvetica (no Vietnamese support)
+            try {
+                BASE_FONT = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                BASE_FONT_BOLD = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private static BaseFont createBaseFont(String[] paths) {
+        for (String path : paths) {
+            try {
+                java.io.File f = new java.io.File(path);
+                if (f.exists()) {
+                    return BaseFont.createFont(path, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                }
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    private static Font font(float size, BaseColor color) {
+        return new Font(BASE_FONT, size, Font.NORMAL, color);
+    }
+
+    private static Font fontBold(float size, BaseColor color) {
+        return new Font(BASE_FONT_BOLD, size, Font.BOLD, color);
+    }
+
+    private static final Font FONT_TITLE = fontBold(24, BaseColor.DARK_GRAY);
+    private static final Font FONT_HEADER = fontBold(14, BaseColor.BLACK);
+    private static final Font FONT_SUBHEADER = fontBold(10, BaseColor.DARK_GRAY);
+    private static final Font FONT_NORMAL = font(10, BaseColor.BLACK);
+    private static final Font FONT_SMALL = font(8, BaseColor.GRAY);
+    private static final Font FONT_TOTAL = fontBold(14, BaseColor.BLUE);
 
     private static final BaseColor COLOR_HEADER = new BaseColor(41, 128, 185);
     private static final BaseColor COLOR_ROW_ODD = new BaseColor(245, 245, 245);
@@ -438,8 +490,9 @@ public class BillPdfGeneratorService {
                 displayUrl = displayUrl.substring(0, 77) + "...";
             }
 
-            paymentUrl.add(new Chunk(displayUrl,
-                    FontFactory.getFont(FontFactory.HELVETICA, 7, Font.UNDERLINE, BaseColor.BLUE)));
+            Font urlFont = font(7, BaseColor.BLUE);
+            urlFont.setStyle(Font.UNDERLINE);
+            paymentUrl.add(new Chunk(displayUrl, urlFont));
             document.add(paymentUrl);
 
 
@@ -488,7 +541,7 @@ public class BillPdfGeneratorService {
     // ==================== TABLE HELPERS ====================
 
     private void addTableHeader(PdfPTable table, String text) {
-        PdfPCell cell = new PdfPCell(new Phrase(text, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)));
+        PdfPCell cell = new PdfPCell(new Phrase(text, fontBold(10, BaseColor.WHITE)));
         cell.setBackgroundColor(COLOR_HEADER);
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);

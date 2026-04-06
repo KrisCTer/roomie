@@ -25,6 +25,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
@@ -34,6 +36,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     IdentityService identityService;
     ObjectMapper objectMapper;
 
+    // Cache introspect results to avoid hammering identity-service
+    @NonFinal
+    private final Map<String, CachedIntrospect> introspectCache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MS = 60_000; // 60 seconds
+
     @NonFinal
     private String[] publicEndpoints = {
             "/identity/auth/.*",
@@ -42,9 +49,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/file/media/download/.*",
             "/property/properties", // GET list properties
             "/property/[^/]+", // GET /properties/{id}
-            "/property/properties/search.*", // GET /properties/search?q=...
-            "/property/properties/by-price.*", // GET /properties/by-price?min=...&max=...
-            "/property/properties/by-province.*", // GET /properties/by-province?province=...
+            "/property/properties/search.*",
+            "/property/properties/by-price.*",
+            "/property/properties/by-province.*",
             "/identity/oauth2/*",
             "/identity/login/oauth2/*"
     };
@@ -55,8 +62,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info("Enter authentication filter....");
-
         if (isPublicEndpoint(exchange.getRequest()))
             return chain.filter(exchange);
 
@@ -66,14 +71,30 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return unauthenticated(exchange.getResponse());
 
         String token = authHeader.getFirst().replace("Bearer ", "");
-        log.info("Token: {}", token);
 
+        // Check cache first
+        CachedIntrospect cached = introspectCache.get(token);
+        if (cached != null && !cached.isExpired()) {
+            if (cached.valid) {
+                return chain.filter(exchange);
+            } else {
+                return unauthenticated(exchange.getResponse());
+            }
+        }
+
+        // Cache miss or expired — call identity service
         return identityService.introspect(token).flatMap(introspectResponse -> {
-            if (introspectResponse.getResult().isValid())
+            boolean valid = introspectResponse.getResult().isValid();
+            introspectCache.put(token, new CachedIntrospect(valid, System.currentTimeMillis()));
+
+            if (valid)
                 return chain.filter(exchange);
             else
                 return unauthenticated(exchange.getResponse());
-        }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
+        }).onErrorResume(throwable -> {
+            log.warn("Introspect failed: {}", throwable.getMessage());
+            return unauthenticated(exchange.getResponse());
+        });
     }
 
     @Override
@@ -104,5 +125,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         return response.writeWith(
                 Mono.just(response.bufferFactory().wrap(body.getBytes())));
+    }
+
+    // Simple cache entry
+    private record CachedIntrospect(boolean valid, long timestamp) {
+        boolean isExpired() {
+            return System.currentTimeMillis() - timestamp > CACHE_TTL_MS;
+        }
     }
 }

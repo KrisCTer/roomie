@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder
@@ -19,10 +20,10 @@ public class Contract {
     @MongoId
     String id;
 
-    String bookingId;     // optional link to booking
+    String bookingId; // optional link to booking
     String propertyId;
     String tenantId;
-    String landlordId;    // optional
+    String landlordId; // optional
 
     Instant startDate;
     Instant endDate;
@@ -37,6 +38,9 @@ public class Contract {
 
     String pdfUrl;
     String signatureToken; // HMAC or signature metadata
+
+    List<String> supplementaryTerms;
+    List<ContractAmendment> amendments;
 
     @CreatedDate
     Instant createdAt;

@@ -4,6 +4,7 @@ import com.roomie.services.booking_service.enums.ApprovalStatus;
 import com.roomie.services.booking_service.enums.PropertyLabel;
 import com.roomie.services.booking_service.enums.PropertyStatus;
 import com.roomie.services.booking_service.enums.PropertyType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PropertyResponse {
     String propertyId;
     String title;
