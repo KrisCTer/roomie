@@ -18,6 +18,9 @@ public enum ErrorCode {
     PROFILE_SERVICE_UNAVAILABLE(1009,"Profile service unavailable", HttpStatus.SERVICE_UNAVAILABLE),
     PROPERTY_NOT_FOUND(1010, "Property not found", HttpStatus.NOT_FOUND),
     INVALID_STATUS_CHANGE(1011, "Invalid status change", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_IMAGES(1012, "At least 8 images required for 3D reconstruction", HttpStatus.BAD_REQUEST),
+    MODEL3D_ALREADY_PROCESSING(1013, "3D model is already being processed", HttpStatus.CONFLICT),
+    MODEL3D_WORKFLOW_ERROR(1014, "Failed to trigger 3D reconstruction workflow", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

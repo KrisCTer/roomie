@@ -128,4 +128,22 @@ public class PropertyController {
         propertyService.deactivate(propertyId);
         return ApiResponse.success(null, "Property deactivated");
     }
+
+    @PostMapping("/{propertyId}/3d-model")
+    public ApiResponse<PropertyResponse> requestModel3d(@PathVariable String propertyId) {
+        return ApiResponse.success(
+                propertyService.requestModel3d(propertyId),
+                "3D reconstruction requested"
+        );
+    }
+
+    @PutMapping("/{propertyId}/3d-visibility")
+    public ApiResponse<PropertyResponse> toggle3dVisibility(
+            @PathVariable String propertyId,
+            @RequestParam boolean visible) {
+        return ApiResponse.success(
+                propertyService.toggleModel3dVisibility(propertyId, visible),
+                "3D visibility updated"
+        );
+    }
 }

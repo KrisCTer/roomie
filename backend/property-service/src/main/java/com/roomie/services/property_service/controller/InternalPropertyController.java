@@ -1,5 +1,6 @@
 package com.roomie.services.property_service.controller;
 
+import com.roomie.services.property_service.dto.request.Model3dCallbackRequest;
 import com.roomie.services.property_service.dto.request.PropertyRequest;
 import com.roomie.services.property_service.dto.response.ApiResponse;
 import com.roomie.services.property_service.dto.response.PropertyResponse;
@@ -61,6 +62,27 @@ public class InternalPropertyController {
     public ApiResponse<Void> reindex() {
         propertyService.reindexAll();
         return ApiResponse.success(null, "Reindex completed");
+    }
+
+    @PostMapping("/3d-callback")
+    public ApiResponse<Void> handle3dCallback(@RequestBody Model3dCallbackRequest request) {
+        log.info("3D callback received for property: {}", request.getPropertyId());
+        propertyService.handleModel3dCallback(request);
+        return ApiResponse.success(null, "3D callback processed");
+    }
+
+    @PostMapping("/{propertyId}/rented")
+    public ApiResponse<String> markAsRented(@PathVariable String propertyId) {
+        log.info("Marking property {} as RENTED", propertyId);
+        propertyService.updatePropertyStatus(propertyId, "RENTED");
+        return ApiResponse.success("OK", "Property marked as rented");
+    }
+
+    @PostMapping("/{propertyId}/available")
+    public ApiResponse<String> markAsAvailable(@PathVariable String propertyId) {
+        log.info("Marking property {} as AVAILABLE", propertyId);
+        propertyService.updatePropertyStatus(propertyId, "AVAILABLE");
+        return ApiResponse.success("OK", "Property marked as available");
     }
 }
 
