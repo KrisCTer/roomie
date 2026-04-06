@@ -11,14 +11,18 @@ import {
   Building2,
   ArrowRight,
 } from "lucide-react";
+import StatCard from "../../components/domain/dashboard/StatCard";
 
 import AdminSidebar from "../../components/layout/layoutAdmin/AdminSidebar";
 import Header from "../../components/layout/layoutUser/Header";
 import Footer from "../../components/layout/layoutUser/Footer";
-import PageTitle from "../../components/common/PageTitle.jsx";
 
 import { adminGetAllProperties } from "../../services/adminPropertyService";
 import { adminGetUsers } from "../../services/adminUserService";
+import {
+  removeToken,
+  removeUserProfile,
+} from "../../services/localStorageService";
 import { useTranslation } from "react-i18next";
 
 import "../../styles/apple-glass-dashboard.css";
@@ -74,10 +78,10 @@ const normalizeProperties = (res) => {
   const list = Array.isArray(res)
     ? res
     : Array.isArray(res?.data)
-    ? res.data
-    : Array.isArray(res?.result)
-    ? res.result
-    : [];
+      ? res.data
+      : Array.isArray(res?.result)
+        ? res.result
+        : [];
 
   return list.map((p) => ({
     ...p,
@@ -107,7 +111,7 @@ const pickImage = (p) => {
   if (m1?.link) return m1.link;
   if (m1?.path) return m1.path;
 
-  return "https://via.placeholder.com/120x90?text=No+Image";
+  return "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400";
 };
 
 const fmtMoney = (v) => {
@@ -182,10 +186,16 @@ const AdminDashboard = () => {
       setProperties(normalizeProperties(pRes));
       const uList = unwrapUsers(uRes);
       setUsers(
-        (uList || []).filter((u) => u?.username?.toLowerCase() !== "admin")
+        (uList || []).filter((u) => u?.username?.toLowerCase() !== "admin"),
       );
     } catch (e) {
       console.error("AdminDashboard load failed:", e);
+      if (e?.response?.status === 401) {
+        removeToken();
+        removeUserProfile();
+        window.location.href = "/login";
+        return;
+      }
       setProperties([]);
       setUsers([]);
     } finally {
@@ -202,11 +212,17 @@ const AdminDashboard = () => {
     const q = searchProperty.trim().toLowerCase();
     if (!q) return properties;
     return properties.filter((p) =>
-      [p?.title, getPropertyStatus(p), formatAddress(p?.address), p?.province, p?.ownerName]
+      [
+        p?.title,
+        getPropertyStatus(p),
+        formatAddress(p?.address),
+        p?.province,
+        p?.ownerName,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
-        .includes(q)
+        .includes(q),
     );
   }, [searchProperty, properties]);
 
@@ -218,7 +234,7 @@ const AdminDashboard = () => {
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
-        .includes(q)
+        .includes(q),
     );
   }, [searchUser, users]);
 
@@ -226,12 +242,12 @@ const AdminDashboard = () => {
   const summaryStats = useMemo(() => {
     const total = properties.length;
     const pending = properties.filter((p) =>
-      getPropertyStatus(p).includes("PENDING")
+      getPropertyStatus(p).includes("PENDING"),
     ).length;
     const approved = properties.filter(
       (p) =>
         getPropertyStatus(p).includes("APPROVED") ||
-        getPropertyStatus(p).includes("ACTIVE")
+        getPropertyStatus(p).includes("ACTIVE"),
     ).length;
     return { total, pending, approved, totalUsers: users.length };
   }, [properties, users]);
@@ -260,70 +276,40 @@ const AdminDashboard = () => {
       <div
         className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"}`}
       >
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <PageTitle
-          title="Admin Dashboard"
-          subtitle="Quản lý hệ thống tổng quan — Bất động sản & Người dùng."
+        <Header
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          pageTitle="Bảng điều khiển quản trị"
+          pageSubtitle="Theo dõi nhanh bất động sản, người dùng và trạng thái hệ thống"
         />
 
         <main className="w-full px-4 pb-8 md:px-8">
           {/* ===== Summary KPI Cards ===== */}
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="apple-glass-panel rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="apple-glass-tinted-blue w-14 h-14 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-7 h-7 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm home-text-muted mb-1">Tổng BĐS</p>
-                  <p className="text-3xl font-bold home-text-primary">
-                    {summaryStats.total}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="apple-glass-panel rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="apple-glass-tinted-orange w-14 h-14 rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm home-text-muted mb-1">Chờ duyệt</p>
-                  <p className="text-3xl font-bold home-text-primary">
-                    {summaryStats.pending}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="apple-glass-panel rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="apple-glass-tinted-green w-14 h-14 rounded-xl flex items-center justify-center">
-                  <Home className="w-7 h-7 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm home-text-muted mb-1">Đã duyệt</p>
-                  <p className="text-3xl font-bold home-text-primary">
-                    {summaryStats.approved}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="apple-glass-panel rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="apple-glass-tinted-teal w-14 h-14 rounded-xl flex items-center justify-center">
-                  <Users className="w-7 h-7 text-teal-600" />
-                </div>
-                <div>
-                  <p className="text-sm home-text-muted mb-1">Người dùng</p>
-                  <p className="text-3xl font-bold home-text-primary">
-                    {summaryStats.totalUsers}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <StatCard
+              icon={Building2}
+              label="Tổng BĐS"
+              value={summaryStats.total}
+              color="blue"
+            />
+            <StatCard
+              icon={Sparkles}
+              label="Chờ duyệt"
+              value={summaryStats.pending}
+              color="orange"
+            />
+            <StatCard
+              icon={Home}
+              label="Đã duyệt"
+              value={summaryStats.approved}
+              color="green"
+            />
+            <StatCard
+              icon={Users}
+              label="Người dùng"
+              value={summaryStats.totalUsers}
+              color="teal"
+            />
           </div>
 
           {/* ===== PROPERTIES Section ===== */}
@@ -370,10 +356,19 @@ const AdminDashboard = () => {
                     key={i}
                     className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
                   >
-                    <div className="w-24 h-16 rounded-xl" style={{ background: "var(--home-surface-soft)" }} />
+                    <div
+                      className="w-24 h-16 rounded-xl"
+                      style={{ background: "var(--home-surface-soft)" }}
+                    />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 rounded w-3/4" style={{ background: "var(--home-surface-soft)" }} />
-                      <div className="h-3 rounded w-1/2" style={{ background: "var(--home-surface-soft)" }} />
+                      <div
+                        className="h-4 rounded w-3/4"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
+                      <div
+                        className="h-3 rounded w-1/2"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
                     </div>
                   </div>
                 ))}
@@ -407,7 +402,13 @@ const AdminDashboard = () => {
 
                   const addr =
                     formatAddress(p?.address) ||
-                    [p?.houseNumber, p?.street, p?.ward, p?.district, p?.province]
+                    [
+                      p?.houseNumber,
+                      p?.street,
+                      p?.ward,
+                      p?.district,
+                      p?.province,
+                    ]
                       .filter(Boolean)
                       .join(", ");
 
@@ -424,7 +425,7 @@ const AdminDashboard = () => {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.src =
-                              "https://via.placeholder.com/120x90?text=No+Image";
+                              "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400";
                           }}
                         />
                       </div>
@@ -444,11 +445,14 @@ const AdminDashboard = () => {
 
                         <div className="mt-1 text-sm flex flex-wrap items-center gap-x-4 gap-y-1">
                           {created && (
-                            <span className="home-text-muted">{fmtDate(created)}</span>
+                            <span className="home-text-muted">
+                              {fmtDate(created)}
+                            </span>
                           )}
                           {price !== null && (
                             <span className="home-text-accent font-semibold">
-                              {fmtMoney(price)} {t("common.currency", { defaultValue: "VND" })}
+                              {fmtMoney(price)}{" "}
+                              {t("common.currency", { defaultValue: "VND" })}
                             </span>
                           )}
                           {addr && (
@@ -506,10 +510,19 @@ const AdminDashboard = () => {
                     key={i}
                     className="apple-glass-soft animate-pulse flex items-center gap-4 rounded-xl p-4"
                   >
-                    <div className="w-10 h-10 rounded-full" style={{ background: "var(--home-surface-soft)" }} />
+                    <div
+                      className="w-10 h-10 rounded-full"
+                      style={{ background: "var(--home-surface-soft)" }}
+                    />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 rounded w-2/4" style={{ background: "var(--home-surface-soft)" }} />
-                      <div className="h-3 rounded w-1/3" style={{ background: "var(--home-surface-soft)" }} />
+                      <div
+                        className="h-4 rounded w-2/4"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
+                      <div
+                        className="h-3 rounded w-1/3"
+                        style={{ background: "var(--home-surface-soft)" }}
+                      />
                     </div>
                   </div>
                 ))}
