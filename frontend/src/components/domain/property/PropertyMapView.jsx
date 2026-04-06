@@ -33,6 +33,8 @@ const PropertyMapView = ({
   nearbyLat = null,
   nearbyLng = null,
   nearbyRadiusKm = 5,
+  directionsTarget = null,
+  onClearDirections = null,
 }) => {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
@@ -48,6 +50,8 @@ const PropertyMapView = ({
   const hasNotifiedInitialReadyRef = useRef(false);
   const nearbyCircleRef = useRef(null);
   const userMarkerRef = useRef(null);
+  const directionsRendererRef = useRef(null);
+  const [directionsInfo, setDirectionsInfo] = useState(null);
 
   const notifyInitialBoundsReady = useCallback(() => {
     if (hasNotifiedInitialReadyRef.current) return;
@@ -359,6 +363,122 @@ const PropertyMapView = ({
     };
   }, [map, nearbyEnabled, nearbyLat, nearbyLng, nearbyRadiusKm]);
 
+  // Directions rendering (using free OSRM instead of paid Google Directions API)
+  useEffect(() => {
+    // Cleanup previous directions
+    if (directionsRendererRef.current) {
+      // directionsRendererRef stores { polyline, originMarker, destMarker }
+      directionsRendererRef.current.polyline?.setMap(null);
+      directionsRendererRef.current.originMarker?.setMap(null);
+      directionsRendererRef.current.destMarker?.setMap(null);
+      directionsRendererRef.current = null;
+    }
+    setDirectionsInfo(null);
+
+    if (!map || !window.google || !directionsTarget) return;
+
+    let cancelled = false;
+
+    const renderRoute = async (originLat, originLng) => {
+      try {
+        // OSRM free routing API — returns real road-following geometry
+        const url = `https://router.project-osrm.org/route/v1/driving/${originLng},${originLat};${directionsTarget.lng},${directionsTarget.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (cancelled || !data.routes?.[0]) return;
+
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map(
+          ([lng, lat]) => new window.google.maps.LatLng(lat, lng)
+        );
+
+        // Draw the route polyline
+        const polyline = new window.google.maps.Polyline({
+          path: coords,
+          strokeColor: "#059669",
+          strokeWeight: 5,
+          strokeOpacity: 0.9,
+          map,
+        });
+
+        // Origin marker (blue dot)
+        const originMarker = new window.google.maps.Marker({
+          position: { lat: originLat, lng: originLng },
+          map,
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#2563EB",
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 3,
+          },
+          title: "Vị trí của bạn",
+          zIndex: 1001,
+        });
+
+        // Destination marker (green)
+        const destMarker = new window.google.maps.Marker({
+          position: { lat: directionsTarget.lat, lng: directionsTarget.lng },
+          map,
+          icon: {
+            path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            scale: 6,
+            fillColor: "#059669",
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2,
+          },
+          title: "Điểm đến",
+          zIndex: 1001,
+        });
+
+        directionsRendererRef.current = { polyline, originMarker, destMarker };
+
+        // Fit map to show the full route
+        const bounds = new window.google.maps.LatLngBounds();
+        bounds.extend({ lat: originLat, lng: originLng });
+        bounds.extend({ lat: directionsTarget.lat, lng: directionsTarget.lng });
+        map.fitBounds(bounds, 60);
+
+        // Distance & duration
+        const distKm = (route.distance / 1000).toFixed(1);
+        const durMin = Math.round(route.duration / 60);
+        setDirectionsInfo({
+          distance: `${distKm} km`,
+          duration: `${durMin} phút`,
+        });
+      } catch (err) {
+        console.error("OSRM routing failed:", err);
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => renderRoute(pos.coords.latitude, pos.coords.longitude),
+        () => {
+          const center = map.getCenter();
+          if (center) renderRoute(center.lat(), center.lng());
+        },
+        { timeout: 5000 }
+      );
+    } else {
+      const center = map.getCenter();
+      if (center) renderRoute(center.lat(), center.lng());
+    }
+
+    return () => {
+      cancelled = true;
+      if (directionsRendererRef.current) {
+        directionsRendererRef.current.polyline?.setMap(null);
+        directionsRendererRef.current.originMarker?.setMap(null);
+        directionsRendererRef.current.destMarker?.setMap(null);
+        directionsRendererRef.current = null;
+      }
+    };
+  }, [map, directionsTarget]);
+
   return (
     <Box
       sx={{
@@ -375,6 +495,71 @@ const PropertyMapView = ({
           height: "100%",
         }}
       />
+
+      {/* Directions info overlay */}
+      {directionsTarget && directionsInfo && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 16,
+            left: 16,
+            right: 16,
+            bgcolor: "white",
+            borderRadius: 3,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            zIndex: 30,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                bgcolor: "#ECFDF5",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Box component="span" sx={{ color: "#059669", fontSize: 18 }}>🧭</Box>
+            </Box>
+            <Box>
+              <Box sx={{ fontWeight: 700, fontSize: 14, color: "#1F2937" }}>
+                {directionsInfo.distance}
+              </Box>
+              <Box sx={{ fontSize: 12, color: "#6B7280" }}>
+                Khoảng {directionsInfo.duration}
+              </Box>
+            </Box>
+          </Box>
+          <Box
+            component="button"
+            onClick={onClearDirections}
+            sx={{
+              px: 2,
+              py: 1,
+              borderRadius: 2,
+              border: "1px solid #E5E7EB",
+              bgcolor: "white",
+              color: "#6B7280",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.15s",
+              "&:hover": { bgcolor: "#F9FAFB", color: "#1F2937" },
+            }}
+          >
+            Đóng
+          </Box>
+        </Box>
+      )}
 
       {!mapsLoaded && (
         <Box

@@ -1,4 +1,4 @@
-﻿/* aria-label */
+/* aria-label */
 import React from "react";
 import PropertyCard from "./PropertyCard";
 
@@ -9,6 +9,7 @@ const PropertyList = ({
   onViewBookings,
   onDelete,
   onPublish,
+  onRefresh,
 }) => {
   if (loading) {
     return (
@@ -40,6 +41,7 @@ const PropertyList = ({
           onViewBookings={onViewBookings}
           onDelete={onDelete}
           onPublish={onPublish}
+          onRefresh={onRefresh}
         />
       ))}
     </div>
@@ -47,5 +49,3 @@ const PropertyList = ({
 };
 
 export default PropertyList;
-
-

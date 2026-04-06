@@ -5,6 +5,7 @@ const GoogleMapPicker = ({
   mapsLoaded,
   location,
   onLocationChange,
+  onAddressResolved,
   error,
   setError,
 }) => {
@@ -13,12 +14,10 @@ const GoogleMapPicker = ({
   const mapInstanceRef = useRef(null);
   const [gettingLocation, setGettingLocation] = React.useState(false);
 
-  // Initialize map
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || mapInstanceRef.current) return;
 
     try {
-      // Default to Bien Hoa, Dong Nai
       const defaultCenter = { lat: 10.9447, lng: 106.8392 };
 
       const mapInstance = new window.google.maps.Map(mapRef.current, {
@@ -32,14 +31,12 @@ const GoogleMapPicker = ({
 
       mapInstanceRef.current = mapInstance;
 
-      // Add click listener to map
       mapInstance.addListener("click", (e) => {
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
         updateMapMarker(lat, lng);
       });
 
-      // Add marker
       const marker = new window.google.maps.Marker({
         map: mapInstance,
         draggable: true,
@@ -49,18 +46,18 @@ const GoogleMapPicker = ({
 
       markerRef.current = marker;
 
-      // Add drag listener to marker
       marker.addListener("dragend", (e) => {
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
         updateLocation(lat, lng);
+        reverseGeocode(lat, lng);
       });
 
-      // Set initial location if exists
       if (location) {
         const [lat, lng] = location.split(",").map((v) => parseFloat(v.trim()));
         if (!isNaN(lat) && !isNaN(lng)) {
-          updateMapMarker(lat, lng);
+          marker.setPosition({ lat, lng });
+          mapInstance.panTo({ lat, lng });
         }
       }
     } catch (err) {
@@ -77,11 +74,51 @@ const GoogleMapPicker = ({
       mapInstanceRef.current.panTo({ lat, lng });
     }
     updateLocation(lat, lng);
+    reverseGeocode(lat, lng);
   };
 
   const updateLocation = (lat, lng) => {
     const locationStr = `${lat.toFixed(6)},${lng.toFixed(6)}`;
     onLocationChange(locationStr);
+  };
+
+  const reverseGeocode = (lat, lng) => {
+    if (!window.google?.maps?.Geocoder || !onAddressResolved) return;
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status !== "OK" || !results?.[0]) return;
+
+      const components = results[0].address_components;
+      const resolved = {
+        fullAddress: results[0].formatted_address || "",
+        province: "",
+        district: "",
+        ward: "",
+        street: "",
+        houseNumber: "",
+      };
+
+      for (const comp of components) {
+        const types = comp.types;
+        if (types.includes("street_number")) {
+          resolved.houseNumber = comp.long_name;
+        } else if (types.includes("route")) {
+          resolved.street = comp.long_name;
+        } else if (
+          types.includes("sublocality_level_1") ||
+          types.includes("sublocality")
+        ) {
+          resolved.ward = comp.long_name;
+        } else if (types.includes("administrative_area_level_2")) {
+          resolved.district = comp.long_name;
+        } else if (types.includes("administrative_area_level_1")) {
+          resolved.province = comp.long_name;
+        }
+      }
+
+      onAddressResolved(resolved);
+    });
   };
 
   const getCurrentLocation = () => {
@@ -106,17 +143,17 @@ const GoogleMapPicker = ({
 
         setGettingLocation(false);
       },
-      (error) => {
+      (geoError) => {
         let errorMessage = "Unable to get your location. ";
 
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
+        switch (geoError.code) {
+          case geoError.PERMISSION_DENIED:
             errorMessage += "Please allow location access in your browser.";
             break;
-          case error.POSITION_UNAVAILABLE:
+          case geoError.POSITION_UNAVAILABLE:
             errorMessage += "Location information is unavailable.";
             break;
-          case error.TIMEOUT:
+          case geoError.TIMEOUT:
             errorMessage += "Location request timed out.";
             break;
           default:
@@ -130,7 +167,7 @@ const GoogleMapPicker = ({
         enableHighAccuracy: true,
         timeout: 5000,
         maximumAge: 0,
-      }
+      },
     );
   };
 

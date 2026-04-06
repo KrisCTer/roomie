@@ -6,9 +6,25 @@ import {
   Expand,
   Heart,
   MapPin,
+  Navigation,
   Share2,
 } from "lucide-react";
 import { useFavorite } from "../../../../hooks/common/useFavorite";
+
+const LABEL_CONFIG = {
+  HOT: {
+    text: "HOT",
+    className: "bg-rose-500 text-white",
+  },
+  NEW: {
+    text: "Mới",
+    className: "bg-emerald-500 text-white",
+  },
+  RECOMMENDED: {
+    text: "Gợi ý",
+    className: "bg-amber-400 text-[var(--home-charcoal)]",
+  },
+};
 
 const HomePropertyCard = ({ property, onCardClick }) => {
   const {
@@ -42,6 +58,8 @@ const HomePropertyCard = ({ property, onCardClick }) => {
     }
   };
 
+  const activeLabel = LABEL_CONFIG[property.label];
+
   return (
     <article
       className="home-card reveal-item group"
@@ -68,6 +86,14 @@ const HomePropertyCard = ({ property, onCardClick }) => {
         {property.displayType && (
           <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[var(--home-charcoal)]">
             {property.displayType}
+          </span>
+        )}
+
+        {activeLabel && (
+          <span
+            className={`absolute left-3 ${property.displayType ? "top-12" : "top-3"} rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${activeLabel.className}`}
+          >
+            {activeLabel.text}
           </span>
         )}
 
@@ -139,9 +165,49 @@ const HomePropertyCard = ({ property, onCardClick }) => {
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--home-muted)]">
             quick match
           </p>
-          <span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--home-accent)] px-4 text-sm font-semibold text-[var(--home-charcoal)] transition group-hover:translate-x-1">
-            Chi tiết <ArrowRight size={15} />
-          </span>
+          <div className="flex items-center gap-2">
+            {property.coordinateLocation && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const [destLat, destLng] = property.coordinateLocation
+                    .split(",")
+                    .map((v) => parseFloat(v.trim()));
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        window.open(
+                          `https://www.google.com/maps/dir/${pos.coords.latitude},${pos.coords.longitude}/${destLat},${destLng}`,
+                          "_blank"
+                        );
+                      },
+                      () => {
+                        window.open(
+                          `https://www.google.com/maps/dir//${destLat},${destLng}`,
+                          "_blank"
+                        );
+                      },
+                      { timeout: 5000 }
+                    );
+                  } else {
+                    window.open(
+                      `https://www.google.com/maps/dir//${destLat},${destLng}`,
+                      "_blank"
+                    );
+                  }
+                }}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 hover:border-emerald-300"
+                aria-label={`Chỉ đường tới ${property.title}`}
+              >
+                <Navigation size={14} />
+                Chỉ đường
+              </button>
+            )}
+            <span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--home-accent)] px-4 text-sm font-semibold text-[var(--home-charcoal)] transition group-hover:translate-x-1">
+              Chi tiết <ArrowRight size={15} />
+            </span>
+          </div>
         </div>
       </div>
     </article>

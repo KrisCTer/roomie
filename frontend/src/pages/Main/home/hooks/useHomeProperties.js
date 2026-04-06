@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllProperties } from "../../../../services/propertyService";
+import { getPublicProperties } from "../../../../services/propertyService";
 import { filterApproved, groupByProvince } from "../utils/homePresentation";
 
 const useHomeProperties = () => {
@@ -9,7 +9,7 @@ const useHomeProperties = () => {
   const loadProperties = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getAllProperties();
+      const res = await getPublicProperties();
 
       let list = [];
       if (res && res.success && Array.isArray(res.result)) {
@@ -38,8 +38,7 @@ const useHomeProperties = () => {
   const highlightedSections = useMemo(() => {
     return [...sections]
       .filter((section) => section.items.length > 0)
-      .sort((a, b) => b.items.length - a.items.length)
-      .slice(0, 4);
+      .sort((a, b) => b.items.length - a.items.length);
   }, [sections]);
 
   const totalProperties = useMemo(

@@ -11,6 +11,9 @@ const PropertyListView = ({
   onPageChange,
   onPropertyHover,
   onPropertyClick,
+  onDirections,
+  onClearDirections,
+  directionsTarget,
   distanceMap,
   nearbyEnabled,
 }) => {
@@ -252,18 +255,56 @@ const PropertyListView = ({
                   >
                     QUICK PREVIEW
                   </Typography>
-                  <Typography
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 0.7,
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "#B45309",
-                    }}
-                  >
-                    Xem chi tiết <ArrowUpRight size={14} />
-                  </Typography>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    {property.address?.location && (() => {
+                      const [destLat, destLng] = property.address.location
+                        .split(",")
+                        .map((v) => parseFloat(v.trim()));
+                      const isActive = directionsTarget
+                        && Math.abs(directionsTarget.lat - destLat) < 0.0001
+                        && Math.abs(directionsTarget.lng - destLng) < 0.0001;
+
+                      return (
+                        <Typography
+                          component="span"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isActive) {
+                              onClearDirections?.();
+                            } else if (!isNaN(destLat) && !isNaN(destLng)) {
+                              onDirections?.({ lat: destLat, lng: destLng });
+                            }
+                          }}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: isActive ? "#DC2626" : "#059669",
+                            cursor: "pointer",
+                            transition: "color 0.2s",
+                            "&:hover": { color: isActive ? "#B91C1C" : "#047857" },
+                          }}
+                        >
+                          <Navigation size={13} />
+                          {isActive ? "Hủy chỉ đường" : "Chỉ đường"}
+                        </Typography>
+                      );
+                    })()}
+                    <Typography
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.7,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: "#B45309",
+                      }}
+                    >
+                      Xem chi tiết <ArrowUpRight size={14} />
+                    </Typography>
+                  </Stack>
                 </Stack>
               </Box>
             </Box>

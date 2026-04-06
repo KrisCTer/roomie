@@ -10,6 +10,10 @@ const SearchFilterBarSection = ({
   setMobileView,
   onOpenFilters,
 }) => {
+  if (isDesktop) {
+    return null;
+  }
+
   return (
     <Box
       sx={{

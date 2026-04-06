@@ -12,6 +12,10 @@ const SearchStatusSection = ({
   searchCriteria,
   t,
 }) => {
+  if (!loading && !waitingForMapSync && visibleCount === 0) {
+    return null;
+  }
+
   return (
     <Box
       sx={{

@@ -7,7 +7,7 @@ import {
   getActiveFilterCount,
 } from "../utils/searchPresentation";
 
-const AVAILABLE_STATUSES = new Set(["AVAILABLE", "PUBLISHED", "VACANT"]);
+const AVAILABLE_STATUSES = new Set(["AVAILABLE", "PUBLISHED", "VACANT", "ACTIVE"]);
 
 const isPropertyAvailable = (property) => {
   const status = (

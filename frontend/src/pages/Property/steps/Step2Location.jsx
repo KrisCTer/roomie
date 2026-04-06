@@ -11,6 +11,7 @@ const Step2Location = ({
   wards,
   mapsLoaded,
   onLocationChange,
+  onAddressResolved,
   error,
   setError,
 }) => {
@@ -27,6 +28,7 @@ const Step2Location = ({
           mapsLoaded={mapsLoaded}
           location={propertyData.location}
           onLocationChange={onLocationChange}
+          onAddressResolved={onAddressResolved}
           error={error}
           setError={setError}
         />

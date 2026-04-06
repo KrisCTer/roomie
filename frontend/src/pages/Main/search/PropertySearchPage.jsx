@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { Box, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -9,7 +9,6 @@ import EditorialFooter from "../../../components/layout/layoutHome/EditorialFoot
 import usePropertySearchData from "./hooks/usePropertySearchData";
 import SearchHeroSection from "./sections/SearchHeroSection";
 import SearchFilterBarSection from "./sections/SearchFilterBarSection";
-import SearchStatusSection from "./sections/SearchStatusSection";
 import SearchContentSection from "./sections/SearchContentSection";
 import "../../../styles/home-redesign.css";
 import "../../../styles/search-redesign.css";
@@ -59,6 +58,16 @@ const PropertySearchPage = () => {
     nearbyRadiusKm,
   } = usePropertySearchData({ searchParams, t, isDesktop, navigate });
 
+  const [directionsTarget, setDirectionsTarget] = useState(null);
+
+  const handleDirections = useCallback((target) => {
+    setDirectionsTarget(target);
+  }, []);
+
+  const handleClearDirections = useCallback(() => {
+    setDirectionsTarget(null);
+  }, []);
+
   return (
     <Box
       className="search-v2 home-v2"
@@ -80,6 +89,8 @@ const PropertySearchPage = () => {
         baseCount={baseFilteredProperties.length}
         visibleCount={visibleCount}
         mapBounds={mapBounds}
+        filterCount={filterCount}
+        onOpenFilters={() => setIsFilterOpen(true)}
       />
 
       <SearchFilterBarSection
@@ -89,17 +100,6 @@ const PropertySearchPage = () => {
         mobileView={mobileView}
         setMobileView={setMobileView}
         onOpenFilters={() => setIsFilterOpen(true)}
-      />
-
-      <SearchStatusSection
-        loading={loading}
-        waitingForMapSync={waitingForMapSync}
-        visibleCount={visibleCount}
-        mapBounds={mapBounds}
-        effectiveTotalPages={effectiveTotalPages}
-        currentPage={currentPage}
-        searchCriteria={searchCriteria}
-        t={t}
       />
 
       <SearchContentSection
@@ -116,6 +116,7 @@ const PropertySearchPage = () => {
         onPageChange={handlePageChange}
         onPropertyHover={setHoveredPropertyId}
         onPropertyClick={handlePropertyClick}
+        onDirections={handleDirections}
         mapBounds={mapBounds}
         mapProperties={mapProperties}
         hoveredPropertyId={hoveredPropertyId}
@@ -128,6 +129,8 @@ const PropertySearchPage = () => {
         nearbyLng={nearbyLng}
         nearbyRadiusKm={nearbyRadiusKm}
         distanceMap={distanceMap}
+        directionsTarget={directionsTarget}
+        onClearDirections={handleClearDirections}
       />
 
       <EditorialFooter description="Search mới đồng bộ visual với Home: map-list split, filter rõ ràng, và flow mobile tối ưu cho thao tác một tay." />
