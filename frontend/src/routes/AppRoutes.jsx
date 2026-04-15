@@ -59,6 +59,12 @@ const MyProperties = lazy(
 const AdminProperties = lazy(() => import("../pages/Admin/AdminProperties"));
 const AdminUsers = lazy(() => import("../pages/Admin/AdminUsers"));
 const AdminDashboard = lazy(() => import("../pages/Admin/AdminDashboard"));
+const AdminBookings = lazy(() => import("../pages/Admin/AdminBookings"));
+const AdminContracts = lazy(() => import("../pages/Admin/AdminContracts"));
+const AdminLogs = lazy(() => import("../pages/Admin/AdminLogs"));
+const AdminSettings = lazy(() => import("../pages/Admin/AdminSettings"));
+const AdminBilling = lazy(() => import("../pages/Admin/AdminBilling"));
+const AdminReports = lazy(() => import("../pages/Admin/AdminReports"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 
 const AppRoutes = () => {
@@ -266,6 +272,61 @@ const AppRoutes = () => {
             </RoleProtectedRoute>
           }
         />
+
+        <Route
+          path="/admin/bookings"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminBookings />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/contracts"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminContracts />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/logs"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminLogs />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/settings"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminSettings />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/billing"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminBilling />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/reports"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AdminReports />
+            </RoleProtectedRoute>
+          }
+        />
+
         {/* ================= FALLBACK ================= */}
         <Route path="*" element={<NotFound />} />
       </Routes>

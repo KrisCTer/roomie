@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Button, Chip, Container, Stack, Typography } from "@mui/material";
 import { Grid2X2, Map as MapIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SearchHeroSection = ({
   isDesktop,
@@ -12,6 +13,8 @@ const SearchHeroSection = ({
   filterCount,
   onOpenFilters,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box
       className="search-hero-shell"
@@ -28,16 +31,15 @@ const SearchHeroSection = ({
           spacing={2.2}
         >
           <Box>
-            <Typography className="search-kicker">SEARCH EXPLORER</Typography>
+            <Typography className="search-kicker">{t("search.kicker")}</Typography>
             <Typography className="search-headline" component="h1">
-              Bản đồ khu ở.
-              <span>Danh sách theo gu.</span>
+              {t("search.headline1")}
+              <span>{t("search.headline2")}</span>
             </Typography>
             <Typography
               sx={{ mt: 1.2, color: "var(--home-muted)", maxWidth: 760 }}
             >
-              Lọc theo khu vực, loại hình và ngân sách, sau đó so sánh trực quan
-              giữa bản đồ và danh sách.
+              {t("search.subtitle")}
             </Typography>
           </Box>
 
@@ -56,14 +58,14 @@ const SearchHeroSection = ({
                 px: 1.8,
               }}
             >
-              {`Bộ lọc${filterCount > 0 ? ` (${filterCount})` : ""}`}
+              {filterCount > 0
+                ? t("search.filterBtnCount", { count: filterCount })
+                : t("search.filterBtn")}
             </Button>
-            <Chip label={`${baseCount} ứng viên`} className="search-chip" />
-            <Chip label={`${visibleCount} hiển thị`} className="search-chip" />
+            <Chip label={t("search.candidates", { count: baseCount })} className="search-chip" />
+            <Chip label={t("search.displayed", { count: visibleCount })} className="search-chip" />
             <Chip
-              label={
-                mapBounds ? "Đang lọc theo vùng map" : "Toàn vùng tìm kiếm"
-              }
+              label={mapBounds ? t("search.filteringByMap") : t("search.fullSearch")}
               className="search-chip"
             />
           </Stack>
@@ -87,7 +89,7 @@ const SearchHeroSection = ({
                 boxShadow: "none",
               }}
             >
-              Danh sách
+              {t("search.list")}
             </Button>
             <Button
               onClick={() => setMobileView("map")}
@@ -105,7 +107,7 @@ const SearchHeroSection = ({
                 boxShadow: "none",
               }}
             >
-              Bản đồ
+              {t("search.map")}
             </Button>
           </Stack>
         )}

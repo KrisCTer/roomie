@@ -1,6 +1,6 @@
-// src/services/admin/adminLogService.js
-import BaseService from "../BaseService";
-import { API, CONFIG } from "../../configurations/configuration";
+// src/services/adminLogService.js
+import BaseService from "./BaseService";
+import { API, CONFIG } from "../configurations/configuration";
 
 export const adminGetLogs = (params) =>
   BaseService.get(API.ADMIN_GET_LOGS, params);

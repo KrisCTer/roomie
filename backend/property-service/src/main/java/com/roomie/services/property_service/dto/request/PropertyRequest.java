@@ -41,4 +41,5 @@ public class PropertyRequest {
     AddressRequest address;
     AmenitiesRequest amenities;
     List<MediaRequest> mediaList;
+    String coverImageUrl;
 }

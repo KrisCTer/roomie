@@ -1,0 +1,29 @@
+package com.roomie.services.admin_service.dto.response.booking;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class BookingResponse {
+    String id;
+    String propertyId;
+    String landlordId;
+    String tenantId;
+    Instant leaseStart;
+    Instant leaseEnd;
+    BigDecimal monthlyRent;
+    BigDecimal rentalDeposit;
+    String status;
+    String bookingReference;
+    Instant createdAt;
+    Instant updatedAt;
+}

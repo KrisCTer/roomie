@@ -41,7 +41,7 @@ const SearchStatusSection = ({
               {loading
                 ? t("propertySearch.loading")
                 : waitingForMapSync
-                  ? "Đang đồng bộ danh sách với bản đồ..."
+                  ? t("search.syncingMap")
                   : `${visibleCount} ${t("propertySearch.places")}${
                       mapBounds ? ` ${t("propertySearch.inArea")}` : ""
                     }${
@@ -68,7 +68,7 @@ const SearchStatusSection = ({
             {waitingForMapSync && (
               <Chip
                 size="small"
-                label="Đang khớp với vùng bản đồ"
+                label={t("search.matchingMap")}
                 sx={{
                   bgcolor: "#FFF4E8",
                   color: "#B45309",
@@ -80,7 +80,7 @@ const SearchStatusSection = ({
             {!loading && !waitingForMapSync && (
               <Chip
                 size="small"
-                label={`${visibleCount} kết quả`}
+                label={t("search.results", { count: visibleCount })}
                 sx={{
                   bgcolor: "#F6F6F6",
                   color: "#374151",

@@ -1,7 +1,7 @@
 # Roomie — Tổng Hợp Kiến Thức Dự Án
 
 > Tài liệu toàn diện cho phỏng vấn & demo dự án.
-> Cập nhật: 2026-04-01
+> Cập nhật: 2026-04-07
 
 ---
 
@@ -10,15 +10,16 @@
 1. [Tổng quan dự án](#1-tổng-quan-dự-án)
 2. [Kiến trúc hệ thống](#2-kiến-trúc-hệ-thống)
 3. [Chi tiết từng Microservice](#3-chi-tiết-từng-microservice)
-4. [Database & Data Model](#4-database--data-model)
-5. [Luồng xử lý chính (Business Flows)](#5-luồng-xử-lý-chính)
-6. [Bảo mật & Authentication](#6-bảo-mật--authentication)
-7. [Frontend Architecture](#7-frontend-architecture)
-8. [Giao tiếp giữa các service](#8-giao-tiếp-giữa-các-service)
-9. [Infrastructure & DevOps](#9-infrastructure--devops)
-10. [Các pattern & công nghệ cần nắm](#10-các-pattern--công-nghệ-cần-nắm)
-11. [Câu hỏi phỏng vấn thường gặp](#11-câu-hỏi-phỏng-vấn-thường-gặp)
-12. [Demo Script](#12-demo-script)
+4. [COLMAP 3D Reconstruction Worker](#4-colmap-3d-reconstruction-worker)
+5. [Database & Data Model](#5-database--data-model)
+6. [Luồng xử lý chính (Business Flows)](#6-luồng-xử-lý-chính)
+7. [Bảo mật & Authentication](#7-bảo-mật--authentication)
+8. [Frontend Architecture](#8-frontend-architecture)
+9. [Giao tiếp giữa các service](#9-giao-tiếp-giữa-các-service)
+10. [Infrastructure & DevOps](#10-infrastructure--devops)
+11. [Các pattern & công nghệ cần nắm](#11-các-pattern--công-nghệ-cần-nắm)
+12. [Câu hỏi phỏng vấn thường gặp](#12-câu-hỏi-phỏng-vấn-thường-gặp)
+13. [Demo Script](#13-demo-script)
 
 ---
 
@@ -39,7 +40,8 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 | Tầng | Công nghệ | Phiên bản |
 |---|---|---|
 | **Backend** | Java, Spring Boot | Java 21, Spring Boot 3.2.5 |
-| **Frontend** | React, MUI, Tailwind CSS | React 19, MUI v7, Tailwind v3 |
+| **Frontend** | React, MUI, Tailwind CSS | React 19.2, MUI v7.3, Tailwind v3.4 |
+| **Build Tool (FE)** | Vite (migrated from CRA) | Vite 7.1 |
 | **Relational DB** | MySQL | 8.0 |
 | **Document DB** | MongoDB | 7.0 |
 | **Graph DB** | Neo4j | 5.15 |
@@ -47,16 +49,23 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 | **Search Engine** | Elasticsearch | 8.11 |
 | **Message Broker** | Apache Kafka | Confluent 7.5 |
 | **Object Storage** | MinIO | S3-compatible |
+| **3D Reconstruction** | COLMAP + Open3D + Trimesh | Python Flask worker |
+| **Maps** | Leaflet + Google Maps API | react-leaflet v5, @googlemaps/markerclusterer |
+| **3D Viewer** | Google Model Viewer | @google/model-viewer v4.2 |
+| **Charts** | Recharts | v3.6 |
 | **Service Discovery** | Eureka | via Docker |
 | **Monitoring** | Prometheus | v2.47 |
 | **Containerization** | Docker Compose | — |
 
 ### Quy mô dự án
 
-- **13 microservices** backend
-- **1 React SPA** frontend
-- **10 infrastructure services** (Docker Compose)
+- **13 microservices** backend (Java Spring Boot)
+- **1 Python worker** (COLMAP 3D reconstruction)
+- **1 React SPA** frontend (~300 JSX/JS files)
+- **11 infrastructure services** (Docker Compose)
 - **~60+ REST API endpoints**
+- **27 frontend service files** (API layer)
+- **9 React Contexts**, **8 custom hooks folders**
 - **Hỗ trợ đa ngôn ngữ** (i18n: Tiếng Việt + English)
 
 ---
@@ -68,7 +77,8 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    FRONTEND (React 19)                   │
-│        MUI v7 + Tailwind CSS + React Router v7          │
+│     MUI v7 + Tailwind CSS + Vite 7 + React Router v7    │
+│        Leaflet Maps + Model Viewer + Recharts            │
 │                   http://localhost:3000                   │
 └──────────────────────┬──────────────────────────────────┘
                        │ HTTP (REST API)
@@ -89,7 +99,7 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 ┌──────────────────────────────────────────────────────────┐
 │                  INFRASTRUCTURE LAYER                     │
 │  MySQL │ MongoDB │ Neo4j │ Redis │ Elasticsearch │ Kafka │
-│  MinIO │ Prometheus │ Eureka │ Zookeeper                 │
+│  MinIO │ Prometheus │ Eureka │ Zookeeper │ COLMAP Worker │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -110,14 +120,24 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 | chat-service | 8089 | /chat | MongoDB + Redis |
 | notification-service | 8090 | /notification | MongoDB + Kafka |
 | ai-service | 8091 | /ai | MongoDB |
+| **colmap-worker** | **5000** | **/reconstruct** | **MinIO (Python Flask)** |
 
-### 2.3 Tại sao dùng Microservices?
+### 2.3 Gateway Routing
+
+Routed qua API Gateway (`/api/v1/*`):
+- identity, admin, profile, property, booking, contract, billing, payment, file, chat
+
+**Chưa route qua gateway:**
+- notification-service (truy cập trực tiếp port 8090)
+- ai-service (truy cập trực tiếp port 8091)
+
+### 2.4 Tại sao dùng Microservices?
 
 | Lý do | Giải thích |
 |---|---|
 | **Separation of Concerns** | Mỗi service chịu trách nhiệm 1 bounded context |
 | **Independent Deployment** | Có thể deploy riêng từng service khi update |
-| **Tech Diversity** | identity dùng MySQL (relational), còn lại dùng MongoDB (document) |
+| **Tech Diversity** | identity dùng MySQL (relational), còn lại dùng MongoDB (document), COLMAP worker dùng Python |
 | **Scalability** | Có thể scale riêng property-service khi traffic tìm kiếm cao |
 | **Team Independence** | Nhiều dev có thể làm việc song song trên các service khác nhau |
 
@@ -161,13 +181,6 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 
 **Kafka Events:** `user-events`, `auth-events` (notify các service khác khi user tạo mới)
 
-**Lý thuyết cần nắm:**
-- JWT (JSON Web Token): structure (Header.Payload.Signature), signing, introspection
-- OAuth2 Authorization Code Flow
-- RBAC (Role-Based Access Control)
-- Token invalidation (blacklist) với bảng `InvalidatedToken`
-- Password hashing (BCrypt)
-
 ---
 
 ### 3.3 Profile Service (Port 8082)
@@ -182,14 +195,9 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - Xác minh danh tính (ID card number, permanent address)
 - Liên kết mối quan hệ user (Neo4j graph — chủ trọ ↔ người thuê)
 
-**Tại sao dùng Neo4j?** Để model mối quan hệ giữa chủ trọ và người thuê (relationship graph), giúp query nhanh "ai đang thuê phòng của ai", "lịch sử thuê trọ".
+**Tại sao dùng Neo4j?** Để model mối quan hệ giữa chủ trọ và người thuê (relationship graph).
 
 **Kafka Consumer:** Lắng nghe `user-events` để tự động tạo profile khi user mới đăng ký.
-
-**Lý thuyết cần nắm:**
-- Graph Database: Node, Relationship, Cypher query language
-- CQRS Pattern (identity quản lý auth, profile quản lý data)
-- Event-Driven: Kafka consumer tạo profile tự động
 
 ---
 
@@ -202,10 +210,13 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 **Chức năng chính:**
 - CRUD thông tin phòng trọ (tiêu đề, mô tả, giá, diện tích, tiện nghi)
 - Tìm kiếm toàn văn (full-text search) qua Elasticsearch
+- **Geo-search:** Tìm phòng theo vị trí gần (nearby search dựa trên tọa độ GPS)
 - Tìm theo giá, tỉnh thành, loại phòng
 - Gắn label (Hot, Mới đăng)
 - Quản lý danh sách yêu thích (Favorites)
 - Duyệt/Từ chối (Approval workflow)
+- **3D Reconstruction callback:** Nhận kết quả từ COLMAP worker → lưu `model3dUrl` vào property
+- **Internal API:** `POST /property/internal/3d-callback` — endpoint nội bộ cho COLMAP worker callback
 
 **Enums quan trọng:**
 - `PropertyType`: ROOM, APARTMENT, HOUSE...
@@ -213,12 +224,7 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - `ApprovalStatus`: PENDING, APPROVED, REJECTED
 - `PropertyLabel`: HOT, NEW, RECOMMENDED
 
-**Tại sao dùng Elasticsearch?** Full-text search tiếng Việt, fuzzy matching, geo-search. MongoDB text index không mạnh bằng.
-
-**Lý thuyết cần nắm:**
-- Elasticsearch indexing, mapping, full-text search
-- MongoDB document modeling (embedded vs referenced)
-- Redis caching strategy (cache property list, invalidate on update)
+**Tại sao dùng Elasticsearch?** Full-text search tiếng Việt, fuzzy matching, geo-search (tọa độ GPS). MongoDB text index không hỗ trợ geo-search mạnh bằng.
 
 ---
 
@@ -233,12 +239,9 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - Landlord approve/reject booking
 - Redis distributed lock (tránh double booking)
 - Publish Kafka events khi booking thay đổi trạng thái
+- **Auto-generate deposit bill:** Khi contract được ký → tự động tạo hóa đơn tiền cọc
 
 **Enums:** `LeaseStatus`: PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED, COMPLETED
-
-**Lý thuyết cần nắm:**
-- Distributed Lock (Redis SETNX) — tránh 2 người book cùng phòng
-- Event Sourcing / Event-driven: booking created → contract service lắng nghe
 
 ---
 
@@ -255,18 +258,13 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - Ký số HMAC (chống giả mạo)
 - Upload PDF lên file-service
 - Gửi email thông báo
+- **Internal status update endpoints:** đồng bộ trạng thái qua các service
 
 **Flow ký hợp đồng:**
 1. Hệ thống tạo hợp đồng → gửi OTP qua email
 2. Tenant nhập OTP → `tenantSigned = true`
 3. Landlord nhập OTP → `landlordSigned = true`
-4. Cả hai đã ký → contract ACTIVE → publish Kafka event
-
-**Lý thuyết cần nắm:**
-- Digital Signature (HMAC-SHA256)
-- OTP verification flow
-- Optimistic Locking (`@Version` annotation) — tránh concurrent update
-- PDF generation (iText hoặc thư viện tương tự)
+4. Cả hai đã ký → contract ACTIVE → publish Kafka event → billing tạo deposit bill
 
 ---
 
@@ -283,17 +281,10 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - Xuất PDF hóa đơn, gửi email
 - Thống kê doanh thu (`BillStatisticsService`)
 - Bulk operations (tạo nhiều hóa đơn 1 lúc)
-- Tích hợp MoMo payment
-- QR Code thanh toán
-
-**Enums:** `BillStatus`: PENDING, PAID, OVERDUE, CANCELLED
+- Tích hợp MoMo payment + QR Code thanh toán
+- **Utility configuration per property:** Cấu hình giá điện/nước/internet riêng cho mỗi property
 
 **Cron Job:** Tự kiểm tra hóa đơn quá hạn hàng ngày (`overdue-check-cron: 0 0 3 * * *`)
-
-**Lý thuyết cần nắm:**
-- OCR (Optical Character Recognition) — đọc chỉ số đồng hồ từ ảnh
-- Cron Job scheduling trong Spring Boot (`@Scheduled`)
-- BigDecimal cho tính toán tiền tệ (không dùng double/float)
 
 ---
 
@@ -305,26 +296,15 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 
 **Chức năng chính:**
 - Tích hợp VNPay (cổng thanh toán ngân hàng)
-- Tích hợp MoMo (ví điện tử)
+- Tích hợp MoMo (ví điện tử) — HMAC-SHA256 signature
 - Webhook nhận callback từ payment gateway
 - Cập nhật trạng thái bill/contract sau thanh toán thành công
-
-**Payment Flow:**
-1. User chọn hóa đơn → chọn phương thức (VNPay/MoMo)
-2. Backend tạo payment URL → redirect user tới payment gateway
-3. User thanh toán → gateway callback webhook
-4. Backend verify + update trạng thái → publish Kafka event
-
-**Lý thuyết cần nắm:**
-- Payment Gateway integration (redirect flow, webhook/IPN callback)
-- Signature verification (HMAC) để chống giả mạo callback
-- Idempotency (xử lý webhook trùng lặp)
 
 ---
 
 ### 3.9 File Service (Port 8088)
 
-**Vai trò:** Quản lý upload/download file (ảnh, tài liệu, PDF).
+**Vai trò:** Quản lý upload/download file (ảnh, tài liệu, PDF, 3D models).
 
 **Entity:** `FileMgmt`
 
@@ -333,8 +313,7 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - Download/serve file qua API
 - Cleanup file hết hạn (`FileCleanupTask`)
 - Hỗ trợ multipart upload
-
-**Tại sao dùng MinIO?** S3-compatible API, self-hosted, không phụ thuộc cloud provider. Có thể migrate sang AWS S3 dễ dàng.
+- **3D model storage:** Lưu trữ file .glb từ COLMAP worker
 
 ---
 
@@ -346,13 +325,9 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 
 **Chức năng chính:**
 - Tạo/quản lý conversation
-- Gửi/nhận tin nhắn real-time qua WebSocket (Socket.IO)
+- Gửi/nhận tin nhắn real-time qua WebSocket (STOMP protocol)
 - Lưu trữ lịch sử chat
-
-**Lý thuyết cần nắm:**
-- WebSocket protocol (full-duplex communication)
-- Socket.IO (auto-reconnect, fallback to long-polling)
-- Message persistence (lưu MongoDB, serve qua REST API + real-time qua WebSocket)
+- Tìm kiếm conversation
 
 ---
 
@@ -363,18 +338,12 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 **Entities:** `Notification`, `NotificationTemplate`
 
 **Chức năng chính:**
-- Nhận Kafka events từ các service khác (booking, contract, payment, property)
+- Nhận Kafka events từ các service khác
 - Gửi thông báo qua: Email, WebSocket (real-time push), In-app
 - Template-based notifications
 - Lịch dọn dẹp notification cũ (retention 90 ngày)
-- Thống kê (đã đọc/chưa đọc)
 
 **Kafka Consumers:** Lắng nghe topics: `BookingEvent`, `ContractEvent`, `PaymentEvent`, `PropertyEvent`, `MessageEvent`
-
-**Lý thuyết cần nắm:**
-- Event-driven notification (Kafka consumer → action)
-- Template pattern cho email/notification content
-- WebSocket push notification
 
 ---
 
@@ -402,92 +371,389 @@ Roomie là **nền tảng quản lý cho thuê nhà/phòng trọ** (Rental Prope
 - Duyệt/từ chối property listings
 - Xem activity logs real-time (WebSocket + Kafka + Elasticsearch)
 - System configuration (cấu hình runtime)
-- Dashboard thống kê
-
-**Kafka Consumer:** `UserActivityConsumer` — ghi log hoạt động user từ các service.
+- Dashboard thống kê (AdminDashboard — ~20KB component)
 
 ---
 
-## 4. Database & Data Model
+## 4. COLMAP 3D Reconstruction Worker
 
-### 4.1 Tại sao dùng Polyglot Persistence?
+> **Service mới hoàn toàn** — Python Flask worker chạy trong Docker container.
+
+### 4.1 Tổng quan
+
+COLMAP Worker là service **Python** chạy pipeline tái tạo 3D từ ảnh chụp phòng trọ. Landlord upload ảnh → hệ thống tự động tạo mô hình 3D → hiển thị bằng Google Model Viewer trên frontend.
+
+| Chi tiết | Giá trị |
+|---|---|
+| **Ngôn ngữ** | Python 3 (Flask) |
+| **Port** | 5000 |
+| **Container** | `roomie-colmap-worker` |
+| **Dependencies** | COLMAP, Open3D, Trimesh, SciPy, Pillow |
+| **Storage** | MinIO bucket `roomie-3d-models` |
+| **Output** | `.glb` (GLB binary format) |
+
+### 4.2 Pipeline Architecture
+
+```
+Images (URLs) → Download → Downscale (max 1600px)
+     → COLMAP Feature Extraction (SIFT)
+     → Feature Matching (Exhaustive ≤100 images / Vocab Tree >100)
+     → Sparse Reconstruction (SfM)
+     ├─[CUDA available]─→ Dense Path (PatchMatch → Stereo Fusion → Poisson Mesh)
+     └─[CPU only]────────→ Sparse Path (PLY Export → Mesh)
+     → Point Cloud Filtering (Statistical + Radius + DBSCAN)
+     → Surface Reconstruction (Poisson → Ball Pivoting → Delaunay → Convex Hull fallback)
+     → GLB Export + Material Injection
+     → Upload to MinIO
+     → Callback to property-service
+```
+
+### 4.3 API Endpoints
+
+| Method | Path | Mô tả |
+|---|---|---|
+| `POST` | `/reconstruct` | Bắt đầu reconstruction job (async) |
+| `GET` | `/status/<job_id>` | Kiểm tra trạng thái job |
+| `GET` | `/health` | Health check |
+
+### 4.4 Chi tiết kỹ thuật quan trọng
+
+**Point Cloud Filtering (3 stages):**
+1. **Statistical outlier removal** (nb_neighbors=20, std_ratio=1.5)
+2. **Radius outlier removal** — scaled theo scene size (scene_scale × 0.03)
+3. **DBSCAN clustering** — giữ cluster lớn nhất, loại bỏ debris/floating points
+
+**Surface Reconstruction (4 methods, cascade fallback):**
+1. **Poisson** (depth 8-9) → ưu tiên, chất lượng cao nhất
+2. **Ball Pivoting** → khi Poisson fail
+3. **Delaunay** → khi Ball Pivoting fail
+4. **Convex Hull** → fallback cuối cùng
+
+**GLB Material Injection:** Fix three.js/model-viewer không render vertex colors bằng cách inject PBR material vào GLB binary (metallicFactor=0, roughnessFactor=0.85, doubleSided=true).
+
+**Y-axis flip:** COLMAP sử dụng Y-down, WebGL sử dụng Y-up → flip Y trước khi export.
+
+**Nearest-Neighbor Color Mapping:** Thay vì dùng Poisson interpolation (bị mờ), dùng cKDTree nearest-neighbor để map màu chính xác từ point cloud sang mesh vertices.
+
+### 4.5 N8N Workflow Integration
+
+N8N đóng vai trò **orchestrator** giữa Property Service và COLMAP Worker, cung cấp webhook trigger + status monitoring loop.
+
+#### Kiến trúc Cross-Machine
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     WINDOWS (Development)                           │
+│                                                                     │
+│  ┌──────────────┐    ┌──────────────────┐    ┌──────────────────┐  │
+│  │ React Frontend│    │ Property Service │    │ Other Spring Boot│  │
+│  │    :3000      │───▶│    :8083         │    │ Services         │  │
+│  └──────────────┘    └────────┬─────────┘    └──────────────────┘  │
+│                               │                                     │
+└───────────────────────────────┼─────────────────────────────────────┘
+                                │ Tailscale VPN
+┌───────────────────────────────┼─────────────────────────────────────┐
+│                     UBUNTU SERVER                                    │
+│                               │                                      │
+│  ┌────────────────────────────▼───────────────────────────────────┐  │
+│  │                    Docker Compose                               │  │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐  │  │
+│  │  │  MinIO   │  │  MongoDB │  │  Redis   │  │     n8n      │  │  │
+│  │  │  :9000   │  │  :27017  │  │  :6379   │  │    :5678     │  │  │
+│  │  └──────────┘  └──────────┘  └──────────┘  └──────┬───────┘  │  │
+│  └───────────────────────────────────────────────────┼───────────┘  │
+│                                                       │              │
+│  ┌────────────────────────────────────────────────────▼───────────┐  │
+│  │              COLMAP Worker (Host / venv)                        │  │
+│  │                    :5000                                        │  │
+│  │  ┌──────────┐  ┌──────────────┐  ┌──────────────┐             │  │
+│  │  │  app.py  │  │ pipeline.py  │  │ converter.py │             │  │
+│  │  │ Flask API│  │ COLMAP SfM   │  │ PLY → GLB    │             │  │
+│  │  └──────────┘  └──────────────┘  └──────────────┘             │  │
+│  │  GPU: NVIDIA RTX 3050 (4GB) — CUDA 12.8                      │  │
+│  └────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+#### Luồng xử lý End-to-End
+
+```
+1. Chủ nhà nhấn "Tạo mô hình 3D" trên frontend
+       │
+2. Frontend gọi POST /property/{id}/3d-model
+       │
+3. Property Service:
+   ├── Set model3dStatus = "PROCESSING"
+   ├── Lấy danh sách imageUrls từ mediaList
+   └── Gọi n8n webhook: POST http://ubuntu:5678/webhook/3d-reconstruct
+       │
+4. n8n workflow nhận request, forward đến COLMAP Worker:
+   POST http://172.18.0.1:5000/reconstruct  (host.docker.internal)
+       │
+5. COLMAP Worker (background thread):
+   ├── Download ảnh từ MinIO URLs
+   ├── Downscale ảnh (max 1600px)
+   ├── COLMAP Feature Extraction (SIFT, max 8192 features)
+   ├── COLMAP Feature Matching (Exhaustive ≤100 / Vocab Tree >100)
+   ├── COLMAP Sparse Reconstruction (SfM)
+   ├── [CUDA] Dense: PatchMatch → Stereo Fusion
+   ├── Point Cloud Filtering (Statistical + Radius + DBSCAN)
+   ├── Surface Reconstruction (Poisson/Ball Pivoting/Delaunay)
+   ├── GLB Export + PBR Material Injection
+   ├── Upload .glb → MinIO (bucket: roomie-3d-models)
+   └── Callback POST → Property Service /internal/3d-callback
+       │
+6. Property Service nhận callback:
+   ├── Set model3dUrl = "http://minio/roomie-3d-models/{id}/{id}.glb"
+   ├── Set model3dStatus = "COMPLETED"
+   └── Set model3dCompletedAt = now()
+       │
+7. Frontend hiển thị mô hình 3D qua <model-viewer> (Google)
+```
+
+#### N8N Workflow Nodes (8 nodes)
+
+```
+[Webhook Trigger] → [Call COLMAP Worker] → [Save Job Info] → [Wait 30s]
+                                                                  │
+[Done] ← [Is Complete? YES] ← [Check Status] ←─────────────────┘
+                    │ NO
+             [Is Failed?]
+              │ YES    │ NO
+         [Failed—Stop] └→ [Wait 30s] (loop)
+```
+
+| Node | Type | Mô tả |
+|---|---|---|
+| **Webhook Trigger** | `webhook` | Nhận POST `/webhook/3d-reconstruct` từ Property Service |
+| **Call COLMAP Worker** | `httpRequest` | Forward request tới `http://host.docker.internal:5000/reconstruct` |
+| **Save Job Info** | `set` | Lưu `jobId` + `propertyId` cho polling |
+| **Wait 30s** | `wait` | Đợi 30 giây trước khi check status |
+| **Check Status** | `httpRequest` | GET `/status/{jobId}` từ COLMAP Worker |
+| **Is Complete?** | `if` | Check `status === "completed"` |
+| **Is Failed?** | `if` | Check `status === "failed"` → stop hoặc loop lại |
+| **Done** | `noOp` | End node (thành công) |
+
+#### N8N Workflow Template
+
+File: `infra/colmap-worker/n8n-workflow-3d-reconstruction.json` — import vào n8n UI.
+
+#### Property Service — Backend Entity Fields
+
+```java
+// Property entity (MongoDB)
+String model3dUrl;           // URL file .glb trên MinIO
+String model3dStatus;        // NONE, PROCESSING, COMPLETED, FAILED
+Boolean model3dVisible;      // Có hiển thị cho người xem không
+Instant model3dRequestedAt;  // Thời điểm yêu cầu tạo 3D
+Instant model3dCompletedAt;  // Thời điểm hoàn thành
+```
+
+#### Internal Callback API
+
+```
+POST /property/internal/3d-callback
+{
+  "propertyId": "69d41a65e349b0663c48038b",
+  "model3dUrl": "http://minio/roomie-3d-models/69d41a65.../69d41a65....glb",
+  "status": "COMPLETED"    // hoặc "FAILED" + "errorMessage"
+}
+```
+
+#### Frontend Components
+
+| Component | File | Vai trò |
+|---|---|---|
+| `Model3DSection.jsx` | `components/domain/property/` | Section trên trang detail: hiển thị trạng thái (Processing / Failed / Completed) |
+| `Model3DViewer.jsx` | `components/domain/property/` | Render GLB bằng `<model-viewer>` (auto-rotate, orbit controls, loading overlay) |
+| `Step4Media.jsx` | `pages/Property/steps/` | Trang edit: nút "Tạo mô hình 3D", toggle visibility |
+
+### 4.6 Cài đặt & Triển khai COLMAP Worker
+
+#### Yêu cầu hệ thống
+
+- Ubuntu 22.04+ (khuyến nghị có NVIDIA GPU)
+- Python 3.12+
+- COLMAP (build với CUDA nếu có GPU)
+- Docker Compose (cho MinIO, n8n, databases)
+
+#### Cài đặt trên Ubuntu
+
+```bash
+# 1. Build COLMAP (với CUDA)
+sudo apt install -y nvidia-cuda-toolkit
+git clone https://github.com/colmap/colmap.git /tmp/colmap-build
+cd /tmp/colmap-build && mkdir build && cd build
+cmake .. -DCMAKE_CUDA_ARCHITECTURES=86 -DCUDA_ENABLED=ON
+make -j$(nproc) && sudo make install
+
+# 2. Setup Python environment
+cd ~/roomie/infra/colmap-worker
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Chạy service (development)
+export MINIO_ENDPOINT="localhost:9000"
+export MINIO_PUBLIC_ENDPOINT="100.96.78.62:9000"
+export MINIO_ACCESS_KEY="roomie"
+export MINIO_SECRET_KEY="<secret>"
+export MINIO_BUCKET_3D="roomie-3d-models"
+export PROPERTY_CALLBACK_URL="http://100.69.114.54:8083/property/internal/3d-callback"
+python3 app.py
+```
+
+#### Chạy nền (production)
+
+```bash
+nohup python3 app.py > /tmp/colmap-worker.log 2>&1 &
+```
+
+Hoặc dùng **systemd service** (khuyến nghị):
+
+```ini
+# /etc/systemd/system/colmap-worker.service
+[Unit]
+Description=COLMAP 3D Reconstruction Worker
+After=network.target
+
+[Service]
+Type=simple
+User=phucloi
+WorkingDirectory=/home/phucloi/roomie/infra/colmap-worker
+Environment="MINIO_ENDPOINT=localhost:9000"
+Environment="MINIO_PUBLIC_ENDPOINT=100.96.78.62:9000"
+Environment="MINIO_ACCESS_KEY=roomie"
+Environment="MINIO_SECRET_KEY=<secret>"
+Environment="MINIO_BUCKET_3D=roomie-3d-models"
+Environment="PROPERTY_CALLBACK_URL=http://100.69.114.54:8083/property/internal/3d-callback"
+ExecStart=/home/phucloi/roomie/infra/colmap-worker/venv/bin/python3 app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl enable colmap-worker
+sudo systemctl start colmap-worker
+sudo journalctl -u colmap-worker -f   # xem log
+```
+
+#### Environment Variables
+
+| Biến | Mô tả | Mặc định |
+|---|---|---|
+| `MINIO_ENDPOINT` | MinIO internal endpoint | `minio:9000` |
+| `MINIO_PUBLIC_ENDPOINT` | MinIO public URL (cho GLB access) | = MINIO_ENDPOINT |
+| `MINIO_ACCESS_KEY` | MinIO access key | `roomie` |
+| `MINIO_SECRET_KEY` | MinIO secret key | *(required)* |
+| `MINIO_BUCKET_3D` | Bucket lưu 3D models | `roomie-3d-models` |
+| `MINIO_SECURE` | HTTPS cho MinIO | `false` |
+| `PROPERTY_CALLBACK_URL` | Property Service callback | `http://property-service:8083/property/internal/3d-callback` |
+| `WORKSPACE_DIR` | Thư mục tạm cho jobs | `/workspace` |
+
+### 4.7 Sparse vs Dense Path
+
+| | Sparse Path (CPU) | Dense Path (CUDA GPU) |
+|---|---|---|
+| **Khi nào** | Không có CUDA | Có NVIDIA GPU + CUDA |
+| **Số điểm 3D** | ~100K | Hàng triệu |
+| **Chất lượng** | Trung bình | Cao |
+| **Thời gian** | ~30-45 phút | ~15-25 phút |
+| **Pipeline** | Extract → Match → SfM → PLY → GLB | Extract → Match → SfM → Undistort → PatchMatch → Fusion → GLB |
+
+### 4.8 Troubleshooting
+
+| Vấn đề | Nguyên nhân | Giải pháp |
+|---|---|---|
+| Model trắng (không màu) | GLB thiếu PBR material | converter.py v3 đã fix bằng `_inject_vertex_color_material()` |
+| Model lộn ngược | COLMAP Y-down ≠ WebGL Y-up | converter.py v3 đã fix bằng Y-axis flip |
+| Mảnh rời bay xung quanh | Noise trong point cloud | DBSCAN clustering giữ cluster lớn nhất |
+| Callback refused | Property Service IP sai | Kiểm tra `PROPERTY_CALLBACK_URL` (dùng Tailscale IP) |
+| SfM failed: sparse/0 not found | Ảnh không đủ overlap | Cần ≥8 ảnh với 60-80% overlap |
+| Model quá thô | Dùng sparse path (CPU only) | Cài CUDA-enabled COLMAP trên GPU machine |
+| Loading kẹt trên frontend | model-viewer chưa load xong | Model3DViewer.jsx dùng event `load` để ẩn overlay |
+| n8n không gọi được worker | Docker network isolation | Dùng `host.docker.internal:5000` hoặc `172.18.0.1:5000` |
+
+### 4.9 Hướng dẫn chụp ảnh tốt cho 3D
+
+1. **Số lượng**: Tối thiểu 8, khuyến nghị 15-30 ảnh
+2. **Góc chụp**: Xoay quanh phòng/tòa nhà, mỗi ảnh overlap 60-80%
+3. **Chất lượng**: Ảnh rõ nét, không bị mờ/rung
+4. **Ánh sáng**: Đều, tránh ngược sáng
+5. **Tránh**: Gương, kính phản chiếu, vật di chuyển (người, xe)
+
+---
+
+## 5. Database & Data Model
+
+### 5.1 Polyglot Persistence
 
 | Database | Dùng cho | Lý do |
 |---|---|---|
 | **MySQL** | User, Role, Permission | Quan hệ Many-to-Many cần ACID transaction + JOIN |
-| **MongoDB** | Property, Contract, Bill, Payment, Chat... | Schema linh hoạt, embedded documents, horizontal scaling |
+| **MongoDB** | Property, Contract, Bill, Payment, Chat... | Schema linh hoạt, embedded documents |
 | **Neo4j** | UserProfile + relationships | Graph traversal nhanh cho relationship queries |
 | **Redis** | Cache, distributed lock, session | In-memory → cực nhanh cho caching và locking |
-| **Elasticsearch** | Property search index | Full-text search, fuzzy matching, aggregation |
-| **MinIO** | File/image storage | S3-compatible object storage, self-hosted |
+| **Elasticsearch** | Property search index | Full-text search, fuzzy matching, geo-search |
+| **MinIO** | File/image/3D model storage | S3-compatible object storage, self-hosted |
 
-### 4.2 Các Entity chính
+### 5.2 Các Entity chính
 
 ```
 User (MySQL - identity)
-├── id (UUID)
-├── username, email, phoneNumber (unique)
+├── id (UUID), username, email, phoneNumber (unique)
 ├── password (BCrypt hashed)
 ├── emailVerified, isActive, isBanned
 ├── authProvider (local/google/facebook)
 └── roles → Set<Role> (Many-to-Many)
 
 UserProfile (Neo4j - profile)
-├── id, userId (link to User)
-├── firstName, lastName, avatar
-├── gender, dob
-├── idCardNumber, permanentAddress
+├── id, userId, firstName, lastName, avatar
+├── gender, dob, idCardNumber, permanentAddress
 └── status (AccountStatus)
 
 Property (MongoDB - property)
-├── propertyId
-├── title, description
-├── address (embedded: province, district, ward, street)
+├── propertyId, title, description
+├── address (embedded: province, district, ward, street, latitude, longitude)
 ├── monthlyRent, rentalDeposit (BigDecimal)
 ├── propertyType, propertyStatus, propertyLabel
-├── size, rooms, bedrooms, bathrooms
 ├── amenities (embedded: wifi, aircon, parking...)
 ├── mediaList (embedded: url, type)
 ├── owner (embedded: userId, name, phone)
+├── model3dUrl (URL to GLB file in MinIO)
 └── status (ApprovalStatus: PENDING/APPROVED/REJECTED)
 
 LeaseLongTerm (MongoDB - booking)
 ├── id, propertyId, landlordId, tenantId
-├── leaseStart, leaseEnd
-├── monthlyRent, rentalDeposit
+├── leaseStart, leaseEnd, monthlyRent, rentalDeposit
 └── status (LeaseStatus)
 
 Contract (MongoDB - contract)
 ├── id, bookingId, propertyId, tenantId, landlordId
-├── startDate, endDate
-├── monthlyRent, rentalDeposit
+├── startDate, endDate, monthlyRent, rentalDeposit
 ├── tenantSigned, landlordSigned
-├── pdfUrl, signatureToken
-├── status (ContractStatus)
-└── version (Optimistic Lock)
+├── pdfUrl, signatureToken, status, version (Optimistic Lock)
 
 Bill (MongoDB - billing)
 ├── id, contractId, landlordId, tenantId, propertyId
-├── monthlyRent
-├── electricity (old/new/consumption/unitPrice/amount)
-├── water (old/new/consumption/unitPrice/amount)
+├── electricity/water (old/new/consumption/unitPrice/amount)
 ├── internet/parking/cleaning/maintenance prices
-├── totalAmount, billingMonth, dueDate
-└── status (BillStatus)
+├── totalAmount, billingMonth, dueDate, status
 
 Payment (MongoDB - payment)
 ├── id, userId, bookingId, contractId, billId
 ├── amount, method (VNPAY/MOMO/CASH)
 ├── status (PENDING/PROCESSING/COMPLETED/FAILED)
-├── transactionId, paymentUrl
-└── paidAt
+└── transactionId, paymentUrl, paidAt
 ```
 
 ---
 
-## 5. Luồng Xử Lý Chính
+## 6. Luồng Xử Lý Chính
 
-### 5.1 Flow: Đăng ký → Tìm phòng → Thuê phòng (End-to-End)
+### 6.1 Flow: End-to-End (Đăng ký → Thuê phòng)
 
 ```
 1. ĐĂNG KÝ
@@ -498,29 +764,29 @@ Payment (MongoDB - payment)
 2. ĐĂNG TIN (Landlord)
    Landlord → POST /property/properties (tạo tin)
    └→ Upload ảnh qua /file/media/upload → MinIO
+   └→ (Tùy chọn) Trigger 3D reconstruction → COLMAP worker
    └→ Property lưu MongoDB (status: PENDING)
    └→ Admin duyệt → APPROVED → xuất hiện trên search
 
 3. TÌM PHÒNG (Tenant)
    Tenant → GET /property/properties/search?q=...
    └→ Elasticsearch full-text search → return danh sách property
+   └→ (Hoặc) Tìm "nearby" theo tọa độ GPS → geo-search
 
 4. ĐẶT PHÒNG
    Tenant → POST /booking/leases (tạo booking)
    └→ Redis lock tránh double booking
-   └→ Booking status: PENDING_APPROVAL
    └→ Kafka event → Notification cho Landlord
 
 5. DUYỆT BOOKING
    Landlord → PUT /booking/leases/{id}/approve
-   └→ Status: APPROVED
    └→ Kafka event → Contract Service tạo hợp đồng
 
 6. KÝ HỢP ĐỒNG
    Hệ thống tạo Contract → gửi OTP email
    Tenant ký (nhập OTP) → Landlord ký (nhập OTP)
    └→ Contract ACTIVE → sinh PDF → upload file-service
-   └→ Kafka event → Billing tạo hóa đơn tháng đầu
+   └→ Kafka event → Billing tạo hóa đơn deposit tự động
 
 7. THANH TOÁN
    Landlord tạo Bill hàng tháng (tiền phòng + điện + nước)
@@ -530,19 +796,23 @@ Payment (MongoDB - payment)
    └→ Kafka event → Notification cho cả 2 bên
 ```
 
-### 5.2 Flow: Admin duyệt tin đăng
+### 6.2 Flow: 3D Reconstruction
 
 ```
-Landlord đăng tin → status: PENDING
-Admin → GET /admin/properties (list pending)
-Admin → PUT /admin/properties/{id}/approve hoặc reject
-└→ Kafka event → Notification cho Landlord
+Landlord upload ≥3 ảnh phòng
+→ Frontend gọi POST /reconstruct (colmap-worker:5000)
+→ Worker download ảnh → chạy COLMAP pipeline (async)
+→ Export .glb → upload MinIO (bucket: roomie-3d-models)
+→ Callback POST /property/internal/3d-callback
+   { propertyId, model3dUrl, status: "COMPLETED" }
+→ Property service lưu model3dUrl vào MongoDB
+→ Frontend render 3D model bằng <model-viewer>
 ```
 
-### 5.3 Flow: Chat real-time
+### 6.3 Flow: Chat real-time
 
 ```
-Tenant mở chat → WebSocket connect (Socket.IO)
+Tenant mở chat → WebSocket connect (STOMP)
 Tenant gửi tin nhắn → POST /chat/messages
 └→ Lưu MongoDB + broadcast qua WebSocket
 Landlord nhận tin nhắn real-time
@@ -550,9 +820,9 @@ Landlord nhận tin nhắn real-time
 
 ---
 
-## 6. Bảo Mật & Authentication
+## 7. Bảo Mật & Authentication
 
-### 6.1 JWT Authentication Flow
+### 7.1 JWT Authentication Flow
 
 ```
 1. Login: POST /identity/auth/token
@@ -564,161 +834,190 @@ Landlord nhận tin nhắn real-time
    → API Gateway intercept → gọi /identity/auth/introspect
    → Token valid? → forward request | Token invalid → 401
 
-3. Token Refresh:
-   → POST /identity/auth/refresh-token
-   → Return new accessToken
-
-4. Logout:
-   → POST /identity/auth/logout
-   → Add token vào bảng InvalidatedToken (blacklist)
+3. Token Refresh: POST /identity/auth/refresh-token
+4. Logout: POST /identity/auth/logout → blacklist token
 ```
 
-### 6.2 Authorization (RBAC)
+### 7.2 Authorization (RBAC)
 
 | Role | Quyền |
 |---|---|
 | **TENANT** | Tìm phòng, booking, ký hợp đồng, xem hóa đơn, thanh toán, chat |
-| **LANDLORD** | Tất cả của tenant + đăng tin, quản lý phòng, tạo hóa đơn, cấu hình tiện ích |
+| **LANDLORD** | Tất cả của tenant + đăng tin, quản lý phòng, tạo hóa đơn |
 | **ADMIN** | Duyệt property, quản lý user, xem log, cấu hình hệ thống |
 
-**Frontend guard:** `RoleProtectedRoute` component kiểm tra role trước khi render page.
-**Backend guard:** `SecurityConfig` + `CustomJwtDecoder` kiểm tra JWT claims.
+**Frontend guard:** `RoleProtectedRoute` + `VerificationGuard` component.
+**Backend guard:** `SecurityConfig` + `CustomJwtDecoder`.
 
-### 6.3 Verification Guard
+### 7.3 OAuth2 Social Login
 
-Một số trang yêu cầu user đã xác minh CCCD (`VerificationGuard`):
-- Profile, Message, Dashboard, Booking, Contract, Billing, Add Property...
-
-### 6.4 OAuth2 Social Login
-
-- Google OAuth2: Authorization Code Flow
-- Facebook OAuth2: Authorization Code Flow
+- Google OAuth2 + Facebook OAuth2: Authorization Code Flow
 - Redirect URI: `http://localhost:3000/oauth2/callback`
-- `OAuth2SuccessHandler` xử lý callback, tạo/link user, phát JWT
 
 ---
 
-## 7. Frontend Architecture
+## 8. Frontend Architecture
 
-### 7.1 Cấu trúc thư mục
+### 8.1 Cấu trúc thư mục (Updated)
 
 ```
 frontend/src/
-├── components/          # UI components
-│   ├── common/          # Button, Input, Spinner, Guards
-│   ├── layout/          # Header, Sidebar, Footer (3 layouts)
-│   │   ├── layoutAdmin/ # Admin panel layout
-│   │   ├── layoutHome/  # Public pages layout
-│   │   └── layoutUser/  # Authenticated user layout
-│   ├── Billing/         # Bill components
-│   ├── Booking/         # Booking components
-│   ├── ChatBox/         # Chat UI
-│   ├── Contracts/       # Contract + signing components
-│   ├── Dashboard/       # User dashboard
-│   ├── Notification/    # Notification bell, list
-│   ├── Profile/         # Profile editor
-│   ├── Property/        # Property card, form
-│   ├── PropertyDetail/  # Property detail page
-│   └── PropertySearch/  # Search filters, results
-├── contexts/            # React Context (Auth, Theme...)
-├── hooks/               # Custom hooks
-├── i18n/                # Internationalization (vi/ en/)
-├── pages/               # Page-level components
-├── routes/              # AppRoutes.jsx
-├── services/            # API service layer (Axios)
-├── styles/              # Global CSS
-└── utils/               # Utility functions
+├── components/
+│   ├── common/              # 15 shared UI components
+│   │   ├── RoleProtectedRoute.jsx
+│   │   ├── VerificationGuard.jsx
+│   │   ├── LanguageSwitcher.jsx
+│   │   ├── ThemeToggle.jsx
+│   │   ├── SettingsMenu.jsx
+│   │   ├── ToastContainer.jsx
+│   │   ├── ErrorBoundary.jsx
+│   │   ├── ConfirmDialog.jsx
+│   │   └── LoadingSpinner.jsx, Button, Input, ...
+│   ├── domain/              # Domain-specific components
+│   │   ├── auth/            # LoginForm, RegisterForm
+│   │   ├── billing/         # 21 components (CreateBillModal, MeterReadingModal, PaymentModal...)
+│   │   ├── booking/         # 13 components (BookingCard, BookingDetailModal, filters...)
+│   │   ├── chat/            # 9 components (ChatArea, MessageBubble, ConversationList...)
+│   │   ├── contract/        # 7 components + signing/ (9 components: OTPModal, PDFViewer...)
+│   │   ├── dashboard/       # 7 components (RevenueChartRecharts, StatCard, QuickActions...)
+│   │   ├── notification/    # 4 components (NotificationBell, Dropdown, Toast...)
+│   │   ├── profile/         # 8 components (EditProfileForm, CameraModal, ProfileOverview...)
+│   │   └── property/        # 25 components ⭐ (PropertyCard, MapView, Model3DViewer, GoogleMapPicker...)
+│   ├── layout/
+│   │   ├── layoutAdmin/     # Admin panel layout
+│   │   ├── layoutHome/      # Public pages layout
+│   │   └── layoutUser/      # Authenticated user layout
+│   └── AppProviders.jsx     # All context providers wrapped
+├── contexts/                # 9 React Contexts
+│   ├── AuthContext.jsx
+│   ├── CallContext.jsx       # ⭐ Video/voice call integration
+│   ├── DialogContext.jsx
+│   ├── NotificationContext.jsx
+│   ├── RefreshContext.jsx
+│   ├── RoleContext.jsx
+│   ├── SocketContext.jsx     # ⭐ WebSocket connection management
+│   ├── ThemeContext.jsx
+│   └── UserContext.jsx
+├── hooks/                   # 8 custom hook folders
+│   ├── billing/, booking/, chat/, common/
+│   ├── contract/, dashboard/, profile/, property/
+├── configurations/
+│   ├── configuration.js     # App-wide config (13.5KB)
+│   └── httpClient.js        # Axios instance setup
+├── services/                # 27 API service files
+├── i18n/                    # vi/ + en/ translation files
+├── pages/                   # 11 page directories
+├── routes/                  # AppRoutes.jsx (277 lines)
+├── styles/                  # Global CSS
+└── utils/                   # Utility functions
 ```
 
-### 7.2 Các trang chính
+### 8.2 Các trang chính (Routes)
 
 | Route | Component | Quyền | Mô tả |
 |---|---|---|---|
 | `/` | Home | Public | Trang chủ, danh sách phòng nổi bật |
-| `/search` | PropertySearch | Public | Tìm kiếm phòng với bộ lọc |
-| `/property/:id` | PropertyDetail | Public | Chi tiết phòng trọ |
+| `/search` | PropertySearch | Public | Tìm kiếm phòng với bộ lọc + **Map View** |
+| `/property/:id` | PropertyDetail | Public | Chi tiết phòng + **3D Model Viewer** |
+| `/user/:userId` | UserProfile | Public | Xem profile công khai |
 | `/login` | Login | Public | Đăng nhập |
 | `/register` | Register | Public | Đăng ký |
-| `/profile` | Profile | Login + Verified | Quản lý hồ sơ |
-| `/dashboard` | Dashboard | Tenant/Landlord | Tổng quan cá nhân |
-| `/my-bookings` | MyBookings | Tenant/Landlord | Danh sách booking |
-| `/my-contracts` | MyContracts | Tenant/Landlord | Danh sách hợp đồng |
-| `/contract-signing/:id` | ContractSigning | Tenant/Landlord | Ký hợp đồng |
-| `/unified-bills` | UnifiedBillsPage | Tenant/Landlord | Danh sách hóa đơn |
-| `/add-property` | AddProperty | Landlord | Đăng tin mới |
-| `/my-properties` | MyProperties | Landlord | Quản lý tin đăng |
-| `/admin/*` | Admin pages | Admin | Quản trị hệ thống |
-| `/message` | Message | Login + Verified | Chat |
+| `/forgot-password` | ForgotPassword | Public | Quên mật khẩu |
+| `/oauth2/callback` | OAuth2Callback | Public | OAuth2 redirect |
+| `/identity-verification` | IdentityVerification | Login | Xác minh CCCD |
+| `/profile` | Profile | Verified | Quản lý hồ sơ |
+| `/dashboard` | Dashboard | Verified | Dashboard + **Revenue Chart (Recharts)** |
+| `/my-bookings` | MyBookings | Verified | Danh sách booking |
+| `/my-contracts` | MyContracts | Verified | Danh sách hợp đồng |
+| `/contract-signing/:id` | ContractSigning | Verified | Ký hợp đồng (OTP) |
+| `/unified-bills` | UnifiedBillsPage | Verified | Tất cả hóa đơn |
+| `/bill-detail/:id` | BillDetail | Verified | Chi tiết hóa đơn |
+| `/payment-result` | PaymentResult | Public | Kết quả thanh toán |
+| `/add-property` | AddProperty | Verified | Đăng tin mới |
+| `/my-properties` | MyProperties | Verified | Quản lý tin đăng |
 | `/my-favorites` | MyFavorites | Login | Phòng yêu thích |
+| `/message` | Message | Verified | Chat |
+| `/notifications` | NotificationCenter | Login | Trung tâm thông báo |
+| `/admin/dashboard` | AdminDashboard | Admin | Admin overview |
+| `/admin/properties` | AdminProperties | Admin | Duyệt property |
+| `/admin/users` | AdminUsers | Admin | Quản lý users |
 
-### 7.3 Chiến lược MUI + Tailwind
+### 8.3 Tính năng Frontend mới (so với phiên bản trước)
 
-- **Tailwind**: Layout, spacing, responsive, typography
-- **MUI**: Complex components (Dialog, DataGrid, DatePicker, Accordion)
-- `StyledEngineProvider injectFirst` để tránh CSS specificity conflict
-- **Lucide React** cho icon (nhẹ hơn MUI Icons)
+| Tính năng | Component/File | Mô tả |
+|---|---|---|
+| **3D Model Viewer** | `Model3DViewer.jsx`, `Model3DSection.jsx` | Xem mô hình 3D phòng bằng `<model-viewer>` |
+| **Map Search View** | `PropertyMapView.jsx` (18.6KB) | Tìm phòng trên bản đồ Leaflet với MarkerClusterer |
+| **Google Maps Picker** | `GoogleMapPicker.jsx` | Chọn vị trí khi đăng tin (geocoding) |
+| **Revenue Chart** | `RevenueChartRecharts.jsx` (15.4KB) | Biểu đồ doanh thu với Recharts |
+| **Video/Voice Call** | `CallContext.jsx` (12KB) | WebRTC video call integration |
+| **Notification Center** | `NotificationsPage`, `NotificationBell` | Trang thông báo + bell dropdown |
+| **Meter Reading OCR** | `MeterReadingModal.jsx` (17.5KB) | Upload ảnh đồng hồ → OCR đọc chỉ số |
+| **Wheel Date Picker** | `WheelDatePicker.jsx` | Custom mobile-friendly date picker |
+| **Dark Mode** | `ThemeContext.jsx`, `ThemeToggle.jsx` | Toggle sáng/tối |
+| **Settings Menu** | `SettingsMenu.jsx` | Cài đặt ngôn ngữ, theme |
+| **Error Boundary** | `ErrorBoundary.jsx` | Catch React errors, hiển thị fallback UI |
 
-### 7.4 Code Splitting
+### 8.4 Build System
 
-Toàn bộ pages sử dụng `React.lazy()` + `Suspense` → code splitting tự động → giảm initial bundle size.
+Frontend đã **migrate từ CRA sang Vite**:
+- Dev server: `npm start` → chạy Vite (nhanh hơn CRA ~10x)
+- Dual build: `npm run build` (CRA) hoặc `npm run build:vite` (Vite)
+- Plugin: `@vitejs/plugin-react-swc` (SWC compiler thay Babel)
+- Env: Load từ `infra/.env` qua `dotenv-cli`
+
+### 8.5 Code Splitting
+
+Toàn bộ 25+ page components sử dụng `React.lazy()` + `Suspense` → code splitting tự động.
 
 ---
 
-## 8. Giao Tiếp Giữa Các Service
+## 9. Giao Tiếp Giữa Các Service
 
-### 8.1 Synchronous (REST — OpenFeign)
-
-Khi service A cần data ngay lập tức từ service B:
+### 9.1 Synchronous (REST — OpenFeign)
 
 ```
-booking-service → ProfileClient.getProfile(userId)  → profile-service
-booking-service → PropertyClient.getProperty(id)    → property-service
+booking-service → ProfileClient, PropertyClient
 contract-service → PropertyClient, ProfileClient, BillingClient, FileClient
 billing-service → ContractClient, PropertyClient, FileClient
 payment-service → BillClient, ContractClient, ProfileClient, FileClient
 admin-service → UserClient (identity), PropertyClient
+colmap-worker → PropertyClient (HTTP callback)
 ```
 
-**Công nghệ:** Spring Cloud OpenFeign — declarative REST client.
-`AuthenticationRequestInterceptor` tự động forward JWT token khi gọi cross-service.
+**AuthenticationRequestInterceptor** tự động forward JWT token khi gọi cross-service.
 
-### 8.2 Asynchronous (Event-driven — Kafka)
-
-Khi service A chỉ cần thông báo, không cần response:
+### 9.2 Asynchronous (Kafka Events)
 
 ```
 identity-service  → "user-events"      → profile-service (tạo profile)
-booking-service   → "BookingEvent"     → notification-service (thông báo)
+booking-service   → "BookingEvent"     → notification-service
 contract-service  → "ContractEvent"    → notification-service + billing-service
 payment-service   → "PaymentEvent"     → notification-service + contract-service
 property-service  → "PropertyEvent"    → notification-service
 ```
 
-**Lý thuyết cần nắm:**
-- Kafka: Topic, Producer, Consumer, Consumer Group
-- At-least-once delivery (cần idempotent consumer)
-- `JsonSerializer` / `JsonDeserializer` cho event objects
-
 ---
 
-## 9. Infrastructure & DevOps
+## 10. Infrastructure & DevOps
 
-### 9.1 Docker Compose Services
+### 10.1 Docker Compose Services (11 containers)
 
 ```yaml
-mongodb:        mongo:7.0             # Document DB
-mysql:          mysql:8.0             # Relational DB
-neo4j:          neo4j:5.15            # Graph DB
-redis:          redis:7.2-alpine      # Cache + Lock
-kafka:          cp-kafka:7.5.0        # Message Broker
-zookeeper:      cp-zookeeper:7.5.0    # Kafka coordination
-elasticsearch:  elasticsearch:8.11.0  # Search Engine
-minio:          minio:RELEASE.2024    # Object Storage
-prometheus:     prom/prometheus:v2.47  # Metrics
-eureka-server:  eureka-server         # Service Discovery
+mongodb:          mongo:7.0             # Document DB
+mysql:            mysql:8.0             # Relational DB
+neo4j:            neo4j:5.15            # Graph DB (APOC plugin)
+redis:            redis:7.2-alpine      # Cache + Lock
+kafka:            cp-kafka:7.5.0        # Message Broker
+zookeeper:        cp-zookeeper:7.5.0    # Kafka coordination
+elasticsearch:    elasticsearch:8.11.0  # Search Engine (xpack.security=true)
+minio:            minio:RELEASE.2024    # Object Storage
+prometheus:       prom/prometheus:v2.47 # Metrics
+eureka-server:    eureka-server         # Service Discovery
+colmap-worker:    custom Dockerfile     # 3D Reconstruction ⭐ NEW
 ```
 
-### 9.2 Build & Run
+### 10.2 Build & Run
 
 ```bash
 # 1. Start infrastructure
@@ -729,184 +1028,201 @@ cd backend && mvn clean install -DskipTests
 
 # 3. Run backend (Windows)
 infra\scripts\backend-runtime\run-from-jars.bat
+# Or use PowerShell:
+powershell -File infra\scripts\backend-runtime\launch-all-fast.ps1
 
 # 4. Run frontend
 cd frontend && npm install && npm start
 ```
 
-### 9.3 Health Check
+### 10.3 Infrastructure Scripts
 
+| Script | Đường dẫn | Mô tả |
+|---|---|---|
+| `run-from-jars.bat` | `infra/scripts/backend-runtime/` | Chạy 13 services từ JAR files |
+| `launch-all-fast.ps1` | `infra/scripts/backend-runtime/` | PowerShell fast launch |
+| `build-all.ps1` | `infra/scripts/backend-runtime/` | Build all Maven modules |
+| `check-services.ps1` | `infra/scripts/backend-runtime/` | Health check tất cả services |
+| `stop-all-services.ps1` | `infra/scripts/backend-runtime/` | Stop all running services |
+| `backup-db.sh` | `infra/scripts/database/` | Backup MySQL + MongoDB + Neo4j |
+| `seed-all.ps1` | `infra/scripts/database/` | Seed test data |
+| `seed-neo4j.ps1` | `infra/scripts/database/` | Seed Neo4j graph data |
+| `deploy-vps.sh` | `infra/scripts/deployment/` | Deploy lên VPS |
+| `setup-ubuntu.sh` | `infra/scripts/deployment/` | Ubuntu one-time server setup |
+| `smoke-test-vps.sh` | `infra/scripts/deployment/` | Post-deploy smoke test |
+
+### 10.4 Multi-Machine / Shared Infra (Tailscale LAN)
+
+Dự án hỗ trợ multi-machine development qua Tailscale VPN:
+- **Host machine:** Chạy Docker Compose, chia sẻ DB ports
+- **Partner machine:** Connect tới host qua Tailscale IP, không cần local containers
+- Cấu hình: Set `*_HOST` env vars tới Tailscale IP trong `infra/.env`
+- **Partner Onboarding Checklist:** `docs/PARTNER_ONBOARDING_CHECKLIST.md`
+- **Connectivity test script:** `infra/scripts/partner-port-test.ps1`
+
+### 10.5 VPS Production Deployment Roadmap
+
+| Phase | Mô tả |
+|---|---|
+| **Phase 1** | Single VPS + Docker Compose + Automated DB Backups |
+| **Phase 2** | Migrate DB sang managed services (MongoDB Atlas, RDS...) |
+| **Phase 3** | Kubernetes khi cần scale |
+
+Templates sẵn có:
+- Nginx reverse proxy: `infra/config/nginx/nginx.vps.conf.template`
+- Deploy script: `infra/scripts/deployment/deploy-vps.sh`
+- Smoke test: `infra/scripts/deployment/smoke-test-vps.sh`
+
+### 10.6 Database Init Scripts
+
+| File | Mô tả |
+|---|---|
+| `infra/init.sql` | MySQL schema init (users, roles, permissions) |
+| `infra/init-mongo.js` | MongoDB databases + users cho 11 service databases |
+| `infra/init-neo4j.cypher` | Neo4j constraints + indexes |
+
+### 10.7 Swagger API Documentation
+
+Mọi service đều có Swagger UI (chỉ bật ở `dev` profile):
 ```
-GET http://localhost:<PORT><CONTEXT_PATH>/actuator/health
-
-Ví dụ:
-GET http://localhost:8082/profile/actuator/health
+http://localhost:<PORT><CONTEXT_PATH>/swagger-ui.html
 ```
-
-3 trạng thái: **HEALTHY** (200) | **DEGRADED** (503, service OK nhưng dependency DOWN) | **OFFLINE** (unreachable)
 
 ---
 
-## 10. Các Pattern & Công Nghệ Cần Nắm
+## 11. Các Pattern & Công Nghệ Cần Nắm
 
-### 10.1 Design Patterns
+### 11.1 Design Patterns
 
 | Pattern | Nơi áp dụng | Giải thích |
 |---|---|---|
-| **API Gateway** | api-gateway | Single entry point, cross-cutting concerns |
-| **CQRS** | identity ↔ profile | Command (identity) tách riêng Query (profile) |
-| **Event-Driven** | Kafka events | Loose coupling giữa services |
+| **API Gateway** | api-gateway | Single entry point |
+| **CQRS** | identity ↔ profile | Command tách riêng Query |
+| **Event-Driven** | Kafka events | Loose coupling |
 | **Repository** | Spring Data JPA/MongoDB | Data access abstraction |
-| **DTO** | Request/Response objects | Không expose entity trực tiếp |
-| **Mapper** | MapStruct interfaces | Entity ↔ DTO conversion tự động |
+| **DTO + Mapper** | MapStruct | Entity ↔ DTO conversion |
 | **Builder** | Lombok `@Builder` | Fluent object creation |
-| **Template Method** | Notification templates | Tái sử dụng cấu trúc notification |
 | **Strategy** | Payment (VNPay/MoMo) | Nhiều phương thức thanh toán |
+| **Cascade Fallback** | COLMAP converter | Poisson → Ball Pivoting → Delaunay → Convex Hull |
 | **Distributed Lock** | Redis lock (booking) | Tránh race condition |
 | **Optimistic Lock** | Contract `@Version` | Tránh concurrent update |
 | **Circuit Breaker** | OpenFeign | Resilience khi service DOWN |
+| **Async Job Processing** | COLMAP worker threads | Background processing |
+| **Observer** | Kafka pub/sub | Event notification |
 
-### 10.2 Thư viện & Framework quan trọng
+### 11.2 Thư viện quan trọng (Backend)
 
-| Thư viện | Vai trò | Ghi chú |
-|---|---|---|
-| **Spring Boot** | Framework chính | Auto-configuration, dependency injection |
-| **Spring Cloud Gateway** | API Gateway | Reactive, WebFlux |
-| **Spring Security** | Security framework | JWT + OAuth2 |
-| **Spring Data JPA** | ORM cho MySQL | Hibernate underneath |
-| **Spring Data MongoDB** | MongoDB access | MongoRepository |
-| **Spring Data Neo4j** | Neo4j access | Cypher queries |
-| **Spring Data Redis** | Cache + Lock | `@Cacheable`, `RedisTemplate` |
-| **Spring Data Elasticsearch** | Search | `ElasticsearchRepository` |
-| **Spring Kafka** | Message broker | `@KafkaListener`, `KafkaTemplate` |
-| **OpenFeign** | HTTP client | Declarative REST calls |
-| **MapStruct** | Object mapping | Compile-time DTO ↔ Entity mapper |
-| **Lombok** | Boilerplate reduction | `@Data`, `@Builder`, `@Slf4j` |
-| **JJWT** | JWT handling | Token signing & parsing |
-| **Springdoc OpenAPI** | API documentation | Swagger UI (dev profile only) |
+| Thư viện | Vai trò |
+|---|---|
+| **Spring Boot 3.2.5** | Framework chính |
+| **Spring Cloud Gateway** | API Gateway (WebFlux) |
+| **Spring Security** | JWT + OAuth2 |
+| **Spring Data JPA/MongoDB/Neo4j/Redis/Elasticsearch** | Data access |
+| **Spring Kafka** | Message broker |
+| **OpenFeign** | Declarative REST client |
+| **MapStruct 1.5.5** | Object mapping (compile-time) |
+| **Lombok 1.18.34** | Boilerplate reduction |
+| **JJWT 0.12.6** | JWT signing & parsing |
+| **Springdoc OpenAPI** | Swagger UI (dev only) |
 
-### 10.3 Key Annotations cần nhớ
+### 11.3 Dependencies quan trọng (Frontend)
 
-```java
-// Spring Boot
-@SpringBootApplication, @RestController, @Service, @Repository
-@Configuration, @Component, @Bean
-
-// Security
-@PreAuthorize, @EnableWebSecurity
-
-// Data
-@Entity, @Table, @Column, @Id, @GeneratedValue (JPA)
-@Document, @MongoId (MongoDB)
-@Node, @Property (Neo4j)
-@Cacheable, @CacheEvict (Redis)
-
-// Validation
-@Valid, @NotNull, @NotBlank, @Size, @Email
-
-// Lombok
-@Data, @Getter, @Setter, @Builder, @NoArgsConstructor
-@AllArgsConstructor, @FieldDefaults, @Slf4j
-
-// Kafka
-@KafkaListener, @EnableKafka
-
-// Feign
-@FeignClient, @RequestMapping
-
-// MapStruct
-@Mapper(componentModel = "spring")
-```
+| Library | Vai trò |
+|---|---|
+| **React 19.2** | UI framework |
+| **MUI v7.3** | Complex components |
+| **Tailwind CSS v3.4** | Utility CSS |
+| **Vite 7.1** | Build tool (SWC) |
+| **React Router v7.9** | Client routing |
+| **Axios 1.13** | HTTP client |
+| **Leaflet + react-leaflet v5** | Maps |
+| **@google/model-viewer v4.2** | 3D GLB viewer |
+| **Recharts v3.6** | Charts |
+| **Socket.IO / STOMP** | Real-time messaging |
+| **i18next** | Internationalization |
+| **Lucide React** | Icon library |
+| **jsQR** | QR code scanning |
+| **jwt-decode** | JWT parsing |
+| **date-fns / dayjs** | Date utilities |
 
 ---
 
-## 11. Câu Hỏi Phỏng Vấn Thường Gặp
+## 12. Câu Hỏi Phỏng Vấn Thường Gặp
 
-### 11.1 Câu hỏi tổng quan
+### 12.1 Câu hỏi tổng quan
 
 **Q1: Giới thiệu tổng quan dự án Roomie.**
-> Roomie là nền tảng quản lý cho thuê phòng trọ, xây dựng theo kiến trúc microservices với 13 service backend (Spring Boot), frontend React, sử dụng polyglot persistence (MySQL, MongoDB, Neo4j), Kafka cho event-driven communication, Elasticsearch cho full-text search, Redis cho caching và distributed lock.
+> Roomie là nền tảng quản lý cho thuê phòng trọ, xây dựng theo kiến trúc microservices với 13 service backend (Spring Boot) + 1 Python worker (3D reconstruction), frontend React 19 với Vite, sử dụng polyglot persistence (MySQL, MongoDB, Neo4j), Kafka cho event-driven communication, Elasticsearch cho full-text + geo-search, Redis cho caching và distributed lock, COLMAP cho 3D room reconstruction.
 
 **Q2: Tại sao chọn microservices thay vì monolith?**
-> - Dự án có nhiều bounded context rõ ràng (auth, property, booking, payment...)
-> - Cần khả năng scale riêng từng service (property search traffic cao hơn payment)
-> - Team có thể develop & deploy independent
-> - Có thể dùng different database per service (MySQL cho identity vì cần ACID, MongoDB cho property vì schema linh hoạt)
+> Nhiều bounded context rõ ràng, cần scale riêng từng service, tech diversity (Java cho business logic, Python cho ML/3D processing), team independence.
 
-**Q3: Dự án dùng bao nhiêu database? Tại sao không dùng 1 database duy nhất?**
-> 5 loại DB. Mỗi loại phù hợp cho use case khác nhau. Đây gọi là Polyglot Persistence. MySQL cho auth (ACID + JOIN), MongoDB cho domain data (schema linh hoạt), Neo4j cho graph giữa user (relationship traversal nhanh), Redis cho cache (in-memory speed), Elasticsearch cho search (full-text, fuzzy, aggregation).
+**Q3: Dự án dùng bao nhiêu database? Tại sao Polyglot Persistence?**
+> 6 loại DB, mỗi loại cho use case riêng. MySQL cho auth (ACID + JOIN), MongoDB cho domain data (schema linh hoạt), Neo4j cho graph relationships, Redis cho cache/lock, Elasticsearch cho search/geo, MinIO cho object storage.
 
-### 11.2 Câu hỏi kỹ thuật
+### 12.2 Câu hỏi kỹ thuật
 
-**Q4: JWT hoạt động như thế nào trong Roomie?**
-> JWT gồm 3 phần: Header (algorithm), Payload (userId, roles, exp), Signature (HMAC-SHA256 với secret key). Identity service phát JWT khi login, API Gateway verify bằng cách gọi introspect endpoint. Token invalidation xử lý bằng blacklist table (InvalidatedToken). Refresh token cho phép lấy access token mới mà không cần login lại.
+**Q4: Giải thích COLMAP 3D reconstruction pipeline.**
+> Nhận ảnh → SIFT feature extraction → exhaustive matching → sparse reconstruction (SfM) → point cloud filtering (statistical + radius + DBSCAN) → surface reconstruction (Poisson mesh, fallback Ball Pivoting/Delaunay) → nearest-neighbor color mapping → GLB export + material injection → upload MinIO → callback tới property-service.
 
-**Q5: Giải thích flow thanh toán online.**
-> User chọn bill → chọn phương thức (VNPay/MoMo) → backend tạo payment request với signature → redirect user tới payment gateway → user thanh toán → gateway POST webhook callback → backend verify signature → update payment + bill status → publish Kafka event → notification service gửi thông báo.
+**Q5: Tại sao cần inject material vào GLB?**
+> Three.js và model-viewer mặc định không render vertex colors từ GLB. Phải inject PBR material với `baseColorFactor=[1,1,1,1]`, `metallicFactor=0`, `roughnessFactor=0.85`, `doubleSided=true` vào primitives có `COLOR_0` attribute.
 
-**Q6: Distributed Lock dùng ở đâu và tại sao?**
-> Dùng Redis SETNX trong booking-service để tránh 2 người cùng book 1 phòng (double booking). Khi tenant click "Book", hệ thống acquire lock trên propertyId trong 15 phút. Nếu lock thành công → cho phép booking. Nếu không → trả về lỗi "phòng đang được xử lý".
+**Q6: JWT hoạt động như thế nào?**
+> JWT gồm Header.Payload.Signature. Identity service phát JWT khi login, API Gateway verify bằng introspect endpoint. Token invalidation bằng blacklist table. Refresh token cho phép lấy access token mới.
 
-**Q7: Elasticsearch dùng cho gì? So sánh với MongoDB text search.**
-> ES dùng cho full-text search property (tìm theo tên, mô tả, địa chỉ). ES mạnh hơn MongoDB text index ở: fuzzy matching (tìm "pòng trọ" → "phòng trọ"), relevance scoring, aggregation (statistics), synonym handling, analyzer cho tiếng Việt.
+**Q7: Distributed Lock dùng ở đâu?**
+> Redis SETNX trong booking-service tránh double booking. Acquire lock trên propertyId 15 phút.
 
-**Q8: Kafka dùng ở đâu? Tại sao không dùng REST API trực tiếp?**
-> Kafka dùng cho async communication: khi booking approved → notify contract service + notification service. Dùng Kafka thay vì REST vì: (1) loose coupling — booking service không cần biết notification service tồn tại, (2) reliability — message được persist, nếu consumer down sẽ xử lý sau, (3) scalability — nhiều consumer có thể xử lý song song.
+**Q8: Geo-search hoạt động thế nào?**
+> Property có latitude/longitude trong address. Elasticsearch geo_distance query tìm property trong bán kính X km. Frontend hiển thị trên Leaflet map với MarkerClusterer.
 
-**Q9: Giải thích cách ký hợp đồng điện tử hoạt động.**
-> Contract được tạo → hệ thống gửi OTP qua email cho tenant → tenant nhập OTP → verify → đánh dấu tenantSigned. Tương tự cho landlord. Sau khi cả 2 ký → sinh PDF với HMAC signature (chống giả mạo) → upload lên MinIO qua file-service → contract ACTIVE.
+**Q9: Tại sao dùng Vite thay CRA?**
+> Vite HMR nhanh hơn ~10x so với CRA (Webpack). SWC compiler thay Babel. Dev experience tốt hơn nhiều.
 
-**Q10: Giải thích Optimistic Locking trong contract-service.**
-> Entity Contract có field `@Version`. Khi 2 request cùng update 1 contract, request đầu thành công (version 0 → 1), request thứ 2 fail vì version đã thay đổi → throw `OptimisticLockException` → retry hoặc trả lỗi. Tránh mất dữ liệu khi concurrent update.
+### 12.3 Câu hỏi Architecture
 
-### 11.3 Câu hỏi về Frontend
+**Q10: Làm sao đảm bảo data consistency giữa các service?**
+> Eventual Consistency qua Kafka events. Payment complete → publish event → billing update. Kafka retain message nếu consumer fail → retry. Cho case critical, check lại bằng REST call.
 
-**Q11: Frontend dùng pattern gì để gọi API?**
-> Service layer pattern: `services/authService.js`, `services/propertyService.js`... Mỗi file tương ứng 1 backend service. Dùng Axios instance với baseURL = API Gateway. Interceptor tự động gắn JWT token vào mỗi request. Response interceptor handle 401 → redirect login.
+**Q11: Nếu 1 service bị DOWN, hệ thống xử lý thế nào?**
+> OpenFeign có timeout + fallback. Kafka messages persist → consumer xử lý khi up lại. Health check phân biệt HEALTHY / DEGRADED / OFFLINE.
 
-**Q12: Code splitting được áp dụng như thế nào?**
-> Tất cả page components dùng `React.lazy()` + `Suspense`. Mỗi route được split thành chunk riêng → user chỉ download code cho page đang xem. Giảm initial bundle size đáng kể.
-
-**Q13: Giải thích hệ thống phân quyền ở Frontend.**
-> `RoleProtectedRoute` component wrap protected routes, kiểm tra JWT decoded roles. `VerificationGuard` kiểm tra thêm user đã xác minh CCCD chưa. Combine cả 2 cho các trang quan trọng (ký hợp đồng, thanh toán...).
-
-### 11.4 Câu hỏi Architecture & Design
-
-**Q14: Giải thích CQRS pattern trong dự án.**
-> Identity service quản lý Write (register, update password, role) — dùng MySQL vì cần ACID transaction. Profile service quản lý Read/Update profile data — dùng Neo4j vì cần graph queries. 2 service sync qua Kafka event: khi user register → identity publish event → profile consumer tạo UserProfile. Tách riêng giúp optimize từng service cho use case riêng.
-
-**Q15: Làm sao đảm bảo data consistency giữa các service?**
-> Eventual Consistency qua Kafka events. Ví dụ: payment complete → publish event → billing update bill status. Nếu consumer fail → Kafka retain message → retry. Cho case critical (payment), có thể check lại bằng REST call. Trade-off: không có strong consistency nhưng đổi lại loosely coupled + resilient.
-
-**Q16: Nếu 1 service bị DOWN, hệ thống xử lý thế nào?**
-> OpenFeign có timeout + fallback. Kafka messages được persist → consumer xử lý khi service up lại. API Gateway trả lỗi 503 cho route tương ứng nhưng không ảnh hưởng các service khác. Health check script phân biệt HEALTHY / DEGRADED / OFFLINE.
+**Q12: Giải thích Cascade Fallback trong COLMAP converter.**
+> Poisson (chất lượng cao nhất) → nếu fail → Ball Pivoting → nếu fail → Delaunay → nếu fail → Convex Hull (fallback cuối). Đảm bảo luôn có output dù input chất lượng thấp.
 
 ---
 
-## 12. Demo Script
+## 13. Demo Script
 
-### 12.1 Demo Flow gợi ý (10 phút)
+### 13.1 Demo Flow gợi ý (12 phút)
 
 1. **[1 phút] Giới thiệu kiến trúc** — show sơ đồ hệ thống, giải thích microservices
 2. **[1 phút] Start hệ thống** — `docker-compose up`, run services, health check
 3. **[1 phút] Đăng ký + Đăng nhập** — register → OTP verify → login → JWT token
 4. **[1 phút] Xác minh CCCD** — quét QR CCCD → điền thông tin
-5. **[2 phút] Landlord đăng tin** — tạo property → upload ảnh → admin duyệt
-6. **[1 phút] Tenant tìm phòng** — tìm kiếm → bộ lọc → xem chi tiết
-7. **[1 phút] Booking + Ký hợp đồng** — đặt phòng → duyệt → ký OTP → PDF
-8. **[1 phút] Hóa đơn + Thanh toán** — landlord tạo bill → tenant thanh toán VNPay/MoMo
-9. **[1 phút] Chat + Notification** — nhắn tin real-time + push notification
+5. **[2 phút] Landlord đăng tin** — tạo property → upload ảnh → Google Maps picker → admin duyệt
+6. **[1 phút] Tenant tìm phòng** — full-text search → bộ lọc → **Map View** → xem chi tiết
+7. **[1 phút] 3D Model Viewer** — xem phòng 3D trên trình duyệt ⭐
+8. **[1 phút] Booking + Ký hợp đồng** — đặt phòng → duyệt → ký OTP → PDF
+9. **[1 phút] Hóa đơn + Thanh toán** — tạo bill → **OCR đọc đồng hồ** → thanh toán VNPay/MoMo
+10. **[1 phút] Chat + Notification** — nhắn tin real-time + push notification + AI chatbot
+11. **[1 phút] Admin Panel** — dashboard thống kê + duyệt tin + quản lý user
 
-### 12.2 Các điểm highlight khi demo
+### 13.2 Các điểm highlight khi demo
 
+- **3D Room Viewer** — xem phòng trọ 3 chiều từ ảnh chụp ⭐
+- **Map Search** — tìm phòng trên bản đồ, nearby search ⭐
 - **Real-time chat** qua WebSocket
 - **OCR đọc đồng hồ** từ ảnh chụp
 - **Ký hợp đồng điện tử** với OTP
 - **Thanh toán online** VNPay/MoMo
-- **Full-text search** tiếng Việt
-- **AI Chatbot** tư vấn phòng
-- **Admin panel** real-time log
+- **Full-text search** tiếng Việt + geo-search
+- **AI Chatbot** tư vấn phòng (Google Gemini)
+- **Admin panel** real-time log + dashboard Recharts
 - **i18n** chuyển đổi Tiếng Việt / English
+- **Dark Mode** toggle
+- **Revenue Charts** biểu đồ doanh thu
 
 ---
 

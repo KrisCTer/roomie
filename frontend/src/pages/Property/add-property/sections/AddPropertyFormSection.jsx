@@ -86,6 +86,7 @@ const AddPropertyFormSection = ({
           propertyId={propertyId}
           model3dStatus={propertyData.model3dStatus}
           model3dVisible={propertyData.model3dVisible}
+          model3dRequestedAt={propertyData.model3dRequestedAt}
           onCoverUpload={onCoverUpload}
           onCoverRemove={onCoverRemove}
           onImageUpload={onImageUpload}

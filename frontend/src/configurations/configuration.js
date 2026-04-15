@@ -266,6 +266,18 @@ export const API = {
   // System Configuration
   ADMIN_GET_SYSTEM_CONFIG: "/admin/system/config",
   ADMIN_UPDATE_SYSTEM_CONFIG: "/admin/system/config",
+
+  // Booking Management (Admin)
+  ADMIN_GET_ALL_BOOKINGS: "/admin/bookings",
+  ADMIN_GET_BOOKING: (id) => `/admin/bookings/${id}`,
+  ADMIN_FORCE_CANCEL_BOOKING: (id) => `/admin/bookings/${id}/cancel`,
+
+  // Contract Management (Admin)
+  ADMIN_GET_ALL_CONTRACTS: "/admin/contracts",
+  ADMIN_GET_CONTRACT: (id) => `/admin/contracts/${id}`,
+
+  // Billing Management (Admin)
+  ADMIN_GET_ALL_BILLS: "/admin/billing",
 };
 
 // Service Ports (for reference)

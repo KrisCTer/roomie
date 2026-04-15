@@ -10,23 +10,25 @@ import {
   Share2,
 } from "lucide-react";
 import { useFavorite } from "../../../../hooks/common/useFavorite";
+import { useTranslation } from "react-i18next";
 
-const LABEL_CONFIG = {
+const getLabelConfig = (t) => ({
   HOT: {
     text: "HOT",
     className: "bg-rose-500 text-white",
   },
   NEW: {
-    text: "Mới",
+    text: t("homeCard.labelNew"),
     className: "bg-emerald-500 text-white",
   },
   RECOMMENDED: {
-    text: "Gợi ý",
+    text: t("homeCard.labelRecommended"),
     className: "bg-amber-400 text-[var(--home-charcoal)]",
   },
-};
+});
 
 const HomePropertyCard = ({ property, onCardClick }) => {
+  const { t } = useTranslation();
   const {
     isFavorited,
     favoriteCount,
@@ -47,7 +49,7 @@ const HomePropertyCard = ({ property, onCardClick }) => {
       if (navigator.share) {
         await navigator.share({
           title: property.title,
-          text: "Xem phòng này trên Roomie",
+          text: property.title,
           url,
         });
       } else {
@@ -58,7 +60,7 @@ const HomePropertyCard = ({ property, onCardClick }) => {
     }
   };
 
-  const activeLabel = LABEL_CONFIG[property.label];
+  const activeLabel = getLabelConfig(t)[property.label];
 
   return (
     <article
@@ -126,7 +128,7 @@ const HomePropertyCard = ({ property, onCardClick }) => {
 
         {favoriteCount > 0 && (
           <p className="absolute bottom-3 right-3 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white">
-            {favoriteCount} likes
+            {favoriteCount} {t("homeCard.likes")}
           </p>
         )}
       </div>
@@ -140,7 +142,7 @@ const HomePropertyCard = ({ property, onCardClick }) => {
             <p className="text-base font-bold text-[var(--home-charcoal)]">
               {property.price.toLocaleString()} ₫
             </p>
-            <p className="text-xs text-[var(--home-muted)]">/ tháng</p>
+            <p className="text-xs text-[var(--home-muted)]">{t("homeCard.perMonth")}</p>
           </div>
         </div>
 
@@ -163,7 +165,7 @@ const HomePropertyCard = ({ property, onCardClick }) => {
 
         <div className="mt-auto flex items-center justify-between border-t border-[var(--home-border)] pt-3">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--home-muted)]">
-            quick match
+            {t("homeCard.quickMatch")}
           </p>
           <div className="flex items-center gap-2">
             {property.coordinateLocation && (
@@ -201,11 +203,11 @@ const HomePropertyCard = ({ property, onCardClick }) => {
                 aria-label={`Chỉ đường tới ${property.title}`}
               >
                 <Navigation size={14} />
-                Chỉ đường
+                {t("homeCard.directions")}
               </button>
             )}
             <span className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--home-accent)] px-4 text-sm font-semibold text-[var(--home-charcoal)] transition group-hover:translate-x-1">
-              Chi tiết <ArrowRight size={15} />
+              {t("homeCard.details")} <ArrowRight size={15} />
             </span>
           </div>
         </div>

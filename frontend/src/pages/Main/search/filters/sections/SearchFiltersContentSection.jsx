@@ -1,13 +1,12 @@
 import React from "react";
-import { Box, Divider, Slider, Switch, Typography } from "@mui/material";
 import { MapPin, Navigation, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   BATHROOM_OPTIONS,
   BEDROOM_OPTIONS,
   DEFAULT_FILTERS,
   PROPERTY_TYPES,
   RADIUS_OPTIONS,
-  summaryChipStyle,
 } from "../utils/filterOptions";
 
 const SearchFiltersContentSection = ({
@@ -15,18 +14,17 @@ const SearchFiltersContentSection = ({
   setLocalFilters,
   activeFilterCount,
 }) => {
+  const { t } = useTranslation();
   const [gettingLocation, setGettingLocation] = React.useState(false);
   const [locationError, setLocationError] = React.useState(null);
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      setLocationError("Trình duyệt không hỗ trợ định vị");
+      setLocationError(t("filters.locationUnsupported"));
       return;
     }
-
     setGettingLocation(true);
     setLocationError(null);
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocalFilters({
@@ -38,14 +36,10 @@ const SearchFiltersContentSection = ({
         setGettingLocation(false);
       },
       (error) => {
-        let msg = "Không thể lấy vị trí. ";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg += "Vui lòng cho phép truy cập vị trí trong trình duyệt.";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          msg += "Thông tin vị trí không khả dụng.";
-        } else {
-          msg += "Yêu cầu hết thời gian chờ.";
-        }
+        let msg = "";
+        if (error.code === error.PERMISSION_DENIED) msg = t("filters.locationDenied");
+        else if (error.code === error.POSITION_UNAVAILABLE) msg = t("filters.locationUnavailable");
+        else msg = t("filters.locationTimeout");
         setLocationError(msg);
         setGettingLocation(false);
       },
@@ -54,380 +48,184 @@ const SearchFiltersContentSection = ({
   };
 
   const handleClearNearby = () => {
-    setLocalFilters({
-      ...localFilters,
-      nearbyEnabled: false,
-      nearbyLat: null,
-      nearbyLng: null,
-      nearbyRadiusKm: 5,
-    });
+    setLocalFilters({ ...localFilters, nearbyEnabled: false, nearbyLat: null, nearbyLng: null, nearbyRadiusKm: 5 });
     setLocationError(null);
   };
 
+  const isTypeSelected = (val) => localFilters.propertyTypes.includes(val);
+  const toggleType = (val) => {
+    const newTypes = isTypeSelected(val)
+      ? localFilters.propertyTypes.filter((v) => v !== val)
+      : [...localFilters.propertyTypes, val];
+    setLocalFilters({ ...localFilters, propertyTypes: newTypes });
+  };
+
   return (
-    <Box sx={{ flex: 1, overflow: "auto", px: 3, py: 3 }}>
+    <div className="flex-1 overflow-auto px-5 py-5 space-y-6">
+
+      {/* Active Filters Summary */}
       {activeFilterCount > 0 && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.2 }}>
-            Dang loc theo
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {(localFilters.priceRange[0] !== DEFAULT_FILTERS.priceRange[0] ||
-              localFilters.priceRange[1] !== DEFAULT_FILTERS.priceRange[1]) && (
-              <Box sx={summaryChipStyle}>
-                Gia: {localFilters.priceRange[0].toLocaleString("vi-VN")}d -{" "}
-                {localFilters.priceRange[1].toLocaleString("vi-VN")}d
-              </Box>
-            )}
-            {localFilters.propertyTypes.length > 0 && (
-              <Box sx={summaryChipStyle}>
-                Loai hinh: {localFilters.propertyTypes.length}
-              </Box>
-            )}
-            {localFilters.bedrooms > 0 && (
-              <Box sx={summaryChipStyle}>
-                Phong ngu:{" "}
-                {localFilters.bedrooms === 4 ? "4+" : localFilters.bedrooms}
-              </Box>
-            )}
-            {localFilters.bathrooms > 0 && (
-              <Box sx={summaryChipStyle}>
-                Phong tam:{" "}
-                {localFilters.bathrooms === 3 ? "3+" : localFilters.bathrooms}
-              </Box>
-            )}
-            {localFilters.nearbyEnabled && (
-              <Box sx={summaryChipStyle}>
-                📍 Quanh day: {localFilters.nearbyRadiusKm}km
-              </Box>
-            )}
-          </Box>
-        </Box>
+        <div className="flex flex-wrap gap-1.5">
+          {(localFilters.priceRange[0] !== DEFAULT_FILTERS.priceRange[0] ||
+            localFilters.priceRange[1] !== DEFAULT_FILTERS.priceRange[1]) && (
+            <span className="apple-glass-pill rounded-full px-3 py-1 text-xs font-semibold home-text-muted">
+              {t("filters.price")}: {localFilters.priceRange[0].toLocaleString("vi-VN")}đ - {localFilters.priceRange[1].toLocaleString("vi-VN")}đ
+            </span>
+          )}
+          {localFilters.propertyTypes.length > 0 && (
+            <span className="apple-glass-pill rounded-full px-3 py-1 text-xs font-semibold home-text-muted">
+              {t("filters.type")}: {localFilters.propertyTypes.length}
+            </span>
+          )}
+          {localFilters.bedrooms > 0 && (
+            <span className="apple-glass-pill rounded-full px-3 py-1 text-xs font-semibold home-text-muted">
+              {t("filters.bedrooms")}: {localFilters.bedrooms === 4 ? "4+" : localFilters.bedrooms}
+            </span>
+          )}
+          {localFilters.bathrooms > 0 && (
+            <span className="apple-glass-pill rounded-full px-3 py-1 text-xs font-semibold home-text-muted">
+              {t("filters.bathrooms")}: {localFilters.bathrooms === 3 ? "3+" : localFilters.bathrooms}
+            </span>
+          )}
+          {localFilters.nearbyEnabled && (
+            <span className="apple-glass-pill rounded-full px-3 py-1 text-xs font-semibold home-text-muted">
+              {t("filters.nearby")}: {localFilters.nearbyRadiusKm}km
+            </span>
+          )}
+        </div>
       )}
 
-      {/* Nearby Search Section */}
-      <Box
-        sx={{
-          mb: 4,
-          p: 2.5,
-          border: "2px solid",
-          borderColor: localFilters.nearbyEnabled ? "#059669" : "#E6DDD0",
-          borderRadius: 3,
-          bgcolor: localFilters.nearbyEnabled ? "#ECFDF5" : "#FEFBF6",
-          transition: "all 0.3s ease",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 2,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <MapPin size={18} color={localFilters.nearbyEnabled ? "#059669" : "#92400E"} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Tim quanh day
-            </Typography>
-          </Box>
+      {/* Nearby Search */}
+      <div className={`apple-glass-panel rounded-2xl p-4 ${localFilters.nearbyEnabled ? "ring-1 ring-emerald-400/30" : ""}`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${localFilters.nearbyEnabled ? "bg-emerald-100/80 text-emerald-700" : "bg-orange-100/80 text-orange-700"}`}>
+              <MapPin className="w-4 h-4" />
+            </div>
+            <span className="text-sm font-bold home-text-primary">{t("filters.searchNearby")}</span>
+          </div>
           {localFilters.nearbyEnabled && (
-            <Box
-              onClick={handleClearNearby}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-                cursor: "pointer",
-                color: "#DC2626",
-                fontSize: 13,
-                fontWeight: 600,
-                "&:hover": { opacity: 0.7 },
-              }}
-            >
-              <X size={14} />
-              Tat
-            </Box>
+            <button onClick={handleClearNearby}
+              className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:opacity-70 transition">
+              <X className="w-3 h-3" /> {t("filters.off")}
+            </button>
           )}
-        </Box>
+        </div>
 
         {!localFilters.nearbyEnabled ? (
-          <Box
-            onClick={handleGetLocation}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1.5,
-              py: 2,
-              px: 3,
-              bgcolor: "#065F46",
-              color: "white",
-              borderRadius: 2,
-              cursor: gettingLocation ? "wait" : "pointer",
-              fontWeight: 700,
-              fontSize: 14,
-              transition: "all 0.2s",
-              opacity: gettingLocation ? 0.7 : 1,
-              "&:hover": { bgcolor: "#047857" },
-            }}
-          >
+          <button onClick={handleGetLocation} disabled={gettingLocation}
+            className="apple-glass-panel interactive w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-[var(--home-charcoal)] transition hover:opacity-90 disabled:opacity-60">
             {gettingLocation ? (
-              <>
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    border: "2px solid white",
-                    borderTopColor: "transparent",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite",
-                    "@keyframes spin": {
-                      "0%": { transform: "rotate(0deg)" },
-                      "100%": { transform: "rotate(360deg)" },
-                    },
-                  }}
-                />
-                Dang lay vi tri...
-              </>
+              <><span className="w-4 h-4 border-2 border-[var(--home-charcoal)] border-t-transparent rounded-full animate-spin" /> {t("filters.gettingLocation")}</>
             ) : (
-              <>
-                <Navigation size={16} />
-                📍 Dung vi tri hien tai
-              </>
+              <><Navigation className="w-4 h-4" /> {t("filters.useLocation")}</>
             )}
-          </Box>
+          </button>
         ) : (
-          <Box>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                mb: 2,
-                p: 1.5,
-                bgcolor: "#D1FAE5",
-                borderRadius: 2,
-              }}
-            >
-              <Navigation size={14} color="#059669" />
-              <Typography sx={{ fontSize: 13, color: "#065F46", fontWeight: 600 }}>
-                Vi tri da xac dinh ✓
-              </Typography>
-            </Box>
-
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 700, mb: 1.5, color: "#1F2937" }}
-            >
-              Ban kinh tim kiem: {localFilters.nearbyRadiusKm}km
-            </Typography>
-
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 rounded-xl bg-emerald-50/60 px-3 py-2">
+              <Navigation className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="text-xs font-semibold text-emerald-700">{t("filters.locationFound")}</span>
+            </div>
+            <p className="text-sm font-bold home-text-primary">{t("filters.radius")}: {localFilters.nearbyRadiusKm}km</p>
+            <div className="flex flex-wrap gap-1.5">
               {RADIUS_OPTIONS.map((r) => (
-                <Box
-                  key={r}
-                  onClick={() =>
-                    setLocalFilters({ ...localFilters, nearbyRadiusKm: r })
-                  }
-                  sx={{
-                    px: 2,
-                    py: 1,
-                    border: "2px solid",
-                    borderColor:
-                      localFilters.nearbyRadiusKm === r ? "#059669" : "#D1D5DB",
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    fontWeight: 600,
-                    fontSize: 13,
-                    bgcolor:
-                      localFilters.nearbyRadiusKm === r ? "#ECFDF5" : "white",
-                    color:
-                      localFilters.nearbyRadiusKm === r ? "#065F46" : "#374151",
-                    transition: "all 0.2s",
-                    "&:hover": { borderColor: "#059669", bgcolor: "#F0FDF4" },
-                  }}
-                >
+                <button key={r} onClick={() => setLocalFilters({ ...localFilters, nearbyRadiusKm: r })}
+                  className={`apple-glass-panel interactive rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                    localFilters.nearbyRadiusKm === r
+                      ? "ring-1 ring-emerald-400/40 bg-emerald-50/50 text-emerald-700"
+                      : "home-text-muted"
+                  }`}>
                   {r}km
-                </Box>
+                </button>
               ))}
-            </Box>
-          </Box>
+            </div>
+          </div>
         )}
 
         {locationError && (
-          <Typography
-            sx={{
-              mt: 1.5,
-              fontSize: 12,
-              color: "#DC2626",
-              fontWeight: 500,
-            }}
-          >
-            {locationError}
-          </Typography>
+          <p className="mt-2 text-xs text-red-600 font-medium">{locationError}</p>
         )}
-      </Box>
+      </div>
 
-      <Divider sx={{ my: 3, borderColor: "#EFE6DA" }} />
-
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-          Khoang gia (VND/thang)
-        </Typography>
-        <Slider
-          value={localFilters.priceRange}
-          onChange={(_, value) =>
-            setLocalFilters({ ...localFilters, priceRange: value })
-          }
-          valueLabelDisplay="auto"
+      {/* Price Range */}
+      <div>
+        <h3 className="text-sm font-bold home-text-primary mb-3">{t("filters.priceRange")}</h3>
+        <input
+          type="range"
           min={0}
           max={50000000}
           step={1000000}
-          valueLabelFormat={(value) => `${(value / 1000000).toFixed(0)}M`}
-          sx={{
-            mb: 2,
-            color: "#EA580C",
-            "& .MuiSlider-thumb": {
-              bgcolor: "#FFFFFF",
-              border: "2px solid #EA580C",
-            },
-          }}
+          value={localFilters.priceRange[1]}
+          onChange={(e) => setLocalFilters({ ...localFilters, priceRange: [localFilters.priceRange[0], Number(e.target.value)] })}
+          className="w-full accent-[var(--home-accent-strong)]"
         />
-      </Box>
+        <div className="flex justify-between mt-1">
+          <span className="text-xs home-text-muted font-medium">{(localFilters.priceRange[0] / 1000000).toFixed(0)}M</span>
+          <span className="text-xs font-bold home-text-primary">{(localFilters.priceRange[1] / 1000000).toFixed(0)}M</span>
+        </div>
+      </div>
 
-      <Divider sx={{ my: 3, borderColor: "#EFE6DA" }} />
+      {/* Property Types */}
+      <div>
+        <h3 className="text-sm font-bold home-text-primary mb-3">{t("filters.propertyType")}</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {PROPERTY_TYPES.map((type) => {
+            const TypeIcon = type.icon;
+            return (
+              <button key={type.value} onClick={() => toggleType(type.value)}
+                className={`apple-glass-panel interactive rounded-2xl p-3 text-left transition-all duration-200 ${
+                  isTypeSelected(type.value)
+                    ? "ring-2 ring-[var(--home-accent-strong)]/50 bg-orange-50/50"
+                    : ""
+                }`}>
+                <div className={`w-9 h-9 rounded-xl ${type.color} flex items-center justify-center mb-2`}>
+                  <TypeIcon className="w-4.5 h-4.5" />
+                </div>
+                <p className={`text-sm ${isTypeSelected(type.value) ? "font-bold home-text-primary" : "font-semibold home-text-muted"}`}>
+                  {t(type.labelKey)}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-          Loai hinh bat dong san
-        </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 2,
-          }}
-        >
-          {PROPERTY_TYPES.map((type) => (
-            <Box
-              key={type.value}
-              onClick={() => {
-                const newTypes = localFilters.propertyTypes.includes(type.value)
-                  ? localFilters.propertyTypes.filter((t) => t !== type.value)
-                  : [...localFilters.propertyTypes, type.value];
-                setLocalFilters({ ...localFilters, propertyTypes: newTypes });
-              }}
-              sx={{
-                px: 2,
-                py: 2,
-                border: "2px solid",
-                borderColor: localFilters.propertyTypes.includes(type.value)
-                  ? "#C2410C"
-                  : "#E6DDD0",
-                borderRadius: 2,
-                cursor: "pointer",
-                transition: "all 0.2s",
-                bgcolor: localFilters.propertyTypes.includes(type.value)
-                  ? "#FFF4E8"
-                  : "transparent",
-                "&:hover": { borderColor: "#C2410C", bgcolor: "#FFF7ED" },
-              }}
-            >
-              <Typography sx={{ fontSize: "1.5rem", mb: 0.5 }}>
-                {type.icon}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-              >
-                {type.label}
-              </Typography>
-            </Box>
+      {/* Bedrooms */}
+      <div>
+        <h3 className="text-sm font-bold home-text-primary mb-3">{t("filters.bedrooms")}</h3>
+        <div className="flex gap-1.5">
+          {BEDROOM_OPTIONS.map((opt) => (
+            <button key={opt.value} onClick={() => setLocalFilters({ ...localFilters, bedrooms: opt.value })}
+              className={`apple-glass-panel interactive flex-1 rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200 ${
+                localFilters.bedrooms === opt.value
+                  ? "ring-2 ring-[var(--home-accent-strong)]/50 bg-orange-50/50 home-text-primary font-bold"
+                  : "home-text-muted"
+              }`}>
+              {opt.labelKey ? t(opt.labelKey) : opt.label}
+            </button>
           ))}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Divider sx={{ my: 3, borderColor: "#EFE6DA" }} />
-
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-          Phong ngu
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1.5 }}>
-          {BEDROOM_OPTIONS.map((option) => (
-            <Box
-              key={option.value}
-              onClick={() =>
-                setLocalFilters({ ...localFilters, bedrooms: option.value })
-              }
-              sx={{
-                flex: 1,
-                py: 1.5,
-                textAlign: "center",
-                border: "2px solid",
-                borderColor:
-                  localFilters.bedrooms === option.value
-                    ? "#C2410C"
-                    : "#E6DDD0",
-                borderRadius: 2,
-                cursor: "pointer",
-                transition: "all 0.2s",
-                bgcolor:
-                  localFilters.bedrooms === option.value
-                    ? "#FFF4E8"
-                    : "transparent",
-                "&:hover": { borderColor: "#C2410C", bgcolor: "#FFF7ED" },
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {option.label}
-              </Typography>
-            </Box>
+      {/* Bathrooms */}
+      <div>
+        <h3 className="text-sm font-bold home-text-primary mb-3">{t("filters.bathrooms")}</h3>
+        <div className="flex gap-1.5">
+          {BATHROOM_OPTIONS.map((opt) => (
+            <button key={opt.value} onClick={() => setLocalFilters({ ...localFilters, bathrooms: opt.value })}
+              className={`apple-glass-panel interactive flex-1 rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200 ${
+                localFilters.bathrooms === opt.value
+                  ? "ring-2 ring-[var(--home-accent-strong)]/50 bg-orange-50/50 home-text-primary font-bold"
+                  : "home-text-muted"
+              }`}>
+              {opt.labelKey ? t(opt.labelKey) : opt.label}
+            </button>
           ))}
-        </Box>
-      </Box>
-
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-          Phong tam
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1.5 }}>
-          {BATHROOM_OPTIONS.map((option) => (
-            <Box
-              key={option.value}
-              onClick={() =>
-                setLocalFilters({ ...localFilters, bathrooms: option.value })
-              }
-              sx={{
-                flex: 1,
-                py: 1.5,
-                textAlign: "center",
-                border: "2px solid",
-                borderColor:
-                  localFilters.bathrooms === option.value
-                    ? "#C2410C"
-                    : "#E6DDD0",
-                borderRadius: 2,
-                cursor: "pointer",
-                transition: "all 0.2s",
-                bgcolor:
-                  localFilters.bathrooms === option.value
-                    ? "#FFF4E8"
-                    : "transparent",
-                "&:hover": { borderColor: "#C2410C", bgcolor: "#FFF7ED" },
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {option.label}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default SearchFiltersContentSection;
-

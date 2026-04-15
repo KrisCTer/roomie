@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getCompleteUserInfo } from "../../../services/localStorageService";
 
-const EditorialFooter = ({
-  description = "Roomie search & discovery experience with section-based IA, interactive cards, and mobile-first browsing.",
-}) => {
+const EditorialFooter = ({ description }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const user = getCompleteUserInfo();
   const isAdmin =
     user?.role?.toLowerCase() === "admin" ||
@@ -18,38 +18,22 @@ const EditorialFooter = ({
         <div className="lg:col-span-7">
           <p className="home-footer-logo">Roomie</p>
           <p className="mt-3 max-w-xl text-sm text-[var(--home-surface)]/80">
-            {description}
+            {description || t("home.footerDesc")}
           </p>
         </div>
         <div className="lg:col-span-5">
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <button
-              type="button"
-              onClick={() => navigate("/search")}
-              className="home-footer-link"
-            >
-              Tìm kiếm
+            <button type="button" onClick={() => navigate("/search")} className="home-footer-link">
+              {t("common.search")}
             </button>
-            <button
-              type="button"
-              onClick={() => navigate("/my-favorites")}
-              className="home-footer-link"
-            >
-              Yêu thích
+            <button type="button" onClick={() => navigate("/my-favorites")} className="home-footer-link">
+              {t("Favorites")}
             </button>
-            <button
-              type="button"
-              onClick={() => navigate(dashboardPath)}
-              className="home-footer-link"
-            >
-              Dashboard
+            <button type="button" onClick={() => navigate(dashboardPath)} className="home-footer-link">
+              {t("headerMenu.dashboard")}
             </button>
-            <button
-              type="button"
-              onClick={() => navigate("/login")}
-              className="home-footer-link"
-            >
-              Đăng nhập
+            <button type="button" onClick={() => navigate("/login")} className="home-footer-link">
+              {t("common.login")}
             </button>
           </div>
         </div>

@@ -17,29 +17,28 @@ const HomeHeroSection = ({
         <div className="reveal-item lg:col-span-8">
           <p className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--home-border-strong)] bg-white px-4 text-sm font-semibold text-[var(--home-charcoal)]">
             <Sparkles size={16} className="text-[var(--home-accent-strong)]" />
-            Editorial Bold / Search-first
+            {t("home.heroTagline")}
           </p>
           <h1 className="home-headline">
-            Thành phố lớn.
-            <span className="block">Góc ở đúng gu.</span>
+            {t("home.heroTitle1")}
+            <span className="block">{t("home.heroTitle2")}</span>
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-[var(--home-muted)] sm:text-lg">
-            {t("home.exploreThousands") ||
-              "Khám phá hàng ngàn căn hộ, phòng trọ, nhà nguyên căn với flow tìm kiếm nhanh và quyết định thuê dễ hơn."}
+            {t("home.exploreThousands")}
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             <p className="home-kpi-card reveal-item">
               <span>{totalProperties.toLocaleString()}</span>
-              listings đang mở
+              {t("home.listingsOpen")}
             </p>
             <p className="home-kpi-card reveal-item">
               <span>{availableAreas.toLocaleString()}</span>
-              khu vực hoạt động
+              {t("home.activeAreas")}
             </p>
             <p className="home-kpi-card reveal-item">
               <span>24h</span>
-              cập nhật gần nhất
+              {t("home.latestUpdate")}
             </p>
           </div>
         </div>
@@ -47,13 +46,13 @@ const HomeHeroSection = ({
         <aside className="reveal-item lg:col-span-4">
           <div className="home-search-panel">
             <h2 className="text-xl font-semibold text-[var(--home-charcoal)]">
-              Tìm nhanh theo khu vực
+              {t("home.searchByArea")}
             </h2>
             <label
               className="mt-4 block text-sm font-medium"
               htmlFor="home-location"
             >
-              Địa điểm
+              {t("home.location")}
             </label>
             <div className="mt-2 flex min-h-12 items-center gap-2 rounded-xl border border-[var(--home-border)] bg-white px-3">
               <MapPin size={17} className="text-[var(--home-muted)]" />
@@ -66,7 +65,7 @@ const HomeHeroSection = ({
                     location: event.target.value,
                   }))
                 }
-                placeholder="VD: Quận 1, TP.HCM"
+                placeholder={t("home.locationPlaceholder")}
                 className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--home-muted)]"
                 aria-label="Search location"
               />
@@ -76,7 +75,7 @@ const HomeHeroSection = ({
               className="mt-4 block text-sm font-medium"
               htmlFor="home-type"
             >
-              Loại hình
+              {t("home.propertyTypeLabel")}
             </label>
             <select
               id="home-type"
@@ -91,7 +90,7 @@ const HomeHeroSection = ({
             >
               {PROPERTY_TYPES.map((type) => (
                 <option key={type || "all"} value={type}>
-                  {type ? t(`home.propertyType.${type}`) : "Tất cả"}
+                  {type ? t(`home.propertyType.${type}`) : t("home.allTypes")}
                 </option>
               ))}
             </select>
@@ -106,7 +105,7 @@ const HomeHeroSection = ({
                     minPrice: event.target.value,
                   }))
                 }
-                placeholder="Min giá"
+                placeholder={t("home.minPrice")}
                 className="home-input"
                 aria-label="Minimum price"
               />
@@ -119,7 +118,7 @@ const HomeHeroSection = ({
                     maxPrice: event.target.value,
                   }))
                 }
-                placeholder="Max giá"
+                placeholder={t("home.maxPrice")}
                 className="home-input"
                 aria-label="Maximum price"
               />
@@ -131,7 +130,7 @@ const HomeHeroSection = ({
               className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--home-charcoal)] text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--home-focus)]"
             >
               <Search size={16} />
-              Mở trang tìm kiếm
+              {t("home.openSearch")}
             </button>
           </div>
         </aside>

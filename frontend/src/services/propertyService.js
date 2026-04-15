@@ -29,8 +29,17 @@ export const getPropertiesByProvince = (province) =>
 export const getPropertiesByOwner = (params) =>
   BaseService.get(API.PROPERTY_BY_ME, params);
 
+export const getPublicProperties = () =>
+  BaseService.get(API.GET_PUBLIC_PROPERTY);
+
 export const publishProperty = (propertyId) =>
   BaseService.post(API.PUBLISH_PROPERTY(propertyId));
 
+export const requestModel3d = (propertyId) =>
+  BaseService.post(`/property/${propertyId}/3d-model`);
+
+export const toggle3dVisibility = (propertyId, visible) =>
+  BaseService.put(`/property/${propertyId}/3d-visibility?visible=${visible}`);
+
 export const searchNearbyProperties = ({ lat, lng, radiusKm, page, size }) =>
-  BaseService.get(API.PROPERTY_NEARBY, { lat, lng, radiusKm, page, size });
+  BaseService.get(API.PROPERTY_NEARBY, { lat, lng, radiusKm, page, size });

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Mail, MessageCircle, Loader2, Shield } from "lucide-react";
+import { Phone, Mail, MessageCircle, Loader2, Shield, User } from "lucide-react";
 
 const OwnerContact = ({
   owner,
@@ -85,6 +85,15 @@ const OwnerContact = ({
               <span>Nhắn tin</span>
             </>
           )}
+        </button>
+
+        {/* View Profile */}
+        <button
+          onClick={handleViewProfile}
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-[#ECDCC8] text-gray-900 rounded-xl hover:bg-[#FFF8F0] transition-colors shadow-sm font-semibold"
+        >
+          <User className="w-5 h-5 text-[#9A3412]" />
+          <span>Xem trang cá nhân</span>
         </button>
 
         {/* Divider */}
