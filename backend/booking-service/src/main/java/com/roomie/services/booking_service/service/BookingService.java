@@ -91,6 +91,12 @@ public class BookingService {
         });
     }
 
+    public List<BookingResponse> getAll() {
+        return leaseLongTermRepository.findAll().stream()
+                .map(bookingMapper::leaseToResponse)
+                .toList();
+    }
+
     public List<BookingResponse> getBookingsByTenant(String tenantId) {
         List<LeaseLongTerm> leases = leaseLongTermRepository.findByTenantId(tenantId);
         return leases.stream()

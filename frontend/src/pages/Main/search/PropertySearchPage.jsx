@@ -133,7 +133,7 @@ const PropertySearchPage = () => {
         onClearDirections={handleClearDirections}
       />
 
-      <EditorialFooter description="Search mới đồng bộ visual với Home: map-list split, filter rõ ràng, và flow mobile tối ưu cho thao tác một tay." />
+      <EditorialFooter />
     </Box>
   );
 };

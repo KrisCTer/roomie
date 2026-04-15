@@ -4,8 +4,6 @@ import {
   X,
   RefreshCw,
   Bell,
-  LayoutDashboard,
-  User,
   LogOut,
   Moon,
   Sun,
@@ -13,28 +11,16 @@ import {
   UserCircle,
   Globe,
 } from "lucide-react";
-import {
-  IconButton,
-  Stack,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Badge,
-  Typography,
-  Box,
-  Paper,
-} from "@mui/material";
+
 import { useTranslation } from "react-i18next";
-import MenuIcon from "@mui/icons-material/Menu";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { useRole } from "../../../contexts/RoleContext";
 import { useRefresh } from "../../../contexts/RefreshContext";
 import { useNotificationContext } from "../../../contexts/NotificationContext";
 import NotificationDropdown from "../../domain/notification/NotificationDropdown";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { removeToken } from "../../../services/localStorageService";
 import { useUser } from "../../../contexts/UserContext";
 import "../../../styles/apple-glass-dashboard.css";
@@ -52,6 +38,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, pageTitle, pageSubtitle }) => {
   // Menu states
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationAnchor, setNotificationAnchor] = useState(null);
+  const menuBtnRef = useRef(null);
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("theme");
     return saved === "dark";
@@ -230,307 +217,127 @@ const Header = ({ sidebarOpen, setSidebarOpen, pageTitle, pageSubtitle }) => {
           </div>
 
           {/* Right side */}
-          <Stack direction="row" spacing={1} alignItems="center">
+          <div className="flex items-center gap-2">
             {/* Notification Bell */}
-            <IconButton
-              onClick={handleOpenNotifications}
-              className="apple-glass-pill"
-              sx={{
-                color: "#2B2A28",
-                transition: "all 0.2s",
-                "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.25)",
-                  transform: "scale(1.05)",
-                },
-              }}
+            <button type="button" onClick={handleOpenNotifications}
+              className="apple-glass-pill relative flex h-10 w-10 items-center justify-center rounded-full transition hover:shadow-md"
             >
-              <Badge
-                badgeContent={unreadCount}
-                color="error"
-                max={99}
-                sx={{
-                  "& .MuiBadge-badge": {
-                    fontSize: "0.65rem",
-                    height: 18,
-                    minWidth: 18,
-                    fontWeight: 700,
-                  },
-                }}
-              >
-                <Bell size={20} />
-              </Badge>
-            </IconButton>
-
-            {/* Notification Dropdown */}
-            <NotificationDropdown
-              anchorEl={notificationAnchor}
-              open={openNotifications}
-              onClose={handleCloseNotifications}
-            />
-
-            {/* User Menu Button */}
-            <Paper
-              className="apple-glass-pill"
-              elevation={0}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                borderRadius: 999,
-                px: 1.5,
-                py: 0.5,
-                cursor: "pointer",
-                transition: "all 0.2s",
-                "&:hover": {
-                  boxShadow: "0 8px 18px rgba(101, 73, 46, 0.16)",
-                  bgcolor: "rgba(255,255,255,0.25)",
-                },
-              }}
-              onClick={handleOpenMenu}
-            >
-              <MenuIcon
-                sx={{ fontSize: 20, color: "grey.700" }}
-                className="dark:text-dark-primary"
-              />
-              {displayUser?.avatar ? (
-                <Avatar
-                  src={displayUser.avatar}
-                  alt={displayUser.username}
-                  sx={{
-                    width: 32,
-                    height: 32,
-                  }}
-                  imgProps={{
-                    onError: (e) => {
-                      e.target.onerror = null;
-                      e.target.src = "";
-                    },
-                  }}
-                />
-              ) : (
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: "primary.main",
-                    fontSize: "0.875rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  {(
-                    displayUser?.fullName?.[0] ||
-                    displayUser?.username?.[0] ||
-                    "U"
-                  ).toUpperCase()}
-                </Avatar>
+              <Bell size={20} className="text-[var(--home-charcoal)]" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
               )}
-            </Paper>
+            </button>
 
-            {/* Enhanced User Menu with Settings */}
-            <Menu
-              anchorEl={anchorEl}
-              open={openMenu}
-              onClose={handleCloseMenu}
-              PaperProps={{
-                elevation: 3,
-                className: "dark:bg-dark-secondary",
-                sx: {
-                  mt: 1.5,
-                  borderRadius: 2,
-                  minWidth: 280,
-                  "& .MuiMenuItem-root": {
-                    px: 2,
-                    py: 1.5,
-                    fontSize: "0.875rem",
-                  },
-                },
-              }}
-              transformOrigin={{ horizontal: "right", vertical: "top" }}
-              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            <NotificationDropdown anchorEl={notificationAnchor} open={openNotifications} onClose={handleCloseNotifications} />
+
+            {/* User Email Button */}
+            <button type="button" ref={menuBtnRef} onClick={handleOpenMenu}
+              className="apple-glass-pill flex items-center gap-2 rounded-full px-3 py-1.5 transition hover:shadow-md"
             >
-              <Box
-                sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
-                className="dark:bg-dark-tertiary"
-              >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 700,
-                    color: "grey.600",
-                    textTransform: "uppercase",
-                  }}
-                  className="dark:text-dark-secondary"
-                >
-                  Vai trò
-                </Typography>
-              </Box>
+              {displayUser?.avatar ? (
+                <img src={displayUser.avatar} alt={displayUser.username} className="w-7 h-7 rounded-full object-cover"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              ) : (
+                <span className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ background: "var(--home-accent-strong)" }}>
+                  {(displayUser?.fullName?.[0] || displayUser?.username?.[0] || "U").toUpperCase()}
+                </span>
+              )}
+              <span className="hidden md:block text-sm font-semibold text-[var(--home-charcoal)] max-w-[180px] truncate">
+                {displayUser?.email || displayUser?.username || "User"}
+              </span>
+            </button>
 
-              <MenuItem
-                onClick={() => handleRoleChange("landlord")}
-                selected={activeRole === "landlord"}
-                className="dark:hover:bg-dark-hover"
-                sx={{
-                  bgcolor:
-                    activeRole === "landlord" ? "primary.light" : "transparent",
-                }}
-              >
-                <ListItemIcon>
-                  <Home size={18} className="text-[#CC6F4A]" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Landlord"
-                  secondary="Quản lý tài sản, hợp đồng"
-                  sx={{
-                    "& .MuiListItemText-secondary": {
-                      fontSize: "0.75rem",
-                    },
-                  }}
-                />
-              </MenuItem>
+            {/* Liquid Glass Dropdown — rendered via portal */}
+            {openMenu && createPortal(
+              <div className="home-v2">
+                <div className="fixed inset-0 z-[9998]" onClick={handleCloseMenu} />
+                <div className="fixed z-[9999] w-72 rounded-2xl p-2 animate-[menuIn_0.18s_ease-out]"
+                  style={{
+                    top: menuBtnRef.current ? menuBtnRef.current.getBoundingClientRect().bottom + 8 : 60,
+                    right: 16,
+                    background: "linear-gradient(145deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.48) 50%, rgba(255,250,245,0.56) 100%)",
+                    backdropFilter: "blur(48px) saturate(200%)",
+                    WebkitBackdropFilter: "blur(48px) saturate(200%)",
+                    border: "0.5px solid rgba(255,255,255,0.55)",
+                    boxShadow: "0 24px 48px rgba(35,32,28,0.12), 0 8px 16px rgba(35,32,28,0.06), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(0,0,0,0.04)",
+                  }}>
+                  <style>{`@keyframes menuIn { from { opacity:0; transform:translateY(-6px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }`}</style>
 
-              <MenuItem
-                onClick={() => handleRoleChange("tenant")}
-                selected={activeRole === "tenant"}
-                className="dark:hover:bg-dark-hover"
-                sx={{
-                  bgcolor:
-                    activeRole === "tenant" ? "primary.light" : "transparent",
-                }}
-              >
-                <ListItemIcon>
-                  <UserCircle size={18} className="text-[#CC6F4A]" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Tenant"
-                  secondary="Tìm phòng, quản lý đặt chỗ"
-                  sx={{
-                    "& .MuiListItemText-secondary": {
-                      fontSize: "0.75rem",
-                    },
-                  }}
-                />
-              </MenuItem>
+                  {/* User Info */}
+                  <div className="flex items-center gap-3 px-3 py-3 mb-1">
+                    {displayUser?.avatar ? (
+                      <img src={displayUser.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white/60" />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white ring-2 ring-white/40"
+                        style={{ background: "linear-gradient(135deg, var(--home-accent), var(--home-accent-strong))" }}>
+                        {(displayUser?.fullName?.[0] || displayUser?.username?.[0] || "U").toUpperCase()}
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-[var(--home-charcoal)] truncate">{displayUser?.fullName || displayUser?.username}</p>
+                      <p className="text-xs text-[var(--home-muted)] truncate">{displayUser?.email}</p>
+                    </div>
+                  </div>
+                  <div className="h-px mx-2 mb-2" style={{ background: "linear-gradient(90deg, transparent, var(--home-border), transparent)" }} />
 
-              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
+                  {/* Role Cards */}
+                  <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--home-muted)]">Vai trò</p>
+                  <div className="grid grid-cols-2 gap-1.5 px-2 mb-2">
+                    <button type="button" onClick={() => handleRoleChange("landlord")}
+                      className={`flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition-all duration-200 ${
+                        activeRole === "landlord"
+                          ? "bg-gradient-to-b from-[var(--home-accent)] to-[#c98a4a] text-[var(--home-charcoal)] shadow-md ring-1 ring-white/30"
+                          : "bg-white/40 text-[var(--home-muted)] hover:bg-white/60 hover:text-[var(--home-charcoal)]"}`}>
+                      <Home size={18} />Landlord
+                    </button>
+                    <button type="button" onClick={() => handleRoleChange("tenant")}
+                      className={`flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition-all duration-200 ${
+                        activeRole === "tenant"
+                          ? "bg-gradient-to-b from-[var(--home-accent)] to-[#c98a4a] text-[var(--home-charcoal)] shadow-md ring-1 ring-white/30"
+                          : "bg-white/40 text-[var(--home-muted)] hover:bg-white/60 hover:text-[var(--home-charcoal)]"}`}>
+                      <UserCircle size={18} />Tenant
+                    </button>
+                  </div>
+                  <div className="h-px mx-2 mb-2" style={{ background: "linear-gradient(90deg, transparent, var(--home-border), transparent)" }} />
 
-              {/* Become a Tenant */}
-              <MenuItem
-                onClick={() => {
-                  handleCloseMenu();
-                  navigate("/");
-                }}
-                className="dark:hover:bg-dark-hover"
-              >
-                <ListItemIcon>
-                  <UserCircle size={18} className="text-blue-600" />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Become a Tenant"
-                  secondary="Find rooms, manage bookings"
-                  className="dark:text-dark-primary"
-                  sx={{
-                    "& .MuiListItemText-secondary": {
-                      fontSize: "0.75rem",
-                    },
-                  }}
-                  classes={{
-                    secondary: "dark:text-dark-secondary",
-                  }}
-                />
-              </MenuItem>
+                  {/* Language Pills */}
+                  <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--home-muted)]">Ngôn ngữ</p>
+                  <div className="flex gap-1.5 px-2 mb-2">
+                    {languages.map((lang) => (
+                      <button key={lang.code} type="button" onClick={() => handleLanguageChange(lang.code)}
+                        className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+                          currentLanguage === lang.code
+                            ? "bg-gradient-to-b from-[var(--home-accent)] to-[#c98a4a] text-[var(--home-charcoal)] shadow-md ring-1 ring-white/30"
+                            : "bg-white/40 text-[var(--home-muted)] hover:bg-white/60 hover:text-[var(--home-charcoal)]"}`}>
+                        <Globe size={14} />{lang.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="h-px mx-2 mb-1" style={{ background: "linear-gradient(90deg, transparent, var(--home-border), transparent)" }} />
 
-              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-              {/* Language Selection */}
-              <Box
-                sx={{ px: 2, py: 1, bgcolor: "grey.50" }}
-                className="dark:bg-dark-tertiary"
-              >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 700,
-                    color: "grey.600",
-                    textTransform: "uppercase",
-                  }}
-                  className="dark:text-dark-secondary"
-                >
-                  Language / Ngôn ngữ
-                </Typography>
-              </Box>
-              {languages.map((lang) => (
-                <MenuItem
-                  key={lang.code}
-                  onClick={() => handleLanguageChange(lang.code)}
-                  selected={currentLanguage === lang.code}
-                  className="dark:hover:bg-dark-hover"
-                  sx={{
-                    bgcolor:
-                      currentLanguage === lang.code
-                        ? "primary.light"
-                        : "transparent",
-                  }}
-                >
-                  <ListItemIcon>
-                    <Globe size={18} className="dark:text-dark-primary" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={lang.label}
-                    className="dark:text-dark-primary"
-                    sx={{
-                      "& .MuiTypography-root": {
-                        fontWeight: currentLanguage === lang.code ? 600 : 400,
-                      },
-                    }}
-                  />
-                  {currentLanguage === lang.code && (
-                    <Typography fontSize="1.25rem" className="ml-2">
-                      {lang.flag}
-                    </Typography>
-                  )}
-                </MenuItem>
-              ))}
-
-              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-              {/* Theme Toggle */}
-              <MenuItem
-                onClick={handleThemeToggle}
-                className="dark:hover:bg-dark-hover"
-              >
-                <ListItemIcon>
-                  {darkMode ? (
-                    <Sun size={18} className="text-yellow-500" />
-                  ) : (
-                    <Moon size={18} className="text-indigo-600" />
-                  )}
-                </ListItemIcon>
-                <ListItemText
-                  primary={darkMode ? "Light mode" : "Dark mode"}
-                  className="dark:text-dark-primary"
-                />
-              </MenuItem>
-
-              <Divider sx={{ my: 1 }} className="dark:border-dark-primary" />
-
-              {/* Logout */}
-              <MenuItem
-                onClick={handleLogout}
-                sx={{
-                  color: "error.main",
-                }}
-                className="dark:hover:bg-dark-hover"
-              >
-                <ListItemIcon>
-                  <LogOut size={18} className="text-red-600" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={t("common.logout") || "Logout"}
-                  sx={{ color: "error.main" }}
-                />
-              </MenuItem>
-            </Menu>
-          </Stack>
+                  {/* Action Buttons */}
+                  <button type="button" onClick={handleThemeToggle}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--home-charcoal)] transition hover:bg-white/50">
+                    {darkMode ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-indigo-500" />}
+                    {darkMode ? "Light mode" : "Dark mode"}
+                  </button>
+                  <button type="button" onClick={() => { handleCloseMenu(); navigate("/"); }}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--home-charcoal)] transition hover:bg-white/50">
+                    <Home size={16} className="text-sky-600" />Trang chủ
+                  </button>
+                  <div className="h-px mx-2 my-1" style={{ background: "linear-gradient(90deg, transparent, var(--home-border), transparent)" }} />
+                  <button type="button" onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50/60">
+                    <LogOut size={16} />{t("common.logout") || "Đăng xuất"}
+                  </button>
+                </div>
+              </div>,
+              document.body
+            )}
+          </div>
         </div>
       </div>
     </header>

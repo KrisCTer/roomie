@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Drawer } from "@mui/material";
+import "../../../../styles/apple-glass-dashboard.css";
 import useSearchFiltersState from "./hooks/useSearchFiltersState";
 import SearchFiltersHeaderSection from "./sections/SearchFiltersHeaderSection";
 import SearchFiltersContentSection from "./sections/SearchFiltersContentSection";
@@ -23,7 +24,12 @@ const SearchFiltersShell = ({ filters, onFilterChange, open, onClose }) => {
         sx: {
           width: { xs: "100%", sm: 480 },
           borderRadius: { xs: 0, sm: "20px 0 0 20px" },
-          bgcolor: "#FFFCF8",
+          background: "linear-gradient(145deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.52) 50%, rgba(255,250,245,0.6) 100%)",
+          backdropFilter: "blur(48px) saturate(200%)",
+          WebkitBackdropFilter: "blur(48px) saturate(200%)",
+          border: "none",
+          borderLeft: "0.5px solid rgba(255,255,255,0.55)",
+          boxShadow: "0 24px 48px rgba(35,32,28,0.12), 0 8px 16px rgba(35,32,28,0.06), inset 0 1px 0 rgba(255,255,255,0.65)",
         },
       }}
     >

@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Button, Chip, Container, Stack } from "@mui/material";
 import { Grid2X2, Map as MapIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SearchFilterBarSection = ({
   isDesktop,
@@ -10,6 +11,8 @@ const SearchFilterBarSection = ({
   setMobileView,
   onOpenFilters,
 }) => {
+  const { t } = useTranslation();
+
   if (isDesktop) {
     return null;
   }
@@ -46,10 +49,12 @@ const SearchFilterBarSection = ({
                 bgcolor: "#FFF",
               }}
             >
-              {`Bộ lọc${filterCount > 0 ? ` (${filterCount})` : ""}`}
+              {filterCount > 0
+                ? t("search.filterBtnCount", { count: filterCount })
+                : t("search.filterBtn")}
             </Button>
             <Chip
-              label={mapBounds ? "Đang theo vùng map" : "Toàn vùng map"}
+              label={mapBounds ? t("search.trackingMap") : t("search.fullMap")}
               className="search-chip"
             />
           </Stack>
@@ -72,7 +77,7 @@ const SearchFilterBarSection = ({
                   px: 2,
                 }}
               >
-                List
+                {t("search.list")}
               </Button>
               <Button
                 onClick={() => setMobileView("map")}
@@ -90,7 +95,7 @@ const SearchFilterBarSection = ({
                   px: 2,
                 }}
               >
-                Map
+                {t("search.map")}
               </Button>
             </Stack>
           )}

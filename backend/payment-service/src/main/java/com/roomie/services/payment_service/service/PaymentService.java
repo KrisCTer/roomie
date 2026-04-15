@@ -140,8 +140,6 @@ public class PaymentService {
 
         String status = Integer.valueOf(0).equals(resultCode) ? "COMPLETED" : "FAILED";
 
-        // Idempotency guard: avoid duplicate side effects when both returnUrl and
-        // webhook hit.
         if ("COMPLETED".equalsIgnoreCase(payment.getStatus())) {
             log.info(
                     "Skip duplicate MoMo callback for paymentId={}, currentStatus={}, incomingStatus={}, transId={}",

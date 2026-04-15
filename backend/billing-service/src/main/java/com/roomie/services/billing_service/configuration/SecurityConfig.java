@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/internal/bills",
+            "/internal/**",
             "/contract/*",
             "/*/pay",
             "/actuator/**"

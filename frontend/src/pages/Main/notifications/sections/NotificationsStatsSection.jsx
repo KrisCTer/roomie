@@ -5,39 +5,37 @@ import {
   CalendarDays,
   CalendarRange,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import StatCard from "../../../../components/domain/dashboard/StatCard.jsx";
 
 const NotificationsStatsSection = ({ stats }) => {
-  if (!stats) {
-    return null;
-  }
+  const { t } = useTranslation();
+
+  if (!stats) return null;
 
   return (
-    <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
       <StatCard
         icon={Bell}
-        label="Tổng số"
+        label={t("notificationCenter.totalCount")}
         value={stats.totalNotifications}
         color="blue"
       />
-
       <StatCard
         icon={BellRing}
-        label="Chưa đọc"
+        label={t("notificationCenter.unreadCount")}
         value={stats.unreadCount}
         color="red"
       />
-
       <StatCard
         icon={CalendarDays}
-        label="Hôm nay"
+        label={t("notificationCenter.todayCount")}
         value={stats.todayCount}
         color="green"
       />
-
       <StatCard
         icon={CalendarRange}
-        label="Tuần này"
+        label={t("notificationCenter.thisWeekCount")}
         value={stats.thisWeekCount}
         color="orange"
       />

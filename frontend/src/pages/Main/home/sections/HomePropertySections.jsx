@@ -45,7 +45,7 @@ const HomePropertySections = ({
                 <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--home-muted)]">
-                      {sectionIndex === 0 ? "Editor pick" : "Hot area"}
+                      {sectionIndex === 0 ? t("home.editorPick") : t("home.hotArea")}
                     </p>
                     <h2 className="mt-1 text-2xl font-semibold text-[var(--home-charcoal)]">
                       {sectionTitle}
@@ -56,7 +56,7 @@ const HomePropertySections = ({
                     onClick={() => onViewAll(section.province)}
                     className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--home-border-strong)] bg-white px-4 text-sm font-semibold transition hover:bg-[var(--home-surface-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--home-focus)]"
                   >
-                    Xem tất cả <ArrowRight size={15} />
+                    {t("home.viewAll")} <ArrowRight size={15} />
                   </button>
                 </div>
 

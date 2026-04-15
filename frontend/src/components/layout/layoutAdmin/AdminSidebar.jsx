@@ -1,28 +1,37 @@
 /* aria-label */
 // src/components/layout/layoutAdmin/AdminSidebar.jsx
 import React from "react";
-import { Home, Building, Users, LogOut } from "lucide-react";
+import { Home, Building, Users, CalendarCheck, FileText, ScrollText, Settings, LogOut, Receipt, BarChart3 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const menuItems = [
+  const menuGroups = [
     {
-      icon: Home,
-      label: "Admin Dashboard",
-      path: "/admin/dashboard",
+      label: "Tổng quan",
+      items: [
+        { icon: Home, label: "Admin Dashboard", path: "/admin/dashboard" },
+      ],
     },
     {
-      icon: Building,
-      label: "Admin Properties",
-      path: "/admin/properties",
+      label: "Quản lý",
+      items: [
+        { icon: Building, label: "Bất động sản", path: "/admin/properties" },
+        { icon: Users, label: "Người dùng", path: "/admin/users" },
+        { icon: CalendarCheck, label: "Đặt phòng", path: "/admin/bookings" },
+        { icon: FileText, label: "Hợp đồng", path: "/admin/contracts" },
+        { icon: Receipt, label: "Hóa đơn", path: "/admin/billing" },
+      ],
     },
     {
-      icon: Users,
-      label: "User Management",
-      path: "/admin/users",
+      label: "Hệ thống",
+      items: [
+        { icon: BarChart3, label: "Báo cáo", path: "/admin/reports" },
+        { icon: ScrollText, label: "Nhật ký", path: "/admin/logs" },
+        { icon: Settings, label: "Cài đặt", path: "/admin/settings" },
+      ],
     },
   ];
 
@@ -52,7 +61,7 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
       ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
     >
       <div
-        className="h-full border-r"
+        className="h-full border-r flex flex-col"
         style={{
           background: "linear-gradient(180deg, var(--home-charcoal) 0%, #1a1714 100%)",
           borderColor: "rgba(217, 200, 181, 0.15)",
@@ -100,45 +109,55 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
           <div className="mt-4 border-t" style={{ borderColor: "rgba(217, 200, 181, 0.15)" }} />
         </div>
 
-        {/* Menu */}
-        <div className="p-4">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item);
-
-            return (
-              <button
-                key={item.label}
-                onClick={() => handleNavigate(item)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 mb-2`}
-                style={
-                  active
-                    ? {
-                        background: "var(--home-accent-strong)",
-                        color: "#fff",
-                        boxShadow: "0 4px 16px rgba(184, 104, 47, 0.3)",
-                      }
-                    : {
-                        color: "rgba(255, 255, 255, 0.75)",
-                      }
-                }
-                onMouseEnter={(e) => {
-                  if (!active) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) e.currentTarget.style.background = "transparent";
-                }}
-                type="button"
+        {/* Menu Groups */}
+        <div className="p-4 flex-1 overflow-y-auto">
+          {menuGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <div
+                className="text-[10px] font-bold uppercase tracking-[0.14em] mb-2 px-4"
+                style={{ color: "rgba(217, 200, 181, 0.45)" }}
               >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            );
-          })}
+                {group.label}
+              </div>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item);
+
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => handleNavigate(item)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 mb-1"
+                    style={
+                      active
+                        ? {
+                            background: "var(--home-accent-strong)",
+                            color: "#fff",
+                            boxShadow: "0 4px 16px rgba(184, 104, 47, 0.3)",
+                          }
+                        : {
+                            color: "rgba(255, 255, 255, 0.75)",
+                          }
+                    }
+                    onMouseEnter={(e) => {
+                      if (!active) e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) e.currentTarget.style.background = "transparent";
+                    }}
+                    type="button"
+                  >
+                    <Icon className="w-[18px] h-[18px]" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         {/* Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="p-4 mt-auto">
           <div className="pt-4 border-t" style={{ borderColor: "rgba(217, 200, 181, 0.15)" }}>
             <button
               onClick={handleLogout}
@@ -146,7 +165,7 @@ const AdminSidebar = ({ activeMenu, setActiveMenu, sidebarOpen }) => {
               type="button"
             >
               <LogOut className="w-5 h-5" />
-              <span className="font-medium">Logout</span>
+              <span className="font-medium">Đăng xuất</span>
             </button>
           </div>
         </div>

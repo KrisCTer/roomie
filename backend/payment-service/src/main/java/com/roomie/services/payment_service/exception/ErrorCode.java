@@ -19,6 +19,8 @@ public enum ErrorCode {
     PROFILE_NOT_FOUND(10010, "Profile not found", HttpStatus.NOT_FOUND),
     PAYMENT_NOT_FOUND(3001, "Payment not found", HttpStatus.NOT_FOUND),
     UNSUPPORTED_PAYMENT_METHOD(3002, "Unsupported payment method", HttpStatus.BAD_REQUEST),
+    PAYMENT_GATEWAY_ERROR(3003, "Payment gateway is temporarily unavailable", HttpStatus.BAD_GATEWAY),
+    PAYMENT_GATEWAY_TIMEOUT(3004, "Payment gateway timeout. Please try again", HttpStatus.GATEWAY_TIMEOUT),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

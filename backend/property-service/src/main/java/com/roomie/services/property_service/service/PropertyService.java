@@ -110,6 +110,15 @@ public class PropertyService {
         if (r.getBedrooms() != null) p.setBedrooms(r.getBedrooms());
         if (r.getBathrooms() != null) p.setBathrooms(r.getBathrooms());
         if (r.getGarages() != null) p.setGarages(r.getGarages());
+        if (r.getCoverImageUrl() != null) p.setCoverImageUrl(r.getCoverImageUrl());
+        if (r.getMediaList() != null) {
+            p.setMediaList(r.getMediaList().stream()
+                    .map(m -> Media.builder()
+                            .url(m.getUrl())
+                            .type(m.getType())
+                            .build())
+                    .toList());
+        }
     }
 
     @CacheEvict(value = "properties", key = "#id")

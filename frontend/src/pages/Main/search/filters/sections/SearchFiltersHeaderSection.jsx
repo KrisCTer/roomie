@@ -1,47 +1,32 @@
 import React from "react";
-import { Box, IconButton, Typography } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
+import { X, SlidersHorizontal } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SearchFiltersHeaderSection = ({ activeFilterCount, onClose }) => {
+  const { t } = useTranslation();
+
   return (
-    <Box
-      sx={{
-        px: 3,
-        py: 2.25,
-        borderBottom: "1px solid",
-        borderColor: "#EEE4D7",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        bgcolor: "rgba(255,255,255,0.9)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <Box>
-        <Typography variant="h6" sx={{ fontWeight: 800, color: "#1F2937" }}>
-          Bo loc
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{ color: "#7A6D61", fontWeight: 600 }}
-        >
-          {activeFilterCount > 0
-            ? `${activeFilterCount} tieu chi dang ap dung`
-            : "Chua ap dung tieu chi"}
-        </Typography>
-      </Box>
-      <IconButton
+    <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--home-border)]">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-orange-100/80 text-orange-700 flex items-center justify-center">
+          <SlidersHorizontal className="w-5 h-5" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold home-text-primary">{t("filters.title")}</h2>
+          <p className="text-xs home-text-muted font-medium">
+            {activeFilterCount > 0
+              ? t("filters.criteriaActive", { count: activeFilterCount })
+              : t("filters.noCriteria")}
+          </p>
+        </div>
+      </div>
+      <button
         onClick={onClose}
-        size="small"
-        sx={{
-          border: "1px solid #EADFCC",
-          bgcolor: "#FFFFFF",
-          "&:hover": { bgcolor: "#FFF7ED" },
-        }}
+        className="apple-glass-panel interactive w-9 h-9 rounded-xl flex items-center justify-center home-text-muted hover:home-text-primary transition"
       >
-        <CloseIcon />
-      </IconButton>
-    </Box>
+        <X className="w-4 h-4" />
+      </button>
+    </div>
   );
 };
 
