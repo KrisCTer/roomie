@@ -9,12 +9,14 @@ import FavoritesLoadingSection from "./sections/FavoritesLoadingSection";
 import "../../../styles/home-redesign.css";
 import "../../../styles/favorites-redesign.css";
 import { useDialog } from "../../../contexts/DialogContext";
+import { useTranslation } from "react-i18next";
 
 const FavoritesPage = () => {
   const navigate = useNavigate();
   const { favorites, loading, removing, removeFavoriteById } =
     useFavoritesData();
   const { showToast, showConfirm } = useDialog();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const items = document.querySelectorAll(".reveal-item");
@@ -45,17 +47,17 @@ const FavoritesPage = () => {
 
   const handleRemove = async (propertyId) => {
     const confirmed = await showConfirm({
-      title: "Bỏ yêu thích",
-      message: "Bạn muốn bỏ bất động sản này khỏi danh sách yêu thích?",
-      confirmText: "Bỏ yêu thích",
-      cancelText: "Hủy",
+      title: t("favorites.removeConfirmTitle"),
+      message: t("favorites.removeConfirmMsg"),
+      confirmText: t("favorites.removeConfirmBtn"),
+      cancelText: t("favorites.cancelBtn"),
       type: "warning",
     });
     if (!confirmed) return;
 
     const result = await removeFavoriteById(propertyId);
     if (!result.success) {
-      showToast("Không thể bỏ yêu thích", "error");
+      showToast(t("favorites.removeError"), "error");
     }
   };
 

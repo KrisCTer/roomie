@@ -2,11 +2,8 @@
 import BaseService from "./BaseService";
 import { API } from "../configurations/configuration";
 
-export const getAllProperties = (params) =>
+export const getAllProperties = (params) => 
   BaseService.get(API.GET_ALL_PROPERTIES, params);
-
-export const getPublicProperties = (params) =>
-  BaseService.get(API.GET_PUBLIC_PROPERTY, params);
 
 export const getPropertyById = (id) =>
   BaseService.get(API.GET_PROPERTY(id));
@@ -32,15 +29,19 @@ export const getPropertiesByProvince = (province) =>
 export const getPropertiesByOwner = (params) =>
   BaseService.get(API.PROPERTY_BY_ME, params);
 
+// Unified: getPublicProperties accepts params (from master)
+export const getPublicProperties = (params) =>
+  BaseService.get(API.GET_PUBLIC_PROPERTY, params);
+
 export const publishProperty = (propertyId) =>
   BaseService.post(API.PUBLISH_PROPERTY(propertyId));
 
-export const searchNearbyProperties = ({ lat, lng, radiusKm, page, size }) =>
-  BaseService.get(API.PROPERTY_NEARBY, { lat, lng, radiusKm, page, size });
-
+// Use API constant-based approach for requestModel3d and toggle3dVisibility (from master)
 export const requestModel3d = (propertyId) =>
   BaseService.post(API.REQUEST_3D_MODEL(propertyId));
 
 export const toggle3dVisibility = (propertyId, visible) =>
   BaseService.put(API.TOGGLE_3D_VISIBILITY(propertyId, visible));
 
+export const searchNearbyProperties = ({ lat, lng, radiusKm, page, size }) =>
+  BaseService.get(API.PROPERTY_NEARBY, { lat, lng, radiusKm, page, size });

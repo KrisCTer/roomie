@@ -2,6 +2,7 @@
 import React from "react";
 import { Box, Typography, Pagination, Stack } from "@mui/material";
 import { BedDouble, Bath, Ruler, MapPin, ArrowUpRight, Navigation } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const PropertyListView = ({
   properties,
@@ -17,6 +18,7 @@ const PropertyListView = ({
   distanceMap,
   nearbyEnabled,
 }) => {
+  const { t } = useTranslation();
   // Initial loading skeleton
   if (loading) {
     return (
@@ -100,10 +102,10 @@ const PropertyListView = ({
           variant="h6"
           sx={{ color: "#374151", mb: 1.5, fontWeight: 700 }}
         >
-          Không tìm thấy bất động sản phù hợp
+          {t("search.noResults")}
         </Typography>
         <Typography variant="body2" sx={{ color: "#6B7280" }}>
-          Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm khu vực khác
+          {t("search.noResultsHint")}
         </Typography>
       </Box>
     );
@@ -253,7 +255,7 @@ const PropertyListView = ({
                       fontWeight: 700,
                     }}
                   >
-                    QUICK PREVIEW
+                    {t("search.quickPreview")}
                   </Typography>
                   <Stack direction="row" spacing={1.5} alignItems="center">
                     {property.address?.location && (() => {
@@ -288,7 +290,7 @@ const PropertyListView = ({
                           }}
                         >
                           <Navigation size={13} />
-                          {isActive ? "Hủy chỉ đường" : "Chỉ đường"}
+                          {isActive ? t("search.cancelDirections") : t("search.directions")}
                         </Typography>
                       );
                     })()}
@@ -302,7 +304,7 @@ const PropertyListView = ({
                         color: "#B45309",
                       }}
                     >
-                      Xem chi tiết <ArrowUpRight size={14} />
+                      {t("search.viewDetails")} <ArrowUpRight size={14} />
                     </Typography>
                   </Stack>
                 </Stack>

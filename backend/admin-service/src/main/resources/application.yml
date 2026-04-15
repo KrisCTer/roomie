@@ -20,6 +20,12 @@ spring:
             url: http://localhost:8080/identity
           property-service:
             url: http://localhost:8083/property
+          booking-service:
+            url: http://localhost:8084/booking
+          contract-service:
+            url: http://localhost:8085/contract
+          billing-service:
+            url: http://localhost:8086/billing
   # MongoDB
   data:
     mongodb:

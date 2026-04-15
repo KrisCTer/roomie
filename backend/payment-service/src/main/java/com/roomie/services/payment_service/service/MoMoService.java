@@ -1,6 +1,8 @@
 package com.roomie.services.payment_service.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.roomie.services.payment_service.exception.AppException;
+import com.roomie.services.payment_service.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,8 +13,11 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -65,9 +70,30 @@ public class MoMoService {
     @Value("${momo.notifyUrl}")
     String notifyUrl;
 
-    static final String MOMO_ENDPOINT = "https://test-payment.momo.vn/v2/gateway/api/create";
+    @Value("${momo.endpoint:https://test-payment.momo.vn/v2/gateway/api/create}")
+    String endpoint;
+
+    @Value("${momo.timeout.connect-ms:5000}")
+    long connectTimeoutMs;
+
+    @Value("${momo.timeout.read-ms:12000}")
+    long readTimeoutMs;
+
+    @Value("${momo.timeout.write-ms:5000}")
+    long writeTimeoutMs;
+
+    @Value("${momo.timeout.max-retries:1}")
+    int maxRetries;
+
     static final ObjectMapper mapper = new ObjectMapper();
-    final OkHttpClient client = new OkHttpClient();
+
+    private OkHttpClient buildClient() {
+        return new OkHttpClient.Builder()
+                .connectTimeout(Duration.ofMillis(connectTimeoutMs))
+                .readTimeout(Duration.ofMillis(readTimeoutMs))
+                .writeTimeout(Duration.ofMillis(writeTimeoutMs))
+                .build();
+    }
 
     public String createPaymentUrl(String transactionId, long amount, String orderInfo) {
         try {
@@ -109,22 +135,55 @@ public class MoMoService {
             String jsonBody = mapper.writeValueAsString(body);
 
             Request request = new Request.Builder()
-                    .url(MOMO_ENDPOINT)
+                    .url(endpoint)
                     .post(RequestBody.create(jsonBody, MediaType.get("application/json")))
                     .build();
 
-            Response response = client.newCall(request).execute();
-            String responseBody = response.body().string();
+            int attempts = Math.max(1, maxRetries + 1);
+            for (int attempt = 1; attempt <= attempts; attempt++) {
+                try (Response response = buildClient().newCall(request).execute()) {
+                    String responseBody = response.body() != null ? response.body().string() : "";
 
-            log.info("MoMo response: {}", responseBody);
+                    log.info("MoMo response: {}", responseBody);
 
-            Map<?, ?> res = mapper.readValue(responseBody, Map.class);
+                    if (!response.isSuccessful()) {
+                        throw new AppException(
+                                ErrorCode.PAYMENT_GATEWAY_ERROR,
+                                "MoMo returned HTTP " + response.code());
+                    }
 
-            return (String) res.get("payUrl");
+                    Map<?, ?> res = mapper.readValue(responseBody, Map.class);
+                    String payUrl = (String) res.get("payUrl");
+
+                    if (payUrl == null || payUrl.isBlank()) {
+                        throw new AppException(
+                                ErrorCode.PAYMENT_GATEWAY_ERROR,
+                                "MoMo response missing payUrl");
+                    }
+
+                    return payUrl;
+                } catch (SocketTimeoutException e) {
+                    if (attempt == attempts) {
+                        throw e;
+                    }
+                    log.warn("MoMo timeout on attempt {}/{}. Retrying...", attempt, attempts);
+                }
+            }
+
+            throw new AppException(ErrorCode.PAYMENT_GATEWAY_TIMEOUT);
+
+        } catch (SocketTimeoutException e) {
+            log.error("MoMo createPaymentUrl timeout", e);
+            throw new AppException(ErrorCode.PAYMENT_GATEWAY_TIMEOUT, e);
+        } catch (IOException e) {
+            log.error("MoMo createPaymentUrl I/O error", e);
+            throw new AppException(ErrorCode.PAYMENT_GATEWAY_ERROR, e);
+        } catch (AppException e) {
+            throw e;
 
         } catch (Exception e) {
             log.error("MoMo createPaymentUrl ERROR", e);
-            throw new RuntimeException("MoMo payment error: " + e.getMessage());
+            throw new AppException(ErrorCode.PAYMENT_GATEWAY_ERROR, e);
         }
     }
 

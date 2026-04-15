@@ -95,6 +95,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:?ELASTICSEARCH_PASSWORD is required}
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
@@ -159,49 +160,25 @@ services:
     networks:
       - roomie-network
 
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: roomie-n8n
-    restart: unless-stopped
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - N8N_SECURE_COOKIE=false
-      - WEBHOOK_URL=http://localhost:5678/
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-roomie2025}
-      - GENERIC_TIMEZONE=Asia/Ho_Chi_Minh
-    volumes:
-      - n8n_data:/home/node/.n8n
-    networks:
-      - roomie-network
-
   colmap-worker:
-    build: ./colmap-worker
+    build:
+      context: ./colmap-worker
+      dockerfile: Dockerfile
     container_name: roomie-colmap-worker
     restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-roomie}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
-      - MINIO_BUCKET_3D=roomie-3d-models
-      - PROPERTY_CALLBACK_URL=http://property-service:8083/property/internal/3d-callback
-      - WORKSPACE_DIR=/workspace
+      MINIO_ENDPOINT: minio:9000
+      MINIO_PUBLIC_ENDPOINT: ${COLMAP_MINIO_PUBLIC_ENDPOINT:-localhost:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-roomie}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_3D: roomie-3d-models
+      MINIO_SECURE: "false"
+      PROPERTY_CALLBACK_URL: http://property-service:8083/property/internal/3d-callback
+      WORKSPACE_DIR: /workspace
     volumes:
       - colmap_workspace:/workspace
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     depends_on:
       - minio
     networks:
@@ -219,7 +196,6 @@ volumes:
   minio_data:
   mysql_data:
   prometheus_data:
-  n8n_data:
   colmap_workspace:
 
 networks:

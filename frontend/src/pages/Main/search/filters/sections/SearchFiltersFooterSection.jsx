@@ -1,55 +1,30 @@
 import React from "react";
-import { Box, Button } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const SearchFiltersFooterSection = ({
   activeFilterCount,
   onReset,
   onApply,
 }) => {
+  const { t } = useTranslation();
+
   return (
-    <Box
-      sx={{
-        px: 3,
-        py: 2,
-        borderTop: "1px solid",
-        borderColor: "#EEE4D7",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 2,
-        bgcolor: "#FFFFFF",
-      }}
-    >
-      <Button
+    <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-[var(--home-border)]">
+      <button
         onClick={onReset}
-        sx={{
-          textTransform: "none",
-          fontWeight: 600,
-          textDecoration: "underline",
-          color: "#374151",
-        }}
+        className="text-sm font-semibold home-text-muted underline underline-offset-2 transition hover:home-text-primary"
       >
-        Xoa tat ca
-      </Button>
-      <Button
+        {t("filters.clearAll")}
+      </button>
+      <button
         onClick={onApply}
-        variant="contained"
-        sx={{
-          borderRadius: 2,
-          px: 4,
-          py: 1.5,
-          textTransform: "none",
-          fontWeight: 700,
-          bgcolor: "#1F2937",
-          boxShadow: "none",
-          "&:hover": { bgcolor: "#111827", boxShadow: "none" },
-        }}
+        className="apple-glass-panel interactive rounded-xl px-6 py-3 text-sm font-bold text-[var(--home-charcoal)] transition"
       >
         {activeFilterCount > 0
-          ? `Hien thi ket qua (${activeFilterCount})`
-          : "Hien thi ket qua"}
-      </Button>
-    </Box>
+          ? t("filters.showResultsCount", { count: activeFilterCount })
+          : t("filters.showResults")}
+      </button>
+    </div>
   );
 };
 

@@ -7,9 +7,12 @@
 
 .favorite-hero {
   margin-bottom: 1.5rem;
-  border: 1px solid #eadbc8;
+  border: 0.5px solid rgba(255,255,255,0.55);
   border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(145deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.48) 50%, rgba(255,250,245,0.56) 100%);
+  backdrop-filter: blur(48px) saturate(200%);
+  -webkit-backdrop-filter: blur(48px) saturate(200%);
+  box-shadow: 0 16px 32px rgba(35,32,28,0.08), inset 0 1px 0 rgba(255,255,255,0.65);
   padding: 1rem;
 }
 
@@ -71,20 +74,22 @@
 
 .favorite-card,
 .favorite-card-skeleton {
-  border: 1px solid #e9dbc8;
+  border: 0.5px solid rgba(255,255,255,0.55);
   border-radius: 1rem;
-  background: #fff;
+  background: linear-gradient(145deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.5) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   overflow: hidden;
 }
 
 .favorite-card {
-  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.04);
+  box-shadow: 0 8px 24px rgba(35,32,28,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
   transition: transform 0.24s ease, box-shadow 0.24s ease;
 }
 
 .favorite-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 14px 26px rgba(17, 24, 39, 0.1);
+  box-shadow: 0 18px 36px rgba(35,32,28,0.12), inset 0 1px 0 rgba(255,255,255,0.7);
 }
 
 .favorite-card:focus-visible {
@@ -182,8 +187,9 @@
 .favorite-meta-pill {
   min-height: 1.8rem;
   border-radius: 999px;
-  border: 1px solid #ebddca;
-  background: #fffaf4;
+  border: 0.5px solid rgba(255,255,255,0.5);
+  background: rgba(255,250,244,0.6);
+  backdrop-filter: blur(8px);
   padding: 0 0.52rem;
   display: inline-flex;
   align-items: center;

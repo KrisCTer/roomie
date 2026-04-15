@@ -94,7 +94,7 @@ const HomePage = () => {
         />
       </main>
 
-      <EditorialFooter description="Home mới tập trung vào flow tìm kiếm và ra quyết định thuê nhanh, với section-based IA, card pattern có khả năng tương tác cao và khả năng đọc tốt trên mobile." />
+      <EditorialFooter />
     </div>
   );
 };

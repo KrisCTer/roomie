@@ -1,4 +1,7 @@
 """
+COLMAP reconstruction pipeline.
+Runs SfM + Dense reconstruction (CUDA) + Meshing + GLB export.
+Optimized for 12GB RAM.
 COLMAP 3D reconstruction pipeline for Roomie property visualization.
 Runs SfM + (optional Dense reconstruction) + Meshing + GLB export.
 Falls back to sparse-only when CUDA is not available.
@@ -60,7 +63,8 @@ class ColmapPipeline:
         os.makedirs(self.dense_dir, exist_ok=True)
         os.makedirs(self.mesh_dir, exist_ok=True)
 
-        self._downscale_images(images_dir, max_size=1600)
+        # 1200px max — enough quality, saves RAM vs original 1600px
+        self._downscale_images(images_dir, max_size=1200)
 
         use_gpu = "1" if CUDA_AVAILABLE else "0"
 
@@ -73,6 +77,8 @@ class ColmapPipeline:
             if os.path.isfile(os.path.join(images_dir, f))
             and f.lower().endswith(('.jpg', '.jpeg', '.png'))
         ])
+        self.n_images = n_images
+        logger.info(f"Total images: {n_images}")
         if n_images <= 100:
             self._exhaustive_matcher(use_gpu)
         else:
@@ -95,7 +101,7 @@ class ColmapPipeline:
             return self._sparse_path(sparse_model)
 
     # ─────────────────────────────────────────────
-    # Dense path (CUDA)
+    # Dense path (CUDA) — optimized for 12GB RAM
     # ─────────────────────────────────────────────
     def _dense_path(self, images_dir, sparse_model):
         logger.info("Step 4: Image undistortion...")
@@ -150,10 +156,21 @@ class ColmapPipeline:
                 "Check image overlap."
             )
 
+        logger.info("Step 4b: Filter sparse point cloud noise...")
+        filtered_ply = os.path.join(self.mesh_dir, "sparse_filtered.ply")
+        self._filter_point_cloud(sparse_ply, filtered_ply)
+
+        n_filtered = self._count_ply_points(filtered_ply)
+        logger.info(f"Filtered sparse PLY: {n_filtered} points")
+
+        if n_filtered < 50:
+            logger.warning("Too few points after filter, using unfiltered sparse cloud")
+            filtered_ply = sparse_ply
+
         logger.info("Step 5: Convert sparse PLY to GLB...")
         from converter import mesh_to_glb
         glb_path = os.path.join(self.mesh_dir, "model.glb")
-        mesh_to_glb(sparse_ply, glb_path)
+        mesh_to_glb(filtered_ply, glb_path)
         return glb_path
 
     # ─────────────────────────────────────────────
@@ -175,7 +192,11 @@ class ColmapPipeline:
             pcd, _ = pcd.remove_radius_outlier(nb_points=10, radius=0.05)
             logger.info(f"After radius filter: {len(pcd.points)}")
 
-            if len(pcd.points) > 3_000_000:
+            # 12GB RAM: limit to 2M points max to avoid OOM during Poisson
+            if len(pcd.points) > 2_000_000:
+                pcd = pcd.voxel_down_sample(voxel_size=0.008)
+                logger.info(f"Downsampled to {len(pcd.points)} points (12GB RAM limit)")
+            elif len(pcd.points) > 1_000_000:
                 pcd = pcd.voxel_down_sample(voxel_size=0.005)
                 logger.info(f"Downsampled to {len(pcd.points)} points")
 
@@ -201,7 +222,7 @@ class ColmapPipeline:
         except Exception:
             return 0
 
-    def _downscale_images(self, images_dir, max_size=1600):
+    def _downscale_images(self, images_dir, max_size=1200):
         try:
             from PIL import Image
             for fname in os.listdir(images_dir):
@@ -217,8 +238,8 @@ class ColmapPipeline:
                         ratio = max_size / max(w, h)
                         new_size = (int(w * ratio), int(h * ratio))
                         img = img.resize(new_size, Image.LANCZOS)
-                        img.save(fpath, quality=95)
-                        logger.info(f"Resized {fname}: {w}x{h} -> {new_size[0]}x{new_size[1]}")
+                        img.save(fpath, quality=92)
+                        logger.info(f"Resized {fname}: {w}x{h} → {new_size[0]}x{new_size[1]}")
                     img.close()
                 except Exception as e:
                     logger.warning(f"Could not resize {fname}: {e}")
@@ -235,22 +256,27 @@ class ColmapPipeline:
         return result
 
     def _feature_extractor(self, images_dir, use_gpu="0"):
+        gpu_index = "0" if use_gpu == "1" else "-1"
         self._run_colmap([
             "feature_extractor",
             "--database_path", self.database_path,
             "--image_path", images_dir,
             "--ImageReader.single_camera", "1",
-            "--SiftExtraction.use_gpu", use_gpu,
+            "--ImageReader.camera_model", "SIMPLE_RADIAL",
+            "--FeatureExtraction.use_gpu", use_gpu,
+            "--FeatureExtraction.gpu_index", gpu_index,
             "--SiftExtraction.max_num_features", "8192",
-            "--SiftExtraction.max_image_size", "1600",
+            "--FeatureExtraction.max_image_size", "1200",
         ])
 
     def _exhaustive_matcher(self, use_gpu="0"):
+        gpu_index = "0" if use_gpu == "1" else "-1"
         self._run_colmap([
             "exhaustive_matcher",
             "--database_path", self.database_path,
-            "--SiftMatching.use_gpu", use_gpu,
-            "--SiftMatching.max_num_matches", "32768",
+            "--FeatureMatching.use_gpu", use_gpu,
+            "--FeatureMatching.gpu_index", gpu_index,
+            "--FeatureMatching.max_num_matches", "32768",
         ])
 
     def _vocab_tree_matcher(self, use_gpu="0"):
@@ -259,10 +285,12 @@ class ColmapPipeline:
             logger.warning("Vocab tree not found, falling back to exhaustive_matcher")
             self._exhaustive_matcher(use_gpu)
             return
+        gpu_index = "0" if use_gpu == "1" else "-1"
         self._run_colmap([
             "vocab_tree_matcher",
             "--database_path", self.database_path,
-            "--SiftMatching.use_gpu", use_gpu,
+            "--FeatureMatching.use_gpu", use_gpu,
+            "--FeatureMatching.gpu_index", gpu_index,
             "--VocabTreeMatching.vocab_tree_path", vocab_tree_path,
         ])
 
@@ -285,18 +313,25 @@ class ColmapPipeline:
             "--input_path", os.path.join(self.sparse_dir, "0"),
             "--output_path", self.dense_dir,
             "--output_type", "COLMAP",
-            "--max_image_size", "1600",
+            "--max_image_size", "1200",
         ])
 
     def _patch_match_stereo(self):
+        # PatchMatch is the slowest step: ~60s per image on RTX 3050
+        n = getattr(self, 'n_images', 50)
+        pm_timeout = max(3600, n * 60)
+        logger.info(f"PatchMatch: {n} images, timeout={pm_timeout}s")
         self._run_colmap([
             "patch_match_stereo",
             "--workspace_path", self.dense_dir,
             "--workspace_format", "COLMAP",
             "--PatchMatchStereo.geom_consistency", "true",
             "--PatchMatchStereo.gpu_index", "0",
-            "--PatchMatchStereo.window_radius", "7",
-        ])
+            # window_radius=5 instead of 7 → less VRAM, faster
+            "--PatchMatchStereo.window_radius", "5",
+            # Limit cache to avoid RAM overflow
+            "--PatchMatchStereo.cache_size", "16",
+        ], timeout=pm_timeout)
 
     def _stereo_fusion(self):
         self._run_colmap([
@@ -307,4 +342,5 @@ class ColmapPipeline:
             "--output_path", os.path.join(self.dense_dir, "fused.ply"),
             "--StereoFusion.min_num_pixels", "3",
             "--StereoFusion.max_reproj_error", "2",
+            "--StereoFusion.max_image_size", "1200",
         ])

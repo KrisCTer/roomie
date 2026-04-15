@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Upload, Trash2, Image, Camera, Box, Eye, EyeOff } from "lucide-react";
+import { Upload, Trash2, Image, Camera, Box, Eye, EyeOff, RefreshCcw } from "lucide-react";
 import ImageUploader from "../../../components/domain/property/ImageUploader";
 import { requestModel3d } from "../../../services/propertyService";
 
@@ -11,6 +11,7 @@ const Step4Media = ({
   propertyId,
   model3dStatus,
   model3dVisible,
+  model3dRequestedAt,
   onCoverUpload,
   onCoverRemove,
   onImageUpload,
@@ -25,6 +26,17 @@ const Step4Media = ({
   const roomImageCount = roomImages.length;
   const has3dModel = model3dStatus === "COMPLETED";
   const is3dProcessing = model3dStatus === "PROCESSING";
+  const is3dFailed = model3dStatus === "FAILED";
+
+  // Detect stuck processing (>30 minutes)
+  const isStuckProcessing = (() => {
+    if (!is3dProcessing || !model3dRequestedAt) return false;
+    const elapsed = Date.now() - new Date(model3dRequestedAt).getTime();
+    return elapsed > 30 * 60 * 1000; // 30 minutes
+  })();
+
+  // Allow retry when FAILED or stuck PROCESSING
+  const canRetry = is3dFailed || isStuckProcessing;
 
   const handleRequest3D = async () => {
     if (!propertyId) return;
@@ -143,8 +155,8 @@ const Step4Media = ({
             <h2 className="text-xl font-bold">Mô hình 3D</h2>
           </div>
 
-          {/* Status display */}
-          {is3dProcessing && (
+          {/* Processing status */}
+          {is3dProcessing && !isStuckProcessing && (
             <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 text-center mb-4">
               <div className="inline-block w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-3" />
               <p className="text-sm font-medium text-indigo-800">
@@ -157,12 +169,31 @@ const Step4Media = ({
             </div>
           )}
 
-          {model3dStatus === "FAILED" && (
-            <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-4">
-              <p className="text-sm text-red-700">
-                ⚠️ Tạo mô hình 3D không thành công. Hãy thử lại với ảnh chất
-                lượng tốt hơn.
+          {/* Stuck processing (>30 min) */}
+          {isStuckProcessing && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+              <p className="text-sm font-medium text-amber-800">
+                ⏱️ Quá trình xử lý đã hơn 30 phút
               </p>
+              <p className="text-xs text-amber-600 mt-1">
+                Có thể đã xảy ra lỗi. Bạn có thể thử tạo lại mô hình 3D.
+              </p>
+            </div>
+          )}
+
+          {/* Failed status with retry */}
+          {is3dFailed && (
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-700">
+                    ⚠️ Tạo mô hình 3D không thành công
+                  </p>
+                  <p className="text-xs text-red-500 mt-1">
+                    Hãy thử lại hoặc upload ảnh chất lượng tốt hơn (nhiều góc, đủ ánh sáng).
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -209,25 +240,33 @@ const Step4Media = ({
             </div>
           )}
 
-          {/* Create/Recreate button */}
+          {/* Create/Recreate/Retry button */}
           <button
             type="button"
             onClick={handleRequest3D}
-            disabled={requesting3d || is3dProcessing || roomImageCount < 8}
+            disabled={requesting3d || (is3dProcessing && !isStuckProcessing) || roomImageCount < 8}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all ${
-              roomImageCount < 8 || is3dProcessing
+              roomImageCount < 8 || (is3dProcessing && !isStuckProcessing)
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:shadow-lg hover:shadow-indigo-200"
+                : canRetry
+                  ? "bg-gradient-to-r from-amber-500 to-red-500 text-white hover:shadow-lg hover:shadow-amber-200"
+                  : "bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:shadow-lg hover:shadow-indigo-200"
             }`}
           >
-            <Box className="w-4 h-4" />
+            {canRetry ? (
+              <RefreshCcw className="w-4 h-4" />
+            ) : (
+              <Box className="w-4 h-4" />
+            )}
             {requesting3d
               ? "Đang gửi yêu cầu..."
-              : is3dProcessing
+              : is3dProcessing && !isStuckProcessing
                 ? "Đang xử lý..."
-                : has3dModel
-                  ? "🔄 Tạo lại mô hình 3D"
-                  : "🧊 Tạo mô hình 3D"}
+                : canRetry
+                  ? "🔄 Thử lại tạo mô hình 3D"
+                  : has3dModel
+                    ? "🔄 Tạo lại mô hình 3D"
+                    : "🧊 Tạo mô hình 3D"}
           </button>
 
           {roomImageCount < 8 && (
@@ -243,3 +282,4 @@ const Step4Media = ({
 };
 
 export default Step4Media;
+

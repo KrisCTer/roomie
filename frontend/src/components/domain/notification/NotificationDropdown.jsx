@@ -113,10 +113,12 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
           width: 420,
           maxHeight: 600,
           mt: 1,
-          borderRadius: 4,
-          border: "1px solid #EFE6DA",
-          boxShadow: "0 24px 48px rgba(17,24,39,0.14)",
-          background: "#FFFCF8",
+          borderRadius: "16px",
+          border: "0.5px solid rgba(255,255,255,0.55)",
+          boxShadow: "0 24px 48px rgba(35,32,28,0.12), 0 8px 16px rgba(35,32,28,0.06), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(0,0,0,0.04)",
+          background: "linear-gradient(145deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.52) 50%, rgba(255,250,245,0.6) 100%)",
+          backdropFilter: "blur(48px) saturate(200%)",
+          WebkitBackdropFilter: "blur(48px) saturate(200%)",
           overflow: "hidden",
         },
       }}
@@ -131,9 +133,8 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "1px solid #F0E7DB",
-          background:
-            "linear-gradient(110deg, rgba(255,249,242,1) 0%, rgba(255,252,248,1) 100%)",
+          borderBottom: "1px solid rgba(236,220,200,0.5)",
+          background: "rgba(255,255,255,0.3)",
         }}
       >
         <Typography variant="h6" fontWeight={700}>
@@ -199,11 +200,11 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
                 onClick={() => handleNotificationClick(notification)}
                 sx={{
                   cursor: "pointer",
-                  bgcolor: notification.isRead ? "transparent" : "#FFF4E8",
+                  bgcolor: notification.isRead ? "transparent" : "rgba(255,244,232,0.5)",
                   "&:hover": {
-                    bgcolor: "#FAF3E9",
+                    bgcolor: "rgba(255,255,255,0.45)",
                   },
-                  borderBottom: "1px solid #F3ECE2",
+                  borderBottom: "1px solid rgba(236,220,200,0.35)",
                 }}
               >
                 {/* ICON */}
@@ -320,7 +321,7 @@ const NotificationDropdown = ({ anchorEl, open, onClose }) => {
       <Divider />
 
       {/* ===== FOOTER ===== */}
-      <Box sx={{ p: 1.2, borderTop: "1px solid #F0E7DB", bgcolor: "#FFFFFF" }}>
+      <Box sx={{ p: 1.2, borderTop: "1px solid rgba(236,220,200,0.5)", bgcolor: "rgba(255,255,255,0.3)" }}>
         <Button
           fullWidth
           onClick={handleViewAll}

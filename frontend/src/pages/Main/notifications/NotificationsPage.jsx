@@ -8,6 +8,7 @@ import NotificationsFiltersSection from "./sections/NotificationsFiltersSection"
 import NotificationsListSection from "./sections/NotificationsListSection";
 import "../../../styles/home-redesign.css";
 import "../../../styles/search-redesign.css";
+import "../../../styles/apple-glass-dashboard.css";
 
 const NotificationsPage = () => {
   const {

@@ -1,5 +1,6 @@
 import React from "react";
 import { Filter } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const NotificationsFiltersSection = ({
   filter,
@@ -9,28 +10,32 @@ const NotificationsFiltersSection = ({
   typeOptions,
   totalFiltered,
 }) => {
+  const { t } = useTranslation();
+
+  const filterTabs = [
+    { key: "all", label: t("notificationCenter.all") },
+    { key: "unread", label: t("notificationCenter.unread") },
+    { key: "read", label: t("notificationCenter.read") },
+  ];
+
   return (
-    <section className="mb-6 rounded-2xl border border-[#EFE6DA] bg-white p-4 shadow-sm">
+    <section className="apple-glass-panel mb-6 rounded-2xl p-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-semibold text-gray-700">Lọc:</span>
+            <Filter className="h-4 w-4 home-text-muted" />
+            <span className="text-sm font-semibold home-text-primary">{t("notificationCenter.filter")}</span>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {[
-              { key: "all", label: "Tất cả" },
-              { key: "unread", label: "Chưa đọc" },
-              { key: "read", label: "Đã đọc" },
-            ].map((item) => (
+          <div className="flex flex-wrap gap-1.5">
+            {filterTabs.map((item) => (
               <button
                 key={item.key}
                 onClick={() => setFilter(item.key)}
-                className={`rounded-xl px-4 py-2 text-sm transition-colors ${
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                   filter === item.key
-                    ? "bg-gray-900 text-white"
-                    : "bg-[#F6F2EA] text-gray-700 hover:bg-[#F0E9DD]"
+                    ? "bg-[var(--home-charcoal)] text-white shadow-sm"
+                    : "apple-glass-panel interactive home-text-muted hover:home-text-primary"
                 }`}
               >
                 {item.label}
@@ -43,7 +48,7 @@ const NotificationsFiltersSection = ({
           <select
             value={typeFilter}
             onChange={(event) => setTypeFilter(event.target.value)}
-            className="rounded-xl border border-[#E8DED1] px-4 py-2.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200"
+            className="apple-glass-panel rounded-xl px-4 py-2.5 text-sm font-medium home-text-primary focus:outline-none focus:ring-2 focus:ring-[var(--home-accent)]/40"
           >
             {typeOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -52,8 +57,8 @@ const NotificationsFiltersSection = ({
             ))}
           </select>
 
-          <span className="rounded-full border border-[#E8DED1] bg-[#FFFCF8] px-3 py-1 text-xs font-semibold text-gray-600">
-            {totalFiltered} thông báo
+          <span className="apple-glass-pill rounded-full px-3 py-1.5 text-xs font-bold home-text-muted">
+            {totalFiltered} {t("notificationCenter.notifications")}
           </span>
         </div>
       </div>

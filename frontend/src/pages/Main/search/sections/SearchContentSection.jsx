@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { Compass, Map as MapIcon, SlidersHorizontal } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import PropertyListView from "../../../../components/domain/property/PropertyListView";
 import PropertyMapView from "../../../../components/domain/property/PropertyMapView";
 
@@ -34,6 +35,8 @@ const SearchContentSection = ({
   directionsTarget,
   onClearDirections,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -73,7 +76,7 @@ const SearchContentSection = ({
                   color: "#7A6D61",
                 }}
               >
-                {nearbyEnabled ? "NEARBY RESULTS" : "DISCOVERY LIST"}
+                {nearbyEnabled ? t("search.nearbyResults") : t("search.discoveryList")}
               </Typography>
             </Stack>
 
@@ -128,7 +131,7 @@ const SearchContentSection = ({
         >
           <Box className="search-map-badge">
             <MapIcon size={14} />
-            <span>{nearbyEnabled ? `Quanh day ${nearbyRadiusKm}km` : mapBounds ? "Đang theo vùng bản đồ" : "Toàn vùng"}</span>
+            <span>{nearbyEnabled ? t("search.nearbyBadge", { radius: nearbyRadiusKm }) : mapBounds ? t("search.trackingMapBadge") : t("search.fullArea")}</span>
             <SlidersHorizontal size={14} />
           </Box>
 

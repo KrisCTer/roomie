@@ -10,6 +10,7 @@ import PropertyAmenities from "../../../components/domain/property/PropertyAmeni
 import PropertyLocation from "../../../components/domain/property/PropertyLocation";
 import PropertyInfo from "../../../components/domain/property/PropertyInfo";
 import OwnerContact from "../../../components/domain/property/OwnerContact";
+import Model3DSection from "../../../components/domain/property/Model3DSection";
 import BookingCard from "../../../components/domain/property/BookingCard";
 import Model3DSection from "../../../components/domain/property/Model3DSection";
 
