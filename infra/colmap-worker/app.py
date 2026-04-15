@@ -1,6 +1,11 @@
 """
-COLMAP Worker — Flask API for 3D reconstruction from images.
+COLMAP Worker — Flask API for 3D reconstruction from property images.
 Receives image URLs, runs COLMAP pipeline, exports .glb, uploads to MinIO.
+
+API Endpoints:
+  POST /reconstruct  — Start async 3D reconstruction job
+  GET  /status/<id>   — Check reconstruction job status
+  GET  /health        — Service health check
 """
 
 import os
@@ -143,6 +148,16 @@ def run_reconstruction(job_id, property_id, image_urls):
 
 @app.route("/reconstruct", methods=["POST"])
 def reconstruct():
+    """Start an async 3D reconstruction job.
+
+    Request body:
+        propertyId (str): Property ID to reconstruct.
+        imageUrls (list[str]): List of image URLs (minimum 3).
+
+    Returns:
+        202: { jobId, status: 'queued' }
+        400: If propertyId missing or < 3 images.
+    """
     data = request.get_json()
 
     property_id = data.get("propertyId")
@@ -167,6 +182,7 @@ def reconstruct():
 
 @app.route("/status/<job_id>", methods=["GET"])
 def get_status(job_id):
+    """Check the status of a reconstruction job by job ID."""
     job = jobs.get(job_id)
     if not job:
         return jsonify({"error": "Job not found"}), 404
@@ -175,6 +191,7 @@ def get_status(job_id):
 
 @app.route("/health", methods=["GET"])
 def health():
+    """Service health check with active job count."""
     return jsonify({"status": "healthy", "activeJobs": len([j for j in jobs.values() if j["status"] not in ("completed", "failed")])}), 200
 
 

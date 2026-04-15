@@ -3,15 +3,24 @@ Point cloud / Mesh to GLB converter — v4
 COLMAP sparse/dense PLY → GLB with correct colors for three.js/model-viewer.
 
 Fixes v4:
-  1. Y-axis flip (COLMAP Y-down → WebGL Y-up)
-  2. GLB material injection so three.js renders COLOR_0 vertex colors
-  3. Nearest-neighbor color mapping
-  4. DBSCAN keep-largest-cluster (always, no 30% threshold)
-  5. 4-stage point cloud cleaning (2 statistical passes)
-  6. Better normal estimation with outward-orientation check
-  7. Poisson density quantile raised → fewer low-density floaters
-  8. Post-mesh island removal → fixes floating leaf/debris artifacts
-  9. doubleSided material in GLB
+    1. Y-axis flip (COLMAP Y-down → WebGL Y-up)
+    2. GLB material injection so three.js renders COLOR_0 vertex colors
+    3. Nearest-neighbor color mapping
+    4. DBSCAN keep-largest-cluster (always, no 30% threshold)
+    5. 4-stage point cloud cleaning (2 statistical passes)
+    6. Better normal estimation with outward-orientation check
+    7. Poisson density quantile raised → fewer low-density floaters
+    8. Post-mesh island removal → fixes floating leaf/debris artifacts
+    9. doubleSided material in GLB
+
+---
+For Roomie 3D property models: creates a proper mesh from COLMAP point clouds using Open3D surface reconstruction.
+
+Reconstruction methods (priority order):
+    1. Poisson Surface Reconstruction (best quality, needs normals)
+    2. Ball Pivoting Algorithm (good for sparse/noisy clouds)
+    3. Delaunay Triangulation (scipy fallback)
+    4. Convex Hull (last resort)
 """
 
 import json

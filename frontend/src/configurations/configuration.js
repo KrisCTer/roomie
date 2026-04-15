@@ -88,6 +88,8 @@ export const API = {
   MARK_AS_AVAILABLE: (propertyId) => `/property/${propertyId}/available`,
   MARK_AS_DEACTIVATED: (propertyId) => `/property/${propertyId}/deactivate`,
   PROPERTY_NEARBY: "/property/nearby",
+  REQUEST_3D_MODEL: (propertyId) => `/property/${propertyId}/3d-model`,
+  TOGGLE_3D_VISIBILITY: (propertyId, visible) => `/property/${propertyId}/3d-visibility?visible=${visible}`,
 
   // Internal Property endpoints
   PROPERTY_INTERNAL_PENDING: "/property/internal/pending",
@@ -129,6 +131,11 @@ export const API = {
   PAUSE_CONTRACT: (id) => `/contract/${id}/pause`,
   RESUME_CONTRACT: (id) => `/contract/${id}/resume`,
   TERMINATE_CONTRACT: (id) => `/contract/${id}/terminate`,
+  UPDATE_CONTRACT_SUPPLEMENTARY_TERMS: (id) =>
+    `/contract/${id}/supplementary-terms`,
+  ADD_CONTRACT_AMENDMENT: (id) => `/contract/${id}/amendments`,
+  APPROVE_CONTRACT_AMENDMENT: (id, amendmentId) =>
+    `/contract/${id}/amendments/${amendmentId}/approve`,
 
   // ========= BILLING (Billing Service - Port 8086) =========
   // Bill Management
